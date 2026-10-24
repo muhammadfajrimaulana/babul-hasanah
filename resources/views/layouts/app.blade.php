@@ -64,7 +64,8 @@
            HEADER & NAVBAR
            ===================================================== */
         .site-header {
-            background: rgba(255, 255, 255, .98); position: sticky; top: 0; z-index: 100;
+            background: rgba(255, 255, 255, .98); position: sticky; top: 0;
+            z-index: 1000; /* PERBAIKAN: dinaikkan agar tidak tertutup elemen halaman (hero/slider) */
             transition: box-shadow .3s ease;
         }
         .site-header.scrolled { box-shadow: 0 8px 28px rgba(15, 40, 30, .08); }
@@ -126,9 +127,18 @@
             .dd-item:hover .ic { background: var(--emerald); color: #fff; }
         }
 
-        .site-actions { display: flex; align-items: center; gap: 12px; font-size: 14px; }
-        .site-login { font-weight: 500; color: var(--ink); padding: 8px 6px; transition: color .2s; }
-        .site-login:hover { color: var(--emerald-d); }
+        /* PERBAIKAN: area aksi selalu di atas dan bisa diklik */
+        .site-actions {
+            display: flex; align-items: center; gap: 12px; font-size: 14px;
+            position: relative; z-index: 2; pointer-events: auto; flex: none;
+        }
+        .site-login {
+            display: inline-flex; align-items: center; justify-content: center;
+            font-weight: 500; color: var(--ink); padding: 10px 14px; border-radius: 10px;
+            cursor: pointer; pointer-events: auto; position: relative; z-index: 2;
+            transition: color .2s, background .2s;
+        }
+        .site-login:hover { color: var(--emerald-d); background: #f1f8f4; }
         .site-btn {
             display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 22px;
             border-radius: 12px; font-size: 13.5px; font-weight: 600; background: var(--emerald); color: #fff;
@@ -178,7 +188,13 @@
            ===================================================== */
         @media (max-width: 1024px) {
             .site-burger { display: inline-flex; align-items: center; justify-content: center; }
-            .site-login { display: none; }
+
+            /* PERBAIKAN: Masuk TIDAK lagi disembunyikan di mobile, tampil sebagai tombol outline */
+            .site-login {
+                display: inline-flex; padding: 8px 14px; font-size: 13px; font-weight: 600;
+                border: 1px solid var(--line); color: var(--green); background: #fff;
+            }
+            .site-actions { gap: 8px; }
             .site-actions .site-btn-desktop { display: none; }
 
             /* Panel menu layar penuh, turun dari atas dan menutupi halaman di belakangnya */
@@ -186,9 +202,10 @@
                 position: fixed; top: 0; right: 0; bottom: 0; left: 0; width: 100%; background: #fff; z-index: 9999;
                 flex-direction: column; align-items: stretch;
                 transform: translateY(-100%); visibility: hidden; opacity: 0;
+                pointer-events: none; /* PERBAIKAN: saat tertutup tidak menangkap klik */
                 transition: transform .4s cubic-bezier(.16, 1, .3, 1), opacity .25s ease, visibility .4s;
             }
-            .site-menu.open { transform: translateY(0); visibility: visible; opacity: 1; }
+            .site-menu.open { transform: translateY(0); visibility: visible; opacity: 1; pointer-events: auto; }
 
             .menu-header {
                 display: flex; align-items: center; justify-content: space-between; gap: 12px; flex: none;
@@ -267,9 +284,9 @@
             .site-nav { padding: 10px 0; }
             .site-brand-logo { width: 38px; height: 38px; }
             .site-brand strong { font-size: 16px; }
-            .site-actions .site-btn { padding: 8px 14px; font-size: 12px; border-radius: 8px; }
-            .foot-grid { grid-template-columns: 1fr; }
+            .site-login { padding: 7px 12px; font-size: 12px; border-radius: 8px; }
             .site-footer { border-radius: 28px 28px 0 0; }
+            .foot-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
