@@ -10,7 +10,6 @@ use App\Http\Controllers\Admin\ProgramController as AdminProgramController;
 use App\Http\Controllers\Admin\KegiatanController as AdminKegiatanController;
 use App\Http\Controllers\Admin\BeritaController as AdminBeritaController;
 use App\Http\Controllers\Admin\GaleriController as AdminGaleriController;
-use App\Http\Controllers\Admin\ImportExcelController as AdminImportExcelController;
 use App\Http\Controllers\Portal\PortalDashboardController as PortalDashboard;
 use App\Http\Controllers\Public\PendaftaranOnlineController;
 use App\Http\Controllers\Public\PrestasiController;
@@ -34,14 +33,11 @@ Route::prefix('profil')->name('profil.')->group(function () {
     Route::get('/pembelajaran', fn () => view('pages.pembelajaran'))->name('pembelajaran');
 });
 
-// ######## PROGRAM ########### //
-Route::get('/program', function () {
-    return view('pages.program');
-})->name('program');
-
-Route::get('/program/kategori-{id}', function ($id) {
-    return view('pages.program', ['kategori' => $id]);
-})->whereNumber('id')->name('program.kategori');
+// ######## JENJANG ########### //
+// Halaman tiap jenjang ada di resources/views/pages/jenjang/{slug}.blade.php
+Route::get('/jenjang/{slug}', fn (string $slug) => view('pages.jenjang.' . $slug))
+    ->whereIn('slug', ['mdta', 'pps-wustha', 'mts', 'ma', 'pdf-wustha', 'pdf-ulya', 'mahad-aly'])
+    ->name('jenjang.show');
 
 // ######## BERITA, GALERI, KEGIATAN ########### //
 Route::get('/berita', function () {
@@ -93,7 +89,7 @@ Route::middleware(['auth', \App\Http\Middleware\RoleAdmin::class])->prefix('admi
     Route::get('/pendaftaran', [AdminPendaftaranController::class, 'index'])->name('pendaftaran.index');
     Route::patch('/pendaftaran/{id}', [AdminPendaftaranController::class, 'updateStatus'])->name('pendaftaran.update');
 
-    // Santri (route statis HARUS di atas route dinamis {id})
+    // Santri
     Route::get('/santri', [AdminDataSantriController::class, 'index'])->name('santri.index');
     Route::get('/santri/template', [AdminDataSantriController::class, 'downloadTemplate'])->name('santri.template');
     Route::post('/santri/import', [AdminDataSantriController::class, 'import'])->name('santri.import');
@@ -120,3 +116,7 @@ Route::middleware(['auth', \App\Http\Middleware\RoleAdmin::class])->prefix('admi
 Route::middleware(['auth', \App\Http\Middleware\RoleWaliSantri::class])->prefix('portal')->name('portal.')->group(function () {
     Route::get('/dashboard', [PortalDashboard::class, 'index'])->name('dashboard');
 });
+
+Route::get('/kontak', function () {
+    return view('pages.kontak');
+})->name('kontak');

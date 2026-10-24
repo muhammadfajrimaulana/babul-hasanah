@@ -3,401 +3,519 @@
 @section('title', 'Dashboard Pondok Pesantren Babul Hasanah')
 
 @section('content')
-    <div class="space-y-5 pb-6">
 
-        <div
-            class="flex items-center justify-between bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm transition-colors duration-300">
-            <div class="space-y-0.5">
-                <span
-                    class="inline-block px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 text-[10px] font-extrabold uppercase tracking-wider border border-emerald-500/20 dark:border-emerald-500/30 mb-1">
-                    Tahun Ajaran 2026/2027
-                </span>
-                <h2 class="text-base sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">Dashboard Utama
-                </h2>
-            </div>
-            <div
-                class="w-10 h-10 rounded-2xl bg-slate-900 dark:bg-slate-800 text-emerald-400 flex items-center justify-center font-black shadow-md shadow-slate-900/20 border border-slate-800">
-                <i class="fa-solid fa-shield-halved text-sm"></i>
-            </div>
+@php
+    /*
+     * Hanya tampilan yang berubah. Sumber data tetap sama dengan versi sebelumnya:
+     *  - $pendaftarTerbaru  : dari controller (tidak diubah)
+     *  - angka statistik, grafik, dan komposisi : masih data statis seperti sebelumnya
+     * Bagian bertanda CONTOH hanya pengisi tampilan dan akan diganti saat fiturnya dikerjakan.
+     */
+    $namaDepan = \Illuminate\Support\Str::before(auth()->user()->name ?? 'Admin', ' ');
+    $tanggal   = now()->locale('id')->translatedFormat('l, d F Y');
+
+    // Mengembalikan URL route bila route-nya ada, supaya halaman tidak error kalau route belum dibuat.
+    $ada = fn (string $nama, array $param = []) => \Illuminate\Support\Facades\Route::has($nama) ? route($nama, $param) : null;
+
+    // Kartu statistik: [label, angka, ikon, lencana, keterangan, warna]
+    $stat = [
+        ['Santri Aktif', 485, 'fa-user-graduate',   '+12%',   'Putra: 250 | Putri: 235', '#12a67a'],
+        ['Pendaftar',    124, 'fa-file-invoice',    'Gel. 1', 'Menunggu verifikasi',     '#3b82c4'],
+        ['Berita',       38,  'fa-newspaper',       'Publik', 'Artikel aktif bulan ini', '#c08a1c'],
+        ['Asatidz',      32,  'fa-chalkboard-user', 'Staf',   'Pengajar & Pembina',      '#8b5cc6'],
+    ];
+
+    // Fitur website sesuai menu navbar: [nama, ikon, warna, deskripsi, link kelola (admin), link lihat (publik)]
+    $fitur = [
+        ['Profil Pesantren',    'fa-landmark',         '#12a67a', 'Sejarah, visi & misi, struktur organisasi, dan pembelajaran.', $ada('admin.konten.index'),     url('/profil/sejarah')],
+        ['Jenjang Pendidikan',  'fa-book-open-reader', '#3b82c4', 'MDTA, PPS Wustha, MTs, MA, Diniyah Formal, dan Ma’had ‘Aly.', $ada('admin.program.index'),    $ada('jenjang.show', ['slug' => 'mdta'])],
+        ['Berita',              'fa-newspaper',        '#c08a1c', 'Kabar, pengumuman, dan artikel kegiatan pesantren.',            $ada('admin.berita.index'),     $ada('berita.index')],
+        ['Galeri',              'fa-images',           '#8b5cc6', 'Album foto dokumentasi kegiatan dan fasilitas.',                $ada('admin.galeri.index'),     $ada('galeri')],
+        ['Kegiatan',            'fa-calendar-days',    '#0e9f8e', 'Agenda dan kegiatan santri di lingkungan pesantren.',           $ada('admin.kegiatan.index'),   $ada('kegiatan')],
+        ['Prestasi Santri',     'fa-trophy',           '#d6525a', 'Capaian dan penghargaan yang diraih santri.',                   null,                           $ada('prestasi.index')],
+        ['Pendaftaran Online',  'fa-file-signature',   '#12a67a', 'Formulir dan data calon santri baru.',                          $ada('admin.pendaftaran.index'), $ada('pendaftaran.index')],
+        ['Kontak',              'fa-address-book',     '#3b82c4', 'Alamat, telepon, email, dan peta lokasi pesantren.',            null,                           $ada('kontak')],
+    ];
+
+    // Grafik tren pendaftar (data sama seperti sebelumnya, periode 2025/2026)
+    $tren = ['Nov' => 12, 'Des' => 18, 'Jan' => 24, 'Feb' => 31, 'Mar' => 37, 'Apr' => 42];
+    $maks = 50;
+    $W = 600; $H = 230; $kiri = 34; $kanan = 12; $atas = 14; $bawah = 28;
+    $lebar = $W - $kiri - $kanan; $tinggi = $H - $atas - $bawah;
+    $n = count($tren); $i = 0; $pts = [];
+    foreach ($tren as $bln => $v) {
+        $pts[] = [round($kiri + $i * $lebar / ($n - 1), 1), round($atas + $tinggi * (1 - $v / $maks), 1), $bln, $v];
+        $i++;
+    }
+    $garis = 'M ' . $pts[0][0] . ',' . $pts[0][1];
+    for ($k = 1; $k < $n; $k++) {
+        $xm = round(($pts[$k - 1][0] + $pts[$k][0]) / 2, 1);
+        $garis .= ' C ' . $xm . ',' . $pts[$k - 1][1] . ' ' . $xm . ',' . $pts[$k][1] . ' ' . $pts[$k][0] . ',' . $pts[$k][1];
+    }
+    $dasar = $atas + $tinggi;
+    $area  = $garis . ' L ' . $pts[$n - 1][0] . ',' . $dasar . ' L ' . $pts[0][0] . ',' . $dasar . ' Z';
+
+    // Komposisi santri aktif (data sama seperti sebelumnya): [nama, persen, jumlah, warna, ikon]
+    $totalSantri = 324;
+    $komposisi = [
+        ['Tingkat Ula / TPQ', 50, 162, '#17402f', 'fa-book-quran'],
+        ['Tingkat Wustha',    30, 97,  '#b08d3e', 'fa-book-open'],
+        ['Tingkat Ulya',      20, 65,  '#9db8a8', 'fa-graduation-cap'],
+    ];
+
+    // CONTOH: agenda terdekat (belum ada sumber datanya, ganti nanti): [tanggal, judul, jam, tempat]
+    $agenda = [
+        ['20', 'Rapat panitia PSB',      '09.00 WIB', 'Ruang pengurus'],
+        ['22', 'Kajian kitab bulanan',   '19.30 WIB', 'Masjid pesantren'],
+        ['25', 'Kunjungan wali santri',  '08.00 WIB', 'Aula utama'],
+    ];
+@endphp
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    /* ===== Dashboard Admin (font Poppins sama dengan website; mode gelap lewat class .dark) ===== */
+    .ad {
+        --surface: #ffffff; --border: #e6e3d8; --text: #1f2a24; --muted: #6b756f; --head: #17402f;
+        --tint: #eef3ec; --chip: #f4f2ea; --beige: #f2e8d5; --gold: #a98532; --accent: #12b886;
+        --ok-bg: #e3f1e8; --ok-tx: #17603f; --wait-bg: #faecc9; --wait-tx: #8a5a0a; --bad-bg: #fbe3e3; --bad-tx: #a02b2b;
+        font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+        color: var(--text); display: flex; flex-direction: column; gap: 22px; padding-bottom: 12px;
+    }
+    .dark .ad {
+        --surface: #14201a; --border: #26362d; --text: #e8efe9; --muted: #9db0a5; --head: #e8efe9;
+        --tint: #1a2b23; --chip: #1c2c24; --beige: #2a2619; --gold: #d3b265; --accent: #2fe0a0;
+        --ok-bg: #12382a; --ok-tx: #6ee0ae; --wait-bg: #3a2f12; --wait-tx: #f0c36a; --bad-bg: #3d1c1e; --bad-tx: #f08c8c;
+    }
+    .ad *, .ad *::before, .ad *::after { box-sizing: border-box; }
+    .ad a { text-decoration: none; }
+    .ad h1, .ad h3, .ad h4, .ad h5, .ad p { margin: 0; }
+
+    .ad-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; }
+
+    /* Kotak ikon berwarna (warna lewat variabel --fc) */
+    .ad-ico {
+        --fc: #12a67a; width: 40px; height: 40px; border-radius: 12px; flex: none; display: grid; place-items: center;
+        font-size: 16px; color: var(--fc); background: color-mix(in srgb, var(--fc) 14%, transparent);
+        transition: all .25s ease;
+    }
+    .ad-ico.sm { width: 34px; height: 34px; border-radius: 10px; font-size: 14px; }
+
+    /* Sapaan */
+    .ad-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .ad-hello { font-size: clamp(22px, 3.4vw, 30px); font-weight: 600; color: var(--head); line-height: 1.25; }
+    .ad-hello span { color: var(--accent); }
+    .ad-sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+    .ad-chips { display: flex; gap: 10px; flex-wrap: wrap; }
+    .ad-chip {
+        display: inline-flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 500; color: var(--text); background: var(--surface);
+        border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px;
+    }
+    .ad-chip i { color: var(--accent); font-size: 13px; }
+
+    /* Strip pemberitahuan */
+    .ad-notice {
+        display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+        background: var(--tint); border-radius: 14px; padding: 14px 18px; font-size: 13px;
+    }
+    .ad-notice > span { display: flex; align-items: center; gap: 12px; }
+    .ad-link { font-size: 12px; font-weight: 600; color: var(--head); display: inline-flex; align-items: center; gap: 8px; transition: gap .2s ease, color .2s ease; white-space: nowrap; }
+    .ad-link:hover { gap: 12px; color: var(--accent); }
+    .ad-link i { font-size: 10px; }
+
+    /* Kartu statistik */
+    .ad-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+    .ad-stat { padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; transition: transform .2s ease, box-shadow .2s ease; }
+    .ad-stat:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(23, 64, 47, .1); }
+    .ad-stat-head { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 500; color: var(--muted); }
+    .ad-num { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .ad-num b { font-size: 34px; font-weight: 600; color: var(--head); line-height: 1; }
+    .ad-badge {
+        font-size: 11px; font-weight: 600; color: var(--fc, var(--gold)); padding: 3px 9px; border-radius: 999px;
+        background: color-mix(in srgb, var(--fc, var(--gold)) 14%, transparent);
+    }
+    .ad-stat small { font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 7px; }
+    .ad-stat small i { font-size: 10px; opacity: .7; }
+
+    /* Judul seksi */
+    .ad-sec { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+    .ad-sec > div:first-child { display: flex; align-items: center; gap: 12px; }
+    .ad-ptitle { font-size: 15px; font-weight: 600; color: var(--head); }
+    .ad-psub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+    /* Fitur website */
+    .ad-feat { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px; }
+    .ad-f { padding: 20px; display: flex; flex-direction: column; gap: 14px; transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+    .ad-f:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(23, 64, 47, .1); border-color: var(--fc); }
+    .ad-f:hover .ad-ico { background: var(--fc); color: #fff; }
+    .ad-f h4 { font-size: 14px; font-weight: 600; color: var(--head); }
+    .ad-f p { font-size: 12px; color: var(--muted); line-height: 1.65; margin-top: 4px; }
+    .ad-f-foot { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; }
+    .ad-f-foot a { font-weight: 600; display: inline-flex; align-items: center; gap: 7px; transition: color .2s ease; }
+    .ad-f-foot .kelola { color: var(--fc); }
+    .ad-f-foot .lihat { color: var(--muted); }
+    .ad-f-foot a:hover { color: var(--accent); }
+    .ad-f-foot i { font-size: 10px; }
+    .ad-f-foot .note { color: var(--muted); font-size: 11px; display: inline-flex; align-items: center; gap: 6px; }
+
+    /* Grid utama */
+    .ad-row { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 22px; align-items: start; }
+    .ad-col { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+    .ad-panel { padding: 24px 26px; }
+    .ad-period { font-size: 12px; font-weight: 500; color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; }
+    .ad-period i { color: var(--accent); }
+
+    .ad-big { display: flex; align-items: baseline; gap: 12px; margin: 20px 0 8px; flex-wrap: wrap; }
+    .ad-big b { font-size: 36px; font-weight: 600; color: var(--head); line-height: 1; }
+    .ad-big span { font-size: 12px; color: var(--muted); }
+
+    .ad-chart { width: 100%; height: auto; display: block; overflow: visible; }
+    .ad-chart text { font-size: 10px; fill: var(--muted); font-family: inherit; }
+    .ad-chart .grid { stroke: var(--border); stroke-width: 1; }
+    .ad-chart .ln { fill: none; stroke: var(--accent); stroke-width: 2.6; stroke-linecap: round; }
+    .ad-chart .dot { fill: var(--surface); stroke: var(--accent); stroke-width: 2; }
+    .ad-chart .dot.last { fill: var(--accent); }
+
+    /* Komposisi */
+    .ad-seg { display: flex; gap: 4px; height: 10px; margin: 20px 0 18px; }
+    .ad-seg span { border-radius: 4px; }
+    .ad-leg { display: flex; flex-direction: column; gap: 14px; }
+    .ad-leg > div { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--muted); }
+    .ad-leg > div > span { display: flex; align-items: center; gap: 10px; }
+    .ad-leg b { color: var(--text); font-weight: 600; font-size: 12.5px; }
+
+    /* Tabel pendaftar */
+    .ad-table-head { padding: 22px 26px 18px; display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+    .ad-table-head > div:first-child { display: flex; align-items: center; gap: 12px; }
+    .ad-cols, .ad-line {
+        display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.3fr) 120px; gap: 14px; align-items: center; padding: 0 26px;
+    }
+    .ad-cols { background: var(--chip); height: 40px; font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+    .ad-line { min-height: 64px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--muted); transition: background .2s ease; }
+    .ad-line:hover { background: var(--chip); }
+    .ad-line .c-jenjang, .ad-line .c-asal { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .ad-line .c-jenjang i, .ad-line .c-asal i { color: var(--accent); font-size: 11px; flex: none; }
+    .ad-who { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .ad-av {
+        width: 38px; height: 38px; border-radius: 50%; background: var(--tint); color: var(--head); font-size: 11.5px; font-weight: 600;
+        display: grid; place-items: center; flex: none;
+    }
+    .ad-who h4 { font-size: 13px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ad-who small { font-size: 11px; color: var(--muted); display: block; }
+    .ad-who .mob { display: none; }
+    .ad-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 5px 11px; border-radius: 999px; justify-self: start; }
+    .ad-pill i { font-size: 10px; }
+    .ad-pill.ok { background: var(--ok-bg); color: var(--ok-tx); }
+    .ad-pill.wait { background: var(--wait-bg); color: var(--wait-tx); }
+    .ad-pill.bad { background: var(--bad-bg); color: var(--bad-tx); }
+    .ad-empty { text-align: center; padding: 30px; font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--border); }
+    .ad-empty i { display: block; font-size: 26px; color: var(--border); margin-bottom: 10px; }
+    .ad-foot { padding: 14px 26px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+
+    /* Agenda */
+    .ad-agenda { display: flex; flex-direction: column; gap: 18px; margin-top: 20px; }
+    .ad-ag { display: flex; align-items: center; gap: 14px; }
+    .ad-date { width: 46px; height: 50px; border-radius: 12px; background: var(--chip); display: flex; flex-direction: column; align-items: center; justify-content: center; flex: none; }
+    .ad-date b { font-size: 18px; font-weight: 600; color: var(--head); line-height: 1; }
+    .ad-date small { font-size: 9px; font-weight: 500; color: var(--muted); margin-top: 3px; letter-spacing: .06em; }
+    .ad-ag h5 { font-size: 13px; font-weight: 600; color: var(--text); }
+    .ad-ag p { font-size: 11px; color: var(--muted); margin-top: 4px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .ad-ag p span { display: inline-flex; align-items: center; gap: 5px; }
+    .ad-ag p i { font-size: 10px; color: var(--accent); }
+
+    /* Kartu bantuan */
+    .ad-help { background: var(--beige); border-radius: 18px; padding: 20px 22px; display: flex; gap: 14px; align-items: flex-start; }
+    .ad-help h5 { font-size: 14px; font-weight: 600; color: var(--text); }
+    .ad-help p { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.65; }
+
+    /* Aksi cepat */
+    .ad-quick { padding: 18px 26px; display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+    .ad-quick > div:first-child { display: flex; align-items: center; gap: 12px; }
+    .ad-quick-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+    .ad-btn {
+        display: inline-flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: var(--head);
+        background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 18px; transition: all .2s ease;
+    }
+    .ad-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+    .ad-btn.main { background: var(--head); border-color: var(--head); color: #fff; }
+    .ad-btn.main:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .dark .ad-btn.main { background: var(--accent); border-color: var(--accent); color: #0f2018; }
+    .ad-btn i { font-size: 13px; }
+
+    @media (max-width: 1200px) {
+        .ad-feat { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 1100px) {
+        .ad-stats { grid-template-columns: repeat(2, 1fr); }
+        .ad-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+        .ad { gap: 16px; }
+        .ad-stats { gap: 12px; }
+        .ad-stat { padding: 16px; }
+        .ad-num b { font-size: 28px; }
+        .ad-panel { padding: 20px 18px; }
+        .ad-table-head { padding: 18px; }
+        .ad-cols { display: none; }
+        .ad-line { grid-template-columns: minmax(0, 1fr) auto; padding: 12px 18px; }
+        .ad-line .c-jenjang, .ad-line .c-asal { display: none; }
+        .ad-who .mob { display: block; }
+        .ad-foot { padding: 14px 18px; }
+        .ad-quick { padding: 18px; }
+        .ad-quick-btns { width: 100%; }
+        .ad-btn { flex: 1; justify-content: center; }
+    }
+    @media (max-width: 560px) {
+        .ad-feat { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 420px) {
+        .ad-stats { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="ad">
+
+    {{-- ===================== SAPAAN ===================== --}}
+    <div class="ad-top">
+        <div>
+            <h1 class="ad-hello">Assalamu’alaikum, <span>{{ $namaDepan }}</span> <i class="fa-solid fa-hands-praying" style="font-size:.7em;color:var(--gold)"></i></h1>
+            <p class="ad-sub">Berikut ringkasan aktivitas dan perkembangan pesantren hari ini.</p>
         </div>
-
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-
-            <div
-                class="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between group transition-colors duration-300">
-                <div class="flex items-center justify-between mb-3">
-                    <span
-                        class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm sm:text-lg">
-                        <i class="fa-solid fa-user-graduate"></i>
-                    </span>
-                    <span
-                        class="text-[9px] sm:text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                        +12%
-                    </span>
-                </div>
-                <div>
-                    <span
-                        class="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Santri
-                        Aktif</span>
-                    <h3 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-0.5">485</h3>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium truncate">Putra: 250 | Putri:
-                        235</p>
-                </div>
-            </div>
-
-            <div
-                class="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between group transition-colors duration-300">
-                <div class="flex items-center justify-between mb-3">
-                    <span
-                        class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 flex items-center justify-center text-sm sm:text-lg">
-                        <i class="fa-solid fa-file-invoice"></i>
-                    </span>
-                    <span
-                        class="text-[9px] sm:text-[10px] font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/60 px-2 py-0.5 rounded-full border border-sky-500/20">
-                        Gel. 1
-                    </span>
-                </div>
-                <div>
-                    <span
-                        class="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Pendaftar</span>
-                    <h3 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-0.5">124</h3>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium truncate">Menunggu verifikasi
-                    </p>
-                </div>
-            </div>
-
-            <div
-                class="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between group transition-colors duration-300">
-                <div class="flex items-center justify-between mb-3">
-                    <span
-                        class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm sm:text-lg">
-                        <i class="fa-solid fa-newspaper"></i>
-                    </span>
-                    <span
-                        class="text-[9px] sm:text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-full border border-amber-500/20">
-                        Publik
-                    </span>
-                </div>
-                <div>
-                    <span
-                        class="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Berita</span>
-                    <h3 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-0.5">38</h3>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium truncate">Artikel aktif bulan
-                        ini</p>
-                </div>
-            </div>
-
-            <div
-                class="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between group transition-colors duration-300">
-                <div class="flex items-center justify-between mb-3">
-                    <span
-                        class="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center text-sm sm:text-lg">
-                        <i class="fa-solid fa-chalkboard-user"></i>
-                    </span>
-                    <span
-                        class="text-[9px] sm:text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded-full border border-purple-500/20">
-                        Staf
-                    </span>
-                </div>
-                <div>
-                    <span
-                        class="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Asatidz</span>
-                    <h3 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-0.5">32</h3>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium truncate">Pengajar & Pembina
-                    </p>
-                </div>
-            </div>
-
+        <div class="ad-chips">
+            <span class="ad-chip"><i class="fa-solid fa-graduation-cap"></i> Tahun Ajaran 2026/2027</span>
+            <span class="ad-chip"><i class="fa-regular fa-calendar"></i> {{ $tanggal }}</span>
         </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-            <div
-                class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm lg:col-span-2 flex flex-col justify-between transition-colors duration-300">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 class="text-sm font-black text-slate-900 dark:text-white">Statistik Tren Pendaftar Santri</h3>
-                        <p class="text-[11px] text-slate-400 dark:text-slate-400">Grafik jumlah calon santri baru per bulan
-                            (Tahun Ajaran)</p>
-                    </div>
-                    <div
-                        class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[11px] font-bold px-3 py-1.5 rounded-xl">
-                        <span>Periode 2025/2026</span>
-                    </div>
-                </div>
-
-                <div class="py-4 relative">
-                    <div
-                        class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20 dark:opacity-10">
-                        <div class="border-b border-dashed border-slate-400 dark:border-slate-600 w-full"></div>
-                        <div class="border-b border-dashed border-slate-400 dark:border-slate-600 w-full"></div>
-                        <div class="border-b border-dashed border-slate-400 dark:border-slate-600 w-full"></div>
-                        <div class="border-b border-dashed border-slate-400 dark:border-slate-600 w-full"></div>
-                    </div>
-
-                    <div class="h-56 w-full flex items-end relative z-10 px-2">
-                        <svg class="w-full h-full overflow-visible" viewBox="0 0 600 200" preserveAspectRatio="none">
-                            <defs>
-                                <linearGradient id="emeraldGradient" x1="0" y1="0" x2="0"
-                                    y2="1">
-                                    <stop offset="0%" stop-color="#10b981" stop-opacity="0.3" />
-                                    <stop offset="100%" stop-color="#10b981" stop-opacity="0.0" />
-                                </linearGradient>
-                            </defs>
-                            <path d="M 0,150 Q 100,120 200,90 T 400,60 T 600,30 L 600,200 L 0,200 Z"
-                                fill="url(#emeraldGradient)" />
-                            <path d="M 0,150 Q 100,120 200,90 T 400,60 T 600,30" fill="none" stroke="#10b981"
-                                stroke-width="3" stroke-linecap="round" />
-                            <circle cx="0" cy="150" r="4" fill="#10b981" />
-                            <circle cx="120" cy="125" r="4" fill="#10b981" />
-                            <circle cx="240" cy="95" r="4" fill="#10b981" />
-                            <circle cx="360" cy="70" r="4" fill="#10b981" />
-                            <circle cx="480" cy="45" r="4" fill="#10b981" />
-                            <circle cx="600" cy="30" r="4" fill="#10b981" />
-                        </svg>
-                    </div>
-
-                    <div
-                        class="grid grid-cols-6 text-center text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-3 pt-2 border-t border-slate-100 dark:border-slate-800">
-                        <span>Nov</span>
-                        <span>Des</span>
-                        <span>Jan</span>
-                        <span>Feb</span>
-                        <span>Mar</span>
-                        <span>Apr</span>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
-                    <div class="flex items-center gap-2">
-                        <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
-                        <span class="text-slate-600 dark:text-slate-300 font-semibold text-[11px]">Jumlah Pendaftar
-                            Masuk</span>
-                    </div>
-                    <span class="text-slate-900 dark:text-white font-black text-xs">Total Puncak: 42 Orang/Bulan</span>
-                </div>
-            </div>
-
-            <div
-                class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between transition-colors duration-300">
-                <div>
-                    <h3 class="text-sm font-black text-slate-900 dark:text-white">Komposisi Santri Aktif</h3>
-                    <p class="text-[11px] text-slate-400 dark:text-slate-400">Distribusi berdasarkan tingkat jenjang
-                        pendidikan</p>
-                </div>
-
-                <div class="my-6 flex flex-col items-center justify-center">
-                    <div class="relative w-36 h-36 rounded-full flex items-center justify-center shadow-inner"
-                        style="background: conic-gradient(#10b981 0% 50%, #3b82f6 50% 80%, #f59e0b 80% 100%);">
-                        <div
-                            class="w-24 h-24 bg-white dark:bg-slate-900 rounded-full flex flex-col items-center justify-center shadow-sm transition-colors duration-300">
-                            <span
-                                class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Total</span>
-                            <span class="text-base font-black text-slate-900 dark:text-white">324</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                            <span class="text-slate-600 dark:text-slate-400 font-medium text-[11px]">Tingkat Ula /
-                                TPQ</span>
-                        </div>
-                        <span class="font-bold text-slate-900 dark:text-slate-200 text-[11px]">50% (162)</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                            <span class="text-slate-600 dark:text-slate-400 font-medium text-[11px]">Tingkat Wustha</span>
-                        </div>
-                        <span class="font-bold text-slate-900 dark:text-slate-200 text-[11px]">30% (97)</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                            <span class="text-slate-600 dark:text-slate-400 font-medium text-[11px]">Tingkat Ulya</span>
-                        </div>
-                        <span class="font-bold text-slate-900 dark:text-slate-200 text-[11px]">20% (65)</span>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
-            <div
-                class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm p-5 sm:p-8 space-y-4 transition-colors duration-300">
-                <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                    <div>
-                        <h3 class="text-sm sm:text-base font-black text-slate-900 dark:text-white">Pendaftar Terbaru</h3>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Calon santri yang baru mengisi formulir
-                        </p>
-                    </div>
-                    <a href="{{ route('admin.pendaftaran.index') }}"
-                        class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 bg-emerald-50 dark:bg-emerald-950/50 px-3 py-1.5 rounded-xl transition">
-                        <span>Semua</span>
-                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                    </a>
-                </div>
-
-                <!-- Mobile View -->
-                <div class="space-y-3 sm:hidden">
-                    @forelse($pendaftarTerbaru as $pendaftar)
-                        <div
-                            class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700 flex items-center justify-between">
-                            <div class="space-y-0.5">
-                                <span class="text-[9px] font-bold text-slate-400">{{ $pendaftar->no_pendaftaran }}</span>
-                                <h4 class="text-xs font-black text-slate-900 dark:text-white">
-                                    {{ $pendaftar->nama_lengkap }}</h4>
-                                <p class="text-[10px] text-slate-500 dark:text-slate-400">{{ $pendaftar->jenjang_tujuan }}
-                                    • {{ $pendaftar->asal_sekolah }}</p>
-                            </div>
-
-                            @php
-                                $statusClass = match (strtolower($pendaftar->status_pendaftaran)) {
-                                    'diterima'
-                                        => 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-400',
-                                    'ditolak' => 'bg-rose-100 dark:bg-rose-950/50 text-rose-800 dark:text-rose-400',
-                                    default => 'bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-400',
-                                };
-                            @endphp
-                            <span class="{{ $statusClass }} px-2.5 py-1 rounded-full text-[9px] font-bold">
-                                {{ ucfirst($pendaftar->status_pendaftaran) }}
-                            </span>
-                        </div>
-                    @empty
-                        <div class="text-center py-4 text-xs text-slate-400">Belum ada data pendaftar.</div>
-                    @endforelse
-                </div>
-
-                <!-- Desktop Table View -->
-                <div class="hidden sm:block overflow-x-auto">
-                    <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300">
-                        <thead
-                            class="bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider">
-                            <tr>
-                                <th class="py-3 px-4 rounded-l-xl">Nama Calon Santri</th>
-                                <th class="py-3 px-4">Jenjang</th>
-                                <th class="py-3 px-4">Asal Sekolah</th>
-                                <th class="py-3 px-4 rounded-r-xl">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
-                            @forelse($pendaftarTerbaru as $pendaftar)
-                                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition">
-                                    <td class="py-3.5 px-4">
-                                        <div class="font-bold text-slate-900 dark:text-white">
-                                            {{ $pendaftar->nama_lengkap }}</div>
-                                        <div class="text-[10px] text-slate-400">ID: {{ $pendaftar->no_pendaftaran }}</div>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">
-                                        {{ $pendaftar->jenjang_tujuan }}</td>
-                                    <td class="py-3.5 px-4 text-slate-500 dark:text-slate-400">
-                                        {{ $pendaftar->asal_sekolah }}</td>
-                                    <td class="py-3.5 px-4">
-                                        @php
-                                            $badgeClass = match (strtolower($pendaftar->status_pendaftaran)) {
-                                                'diterima'
-                                                    => 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-400',
-                                                'ditolak'
-                                                    => 'bg-rose-100 dark:bg-rose-950/50 text-rose-800 dark:text-rose-400',
-                                                default
-                                                    => 'bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-400',
-                                            };
-                                        @endphp
-                                        <span
-                                            class="{{ $badgeClass }} px-3 py-1 rounded-full text-[10px] font-bold inline-block">
-                                            {{ ucfirst($pendaftar->status_pendaftaran) }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="text-center py-6 text-slate-400 text-xs">Belum ada data
-                                        pendaftar terbaru.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div
-                class="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm p-5 sm:p-8 flex flex-col justify-between space-y-4 transition-colors duration-300">
-                <div>
-                    <h3 class="text-sm sm:text-base font-black text-slate-900 dark:text-white mb-0.5">Aksi Cepat</h3>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-4">Pintasan menu operasional sistem</p>
-
-                    <div class="space-y-2.5">
-                        <a href="#"
-                            class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-700 dark:hover:text-emerald-400 border border-slate-200/60 dark:border-slate-700 transition group">
-                            <div class="flex items-center gap-3">
-                                <span
-                                    class="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center shadow-sm transition">
-                                    <i class="fa-solid fa-user-plus text-xs"></i>
-                                </span>
-                                <div>
-                                    <h4
-                                        class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400">
-                                        Tambah Data Santri</h4>
-                                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Input manual data baru</p>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-xs text-slate-400 group-hover:text-emerald-600"></i>
-                        </a>
-
-                        <a href="#"
-                            class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-700 dark:hover:text-emerald-400 border border-slate-200/60 dark:border-slate-700 transition group">
-                            <div class="flex items-center gap-3">
-                                <span
-                                    class="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center shadow-sm transition">
-                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
-                                </span>
-                                <div>
-                                    <h4
-                                        class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400">
-                                        Tulis Berita Baru</h4>
-                                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Publikasi info kegiatan</p>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-xs text-slate-400 group-hover:text-emerald-600"></i>
-                        </a>
-
-                        <a href="#"
-                            class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-700 dark:hover:text-emerald-400 border border-slate-200/60 dark:border-slate-700 transition group">
-                            <div class="flex items-center gap-3">
-                                <span
-                                    class="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center shadow-sm transition">
-                                    <i class="fa-solid fa-cloud-arrow-down text-xs"></i>
-                                </span>
-                                <div>
-                                    <h4
-                                        class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400">
-                                        Rekapitulasi Data</h4>
-                                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Unduh laporan Excel/PDF</p>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-xs text-slate-400 group-hover:text-emerald-600"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <div
-                    class="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-900 to-slate-900 text-white space-y-1.5 shadow-sm">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-circle-info text-emerald-400 text-xs"></i>
-                        <h5 class="text-[11px] font-bold tracking-wide">Pusat Bantuan</h5>
-                    </div>
-                    <p class="text-[10px] text-slate-300 leading-relaxed">
-                        Kendala server atau database? Hubungi tim pengembang internal.
-                    </p>
-                </div>
-            </div>
-
-        </div>
-
     </div>
+
+    {{-- ===================== PEMBERITAHUAN ===================== --}}
+    <div class="ad-notice">
+        <span><span class="ad-ico sm" style="--fc:#12a67a"><i class="fa-solid fa-clipboard-check"></i></span> Ada 124 pendaftaran yang menunggu verifikasi. Mari bantu calon santri melanjutkan langkahnya.</span>
+        <a href="{{ route('admin.pendaftaran.index') }}" class="ad-link">Tinjau Pendaftaran <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    {{-- ===================== STATISTIK ===================== --}}
+    <div class="ad-stats">
+        @foreach ($stat as $s)
+            <div class="ad-card ad-stat" style="--fc: {{ $s[5] }}">
+                <div class="ad-stat-head"><span>{{ $s[0] }}</span><span class="ad-ico"><i class="fa-solid {{ $s[2] }}"></i></span></div>
+                <div class="ad-num"><b>{{ number_format($s[1], 0, ',', '.') }}</b><span class="ad-badge">{{ $s[3] }}</span></div>
+                <small><i class="fa-solid fa-circle"></i>{{ $s[4] }}</small>
+            </div>
+        @endforeach
+    </div>
+
+    {{-- ===================== FITUR WEBSITE ===================== --}}
+    <div>
+        <div class="ad-sec">
+            <div>
+                <span class="ad-ico" style="--fc:#12a67a"><i class="fa-solid fa-globe"></i></span>
+                <div>
+                    <h3 class="ad-ptitle">Fitur Website</h3>
+                    <p class="ad-psub">Halaman yang tampil di website, sesuai menu navigasi pesantren</p>
+                </div>
+            </div>
+            <a href="{{ url('/') }}" target="_blank" rel="noopener noreferrer" class="ad-link">Buka website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+
+        <div class="ad-feat">
+            @foreach ($fitur as $f)
+                <div class="ad-card ad-f" style="--fc: {{ $f[2] }}">
+                    <div style="display:flex;gap:14px;align-items:flex-start">
+                        <span class="ad-ico"><i class="fa-solid {{ $f[1] }}"></i></span>
+                        <div>
+                            <h4>{{ $f[0] }}</h4>
+                            <p>{{ $f[3] }}</p>
+                        </div>
+                    </div>
+                    <div class="ad-f-foot">
+                        @if ($f[4])
+                            <a href="{{ $f[4] }}" class="kelola"><i class="fa-solid fa-sliders"></i> Kelola</a>
+                        @else
+                            <span class="note"><i class="fa-regular fa-eye"></i> Halaman publik</span>
+                        @endif
+                        @if ($f[5])
+                            <a href="{{ $f[5] }}" target="_blank" rel="noopener noreferrer" class="lihat">Lihat <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                        @endif
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+
+    {{-- ===================== GRAFIK + KOMPOSISI ===================== --}}
+    <div class="ad-row">
+
+        <div class="ad-card ad-panel">
+            <div class="ad-sec">
+                <div>
+                    <span class="ad-ico" style="--fc:#12a67a"><i class="fa-solid fa-chart-line"></i></span>
+                    <div>
+                        <h3 class="ad-ptitle">Statistik Tren Pendaftar Santri</h3>
+                        <p class="ad-psub">Jumlah calon santri baru per bulan (Tahun Ajaran)</p>
+                    </div>
+                </div>
+                <span class="ad-period"><i class="fa-regular fa-calendar-check"></i> Periode 2025/2026</span>
+            </div>
+
+            <div class="ad-big"><b>{{ max($tren) }}</b><span>puncak pendaftar masuk per bulan</span></div>
+
+            <svg class="ad-chart" viewBox="0 0 {{ $W }} {{ $H }}" role="img" aria-label="Grafik tren pendaftar per bulan">
+                <defs>
+                    <linearGradient id="adGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#12b886" stop-opacity=".22" />
+                        <stop offset="100%" stop-color="#12b886" stop-opacity="0" />
+                    </linearGradient>
+                </defs>
+
+                @for ($g = 0; $g <= 5; $g++)
+                    @php $gy = round($atas + $tinggi * (1 - $g / 5), 1); @endphp
+                    <line class="grid" x1="{{ $kiri }}" x2="{{ $W - $kanan }}" y1="{{ $gy }}" y2="{{ $gy }}" />
+                    <text x="{{ $kiri - 10 }}" y="{{ $gy + 3 }}" text-anchor="end">{{ $g * 10 }}</text>
+                @endfor
+
+                <path d="{{ $area }}" fill="url(#adGrad)" />
+                <path d="{{ $garis }}" class="ln" />
+
+                @foreach ($pts as $idx => $p)
+                    <circle class="dot {{ $idx === $n - 1 ? 'last' : '' }}" cx="{{ $p[0] }}" cy="{{ $p[1] }}" r="{{ $idx === $n - 1 ? 4.5 : 3.5 }}" />
+                    <text x="{{ $p[0] }}" y="{{ $H - 8 }}" text-anchor="middle">{{ $p[2] }}</text>
+                @endforeach
+            </svg>
+        </div>
+
+        <div class="ad-card ad-panel">
+            <div class="ad-sec" style="flex-wrap:nowrap">
+                <div>
+                    <span class="ad-ico" style="--fc:#c08a1c"><i class="fa-solid fa-chart-pie"></i></span>
+                    <div>
+                        <h3 class="ad-ptitle">Komposisi Santri Aktif</h3>
+                        <p class="ad-psub">Berdasarkan tingkat jenjang</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ad-big" style="margin-top:24px"><b>{{ $totalSantri }}</b><span>total santri</span></div>
+
+            <div class="ad-seg">
+                @foreach ($komposisi as $k)
+                    <span style="width: {{ $k[1] }}%; background: {{ $k[3] }}"></span>
+                @endforeach
+            </div>
+
+            <div class="ad-leg">
+                @foreach ($komposisi as $k)
+                    <div>
+                        <span><span class="ad-ico sm" style="--fc: {{ $k[3] }}; width:30px; height:30px; font-size:12px"><i class="fa-solid {{ $k[4] }}"></i></span>{{ $k[0] }}</span>
+                        <b>{{ $k[1] }}% ({{ $k[2] }})</b>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    {{-- ===================== PENDAFTAR TERBARU + AGENDA ===================== --}}
+    <div class="ad-row">
+
+        <div class="ad-card" style="overflow:hidden">
+            <div class="ad-table-head">
+                <div>
+                    <span class="ad-ico" style="--fc:#3b82c4"><i class="fa-solid fa-user-plus"></i></span>
+                    <div>
+                        <h3 class="ad-ptitle">Pendaftar Terbaru</h3>
+                        <p class="ad-psub">Calon santri yang baru mengisi formulir</p>
+                    </div>
+                </div>
+                <a href="{{ route('admin.pendaftaran.index') }}" class="ad-link">Lihat semua <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+
+            <div class="ad-cols">
+                <span>Nama Calon Santri</span>
+                <span>Jenjang</span>
+                <span>Asal Sekolah</span>
+                <span>Status</span>
+            </div>
+
+            @forelse ($pendaftarTerbaru as $pendaftar)
+                @php
+                    $kelas = match (strtolower($pendaftar->status_pendaftaran)) {
+                        'diterima' => 'ok',
+                        'ditolak'  => 'bad',
+                        default    => 'wait',
+                    };
+                    $ikonStatus = ['ok' => 'fa-circle-check', 'bad' => 'fa-circle-xmark', 'wait' => 'fa-clock'][$kelas];
+                    $inisial = collect(preg_split('/\s+/', trim($pendaftar->nama_lengkap)))
+                        ->take(2)->map(fn ($w) => mb_strtoupper(mb_substr($w, 0, 1)))->implode('');
+                @endphp
+                <div class="ad-line">
+                    <div class="ad-who">
+                        <span class="ad-av">{{ $inisial }}</span>
+                        <div style="min-width:0">
+                            <h4>{{ $pendaftar->nama_lengkap }}</h4>
+                            <small>ID: {{ $pendaftar->no_pendaftaran }}</small>
+                            <small class="mob">{{ $pendaftar->jenjang_tujuan }} • {{ $pendaftar->asal_sekolah }}</small>
+                        </div>
+                    </div>
+                    <span class="c-jenjang"><i class="fa-solid fa-school"></i>{{ $pendaftar->jenjang_tujuan }}</span>
+                    <span class="c-asal"><i class="fa-solid fa-building-columns"></i>{{ $pendaftar->asal_sekolah }}</span>
+                    <span class="ad-pill {{ $kelas }}"><i class="fa-solid {{ $ikonStatus }}"></i>{{ ucfirst($pendaftar->status_pendaftaran) }}</span>
+                </div>
+            @empty
+                <div class="ad-empty"><i class="fa-regular fa-folder-open"></i>Belum ada data pendaftar terbaru.</div>
+            @endforelse
+
+            <div class="ad-foot"><i class="fa-solid fa-list-ul"></i> Menampilkan {{ count($pendaftarTerbaru) }} pendaftar terbaru</div>
+        </div>
+
+        <div class="ad-col">
+            {{-- CONTOH: data agenda masih statis --}}
+            <div class="ad-card ad-panel">
+                <div class="ad-sec" style="flex-wrap:nowrap">
+                    <div>
+                        <span class="ad-ico" style="--fc:#8b5cc6"><i class="fa-solid fa-calendar-check"></i></span>
+                        <h3 class="ad-ptitle">Agenda Terdekat</h3>
+                    </div>
+                </div>
+                <div class="ad-agenda">
+                    @foreach ($agenda as $a)
+                        <div class="ad-ag">
+                            <span class="ad-date"><b>{{ $a[0] }}</b><small>OKT</small></span>
+                            <div>
+                                <h5>{{ $a[1] }}</h5>
+                                <p><span><i class="fa-regular fa-clock"></i>{{ $a[2] }}</span><span><i class="fa-solid fa-location-dot"></i>{{ $a[3] }}</span></p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="ad-help">
+                <span class="ad-ico" style="--fc:#c08a1c"><i class="fa-regular fa-circle-question"></i></span>
+                <div>
+                    <h5>Pusat Bantuan</h5>
+                    <p>Kendala server atau database? Hubungi tim pengembang internal.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ===================== AKSI CEPAT ===================== --}}
+    <div class="ad-card ad-quick">
+        <div>
+            <span class="ad-ico" style="--fc:#d6525a"><i class="fa-solid fa-bolt"></i></span>
+            <div>
+                <h3 class="ad-ptitle">Aksi Cepat</h3>
+                <p class="ad-psub">Pintasan menu operasional sistem</p>
+            </div>
+        </div>
+        <div class="ad-quick-btns">
+            <a href="#" class="ad-btn"><i class="fa-solid fa-user-plus"></i> Tambah Data Santri</a>
+            <a href="#" class="ad-btn"><i class="fa-regular fa-pen-to-square"></i> Tulis Berita Baru</a>
+            <a href="#" class="ad-btn main"><i class="fa-solid fa-cloud-arrow-down"></i> Rekapitulasi Data</a>
+        </div>
+    </div>
+
+</div>
+
 @endsection

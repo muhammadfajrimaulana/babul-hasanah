@@ -104,7 +104,7 @@
         /* Dropdown */
         .dd { position: relative; }
         .dd-panel {
-            position: absolute; left: 0; top: 100%; margin-top: 10px; width: 240px; background: #fff;
+            position: absolute; left: 0; top: 100%; margin-top: 10px; width: 260px; background: #fff;
             border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow-lg); padding: 8px; z-index: 60;
         }
         .dd-title {
@@ -119,6 +119,8 @@
             width: 32px; height: 32px; border-radius: 10px; background: var(--cream); color: var(--green);
             display: grid; place-items: center; font-size: 12px; flex: none; transition: all .2s ease;
         }
+        .dd-item.active { background: #f1f8f4; color: var(--emerald-d); }
+        .dd-item.active .ic { background: var(--emerald); color: #fff; }
         @media (hover: hover) {
             .dd-item:hover { background: #f1f8f4; color: var(--emerald-d); }
             .dd-item:hover .ic { background: var(--emerald); color: #fff; }
@@ -220,7 +222,7 @@
             .menu-links > a.active, .dd-btn.active { background: #eaf7f1; color: var(--emerald-d); font-weight: 600; }
             .menu-links > a.active .mi, .dd-btn.active .mi { background: var(--emerald); color: #fff; }
 
-            /* Submenu Profil / Program */
+            /* Submenu Profil / Jenjang */
             .dd { width: 100%; }
             .dd-panel {
                 position: static; width: auto; margin: 2px 0 6px 29px; padding: 2px 0 2px 12px;
@@ -344,11 +346,11 @@
                         </div>
                     </div>
 
-                    {{-- Dropdown Program --}}
+                    {{-- Dropdown Jenjang --}}
                     <div class="dd" x-data="{ open: false }" @click.outside="open = false">
-                        <button type="button" class="dd-btn {{ request()->is('program*') ? 'active' : '' }}" @click="open = !open">
+                        <button type="button" class="dd-btn {{ request()->is('jenjang*') ? 'active' : '' }}" @click="open = !open">
                             <span class="mi"><i class="fa-solid fa-book-open-reader"></i></span>
-                            <span class="label">Program</span>
+                            <span class="label">Jenjang</span>
                             <i class="fa-solid fa-chevron-down chev" :class="{ 'open': open }"></i>
                         </button>
                         <div class="dd-panel" x-show="open" x-cloak
@@ -359,10 +361,14 @@
                             x-transition:leave-start="opacity-100 translate-y-0"
                             x-transition:leave-end="opacity-0 translate-y-2"
                             style="display: none;">
-                            <div class="dd-title">Pilihan Program</div>
-                            <a href="{{ url('/program/kategori-1') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-book-quran"></i></span>Program 1</a>
-                            <a href="{{ url('/program/kategori-2') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-award"></i></span>Program 2</a>
-                            <a href="{{ url('/program/kategori-3') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-star"></i></span>Program 3</a>
+                            <div class="dd-title">Jenjang Pendidikan</div>
+                            <a href="{{ route('jenjang.show', 'mdta') }}" class="dd-item {{ request()->is('jenjang/mdta') ? 'active' : '' }}"><span class="ic"><i class="fa-solid fa-book-quran"></i></span>Madrasah Diniyah Takmiliyah</a>
+                            <a href="{{ route('jenjang.show', 'pps-wustha') }}" class="dd-item {{ request()->is('jenjang/pps-wustha') ? 'active' : '' }}"><span class="ic"><i class="fa-solid fa-award"></i></span>PPS Wustha</a>
+                            <a href="{{ route('jenjang.show', 'mts') }}" class="dd-item {{ request()->is('jenjang/mts') ? 'active' : '' }}"><span class="ic"><i class="fa-solid fa-school"></i></span>MTs</a>
+                            <a href="{{ route('jenjang.show', 'ma') }}" class="dd-item {{ request()->is('jenjang/ma') ? 'active' : '' }}"><span class="ic"><i class="fa-solid fa-school-flag"></i></span>MA</a>
+                            <a href="{{ route('jenjang.show', 'pdf-wustha') }}" class="dd-item {{ request()->is('jenjang/pdf-wustha') ? 'active' : '' }}"><span class="ic"><i class="fa-solid fa-book"></i></span>Diniyah Formal Wustha</a>
+                            <a href="{{ route('jenjang.show', 'pdf-ulya') }}" class="dd-item {{ request()->is('jenjang/pdf-ulya') ? 'active' : '' }}"><span class="ic"><i class="fa-solid fa-book-open"></i></span>Diniyah Formal Ulya</a>
+                            <a href="{{ route('jenjang.show', 'mahad-aly') }}" class="dd-item {{ request()->is('jenjang/mahad-aly') ? 'active' : '' }}"><span class="ic"><i class="fa-solid fa-graduation-cap"></i></span>Ma'had 'Aly</a>
                         </div>
                     </div>
 
@@ -375,7 +381,7 @@
                     <a href="{{ url('/prestasi') }}" class="{{ request()->is('prestasi*') ? 'active' : '' }}">
                         <span class="mi"><i class="fa-solid fa-trophy"></i></span>Prestasi
                     </a>
-                    <a href="{{ url('/') }}#kontak">
+                    <a href="{{ route('kontak') }}" class="{{ request()->is('kontak*') ? 'active' : '' }}">
                         <span class="mi"><i class="fa-solid fa-address-book"></i></span>Kontak
                     </a>
                 </div>
@@ -439,7 +445,7 @@
                     <h5>Tautan Cepat</h5>
                     <ul>
                         <li><a href="{{ url('/profil/sejarah') }}">Tentang Pesantren</a></li>
-                        <li><a href="{{ url('/program/kategori-1') }}">Program Pesantren</a></li>
+                        <li><a href="{{ route('jenjang.show', 'mdta') }}">Jenjang Pendidikan</a></li>
                         <li><a href="{{ route('pendaftaran.index') }}">Pendaftaran Santri Baru</a></li>
                         <li><a href="{{ route('login') }}">Portal Wali Santri</a></li>
                     </ul>
