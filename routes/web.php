@@ -10,9 +10,11 @@ use App\Http\Controllers\Admin\ProgramController as AdminProgramController;
 use App\Http\Controllers\Admin\KegiatanController as AdminKegiatanController;
 use App\Http\Controllers\Admin\BeritaController as AdminBeritaController;
 use App\Http\Controllers\Admin\GaleriController as AdminGaleriController;
+use App\Http\Controllers\Admin\PrestasiAdminController;
 use App\Http\Controllers\Portal\PortalDashboardController as PortalDashboard;
 use App\Http\Controllers\Public\PendaftaranOnlineController;
 use App\Http\Controllers\Public\PrestasiController;
+use App\Http\Controllers\Public\GaleriController as PublicGaleriController;
 
 // ==========================================
 // 1. PUBLIC ROUTES (Halaman Depan & Pendaftaran)
@@ -44,9 +46,7 @@ Route::get('/berita', function () {
     return view('pages.berita');
 })->name('berita.index');
 
-Route::get('/galeri', function () {
-    return view('pages.galeri');
-})->name('galeri');
+Route::get('/galeri', [PublicGaleriController::class, 'index'])->name('galeri');
 
 Route::get('/kegiatan', function () {
     return view('pages.kegiatan');
@@ -107,7 +107,20 @@ Route::middleware(['auth', \App\Http\Middleware\RoleAdmin::class])->prefix('admi
     Route::get('/pengelolaan-program', [AdminProgramController::class, 'index'])->name('program.index');
     Route::get('/pengelolaan-kegiatan', [AdminKegiatanController::class, 'index'])->name('kegiatan.index');
     Route::get('/pengelolaan-berita', [AdminBeritaController::class, 'index'])->name('berita.index');
+
+    // Galeri (album foto & video)
     Route::get('/pengelolaan-galeri', [AdminGaleriController::class, 'index'])->name('galeri.index');
+    Route::get('/pengelolaan-galeri/tambah', [AdminGaleriController::class, 'create'])->name('galeri.create');
+    Route::post('/pengelolaan-galeri', [AdminGaleriController::class, 'store'])->name('galeri.store');
+    Route::delete('/pengelolaan-galeri/{galeri}', [AdminGaleriController::class, 'destroy'])->name('galeri.destroy');
+
+    // Prestasi santri
+    Route::get('/pengelolaan-prestasi', [PrestasiAdminController::class, 'index'])->name('prestasi.index');
+    Route::get('/pengelolaan-prestasi/tambah', [PrestasiAdminController::class, 'create'])->name('prestasi.create');
+    Route::post('/pengelolaan-prestasi', [PrestasiAdminController::class, 'store'])->name('prestasi.store');
+    Route::get('/pengelolaan-prestasi/{prestasi}/edit', [PrestasiAdminController::class, 'edit'])->name('prestasi.edit');
+    Route::put('/pengelolaan-prestasi/{prestasi}', [PrestasiAdminController::class, 'update'])->name('prestasi.update');
+    Route::delete('/pengelolaan-prestasi/{prestasi}', [PrestasiAdminController::class, 'destroy'])->name('prestasi.destroy');
 });
 
 // ==========================================

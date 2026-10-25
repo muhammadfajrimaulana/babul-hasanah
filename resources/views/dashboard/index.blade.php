@@ -30,9 +30,9 @@
         ['Profil Pesantren',    'fa-landmark',         '#12a67a', 'Sejarah, visi & misi, struktur organisasi, dan pembelajaran.', $ada('admin.konten.index'),     url('/profil/sejarah')],
         ['Jenjang Pendidikan',  'fa-book-open-reader', '#3b82c4', 'MDTA, PPS Wustha, MTs, MA, Diniyah Formal, dan Ma’had ‘Aly.', $ada('admin.program.index'),    $ada('jenjang.show', ['slug' => 'mdta'])],
         ['Berita',              'fa-newspaper',        '#c08a1c', 'Kabar, pengumuman, dan artikel kegiatan pesantren.',            $ada('admin.berita.index'),     $ada('berita.index')],
-        ['Galeri',              'fa-images',           '#8b5cc6', 'Album foto dokumentasi kegiatan dan fasilitas.',                $ada('admin.galeri.index'),     $ada('galeri')],
+        ['Galeri',              'fa-images',           '#8b5cc6', 'Album foto dan video dokumentasi kegiatan dan fasilitas.',      $ada('admin.galeri.index'),     $ada('galeri')],
         ['Kegiatan',            'fa-calendar-days',    '#0e9f8e', 'Agenda dan kegiatan santri di lingkungan pesantren.',           $ada('admin.kegiatan.index'),   $ada('kegiatan')],
-        ['Prestasi Santri',     'fa-trophy',           '#d6525a', 'Capaian dan penghargaan yang diraih santri.',                   null,                           $ada('prestasi.index')],
+        ['Prestasi Santri',     'fa-trophy',           '#d6525a', 'Capaian dan penghargaan yang diraih santri.',                   $ada('admin.prestasi.index'),   $ada('prestasi.index')],
         ['Pendaftaran Online',  'fa-file-signature',   '#12a67a', 'Formulir dan data calon santri baru.',                          $ada('admin.pendaftaran.index'), $ada('pendaftaran.index')],
         ['Kontak',              'fa-address-book',     '#3b82c4', 'Alamat, telepon, email, dan peta lokasi pesantren.',            null,                           $ada('kontak')],
     ];
@@ -512,6 +512,8 @@
         <div class="ad-quick-btns">
             <a href="#" class="ad-btn"><i class="fa-solid fa-user-plus"></i> Tambah Data Santri</a>
             <a href="#" class="ad-btn"><i class="fa-regular fa-pen-to-square"></i> Tulis Berita Baru</a>
+            <a href="{{ $ada('admin.galeri.create') ?? '#' }}" class="ad-btn"><i class="fa-solid fa-images"></i> Tambah Album Galeri</a>
+            <a href="{{ $ada('admin.prestasi.create') ?? '#' }}" class="ad-btn"><i class="fa-solid fa-trophy"></i> Tambah Prestasi</a>
             <a href="#" class="ad-btn main"><i class="fa-solid fa-cloud-arrow-down"></i> Rekapitulasi Data</a>
         </div>
     </div>
