@@ -63,7 +63,7 @@
             </a>
 
             <!-- MENU UTAMA -->
-            <div class="pt-3" x-data="{ open: {{ request()->routeIs('admin.pendaftaran.*') || request()->routeIs('admin.santri.*') ? 'true' : 'false' }} }">
+            <div class="pt-3" x-data="{ open: {{ request()->routeIs('admin.pendaftaran.*') || request()->routeIs('admin.santri.*') || request()->routeIs('admin.alumni.*') || request()->routeIs('super.pengguna.*') ? 'true' : 'false' }} }">
                 <button @click="if(!sidebarMinimize) { open = !open } else { sidebarMinimize = false; open = true; }"
                     class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-400 hover:bg-slate-800 transition relative group">
                     <div class="flex items-center gap-3">
@@ -90,15 +90,20 @@
                         <span>Pendaftaran</span>
                     </a>
                     <a href="{{ route('admin.santri.index') }}" @click="sidebarOpen = false"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.santri.*') && !request()->routeIs('admin.pengguna.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.santri.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
                         <i class="fa-solid fa-people-group w-4 text-xs flex-shrink-0"></i>
                         <span>Data Santri</span>
                     </a>
+                    <a href="{{ route('admin.alumni.index') }}" @click="sidebarOpen = false"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.alumni.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
+                        <i class="fa-solid fa-user-graduate w-4 text-xs flex-shrink-0"></i>
+                        <span>Data Alumni</span>
+                    </a>
                     @if (auth()->check() && auth()->user()->role == 'super_admin')
-                        <a href="{{ route('admin.santri.index') }}" @click="sidebarOpen = false"
-                            class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.pengguna.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
-                            <i class="fa-solid fa-users w-4 text-xs flex-shrink-0"></i>
-                            <span>Pengguna</span>
+                        <a href="{{ route('super.pengguna.index') }}" @click="sidebarOpen = false"
+                            class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('super.pengguna.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
+                            <i class="fa-solid fa-users-gear w-4 text-xs flex-shrink-0"></i>
+                            <span>Pengguna Dashboard</span>
                         </a>
                     @endif
                 </div>

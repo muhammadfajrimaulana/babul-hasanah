@@ -5,38 +5,6 @@
 @section('content')
 
 @php
-    /*
-     * CATATAN: data di bawah masih CONTOH. Nanti ganti dengan data dari database
-     * (controller) dan cukup sesuaikan nama field-nya.
-     */
-    $gambar = asset('assets/img/banner/banner.png');
-
-    $headline = [
-        'kategori' => 'Pendidikan',
-        'waktu'    => '10 menit lalu',
-        'judul'    => 'Pondok Pesantren Babul Hasanah Cetak Generasi Unggul Penguasa Kitab Kuning',
-        'ringkas'  => 'Komitmen memadukan kurikulum salafiyah murni dan sistem pendidikan modern membawa hasil gemilang bagi perkembangan santri di Padang Lawas.',
-        'url'      => '#',
-    ];
-
-    $sub = [
-        ['kategori' => 'Pengumuman', 'judul' => 'Jadwal Seleksi Masuk Gelombang 1 Resmi Diumumkan Oleh Panitia', 'waktu' => '2 jam lalu', 'penulis' => 'Admin', 'url' => '#'],
-        ['kategori' => 'Kegiatan', 'judul' => 'Santri Gelar Pelatihan Pidato 3 Bahasa (Arab, Inggris, Indonesia)', 'waktu' => '5 jam lalu', 'penulis' => 'Pers Santri', 'url' => '#'],
-    ];
-
-    $populer = [
-        ['kategori' => 'Akademik', 'judul' => 'Mengenal Metode Bandongan & Sorogan Kitab Kuning di Pesantren', 'url' => '#'],
-        ['kategori' => 'Prestasi', 'judul' => 'Alumni Babul Hasanah Berhasil Lanjut Studi ke Universitas Al-Azhar Kairo', 'url' => '#'],
-        ['kategori' => 'Fasilitas', 'judul' => 'Pembangunan Gedung Asrama Putra Tahap II Rampung Tepat Waktu', 'url' => '#'],
-        ['kategori' => 'Kegiatan', 'judul' => 'Peringatan Maulid Nabi Diisi Dengan Tabligh Akbar Bersama Ulama Tamu', 'url' => '#'],
-    ];
-
-    $indeks = [
-        ['kategori' => 'Pesantren', 'waktu' => 'Kemarin', 'judul' => 'Pentingnya Menjaga Kedisiplinan Bahasa Di Lingkungan Asrama Pesantren', 'ringkas' => 'Pembiasaan berbahasa Arab dan Inggris harian terbukti efektif meningkatkan kepercayaan diri santri.', 'url' => '#'],
-        ['kategori' => 'Akademik', 'waktu' => '23 Agustus 2026', 'judul' => 'Evaluasi Ujian Semester Ganjil Kitab Kuning Tingkat MTs & MA', 'ringkas' => 'Proses penilaian munaqasyah hafalan dan pemahaman teks klasik berjalan dengan lancar.', 'url' => '#'],
-        ['kategori' => 'Ekstrakurikuler', 'waktu' => '20 Agustus 2026', 'judul' => 'Tim Hadroh Babul Hasanah Tampil Memukau di Acara Desa Manggis', 'ringkas' => 'Penampilan seni Islami tradisional ini mendapat apresiasi hangat dari warga sekitar.', 'url' => '#'],
-    ];
-
     $tanggal = now()->locale('id')->translatedFormat('l, d F Y');
 @endphp
 
@@ -122,8 +90,6 @@
     /* Indeks */
     .nw-sec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 56px 0 24px; }
     .nw-sec-title { font-size: 22px; font-weight: 600; color: var(--green); margin-top: 4px; }
-    .nw-link { font-size: 13px; font-weight: 600; color: var(--emerald-d); transition: color .2s ease; }
-    .nw-link:hover { color: var(--green); }
     .nw-index { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
     .nw-index .nw-img { height: 170px; }
     .nw-index .nw-h { font-size: 15px; }
@@ -164,52 +130,55 @@
 <section class="nw-body">
     <div class="site-container">
 
+        @if (!$headline)
+            <div class="nw-box" style="text-align:center;padding:60px 22px;color:var(--muted)">
+                Belum ada berita yang dipublikasikan.
+            </div>
+        @else
         <div class="nw-grid">
 
-            {{-- Headline + sub headline --}}
             <div class="nw-main">
-
-                <a href="{{ $headline['url'] }}" class="nw-card nw-feature">
+                <a href="{{ route('berita.show', $headline) }}" class="nw-card nw-feature">
                     <div class="nw-img">
-                        <img src="{{ $gambar }}" alt="{{ $headline['judul'] }}">
+                        <img src="{{ $headline->gambar_url }}" alt="{{ $headline->judul }}">
                         <span class="nw-badge">Utama</span>
                     </div>
                     <div class="nw-feature-body">
                         <div>
-                            <div class="nw-cat">{{ $headline['kategori'] }} <span class="nw-meta">&bull; {{ $headline['waktu'] }}</span></div>
-                            <h2 class="nw-h">{{ $headline['judul'] }}</h2>
-                            <p class="nw-p clamp-3">{{ $headline['ringkas'] }}</p>
+                            <div class="nw-cat">{{ $headline->kategori }}
+                                <span class="nw-meta">&bull; {{ $headline->published_at->diffForHumans() }}</span>
+                            </div>
+                            <h2 class="nw-h">{{ $headline->judul }}</h2>
+                            <p class="nw-p clamp-3">{{ $headline->ringkasan_otomatis }}</p>
                         </div>
                         <span class="nw-more">Baca Berita <i class="fa-solid fa-arrow-right"></i></span>
                     </div>
                 </a>
 
                 @foreach ($sub as $b)
-                    <a href="{{ $b['url'] }}" class="nw-card nw-item">
-                        <div class="nw-img"><img src="{{ $gambar }}" alt="{{ $b['judul'] }}"></div>
+                    <a href="{{ route('berita.show', $b) }}" class="nw-card nw-item">
+                        <div class="nw-img"><img src="{{ $b->gambar_url }}" alt="{{ $b->judul }}"></div>
                         <div class="nw-item-body">
-                            <span class="nw-cat">{{ $b['kategori'] }}</span>
-                            <h3 class="nw-h clamp-2">{{ $b['judul'] }}</h3>
+                            <span class="nw-cat">{{ $b->kategori }}</span>
+                            <h3 class="nw-h clamp-2">{{ $b->judul }}</h3>
                             <div class="nw-foot nw-meta">
-                                <span>{{ $b['waktu'] }}</span>
-                                <span>Oleh {{ $b['penulis'] }}</span>
+                                <span>{{ $b->published_at->diffForHumans() }}</span>
+                                <span>Oleh {{ $b->penulis }}</span>
                             </div>
                         </div>
                     </a>
                 @endforeach
-
             </div>
 
-            {{-- Sidebar --}}
             <aside class="nw-side">
                 <div class="nw-box">
                     <div class="nw-box-title">Terpopuler</div>
                     @foreach ($populer as $i => $b)
-                        <a href="{{ $b['url'] }}" class="nw-pop">
+                        <a href="{{ route('berita.show', $b) }}" class="nw-pop">
                             <span class="nw-num">{{ $i + 1 }}</span>
                             <div>
-                                <span class="nw-cat">{{ $b['kategori'] }}</span>
-                                <h4 class="nw-h">{{ $b['judul'] }}</h4>
+                                <span class="nw-cat">{{ $b->kategori }}</span>
+                                <h4 class="nw-h">{{ $b->judul }}</h4>
                             </div>
                         </a>
                     @endforeach
@@ -222,30 +191,34 @@
                     <a href="{{ route('pendaftaran.index') }}" class="site-btn">Daftar Online Sekarang</a>
                 </div>
             </aside>
-
         </div>
 
-        {{-- Indeks berita --}}
-        <div class="nw-sec-head">
-            <div>
-                <span class="nw-eyebrow">Arsip</span>
-                <h2 class="nw-sec-title">Indeks Berita Terbaru</h2>
+        @if ($indeks->count())
+            <div class="nw-sec-head">
+                <div>
+                    <span class="nw-eyebrow">Arsip</span>
+                    <h2 class="nw-sec-title">Indeks Berita Terbaru</h2>
+                </div>
             </div>
-            <a href="#" class="nw-link">Lihat Semua Berita <i class="fa-solid fa-arrow-right" style="font-size:11px;margin-left:4px"></i></a>
-        </div>
 
-        <div class="nw-index">
-            @foreach ($indeks as $b)
-                <a href="{{ $b['url'] }}" class="nw-card">
-                    <div class="nw-img"><img src="{{ $gambar }}" alt="{{ $b['judul'] }}"></div>
-                    <div class="nw-item-body">
-                        <div class="nw-cat">{{ $b['kategori'] }} <span class="nw-meta">&bull; {{ $b['waktu'] }}</span></div>
-                        <h3 class="nw-h clamp-2">{{ $b['judul'] }}</h3>
-                        <p class="nw-p clamp-2">{{ $b['ringkas'] }}</p>
-                    </div>
-                </a>
-            @endforeach
-        </div>
+            <div class="nw-index">
+                @foreach ($indeks as $b)
+                    <a href="{{ route('berita.show', $b) }}" class="nw-card">
+                        <div class="nw-img"><img src="{{ $b->gambar_url }}" alt="{{ $b->judul }}"></div>
+                        <div class="nw-item-body">
+                            <div class="nw-cat">{{ $b->kategori }}
+                                <span class="nw-meta">&bull; {{ $b->published_at->translatedFormat('d F Y') }}</span>
+                            </div>
+                            <h3 class="nw-h clamp-2">{{ $b->judul }}</h3>
+                            <p class="nw-p clamp-2">{{ $b->ringkasan_otomatis }}</p>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+
+            <div style="margin-top:32px">{{ $indeks->links() }}</div>
+        @endif
+        @endif
 
     </div>
 </section>

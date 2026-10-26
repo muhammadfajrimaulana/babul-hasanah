@@ -656,43 +656,29 @@
             </div>
         </section>
 
-        {{-- BERITA TERBARU --}}
-        <section class="news">
-            <div class="container">
-                <div class="eyebrow">Informasi &amp; Kegiatan</div>
-                <div class="head-row">
-                    <h2 class="section-title">Berita Terbaru Pesantren</h2>
-                    <a href="{{ route('berita.index') }}" class="btn btn-outline">Lihat Semua Berita <i class="fa-solid fa-arrow-right"></i></a>
-                </div>
+@php
+    $beritaTerbaru = \App\Models\Berita::published()->latest('published_at')->take(3)->get();
+    $warna = ['', 'c', 'd'];
+@endphp
 
-                <div class="news-grid">
-                    <article class="news-card">
-                        <div class="ph">[ Gambar Kegiatan ]</div>
-                        <div class="news-meta"><span class="cat">Pengumuman</span><span class="date">24 Agustus 2026</span></div>
-                        <h3>Pelaksanaan Ujian Semester Ganjil Santri Babul Hasanah</h3>
-                        <p>Ujian akhir semester ganjil tahun ajaran ini resmi dibuka oleh pimpinan pondok dengan sistem terpadu...</p>
-                        <a href="#" class="link-more">Baca Selengkapnya <i class="fa-solid fa-arrow-right"></i></a>
-                    </article>
-
-                    <article class="news-card">
-                        <div class="ph c">[ Gambar Kegiatan ]</div>
-                        <div class="news-meta"><span class="cat">Prestasi</span><span class="date">20 Agustus 2026</span></div>
-                        <h3>Santri Babul Hasanah Juara 1 Musabaqah Tilawatil Qur'an</h3>
-                        <p>Kebanggaan kembali hadir setelah perwakilan santri berhasil menyabet juara pertama tingkat Kabupaten Padang Lawas...</p>
-                        <a href="#" class="link-more">Baca Selengkapnya <i class="fa-solid fa-arrow-right"></i></a>
-                    </article>
-
-                    <article class="news-card">
-                        <div class="ph d">[ Gambar Kegiatan ]</div>
-                        <div class="news-meta"><span class="cat">Kegiatan Pondok</span><span class="date">15 Agustus 2026</span></div>
-                        <h3>Kajian Kitab Kuning Bulanan Bersama Ulama Tamu</h3>
-                        <p>Kegiatan rutin pengajian kitab kuning penunjang pemahaman fiqih santri dilaksanakan di aula utama pesantren...</p>
-                        <a href="#" class="link-more">Baca Selengkapnya <i class="fa-solid fa-arrow-right"></i></a>
-                    </article>
-                </div>
+<div class="news-grid">
+    @forelse ($beritaTerbaru as $i => $b)
+        <article class="news-card">
+            <a href="{{ route('berita.show', $b) }}">
+                <div class="ph {{ $warna[$i % 3] }}" style="background-image:url('{{ $b->gambar_url }}')"></div>
+            </a>
+            <div class="news-meta">
+                <span class="cat">{{ $b->kategori }}</span>
+                <span class="date">{{ $b->published_at->translatedFormat('d F Y') }}</span>
             </div>
-        </section>
-
+            <h3>{{ $b->judul }}</h3>
+            <p>{{ \Illuminate\Support\Str::limit($b->ringkasan_otomatis, 110) }}</p>
+            <a href="{{ route('berita.show', $b) }}" class="link-more">Baca Selengkapnya <i class="fa-solid fa-arrow-right"></i></a>
+        </article>
+    @empty
+        <p style="grid-column:1/-1;color:var(--muted)">Belum ada berita.</p>
+    @endforelse
+</div>
         {{-- KEHIDUPAN SANTRI --}}
         <section class="life">
             <div class="container">

@@ -6,45 +6,47 @@
 
 @php
     /*
-     * Hanya tampilan yang berubah. Sumber data tetap sama dengan versi sebelumnya:
-     *  - $pendaftarTerbaru  : dari controller (tidak diubah)
-     *  - angka statistik, grafik, dan komposisi : masih data statis seperti sebelumnya
-     * Bagian bertanda CONTOH hanya pengisi tampilan dan akan diganti saat fiturnya dikerjakan.
+     * Semua data datang dari DashboardController:
+     * totalSantri, santriPutra, santriPutri, totalPendaftar, pendaftarMenunggu, pendaftarTerbaru,
+     * totalBerita, beritaBulanIni, totalAsatidz, jmlGaleri, jmlPrestasi, tahunAjaran, tren, komposisi, agenda
      */
     $namaDepan = \Illuminate\Support\Str::before(auth()->user()->name ?? 'Admin', ' ');
     $tanggal   = now()->locale('id')->translatedFormat('l, d F Y');
 
-    // Mengembalikan URL route bila route-nya ada, supaya halaman tidak error kalau route belum dibuat.
     $ada = fn (string $nama, array $param = []) => \Illuminate\Support\Facades\Route::has($nama) ? route($nama, $param) : null;
 
     // Kartu statistik: [label, angka, ikon, lencana, keterangan, warna]
     $stat = [
-        ['Santri Aktif', 485, 'fa-user-graduate',   '+12%',   'Putra: 250 | Putri: 235', '#12a67a'],
-        ['Pendaftar',    124, 'fa-file-invoice',    'Gel. 1', 'Menunggu verifikasi',     '#3b82c4'],
-        ['Berita',       38,  'fa-newspaper',       'Publik', 'Artikel aktif bulan ini', '#c08a1c'],
-        ['Asatidz',      32,  'fa-chalkboard-user', 'Staf',   'Pengajar & Pembina',      '#8b5cc6'],
+        ['Santri Aktif', $totalSantri,    'fa-user-graduate',   'Aktif',                      "Putra: {$santriPutra} | Putri: {$santriPutri}",   '#12a67a'],
+        ['Pendaftar',    $totalPendaftar, 'fa-file-invoice',    $pendaftarMenunggu . ' baru', 'Menunggu verifikasi',                              '#3b82c4'],
+        ['Berita',       $totalBerita,    'fa-newspaper',       'Publik',                     $beritaBulanIni . ' artikel terbit bulan ini',      '#c08a1c'],
+        ['Asatidz',      $totalAsatidz,   'fa-chalkboard-user', 'Staf',                       'Pengajar & Pembina',                               '#8b5cc6'],
     ];
 
-    // Fitur website sesuai menu navbar: [nama, ikon, warna, deskripsi, link kelola (admin), link lihat (publik)]
+    // Fitur website: [nama, ikon, warna, deskripsi, link kelola, link lihat, badge jumlah]
     $fitur = [
-        ['Profil Pesantren',    'fa-landmark',         '#12a67a', 'Sejarah, visi & misi, struktur organisasi, dan pembelajaran.', $ada('admin.konten.index'),     url('/profil/sejarah')],
-        ['Jenjang Pendidikan',  'fa-book-open-reader', '#3b82c4', 'MDTA, PPS Wustha, MTs, MA, Diniyah Formal, dan Ma’had ‘Aly.', $ada('admin.program.index'),    $ada('jenjang.show', ['slug' => 'mdta'])],
-        ['Berita',              'fa-newspaper',        '#c08a1c', 'Kabar, pengumuman, dan artikel kegiatan pesantren.',            $ada('admin.berita.index'),     $ada('berita.index')],
-        ['Galeri',              'fa-images',           '#8b5cc6', 'Album foto dan video dokumentasi kegiatan dan fasilitas.',      $ada('admin.galeri.index'),     $ada('galeri')],
-        ['Kegiatan',            'fa-calendar-days',    '#0e9f8e', 'Agenda dan kegiatan santri di lingkungan pesantren.',           $ada('admin.kegiatan.index'),   $ada('kegiatan')],
-        ['Prestasi Santri',     'fa-trophy',           '#d6525a', 'Capaian dan penghargaan yang diraih santri.',                   $ada('admin.prestasi.index'),   $ada('prestasi.index')],
-        ['Pendaftaran Online',  'fa-file-signature',   '#12a67a', 'Formulir dan data calon santri baru.',                          $ada('admin.pendaftaran.index'), $ada('pendaftaran.index')],
-        ['Kontak',              'fa-address-book',     '#3b82c4', 'Alamat, telepon, email, dan peta lokasi pesantren.',            null,                           $ada('kontak')],
+        ['Profil Pesantren',   'fa-landmark',         '#12a67a', 'Sejarah, visi & misi, struktur organisasi, dan pembelajaran.', $ada('admin.konten.index'),      url('/profil/sejarah'),                          $totalAsatidz . ' pengurus'],
+        ['Jenjang Pendidikan', 'fa-book-open-reader', '#3b82c4', 'MDTA, PPS Wustha, MTs, MA, Diniyah Formal, dan Ma’had ‘Aly.', $ada('admin.program.index'),     $ada('jenjang.show', ['slug' => 'mdta']),        null],
+        ['Berita',             'fa-newspaper',        '#c08a1c', 'Kabar, pengumuman, dan artikel kegiatan pesantren.',            $ada('admin.berita.index'),      $ada('berita.index'),                            $totalBerita . ' berita'],
+        ['Galeri',             'fa-images',           '#8b5cc6', 'Album foto dan video dokumentasi kegiatan dan fasilitas.',      $ada('admin.galeri.index'),      $ada('galeri'),                                  $jmlGaleri . ' album'],
+        ['Kegiatan',           'fa-calendar-days',    '#0e9f8e', 'Agenda dan kegiatan santri di lingkungan pesantren.',           $ada('admin.kegiatan.index'),    $ada('kegiatan'),                                null],
+        ['Prestasi Santri',    'fa-trophy',           '#d6525a', 'Capaian dan penghargaan yang diraih santri.',                   $ada('admin.prestasi.index'),    $ada('prestasi.index'),                          $jmlPrestasi . ' prestasi'],
+        ['Pendaftaran Online', 'fa-file-signature',   '#12a67a', 'Formulir dan data calon santri baru.',                          $ada('admin.pendaftaran.index'), $ada('pendaftaran.index'),                       $totalPendaftar . ' pendaftar'],
+        ['Data Alumni',        'fa-user-graduate',    '#0e9f8e', 'Data lulusan, angkatan, dan kegiatan alumni setelah lulus.',    $ada('admin.alumni.index'),      null,                                            $totalAlumni . ' alumni'],
+        ['Pengguna Dashboard', 'fa-users-gear',       '#d6525a', 'Akun super admin, admin, dan wali santri yang dapat masuk panel.', $ada('super.pengguna.index'),    null,                                            $totalPengguna . ' akun'],
+        ['Kontak',             'fa-address-book',     '#3b82c4', 'Alamat, telepon, email, dan peta lokasi pesantren.',            null,                            $ada('kontak'),                                  null],
     ];
 
-    // Grafik tren pendaftar (data sama seperti sebelumnya, periode 2025/2026)
-    $tren = ['Nov' => 12, 'Des' => 18, 'Jan' => 24, 'Feb' => 31, 'Mar' => 37, 'Apr' => 42];
-    $maks = 50;
+    // Pengguna Dashboard hanya tampil untuk Super Admin
+    $fitur = array_values(array_filter($fitur, fn ($f) => $f[0] !== 'Pengguna Dashboard' || $isSuperAdmin));
+
+    // Grafik tren pendaftar (data dari controller, skala otomatis)
+    $maks = max(10, (int) (ceil(max($tren) / 10) * 10));
     $W = 600; $H = 230; $kiri = 34; $kanan = 12; $atas = 14; $bawah = 28;
     $lebar = $W - $kiri - $kanan; $tinggi = $H - $atas - $bawah;
     $n = count($tren); $i = 0; $pts = [];
     foreach ($tren as $bln => $v) {
-        $pts[] = [round($kiri + $i * $lebar / ($n - 1), 1), round($atas + $tinggi * (1 - $v / $maks), 1), $bln, $v];
+        $pts[] = [round($kiri + $i * $lebar / max($n - 1, 1), 1), round($atas + $tinggi * (1 - $v / $maks), 1), $bln, $v];
         $i++;
     }
     $garis = 'M ' . $pts[0][0] . ',' . $pts[0][1];
@@ -54,21 +56,7 @@
     }
     $dasar = $atas + $tinggi;
     $area  = $garis . ' L ' . $pts[$n - 1][0] . ',' . $dasar . ' L ' . $pts[0][0] . ',' . $dasar . ' Z';
-
-    // Komposisi santri aktif (data sama seperti sebelumnya): [nama, persen, jumlah, warna, ikon]
-    $totalSantri = 324;
-    $komposisi = [
-        ['Tingkat Ula / TPQ', 50, 162, '#17402f', 'fa-book-quran'],
-        ['Tingkat Wustha',    30, 97,  '#b08d3e', 'fa-book-open'],
-        ['Tingkat Ulya',      20, 65,  '#9db8a8', 'fa-graduation-cap'],
-    ];
-
-    // CONTOH: agenda terdekat (belum ada sumber datanya, ganti nanti): [tanggal, judul, jam, tempat]
-    $agenda = [
-        ['20', 'Rapat panitia PSB',      '09.00 WIB', 'Ruang pengurus'],
-        ['22', 'Kajian kitab bulanan',   '19.30 WIB', 'Masjid pesantren'],
-        ['25', 'Kunjungan wali santri',  '08.00 WIB', 'Aula utama'],
-    ];
+    $periode = array_key_first($tren) . ' – ' . array_key_last($tren);
 @endphp
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -76,7 +64,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-    /* ===== Dashboard Admin (font Poppins sama dengan website; mode gelap lewat class .dark) ===== */
     .ad {
         --surface: #ffffff; --border: #e6e3d8; --text: #1f2a24; --muted: #6b756f; --head: #17402f;
         --tint: #eef3ec; --chip: #f4f2ea; --beige: #f2e8d5; --gold: #a98532; --accent: #12b886;
@@ -95,7 +82,6 @@
 
     .ad-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; }
 
-    /* Kotak ikon berwarna (warna lewat variabel --fc) */
     .ad-ico {
         --fc: #12a67a; width: 40px; height: 40px; border-radius: 12px; flex: none; display: grid; place-items: center;
         font-size: 16px; color: var(--fc); background: color-mix(in srgb, var(--fc) 14%, transparent);
@@ -103,7 +89,6 @@
     }
     .ad-ico.sm { width: 34px; height: 34px; border-radius: 10px; font-size: 14px; }
 
-    /* Sapaan */
     .ad-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
     .ad-hello { font-size: clamp(22px, 3.4vw, 30px); font-weight: 600; color: var(--head); line-height: 1.25; }
     .ad-hello span { color: var(--accent); }
@@ -115,7 +100,6 @@
     }
     .ad-chip i { color: var(--accent); font-size: 13px; }
 
-    /* Strip pemberitahuan */
     .ad-notice {
         display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
         background: var(--tint); border-radius: 14px; padding: 14px 18px; font-size: 13px;
@@ -125,7 +109,6 @@
     .ad-link:hover { gap: 12px; color: var(--accent); }
     .ad-link i { font-size: 10px; }
 
-    /* Kartu statistik */
     .ad-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
     .ad-stat { padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; transition: transform .2s ease, box-shadow .2s ease; }
     .ad-stat:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(23, 64, 47, .1); }
@@ -139,13 +122,11 @@
     .ad-stat small { font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 7px; }
     .ad-stat small i { font-size: 10px; opacity: .7; }
 
-    /* Judul seksi */
     .ad-sec { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
     .ad-sec > div:first-child { display: flex; align-items: center; gap: 12px; }
     .ad-ptitle { font-size: 15px; font-weight: 600; color: var(--head); }
     .ad-psub { font-size: 12px; color: var(--muted); margin-top: 3px; }
 
-    /* Fitur website */
     .ad-feat { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px; }
     .ad-f { padding: 20px; display: flex; flex-direction: column; gap: 14px; transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
     .ad-f:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(23, 64, 47, .1); border-color: var(--fc); }
@@ -160,7 +141,6 @@
     .ad-f-foot i { font-size: 10px; }
     .ad-f-foot .note { color: var(--muted); font-size: 11px; display: inline-flex; align-items: center; gap: 6px; }
 
-    /* Grid utama */
     .ad-row { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 22px; align-items: start; }
     .ad-col { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
     .ad-panel { padding: 24px 26px; }
@@ -178,7 +158,6 @@
     .ad-chart .dot { fill: var(--surface); stroke: var(--accent); stroke-width: 2; }
     .ad-chart .dot.last { fill: var(--accent); }
 
-    /* Komposisi */
     .ad-seg { display: flex; gap: 4px; height: 10px; margin: 20px 0 18px; }
     .ad-seg span { border-radius: 4px; }
     .ad-leg { display: flex; flex-direction: column; gap: 14px; }
@@ -186,7 +165,6 @@
     .ad-leg > div > span { display: flex; align-items: center; gap: 10px; }
     .ad-leg b { color: var(--text); font-weight: 600; font-size: 12.5px; }
 
-    /* Tabel pendaftar */
     .ad-table-head { padding: 22px 26px 18px; display: flex; justify-content: space-between; align-items: center; gap: 14px; }
     .ad-table-head > div:first-child { display: flex; align-items: center; gap: 12px; }
     .ad-cols, .ad-line {
@@ -214,7 +192,6 @@
     .ad-empty i { display: block; font-size: 26px; color: var(--border); margin-bottom: 10px; }
     .ad-foot { padding: 14px 26px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
 
-    /* Agenda */
     .ad-agenda { display: flex; flex-direction: column; gap: 18px; margin-top: 20px; }
     .ad-ag { display: flex; align-items: center; gap: 14px; }
     .ad-date { width: 46px; height: 50px; border-radius: 12px; background: var(--chip); display: flex; flex-direction: column; align-items: center; justify-content: center; flex: none; }
@@ -224,13 +201,12 @@
     .ad-ag p { font-size: 11px; color: var(--muted); margin-top: 4px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .ad-ag p span { display: inline-flex; align-items: center; gap: 5px; }
     .ad-ag p i { font-size: 10px; color: var(--accent); }
+    .ad-none { font-size: 12px; color: var(--muted); margin-top: 18px; }
 
-    /* Kartu bantuan */
     .ad-help { background: var(--beige); border-radius: 18px; padding: 20px 22px; display: flex; gap: 14px; align-items: flex-start; }
     .ad-help h5 { font-size: 14px; font-weight: 600; color: var(--text); }
     .ad-help p { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.65; }
 
-    /* Aksi cepat */
     .ad-quick { padding: 18px 26px; display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
     .ad-quick > div:first-child { display: flex; align-items: center; gap: 12px; }
     .ad-quick-btns { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -244,9 +220,7 @@
     .dark .ad-btn.main { background: var(--accent); border-color: var(--accent); color: #0f2018; }
     .ad-btn i { font-size: 13px; }
 
-    @media (max-width: 1200px) {
-        .ad-feat { grid-template-columns: repeat(2, 1fr); }
-    }
+    @media (max-width: 1200px) { .ad-feat { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 1100px) {
         .ad-stats { grid-template-columns: repeat(2, 1fr); }
         .ad-row { grid-template-columns: 1fr; }
@@ -267,12 +241,8 @@
         .ad-quick-btns { width: 100%; }
         .ad-btn { flex: 1; justify-content: center; }
     }
-    @media (max-width: 560px) {
-        .ad-feat { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 420px) {
-        .ad-stats { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 560px) { .ad-feat { grid-template-columns: 1fr; } }
+    @media (max-width: 420px) { .ad-stats { grid-template-columns: 1fr; } }
 </style>
 
 <div class="ad">
@@ -284,14 +254,21 @@
             <p class="ad-sub">Berikut ringkasan aktivitas dan perkembangan pesantren hari ini.</p>
         </div>
         <div class="ad-chips">
-            <span class="ad-chip"><i class="fa-solid fa-graduation-cap"></i> Tahun Ajaran 2026/2027</span>
+            <span class="ad-chip"><i class="fa-solid fa-graduation-cap"></i> Tahun Ajaran {{ $tahunAjaran }}</span>
             <span class="ad-chip"><i class="fa-regular fa-calendar"></i> {{ $tanggal }}</span>
         </div>
     </div>
 
     {{-- ===================== PEMBERITAHUAN ===================== --}}
     <div class="ad-notice">
-        <span><span class="ad-ico sm" style="--fc:#12a67a"><i class="fa-solid fa-clipboard-check"></i></span> Ada 124 pendaftaran yang menunggu verifikasi. Mari bantu calon santri melanjutkan langkahnya.</span>
+        <span>
+            <span class="ad-ico sm" style="--fc:#12a67a"><i class="fa-solid fa-clipboard-check"></i></span>
+            @if ($pendaftarMenunggu > 0)
+                Ada {{ $pendaftarMenunggu }} pendaftaran yang menunggu verifikasi. Mari bantu calon santri melanjutkan langkahnya.
+            @else
+                Semua pendaftaran sudah diverifikasi.
+            @endif
+        </span>
         <a href="{{ route('admin.pendaftaran.index') }}" class="ad-link">Tinjau Pendaftaran <i class="fa-solid fa-arrow-right"></i></a>
     </div>
 
@@ -325,7 +302,11 @@
                     <div style="display:flex;gap:14px;align-items:flex-start">
                         <span class="ad-ico"><i class="fa-solid {{ $f[1] }}"></i></span>
                         <div>
-                            <h4>{{ $f[0] }}</h4>
+                            <h4>{{ $f[0] }}
+                                @if (!empty($f[6]))
+                                    <span class="ad-badge" style="margin-left:6px">{{ $f[6] }}</span>
+                                @endif
+                            </h4>
                             <p>{{ $f[3] }}</p>
                         </div>
                     </div>
@@ -353,10 +334,10 @@
                     <span class="ad-ico" style="--fc:#12a67a"><i class="fa-solid fa-chart-line"></i></span>
                     <div>
                         <h3 class="ad-ptitle">Statistik Tren Pendaftar Santri</h3>
-                        <p class="ad-psub">Jumlah calon santri baru per bulan (Tahun Ajaran)</p>
+                        <p class="ad-psub">Jumlah calon santri baru per bulan</p>
                     </div>
                 </div>
-                <span class="ad-period"><i class="fa-regular fa-calendar-check"></i> Periode 2025/2026</span>
+                <span class="ad-period"><i class="fa-regular fa-calendar-check"></i> 6 bulan terakhir ({{ $periode }})</span>
             </div>
 
             <div class="ad-big"><b>{{ max($tren) }}</b><span>puncak pendaftar masuk per bulan</span></div>
@@ -372,7 +353,7 @@
                 @for ($g = 0; $g <= 5; $g++)
                     @php $gy = round($atas + $tinggi * (1 - $g / 5), 1); @endphp
                     <line class="grid" x1="{{ $kiri }}" x2="{{ $W - $kanan }}" y1="{{ $gy }}" y2="{{ $gy }}" />
-                    <text x="{{ $kiri - 10 }}" y="{{ $gy + 3 }}" text-anchor="end">{{ $g * 10 }}</text>
+                    <text x="{{ $kiri - 10 }}" y="{{ $gy + 3 }}" text-anchor="end">{{ round($maks / 5 * $g) }}</text>
                 @endfor
 
                 <path d="{{ $area }}" fill="url(#adGrad)" />
@@ -396,22 +377,26 @@
                 </div>
             </div>
 
-            <div class="ad-big" style="margin-top:24px"><b>{{ $totalSantri }}</b><span>total santri</span></div>
+            <div class="ad-big" style="margin-top:24px"><b>{{ number_format($totalSantri, 0, ',', '.') }}</b><span>total santri</span></div>
 
-            <div class="ad-seg">
-                @foreach ($komposisi as $k)
-                    <span style="width: {{ $k[1] }}%; background: {{ $k[3] }}"></span>
-                @endforeach
-            </div>
+            @if (count($komposisi))
+                <div class="ad-seg">
+                    @foreach ($komposisi as $k)
+                        <span style="width: {{ $k[1] }}%; background: {{ $k[3] }}"></span>
+                    @endforeach
+                </div>
 
-            <div class="ad-leg">
-                @foreach ($komposisi as $k)
-                    <div>
-                        <span><span class="ad-ico sm" style="--fc: {{ $k[3] }}; width:30px; height:30px; font-size:12px"><i class="fa-solid {{ $k[4] }}"></i></span>{{ $k[0] }}</span>
-                        <b>{{ $k[1] }}% ({{ $k[2] }})</b>
-                    </div>
-                @endforeach
-            </div>
+                <div class="ad-leg">
+                    @foreach ($komposisi as $k)
+                        <div>
+                            <span><span class="ad-ico sm" style="--fc: {{ $k[3] }}; width:30px; height:30px; font-size:12px"><i class="fa-solid {{ $k[4] }}"></i></span>{{ $k[0] }}</span>
+                            <b>{{ $k[1] }}% ({{ $k[2] }})</b>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <p class="ad-none">Belum ada data santri.</p>
+            @endif
         </div>
     </div>
 
@@ -439,7 +424,8 @@
 
             @forelse ($pendaftarTerbaru as $pendaftar)
                 @php
-                    $kelas = match (strtolower($pendaftar->status_pendaftaran)) {
+                    $statusAsli = $pendaftar->status_pendaftaran ?: 'menunggu';
+                    $kelas = match (strtolower($statusAsli)) {
                         'diterima' => 'ok',
                         'ditolak'  => 'bad',
                         default    => 'wait',
@@ -459,17 +445,16 @@
                     </div>
                     <span class="c-jenjang"><i class="fa-solid fa-school"></i>{{ $pendaftar->jenjang_tujuan }}</span>
                     <span class="c-asal"><i class="fa-solid fa-building-columns"></i>{{ $pendaftar->asal_sekolah }}</span>
-                    <span class="ad-pill {{ $kelas }}"><i class="fa-solid {{ $ikonStatus }}"></i>{{ ucfirst($pendaftar->status_pendaftaran) }}</span>
+                    <span class="ad-pill {{ $kelas }}"><i class="fa-solid {{ $ikonStatus }}"></i>{{ ucfirst($statusAsli) }}</span>
                 </div>
             @empty
                 <div class="ad-empty"><i class="fa-regular fa-folder-open"></i>Belum ada data pendaftar terbaru.</div>
             @endforelse
 
-            <div class="ad-foot"><i class="fa-solid fa-list-ul"></i> Menampilkan {{ count($pendaftarTerbaru) }} pendaftar terbaru</div>
+            <div class="ad-foot"><i class="fa-solid fa-list-ul"></i> Menampilkan {{ count($pendaftarTerbaru) }} dari {{ $totalPendaftar }} pendaftar</div>
         </div>
 
         <div class="ad-col">
-            {{-- CONTOH: data agenda masih statis --}}
             <div class="ad-card ad-panel">
                 <div class="ad-sec" style="flex-wrap:nowrap">
                     <div>
@@ -477,17 +462,21 @@
                         <h3 class="ad-ptitle">Agenda Terdekat</h3>
                     </div>
                 </div>
-                <div class="ad-agenda">
-                    @foreach ($agenda as $a)
-                        <div class="ad-ag">
-                            <span class="ad-date"><b>{{ $a[0] }}</b><small>OKT</small></span>
-                            <div>
-                                <h5>{{ $a[1] }}</h5>
-                                <p><span><i class="fa-regular fa-clock"></i>{{ $a[2] }}</span><span><i class="fa-solid fa-location-dot"></i>{{ $a[3] }}</span></p>
+                @if (count($agenda))
+                    <div class="ad-agenda">
+                        @foreach ($agenda as $a)
+                            <div class="ad-ag">
+                                <span class="ad-date"><b>{{ $a[0] }}</b><small>{{ $a[4] }}</small></span>
+                                <div>
+                                    <h5>{{ $a[1] }}</h5>
+                                    <p><span><i class="fa-regular fa-clock"></i>{{ $a[2] }}</span><span><i class="fa-solid fa-location-dot"></i>{{ $a[3] }}</span></p>
+                                </div>
                             </div>
-                        </div>
-                    @endforeach
-                </div>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="ad-none">Belum ada agenda mendatang.</p>
+                @endif
             </div>
 
             <div class="ad-help">
@@ -511,9 +500,13 @@
         </div>
         <div class="ad-quick-btns">
             <a href="#" class="ad-btn"><i class="fa-solid fa-user-plus"></i> Tambah Data Santri</a>
-            <a href="#" class="ad-btn"><i class="fa-regular fa-pen-to-square"></i> Tulis Berita Baru</a>
+            <a href="{{ $ada('admin.berita.create') ?? '#' }}" class="ad-btn"><i class="fa-regular fa-pen-to-square"></i> Tulis Berita Baru</a>
             <a href="{{ $ada('admin.galeri.create') ?? '#' }}" class="ad-btn"><i class="fa-solid fa-images"></i> Tambah Album Galeri</a>
             <a href="{{ $ada('admin.prestasi.create') ?? '#' }}" class="ad-btn"><i class="fa-solid fa-trophy"></i> Tambah Prestasi</a>
+            <a href="{{ $ada('admin.alumni.create') ?? '#' }}" class="ad-btn"><i class="fa-solid fa-user-graduate"></i> Tambah Alumni</a>
+            @if ($isSuperAdmin)
+                <a href="{{ $ada('super.pengguna.create') ?? '#' }}" class="ad-btn"><i class="fa-solid fa-users-gear"></i> Tambah Pengguna</a>
+            @endif
             <a href="#" class="ad-btn main"><i class="fa-solid fa-cloud-arrow-down"></i> Rekapitulasi Data</a>
         </div>
     </div>

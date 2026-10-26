@@ -11,10 +11,13 @@ use App\Http\Controllers\Admin\KegiatanController as AdminKegiatanController;
 use App\Http\Controllers\Admin\BeritaController as AdminBeritaController;
 use App\Http\Controllers\Admin\GaleriController as AdminGaleriController;
 use App\Http\Controllers\Admin\PrestasiAdminController;
+use App\Http\Controllers\Admin\AlumniController as AdminAlumniController;
+use App\Http\Controllers\Admin\PenggunaController as AdminPenggunaController;
 use App\Http\Controllers\Portal\PortalDashboardController as PortalDashboard;
 use App\Http\Controllers\Public\PendaftaranOnlineController;
 use App\Http\Controllers\Public\PrestasiController;
 use App\Http\Controllers\Public\GaleriController as PublicGaleriController;
+use App\Http\Controllers\Public\BeritaController as PublicBeritaController;
 
 // ==========================================
 // 1. PUBLIC ROUTES (Halaman Depan & Pendaftaran)
@@ -42,9 +45,8 @@ Route::get('/jenjang/{slug}', fn (string $slug) => view('pages.jenjang.' . $slug
     ->name('jenjang.show');
 
 // ######## BERITA, GALERI, KEGIATAN ########### //
-Route::get('/berita', function () {
-    return view('pages.berita');
-})->name('berita.index');
+Route::get('/berita', [PublicBeritaController::class, 'index'])->name('berita.index');
+Route::get('/berita/{berita:slug}', [PublicBeritaController::class, 'show'])->name('berita.show');
 
 Route::get('/galeri', [PublicGaleriController::class, 'index'])->name('galeri');
 
@@ -77,6 +79,12 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name
 // ==========================================
 Route::middleware(['auth', \App\Http\Middleware\RoleSuperAdmin::class])->prefix('super')->name('super.')->group(function () {
     Route::get('/pengaturan-sistem', [AdminDashboard::class, 'settings'])->name('settings');
+
+    // Pengguna dashboard (CRUD): super.pengguna.index/create/store/edit/update/destroy
+    Route::resource('pengguna', AdminPenggunaController::class)
+        ->parameters(['pengguna' => 'pengguna'])
+        ->except('show')
+        ->names('pengguna');
 });
 
 // ==========================================
@@ -95,6 +103,12 @@ Route::middleware(['auth', \App\Http\Middleware\RoleAdmin::class])->prefix('admi
     Route::post('/santri/import', [AdminDataSantriController::class, 'import'])->name('santri.import');
     Route::get('/santri/{id}', [AdminDataSantriController::class, 'detail'])->name('santri.detail');
 
+    // Alumni (CRUD): admin.alumni.index/create/store/edit/update/destroy
+    Route::resource('data-alumni', AdminAlumniController::class)
+        ->parameters(['data-alumni' => 'alumni'])
+        ->except('show')
+        ->names('alumni');
+
     // Konten
     Route::get('/pengelolaan-konten', [AdminKontenController::class, 'index'])->name('konten.index');
     Route::put('/konten/update', [AdminKontenController::class, 'updateProfil'])->name('konten.update');
@@ -106,7 +120,12 @@ Route::middleware(['auth', \App\Http\Middleware\RoleAdmin::class])->prefix('admi
     // Pengelolaan lainnya
     Route::get('/pengelolaan-program', [AdminProgramController::class, 'index'])->name('program.index');
     Route::get('/pengelolaan-kegiatan', [AdminKegiatanController::class, 'index'])->name('kegiatan.index');
-    Route::get('/pengelolaan-berita', [AdminBeritaController::class, 'index'])->name('berita.index');
+
+    // Berita (CRUD): admin.berita.index/create/store/edit/update/destroy
+    Route::resource('pengelolaan-berita', AdminBeritaController::class)
+        ->parameters(['pengelolaan-berita' => 'berita'])
+        ->except('show')
+        ->names('berita');
 
     // Galeri (album foto & video)
     Route::get('/pengelolaan-galeri', [AdminGaleriController::class, 'index'])->name('galeri.index');
