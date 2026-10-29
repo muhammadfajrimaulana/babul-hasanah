@@ -15,6 +15,13 @@
 
     $ada = fn (string $nama, array $param = []) => \Illuminate\Support\Facades\Route::has($nama) ? route($nama, $param) : null;
 
+    // Jumlah pengurus aktif di bagan (aman bila tabel belum dimigrasi)
+    $jmlStruktur = 0;
+    try {
+        $jmlStruktur = \App\Models\StrukturOrganisasi::aktif()->diKategori('bagan')->count();
+    } catch (\Throwable $e) {
+    }
+
     // Kartu statistik: [label, angka, ikon, lencana, keterangan, warna]
     $stat = [
         ['Santri Aktif', $totalSantri,    'fa-user-graduate',   'Aktif',                      "Putra: {$santriPutra} | Putri: {$santriPutri}",   '#12a67a'],
@@ -25,7 +32,8 @@
 
     // Fitur website: [nama, ikon, warna, deskripsi, link kelola, link lihat, badge jumlah]
     $fitur = [
-        ['Profil Pesantren',   'fa-landmark',         '#12a67a', 'Sejarah, visi & misi, struktur organisasi, dan pembelajaran.', $ada('admin.konten.index'),      url('/profil/sejarah'),                          $totalAsatidz . ' pengurus'],
+        ['Profil Pesantren',   'fa-landmark',         '#12a67a', 'Sejarah, visi & misi, struktur organisasi, dan pembelajaran.', $ada('admin.konten.index'),      url('/profil/sejarah'),                          null],
+        ['Struktur Organisasi', 'fa-sitemap',         '#0e9f8e', 'Bagan pengurus, ketua jenjang, dan bidang pelayanan beserta foto.', $ada('admin.struktur.index'), $ada('profil.struktur-organisasi'),          $jmlStruktur . ' pengurus'],
         ['Jenjang Pendidikan', 'fa-book-open-reader', '#3b82c4', 'MDTA, PPS Wustha, MTs, MA, Diniyah Formal, dan Ma’had ‘Aly.', $ada('admin.program.index'),     $ada('jenjang.show', ['slug' => 'mdta']),        null],
         ['Berita',             'fa-newspaper',        '#c08a1c', 'Kabar, pengumuman, dan artikel kegiatan pesantren.',            $ada('admin.berita.index'),      $ada('berita.index'),                            $totalBerita . ' berita'],
         ['Galeri',             'fa-images',           '#8b5cc6', 'Album foto dan video dokumentasi kegiatan dan fasilitas.',      $ada('admin.galeri.index'),      $ada('galeri'),                                  $jmlGaleri . ' album'],
@@ -503,6 +511,7 @@
             <a href="{{ $ada('admin.berita.create') ?? '#' }}" class="ad-btn"><i class="fa-regular fa-pen-to-square"></i> Tulis Berita Baru</a>
             <a href="{{ $ada('admin.galeri.create') ?? '#' }}" class="ad-btn"><i class="fa-solid fa-images"></i> Tambah Album Galeri</a>
             <a href="{{ $ada('admin.prestasi.create') ?? '#' }}" class="ad-btn"><i class="fa-solid fa-trophy"></i> Tambah Prestasi</a>
+            <a href="{{ $ada('admin.struktur.create') ?? '#' }}" class="ad-btn"><i class="fa-solid fa-sitemap"></i> Tambah Struktur</a>
             <a href="{{ $ada('admin.alumni.create') ?? '#' }}" class="ad-btn"><i class="fa-solid fa-user-graduate"></i> Tambah Alumni</a>
             @if ($isSuperAdmin)
                 <a href="{{ $ada('super.pengguna.create') ?? '#' }}" class="ad-btn"><i class="fa-solid fa-users-gear"></i> Tambah Pengguna</a>

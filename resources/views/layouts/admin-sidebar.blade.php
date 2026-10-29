@@ -146,11 +146,12 @@
                         <i class="fa-solid fa-newspaper w-4 text-xs flex-shrink-0"></i>
                         <span>Berita</span>
                     </a>
-                    <a href="{{ route('admin.kegiatan.index') }}" @click="sidebarOpen = false"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.kegiatan.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
+                    <a href="{{ route('admin.struktur.index') }}" @click="sidebarOpen = false"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.struktur.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
                         <i class="fa-solid fa-calendar-plus w-4 text-xs flex-shrink-0"></i>
-                        <span>Kegiatan</span>
+                        <span>Struktur Organisasi</span>
                     </a>
+                    
                     <a href="{{ route('admin.galeri.index') }}" @click="sidebarOpen = false"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.galeri.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
                         <i class="fa-solid fa-photo-film w-4 text-xs flex-shrink-0"></i>

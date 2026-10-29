@@ -18,6 +18,8 @@ use App\Http\Controllers\Public\PendaftaranOnlineController;
 use App\Http\Controllers\Public\PrestasiController;
 use App\Http\Controllers\Public\GaleriController as PublicGaleriController;
 use App\Http\Controllers\Public\BeritaController as PublicBeritaController;
+use App\Http\Controllers\Public\StrukturOrganisasiController;
+use App\Http\Controllers\Admin\StrukturOrganisasiController as AdminStrukturController;
 
 // ==========================================
 // 1. PUBLIC ROUTES (Halaman Depan & Pendaftaran)
@@ -34,7 +36,7 @@ Route::get('/profil', function () {
 Route::prefix('profil')->name('profil.')->group(function () {
     Route::get('/sejarah', fn () => view('pages.sejarah'))->name('sejarah');
     Route::get('/visi-misi', fn () => view('pages.visi-misi'))->name('visi-misi');
-    Route::get('/struktur-organisasi', fn () => view('pages.struktur-organisasi'))->name('struktur-organisasi');
+    Route::get('/struktur-organisasi', [StrukturOrganisasiController::class, 'index'])->name('struktur-organisasi');
     Route::get('/pembelajaran', fn () => view('pages.pembelajaran'))->name('pembelajaran');
 });
 
@@ -140,6 +142,12 @@ Route::middleware(['auth', \App\Http\Middleware\RoleAdmin::class])->prefix('admi
     Route::get('/pengelolaan-prestasi/{prestasi}/edit', [PrestasiAdminController::class, 'edit'])->name('prestasi.edit');
     Route::put('/pengelolaan-prestasi/{prestasi}', [PrestasiAdminController::class, 'update'])->name('prestasi.update');
     Route::delete('/pengelolaan-prestasi/{prestasi}', [PrestasiAdminController::class, 'destroy'])->name('prestasi.destroy');
+
+    // Struktur organisasi (CRUD): admin.struktur.index/create/store/edit/update/destroy
+    Route::resource('struktur-organisasi', AdminStrukturController::class)
+        ->parameters(['struktur-organisasi' => 'struktur'])
+        ->except('show')
+        ->names('struktur');
 });
 
 // ==========================================
