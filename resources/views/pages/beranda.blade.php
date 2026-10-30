@@ -8,11 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <style>
-       
         .dh {
             --green: #17402f;
             --green-2: #1d4d3a;
@@ -170,13 +167,6 @@
         .dh .badge-year span { font-size: 10.5px; color: var(--muted); line-height: 1.3; display: block; margin-top: 4px; }
         .dh .profile h2 { font-size: clamp(26px, 3.2vw, 38px); margin-bottom: 18px; }
         .dh .profile .desc { color: var(--muted); font-size: 13.5px; margin-bottom: 24px; }
-        .dh .tabs {
-            display: flex; gap: 6px; background: var(--cream); padding: 5px; border-radius: 999px;
-            width: fit-content; margin-bottom: 20px; flex-wrap: wrap;
-        }
-        .dh .tab { padding: 8px 18px; font-size: 12px; color: var(--muted); border-radius: 999px; transition: all .25s ease; }
-        .dh .tab:hover { color: var(--green); }
-        .dh .tab.active { background: #fff; color: var(--green); font-weight: 600; box-shadow: 0 4px 12px rgba(23, 64, 47, .1); }
         .dh .tab-note { font-size: 13px; color: var(--muted); }
 
         .dh .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 60px; }
@@ -192,10 +182,65 @@
         .dh .feature h3 { font-size: 14px; margin-bottom: 4px; }
         .dh .feature p { font-size: 11.5px; color: var(--muted); }
 
-        /* ---------- PROGRAM UNGGULAN (SWIPER) ---------- */
+        /* ---------- PINTASAN PROFIL ---------- */
+        .dh .quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 40px; }
+        .dh .quick {
+            background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px;
+            display: flex; flex-direction: column; gap: 8px; transition: all .3s ease;
+        }
+        .dh .quick:hover { transform: translateY(-5px); box-shadow: var(--shadow); border-color: var(--gold); }
+        .dh .quick .q-ico {
+            width: 40px; height: 40px; border-radius: 12px; background: var(--cream); color: var(--green);
+            display: grid; place-items: center;
+        }
+        .dh .quick h3 { font-size: 15px; }
+        .dh .quick p { font-size: 11.5px; color: var(--muted); }
+
+        /* ---------- JENJANG / LEVELS ---------- */
         .dh .levels { background: var(--cream); padding: 80px 0; border-radius: 36px; margin: 0 1.5%; }
         .dh .section-title { font-size: clamp(26px, 3.4vw, 38px); margin-bottom: 12px; }
         .dh .section-sub { color: var(--muted); font-size: 13.5px; margin-bottom: 36px; max-width: 600px; }
+        .dh .level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+        .dh .level {
+            background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px;
+            display: flex; flex-direction: column; gap: 8px; transition: all .3s ease;
+        }
+        .dh .level:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: var(--gold); }
+        .dh .level .top {
+            display: flex; justify-content: space-between; align-items: center; font-size: 9px;
+            letter-spacing: .1em; text-transform: uppercase; color: var(--gold); font-weight: 600;
+        }
+        .dh .level h3 { font-size: 20px; margin-top: 6px; }
+        .dh .level .sub { font-size: 11px; color: var(--ink); font-weight: 500; }
+        .dh .level p { font-size: 11.5px; color: var(--muted); flex: 1; margin-bottom: 12px; }
+        .dh .level .dur {
+            font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px;
+            border-top: 1px solid var(--line); padding-top: 12px;
+        }
+        .dh .level-cta {
+            background: linear-gradient(150deg, var(--green-2), var(--green)); color: #fff; border-radius: var(--radius);
+            padding: 24px; display: flex; flex-direction: column; gap: 12px; justify-content: center; box-shadow: var(--shadow);
+        }
+        .dh .level-cta h3 { color: #fff; font-size: 18px; }
+        .dh .level-cta p { font-size: 11.5px; color: #b9d0c4; }
+
+        /* ---------- STRUKTUR ORGANISASI (BERANDA) ---------- */
+        .dh .org { padding: 80px 0 20px; }
+        .dh .org-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+        .dh .org-card {
+            background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 20px;
+            display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px;
+            transition: all .3s ease;
+        }
+        .dh .org-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: var(--gold); }
+        .dh .org-card .avatar {
+            width: 96px; height: 96px; border-radius: 50%; margin-bottom: 10px; border: 3px solid var(--cream);
+            display: grid; place-items: center; color: rgba(255, 255, 255, .85); font-size: 30px;
+        }
+        .dh .org-card h3 { font-size: 15px; }
+        .dh .org-card .role { font-size: 11.5px; color: var(--gold); font-weight: 600; }
+
+        /* ---------- PROGRAM UNGGULAN (SWIPER) ---------- */
         .dh .program-sec { padding: 80px 0 40px; }
         .dh .program-sec .swiper { padding: 10px 4px 6px !important; }
         .dh .program-card {
@@ -229,6 +274,57 @@
         .dh .custom-swiper-pagination .swiper-pagination-bullet { background: var(--green); opacity: .25; width: 8px; height: 8px; }
         .dh .custom-swiper-pagination .swiper-pagination-bullet-active { background: var(--emerald); opacity: 1; width: 22px; border-radius: 99px; }
 
+        /* ---------- INFO HARIAN ---------- */
+        .dh .ih-sec { padding: 80px 0 40px; }
+        .dh .ih-date {
+            display: inline-flex; align-items: center; gap: 8px; background: var(--cream); color: var(--green);
+            font-size: 12px; font-weight: 600; padding: 9px 16px; border-radius: 999px;
+        }
+        .dh .ih-date i { color: var(--gold); }
+        .dh .ih-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 24px; align-items: stretch; }
+        .dh .ih-today {
+            background: linear-gradient(150deg, var(--green), var(--green-2)); color: #fff; border-radius: 28px;
+            padding: 28px; box-shadow: var(--shadow-lg);
+        }
+        .dh .ih-today-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+        .dh .ih-today-head > i {
+            width: 44px; height: 44px; border-radius: 14px; background: rgba(255, 255, 255, .12);
+            display: grid; place-items: center; color: var(--emerald-l); font-size: 18px;
+        }
+        .dh .ih-today-head small { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #a9c4b6; display: block; }
+        .dh .ih-today-head h3 { color: #fff; font-size: 20px; }
+        .dh .ih-row {
+            display: flex; gap: 16px; align-items: baseline; padding: 12px 0;
+            border-top: 1px solid rgba(255, 255, 255, .12); transition: transform .25s ease;
+        }
+        .dh .ih-row:hover { transform: translateX(6px); }
+        .dh .ih-row b { font-size: 15px; font-weight: 600; min-width: 52px; color: #e6d3a3; }
+        .dh .ih-row span { font-size: 12.5px; color: #d8e8df; }
+        .dh .ih-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .dh .ih-card {
+            background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px;
+            display: flex; flex-direction: column; gap: 8px; transition: all .3s ease;
+        }
+        .dh .ih-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); border-color: var(--gold); }
+        .dh .ih-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .dh .ih-chip {
+            display: inline-flex; align-items: center; gap: 7px; font-size: 10px; letter-spacing: .08em;
+            text-transform: uppercase; font-weight: 600; color: var(--gold);
+        }
+        .dh .ih-chip i {
+            width: 28px; height: 28px; border-radius: 9px; background: rgba(183, 121, 31, .1);
+            display: grid; place-items: center; font-size: 12px;
+        }
+        .dh .ih-pin {
+            font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+            background: rgba(18, 184, 134, .12); color: var(--emerald-d); padding: 3px 9px; border-radius: 999px;
+        }
+        .dh .ih-card h3 { font-size: 15px; line-height: 1.4; }
+        .dh .ih-card p { font-size: 12px; color: var(--muted); flex: 1; }
+        .dh .ih-time { font-size: 11px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+        @media (max-width: 1024px) { .dh .ih-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 640px) { .dh .ih-cards { grid-template-columns: 1fr; } .dh .ih-today { padding: 22px; } }
+
         /* ---------- BERITA ---------- */
         .dh .news { padding: 80px 0; }
         .dh .head-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 34px; }
@@ -247,31 +343,6 @@
         .dh .news-card p { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
         .dh .link-more { font-size: 12px; font-weight: 600; color: var(--green); display: inline-flex; gap: 6px; align-items: center; }
         .dh .link-more:hover { color: var(--emerald-d); }
-
-        /* ---------- JENJANG PENDIDIKAN ---------- */
-        .dh .level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-        .dh .level {
-            background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px;
-            display: flex; flex-direction: column; gap: 8px; transition: all .3s ease;
-        }
-        .dh .level:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: var(--gold); }
-        .dh .level .top {
-            display: flex; justify-content: space-between; align-items: center; font-size: 9px;
-            letter-spacing: .1em; text-transform: uppercase; color: var(--gold); font-weight: 600;
-        }
-        .dh .level h3 { font-size: 20px; margin-top: 6px; }
-        .dh .level .sub { font-size: 11px; color: var(--ink); font-weight: 500; }
-        .dh .level p { font-size: 11.5px; color: var(--muted); flex: 1; margin-bottom: 12px; }
-        .dh .level .dur {
-            font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px;
-            border-top: 1px solid var(--line); padding-top: 12px;
-        }
-        .dh .level-cta {
-            background: linear-gradient(150deg, var(--green-2), var(--green)); color: #fff; border-radius: var(--radius);
-            padding: 24px; display: flex; flex-direction: column; gap: 12px; justify-content: center; box-shadow: var(--shadow);
-        }
-        .dh .level-cta h3 { color: #fff; font-size: 18px; }
-        .dh .level-cta p { font-size: 11.5px; color: #b9d0c4; }
 
         /* ---------- KEHIDUPAN SANTRI ---------- */
         .dh .life {
@@ -311,12 +382,14 @@
         .dh .g-video .cap { position: relative; z-index: 2; }
         .dh .g-video .cap strong { display: block; font-size: 20px; color: #fff; }
         .dh .g-video .cap span { font-size: 10px; letter-spacing: .08em; color: #e8efe9; text-transform: uppercase; }
+        .dh .g-item > a { display: block; }
+        .dh .g-video .play { pointer-events: none; }
 
         /* ---------- PRESTASI ---------- */
         .dh .achv { padding: 60px 0; }
         .dh .achv .container { display: grid; grid-template-columns: .8fr 2.2fr; gap: 40px; align-items: center; }
         .dh .achv h2 { font-size: clamp(26px, 3vw, 36px); margin-bottom: 12px; }
-        .dh .achv .intro { font-size: 13px; color: var(--muted); }
+        .dh .achv .intro { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
         .dh .achv-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
         .dh .achv-card {
             background: #fff; border-radius: var(--radius); padding: 22px; border: 1px solid var(--line); transition: all .3s ease;
@@ -393,25 +466,18 @@
             .dh .badge-year { right: 10px; bottom: -10px; }
             .dh .levels { margin: 0; border-radius: 0; }
             .dh .head-row { flex-direction: column; align-items: flex-start; }
+            .dh .level-grid, .dh .org-grid, .dh .quick-grid { grid-template-columns: repeat(2, 1fr); }
+            .dh .life .container, .dh .achv .container, .dh .psb-box, .dh .contact .container { grid-template-columns: 1fr; gap: 40px; }
+            .dh .times, .dh .achv-cards, .dh .gallery-grid { grid-template-columns: 1fr; }
+            .dh .life { margin: 0; border-radius: 0; }
         }
         @media (max-width: 640px) {
             .dh .hero2-cta { flex-direction: column; width: 100%; }
             .dh .hero2-cta .btn { width: 100%; }
             .dh .stats .container { grid-template-columns: 1fr; }
             .dh .stat { border-left: 0; border-bottom: 1px solid rgba(255, 255, 255, .15); padding-left: 0; padding-bottom: 12px; }
-            .dh .psb-box { padding: 36px 20px; border-radius: 20px; }
-            .dh .psb .btns { flex-direction: column; }
-            .dh .psb .btn { width: 100%; }
             .dh .info-inner { border-radius: 16px; }
-        }
-        @media (max-width: 1024px) {
-            .dh .level-grid { grid-template-columns: repeat(2, 1fr); }
-            .dh .life .container, .dh .achv .container, .dh .psb-box, .dh .contact .container { grid-template-columns: 1fr; gap: 40px; }
-            .dh .times, .dh .achv-cards, .dh .gallery-grid { grid-template-columns: 1fr; }
-            .dh .life { margin: 0; border-radius: 0; }
-        }
-        @media (max-width: 640px) {
-            .dh .level-grid, .dh .contact-two { grid-template-columns: 1fr; }
+            .dh .level-grid, .dh .org-grid, .dh .quick-grid, .dh .contact-two { grid-template-columns: 1fr; }
             .dh .psb-box { padding: 28px 20px; border-radius: 20px; }
             .dh .psb .btns { flex-direction: column; }
             .dh .psb .btn { width: 100%; }
@@ -424,6 +490,64 @@
             .dh .reveal, .dh .hero2-bg { transition: none !important; opacity: 1 !important; transform: none !important; }
         }
     </style>
+
+    @php
+        // ----- Data dinamis dari database -----
+        $beritaTerbaru = \App\Models\Berita::published()->latest('published_at')->take(3)->get();
+        $warna = ['', 'c', 'd'];
+
+        // Kolom diasumsikan: nama, jabatan, foto. Sesuaikan jika berbeda di model StrukturOrganisasi.
+        $pengurus = \App\Models\StrukturOrganisasi::where('aktif', 1)
+            ->where('kategori', 'bagan')
+            ->orderBy('urutan')->orderBy('id')
+            ->take(4)->get();
+
+        // INFO HARIAN: konten section "Kabar & jadwal pesantren hari ini", dikelola lewat
+        // dashboard super admin (menu Pengelolaan > Info Harian).
+        // Guard hasTable membuat beranda tetap tampil selama migrasi info_harian belum dijalankan.
+        $infoHarian = collect();
+        $jadwalHariIni = collect();
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('info_harian')) {
+            $infoHarian = \App\Models\InfoHarian::info()->aktif()->berlaku()->sudahTerbit()
+                ->orderByDesc('penting')->orderByDesc('tanggal')->orderByDesc('id')
+                ->take(4)->get();
+
+            $jadwalHariIni = \App\Models\InfoHarian::jadwal()->aktif()->berlaku()
+                ->orderBy('jam')->orderBy('urutan')->orderBy('id')->get();
+        }
+
+        $teksInfo = $infoHarian->where('penting', true)->pluck('judul')->implode('   •   ');
+
+        // Prestasi: urutan sama dengan halaman /prestasi (tahun terbaru, juara 1-3 dulu, penghargaan di akhir)
+        $prestasiTerbaru = \App\Models\PrestasiSantri::query()
+            ->orderByDesc('tahun')
+            ->orderByRaw('peringkat = 0, peringkat')
+            ->orderByDesc('id')
+            ->take(3)->get();
+
+        // Galeri: ambil album terbaru (relasi `media` sama seperti di Public\GaleriController).
+        // Slot besar diprioritaskan untuk album yang memuat video, sisanya 2 album terbaru.
+        $albumTerbaru = \App\Models\Album::with('media')
+            ->orderByDesc('tanggal')->orderByDesc('id')->take(6)->get();
+        $albumUtama = $albumTerbaru->first(fn ($a) => $a->media->where('tipe', '!=', 'foto')->isNotEmpty())
+            ?? $albumTerbaru->first();
+        $albumLain = $albumTerbaru->reject(fn ($a) => $albumUtama && $a->id === $albumUtama->id)->take(2);
+        $galeriBeranda = $albumUtama ? collect([$albumUtama])->merge($albumLain) : collect();
+        $gambarDefault = asset('assets/img/banner/banner.png');
+
+        $sampulAlbum = function ($a) use ($gambarDefault) {
+            if ($a->sampul) {
+                return \Illuminate\Support\Facades\Storage::url($a->sampul);
+            }
+            $foto = $a->media->first(fn ($m) => $m->tipe === 'foto' && $m->path);
+            if ($foto) {
+                return \Illuminate\Support\Facades\Storage::url($foto->path);
+            }
+            $poster = $a->media->first(fn ($m) => ! empty($m->poster));
+            return $poster ? \Illuminate\Support\Facades\Storage::url($poster->poster) : $gambarDefault;
+        };
+    @endphp
 
     <div class="dh">
 
@@ -451,7 +575,7 @@
                 <div class="info-inner">
                     <span class="info-tag"><i class="fa-solid fa-bullhorn"></i> INFO</span>
                     <marquee scrollamount="5">
-                        Selamat datang di portal resmi Pondok Pesantren Babul Hasanah. Pendaftaran Santri Baru Tahun Ajaran Baru telah dibuka, mari bergabung bersama kami untuk mencetak generasi unggul!
+                        {{ $teksInfo ?: 'Selamat datang di portal resmi Pondok Pesantren Babul Hasanah.' }}
                     </marquee>
                 </div>
             </div>
@@ -464,17 +588,17 @@
                     <small>Bersama Babul Hasanah</small>
                     <div class="since">Mengabdi sejak 1998.</div>
                 </div>
-                <a href="{{ url('/santri') }}" class="stat">
+                <a href="{{ route('pendaftaran.index') }}" class="stat">
                     <b data-count="500" data-suffix="+">500+</b><span>Santri Aktif</span>
                 </a>
-                <a href="{{ url('/profil/struktur-organisasi') }}" class="stat">
+                <a href="{{ route('profil.struktur-organisasi') }}" class="stat">
                     <b data-count="30" data-suffix="+">30+</b><span>Ustadz / Ustadzah</span>
                 </a>
-                <a href="{{ url('/program/kategori-1') }}" class="stat">
-                    <b data-count="2">2</b><span>Program Unggulan</span>
+                <a href="#info" class="stat">
+                    <b data-count="{{ $infoHarian->count() }}">{{ $infoHarian->count() }}</b><span>Info Hari Ini</span>
                 </a>
-                <a href="{{ url('/ekstrakurikuler') }}" class="stat">
-                    <b data-count="15" data-suffix="+">15+</b><span>Ekstrakurikuler</span>
+                <a href="#jenjang" class="stat">
+                    <b data-count="7">7</b><span>Jenjang Pendidikan</span>
                 </a>
             </div>
         </section>
@@ -525,6 +649,26 @@
                         <div><h3>Adab Keseharian</h3><p>Pembiasaan ibadah, kemandirian, dan kepedulian sosial.</p></div>
                     </div>
                 </div>
+
+                {{-- PINTASAN HALAMAN PROFIL --}}
+                <div class="quick-grid">
+                    <a href="{{ route('profil.sejarah') }}" class="quick">
+                        <span class="q-ico"><i class="fa-solid fa-landmark"></i></span>
+                        <h3>Sejarah</h3><p>Perjalanan pesantren sejak 1998.</p>
+                    </a>
+                    <a href="{{ route('profil.visi-misi') }}" class="quick">
+                        <span class="q-ico"><i class="fa-solid fa-bullseye"></i></span>
+                        <h3>Visi &amp; Misi</h3><p>Arah dan tujuan pendidikan kami.</p>
+                    </a>
+                    <a href="{{ route('profil.struktur-organisasi') }}" class="quick">
+                        <span class="q-ico"><i class="fa-solid fa-sitemap"></i></span>
+                        <h3>Struktur Organisasi</h3><p>Pengurus, jenjang, dan bidang.</p>
+                    </a>
+                    <a href="{{ route('profil.pembelajaran') }}" class="quick">
+                        <span class="q-ico"><i class="fa-solid fa-book-open-reader"></i></span>
+                        <h3>Pembelajaran</h3><p>Sistem dan kurikulum belajar santri.</p>
+                    </a>
+                </div>
             </div>
         </section>
 
@@ -535,13 +679,13 @@
                 <h2 class="section-title">Setiap tahap, jalan menuju kebermanfaatan.</h2>
                 <p class="section-sub">Tujuh pilihan pendidikan yang saling melengkapi. Temukan jalur yang sesuai dengan perjalanan putra-putri Anda.</p>
                 <div class="level-grid">
-                    <a href="#" class="level"><div class="top"><span>Diniyah Nonformal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>MDTA</h3><div class="sub">Madrasah Diniyah Takmiliyah</div><p>Fondasi mengaji, ibadah, dan akhlak untuk usia sekolah dasar.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 4 tahun</div></a>
-                    <a href="#" class="level"><div class="top"><span>Ketarbiyahan</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>PPS WUSTHA</h3><div class="sub">Pendidikan Pesantren Salafiyah</div><p>Kajian kepesantrenan dengan pendidikan kesetaraan tingkat SMP.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
-                    <a href="#" class="level"><div class="top"><span>Pendidikan Formal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>MTS</h3><div class="sub">Madrasah Tsanawiyah</div><p>Ilmu agama dan pengetahuan umum dalam budaya belajar santri.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
-                    <a href="#" class="level"><div class="top"><span>Pendidikan Formal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>MA</h3><div class="sub">Madrasah Aliyah</div><p>Penguatan akademik, karakter, dan persiapan studi lanjutan.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
-                    <a href="#" class="level"><div class="top"><span>Diniyah Formal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>PDF Wustha</h3><div class="sub">Pendidikan Diniyah Formal</div><p>Pendalaman kitab turats pada jenjang menengah pertama.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
-                    <a href="#" class="level"><div class="top"><span>Diniyah Formal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>PDF ULYA</h3><div class="sub">Pendidikan Diniyah Formal</div><p>Penguasaan ilmu syariah dan tradisi keilmuan tingkat lanjutan.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
-                    <a href="#" class="level"><div class="top"><span>Pendidikan Tinggi</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>MA'HAD 'ALY</h3><div class="sub">Pendidikan Tinggi Pesantren</div><p>Mengkaji fikih dan usul fikih untuk calon kader ulama.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 4 tahun</div></a>
+                    <a href="{{ route('jenjang.show', 'mdta') }}" class="level"><div class="top"><span>Diniyah Nonformal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>MDTA</h3><div class="sub">Madrasah Diniyah Takmiliyah</div><p>Fondasi mengaji, ibadah, dan akhlak untuk usia sekolah dasar.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 4 tahun</div></a>
+                    <a href="{{ route('jenjang.show', 'pps-wustha') }}" class="level"><div class="top"><span>Ketarbiyahan</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>PPS WUSTHA</h3><div class="sub">Pendidikan Pesantren Salafiyah</div><p>Kajian kepesantrenan dengan pendidikan kesetaraan tingkat SMP.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
+                    <a href="{{ route('jenjang.show', 'mts') }}" class="level"><div class="top"><span>Pendidikan Formal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>MTS</h3><div class="sub">Madrasah Tsanawiyah</div><p>Ilmu agama dan pengetahuan umum dalam budaya belajar santri.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
+                    <a href="{{ route('jenjang.show', 'ma') }}" class="level"><div class="top"><span>Pendidikan Formal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>MA</h3><div class="sub">Madrasah Aliyah</div><p>Penguatan akademik, karakter, dan persiapan studi lanjutan.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
+                    <a href="{{ route('jenjang.show', 'pdf-wustha') }}" class="level"><div class="top"><span>Diniyah Formal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>PDF Wustha</h3><div class="sub">Pendidikan Diniyah Formal</div><p>Pendalaman kitab turats pada jenjang menengah pertama.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
+                    <a href="{{ route('jenjang.show', 'pdf-ulya') }}" class="level"><div class="top"><span>Diniyah Formal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>PDF ULYA</h3><div class="sub">Pendidikan Diniyah Formal</div><p>Penguasaan ilmu syariah dan tradisi keilmuan tingkat lanjutan.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
+                    <a href="{{ route('jenjang.show', 'mahad-aly') }}" class="level"><div class="top"><span>Pendidikan Tinggi</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>MA'HAD 'ALY</h3><div class="sub">Pendidikan Tinggi Pesantren</div><p>Mengkaji fikih dan usul fikih untuk calon kader ulama.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 4 tahun</div></a>
                     <div class="level-cta">
                         <i class="fa-regular fa-comments" style="font-size:22px"></i>
                         <h3>Masih mencari jenjang yang tepat?</h3>
@@ -552,133 +696,109 @@
             </div>
         </section>
 
-        {{-- PROGRAM UNGGULAN (SWIPER) --}}
-        <section class="program-sec" id="program">
-            <div class="container">
-                <div class="eyebrow">Program Unggulan</div>
-                <h2 class="section-title">Pusat Pendidikan Islam Berwawasan Global</h2>
-                <p class="section-sub">
-                    Pondok Pesantren Babul Hasanah hadir di Kabupaten Padang Lawas untuk memberikan fasilitas pendidikan
-                    agama yang kokoh serta penguasaan sains dan teknologi.
-                </p>
-
-                <div class="swiper mySwiper">
-                    <div class="swiper-wrapper">
-
-                        <div class="swiper-slide !h-auto">
-                            <div class="program-card">
-                                <div class="program-cover" style="background-image: url('https://images.unsplash.com/photo-1609599006353-e629aaabfeae?q=80&w=500&auto=format&fit=crop');">
-                                    <span class="pc-ico"><i class="fa-solid fa-book-quran"></i></span>
-                                    <span class="pc-tag">Tahfidz</span>
+        {{-- STRUKTUR ORGANISASI (tampil jika sudah ada data aktif) --}}
+        @if ($pengurus->count())
+            <section class="org" id="struktur">
+                <div class="container">
+                    <div class="eyebrow">Struktur Organisasi</div>
+                    <div class="head-row">
+                        <h2 class="section-title" style="margin-bottom:0">Pengurus &amp; pengasuh pesantren.</h2>
+                        <a href="{{ route('profil.struktur-organisasi') }}" class="btn btn-outline">Lihat Struktur Lengkap <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                    </div>
+                    <div class="org-grid">
+                        @foreach ($pengurus as $i => $p)
+                            @php $foto = $p->foto ?? null; @endphp
+                            <div class="org-card">
+                                <div class="avatar ph {{ $warna[$i % 3] }}"
+                                    @if ($foto) style="background-image:url('{{ asset('storage/' . $foto) }}')" @endif>
+                                    @unless ($foto)<i class="fa-solid fa-user"></i>@endunless
                                 </div>
-                                <div class="program-body">
-                                    <h5>Tahfidzul Qur'an</h5>
-                                    <p>Program khusus hafalan Al-Qur'an dengan bimbingan intensif dan metode talaqqi yang teruji menghasilkan hafizh dan hafizhah handal.</p>
-                                    <a href="#" class="btn btn-primary">DAFTAR <i class="fa-solid fa-arrow-right"></i></a>
-                                </div>
+                                <h3>{{ $p->nama ?? '-' }}</h3>
+                                <div class="role">{{ $p->jabatan ?? '' }}</div>
                             </div>
-                        </div>
-
-                        <div class="swiper-slide !h-auto">
-                            <div class="program-card">
-                                <div class="program-cover" style="background-image: url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=500&auto=format&fit=crop');">
-                                    <span class="pc-ico"><i class="fa-solid fa-school"></i></span>
-                                    <span class="pc-tag">Formal</span>
-                                </div>
-                                <div class="program-body">
-                                    <h5>Kulliyatul Mu'allimin</h5>
-                                    <p>Pendidikan formal tingkat MTs dan MA dengan kurikulum memadukan DEPAG, pesantren salafiyah, serta penguasaan bahasa asing.</p>
-                                    <a href="#" class="btn btn-primary">DAFTAR <i class="fa-solid fa-arrow-right"></i></a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="swiper-slide !h-auto">
-                            <div class="program-card">
-                                <div class="program-cover" style="background-image: url('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=500&auto=format&fit=crop');">
-                                    <span class="pc-ico"><i class="fa-solid fa-laptop-code"></i></span>
-                                    <span class="pc-tag">Teknologi</span>
-                                </div>
-                                <div class="program-body">
-                                    <h5>Kemandirian &amp; Teknologi</h5>
-                                    <p>Membekali santri dengan kecakapan hidup (life skills), kewirausahaan, serta literasi digital guna menghadapi tantangan zaman modern.</p>
-                                    <a href="#" class="btn btn-primary">DAFTAR <i class="fa-solid fa-arrow-right"></i></a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="swiper-slide !h-auto">
-                            <div class="program-card">
-                                <div class="program-cover" style="background-image: url('https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=500&auto=format&fit=crop');">
-                                    <span class="pc-ico"><i class="fa-solid fa-book-open"></i></span>
-                                    <span class="pc-tag">Salafiyah</span>
-                                </div>
-                                <div class="program-body">
-                                    <h5>Kajian Kitab Kuning</h5>
-                                    <p>Pendalaman ilmu agama klasik bermetode muhafazhah dan pendalaman kaidah Bahasa Arab Nahwu &amp; Shorof secara terstruktur.</p>
-                                    <a href="#" class="btn btn-primary">DAFTAR <i class="fa-solid fa-arrow-right"></i></a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="swiper-slide !h-auto">
-                            <div class="program-card">
-                                <div class="program-cover" style="background-image: url('https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=500&auto=format&fit=crop');">
-                                    <span class="pc-ico"><i class="fa-solid fa-language"></i></span>
-                                    <span class="pc-tag">Bahasa</span>
-                                </div>
-                                <div class="program-body">
-                                    <h5>Bahasa Asing Intensif</h5>
-                                    <p>Pembiasaan percakapan harian (Arabic &amp; English Club) guna membentuk santri yang komunikatif dan berwawasan global.</p>
-                                    <a href="#" class="btn btn-primary">DAFTAR <i class="fa-solid fa-arrow-right"></i></a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="swiper-slide !h-auto">
-                            <div class="program-card">
-                                <div class="program-cover" style="background-image: url('https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=500&auto=format&fit=crop');">
-                                    <span class="pc-ico"><i class="fa-solid fa-award"></i></span>
-                                    <span class="pc-tag">Ekstra</span>
-                                </div>
-                                <div class="program-body">
-                                    <h5>Minat &amp; Bakat Santri</h5>
-                                    <p>Wadah pengembangan kepemimpinan melalui pramuka, seni bela diri, kaligrafi, pidato 3 bahasa, dan keolahragaan.</p>
-                                    <a href="#" class="btn btn-primary">DAFTAR <i class="fa-solid fa-arrow-right"></i></a>
-                                </div>
-                            </div>
-                        </div>
-
+                        @endforeach
                     </div>
                 </div>
+            </section>
+        @endif
 
-                <div class="custom-swiper-pagination"></div>
+        {{-- INFO HARIAN (pengganti Program Unggulan) --}}
+        <section class="ih-sec" id="info">
+            <div class="container">
+                <div class="eyebrow">Info Harian</div>
+                <div class="head-row">
+                    <h2 class="section-title" style="margin-bottom:0">Kabar &amp; jadwal pesantren hari ini.</h2>
+                    <span class="ih-date"><i class="fa-regular fa-calendar"></i> {{ now()->locale('id')->translatedFormat('l, d F Y') }}</span>
+                </div>
+
+                <div class="ih-grid">
+                    <div class="ih-today">
+                        <div class="ih-today-head">
+                            <i class="fa-regular fa-clock"></i>
+                            <div><small>Jadwal</small><h3>Hari Ini</h3></div>
+                        </div>
+                        @forelse ($jadwalHariIni as $j)
+                            <div class="ih-row"><b>{{ $j->jam }}</b><span>{{ $j->judul }}</span></div>
+                        @empty
+                            <div class="ih-row"><span>Belum ada jadwal hari ini.</span></div>
+                        @endforelse
+                    </div>
+
+                    <div class="ih-cards">
+                        @forelse ($infoHarian as $info)
+                            <article class="ih-card">
+                                <div class="ih-top">
+                                    <span class="ih-chip"><i class="fa-solid {{ $info->ikon }}"></i>{{ $info->kategori }}</span>
+                                    @if ($info->penting)<span class="ih-pin">Penting</span>@endif
+                                </div>
+                                <h3>{{ $info->judul }}</h3>
+                                @if ($info->isi)<p>{{ $info->isi }}</p>@endif
+                                <div class="ih-time"><i class="fa-regular fa-clock"></i>{{ $info->waktu_label }}</div>
+                            </article>
+                        @empty
+                            <article class="ih-card">
+                                <div class="ih-top">
+                                    <span class="ih-chip"><i class="fa-solid fa-circle-info"></i>Info</span>
+                                </div>
+                                <h3>Belum ada info hari ini</h3>
+                                <p>Pengumuman dan agenda pesantren akan tampil di sini.</p>
+                            </article>
+                        @endforelse
+                    </div>
+                </div>
             </div>
         </section>
 
-@php
-    $beritaTerbaru = \App\Models\Berita::published()->latest('published_at')->take(3)->get();
-    $warna = ['', 'c', 'd'];
-@endphp
+        {{-- BERITA --}}
+        <section class="news" id="berita">
+            <div class="container">
+                <div class="eyebrow">Berita &amp; Pengumuman</div>
+                <div class="head-row">
+                    <h2 class="section-title" style="margin-bottom:0">Kabar terbaru dari pesantren.</h2>
+                    <a href="{{ route('berita.index') }}" class="btn btn-outline">Semua Berita <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                </div>
 
-<div class="news-grid">
-    @forelse ($beritaTerbaru as $i => $b)
-        <article class="news-card">
-            <a href="{{ route('berita.show', $b) }}">
-                <div class="ph {{ $warna[$i % 3] }}" style="background-image:url('{{ $b->gambar_url }}')"></div>
-            </a>
-            <div class="news-meta">
-                <span class="cat">{{ $b->kategori }}</span>
-                <span class="date">{{ $b->published_at->translatedFormat('d F Y') }}</span>
+                <div class="news-grid">
+                    @forelse ($beritaTerbaru as $i => $b)
+                        <article class="news-card">
+                            <a href="{{ route('berita.show', $b) }}">
+                                <div class="ph {{ $warna[$i % 3] }}" style="background-image:url('{{ $b->gambar_url }}')"></div>
+                            </a>
+                            <div class="news-meta">
+                                <span class="cat">{{ $b->kategori }}</span>
+                                <span class="date">{{ $b->published_at->translatedFormat('d F Y') }}</span>
+                            </div>
+                            <h3>{{ $b->judul }}</h3>
+                            <p>{{ \Illuminate\Support\Str::limit($b->ringkasan_otomatis, 110) }}</p>
+                            <a href="{{ route('berita.show', $b) }}" class="link-more">Baca Selengkapnya <i class="fa-solid fa-arrow-right"></i></a>
+                        </article>
+                    @empty
+                        <p style="grid-column:1/-1;color:var(--muted)">Belum ada berita.</p>
+                    @endforelse
+                </div>
             </div>
-            <h3>{{ $b->judul }}</h3>
-            <p>{{ \Illuminate\Support\Str::limit($b->ringkasan_otomatis, 110) }}</p>
-            <a href="{{ route('berita.show', $b) }}" class="link-more">Baca Selengkapnya <i class="fa-solid fa-arrow-right"></i></a>
-        </article>
-    @empty
-        <p style="grid-column:1/-1;color:var(--muted)">Belum ada berita.</p>
-    @endforelse
-</div>
+        </section>
+
         {{-- KEHIDUPAN SANTRI --}}
         <section class="life">
             <div class="container">
@@ -700,19 +820,48 @@
             <div class="container">
                 <div class="eyebrow">Galeri Foto &amp; Video Santri</div>
                 <div class="head-row">
-                    <h2 class="section-title">Momen sederhana, kenangan berharga.</h2>
-                    <a href="#" class="btn btn-outline">Jelajahi Galeri <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                    <h2 class="section-title" style="margin-bottom:0">Momen sederhana, kenangan berharga.</h2>
+                    <a href="{{ route('galeri') }}" class="btn btn-outline">Jelajahi Galeri <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                 </div>
-                <div class="gallery-grid">
-                    <figure class="g-item g-video">
-                        <div class="ph c">
-                            <button class="play" aria-label="Putar video"><i class="fa-solid fa-play"></i></button>
-                            <div class="cap"><strong>Sehari menjadi santri Babul Hasanah</strong><span>Video Profil • 04:32 Menit</span></div>
-                        </div>
-                    </figure>
-                    <figure class="g-item"><div class="ph d"></div><figcaption>Ruang karya &amp; kreativitas</figcaption></figure>
-                    <figure class="g-item"><div class="ph b"></div><figcaption>Hadrah &amp; kebersamaan</figcaption></figure>
-                </div>
+                @if ($galeriBeranda->isNotEmpty())
+                    <div class="gallery-grid">
+                        @foreach ($galeriBeranda as $i => $a)
+                            @php
+                                $jmlVideo = $a->media->where('tipe', '!=', 'foto')->count();
+                                $jmlFoto = $a->media->where('tipe', 'foto')->count();
+                                $ringkas = collect([
+                                    $jmlFoto ? $jmlFoto . ' foto' : null,
+                                    $jmlVideo ? $jmlVideo . ' video' : null,
+                                ])->filter()->implode(' • ');
+                            @endphp
+
+                            @if ($i === 0)
+                                <figure class="g-item g-video">
+                                    <a href="{{ route('galeri') }}" aria-label="Buka album {{ $a->judul }}">
+                                        <div class="ph c" style="background-image:url('{{ $sampulAlbum($a) }}')">
+                                            @if ($jmlVideo)
+                                                <span class="play"><i class="fa-solid fa-play"></i></span>
+                                            @endif
+                                            <div class="cap">
+                                                <strong>{{ $a->judul }}</strong>
+                                                <span>{{ $a->kategori }}@if ($ringkas) • {{ $ringkas }}@endif</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </figure>
+                            @else
+                                <figure class="g-item">
+                                    <a href="{{ route('galeri') }}" aria-label="Buka album {{ $a->judul }}">
+                                        <div class="ph {{ $i === 1 ? 'd' : 'b' }}" style="background-image:url('{{ $sampulAlbum($a) }}')"></div>
+                                    </a>
+                                    <figcaption>{{ $a->judul }}</figcaption>
+                                </figure>
+                            @endif
+                        @endforeach
+                    </div>
+                @else
+                    <p style="color:var(--muted)">Belum ada album galeri.</p>
+                @endif
             </div>
         </section>
 
@@ -723,11 +872,24 @@
                     <div class="eyebrow">Prestasi Santri</div>
                     <h2>Ikhtiar terbaik, buah yang berarti.</h2>
                     <p class="intro">Merayakan proses, menguatkan semangat untuk terus bertumbuh.</p>
+                    <a href="{{ route('prestasi.index') }}" class="link-more">Lihat semua prestasi <i class="fa-solid fa-arrow-right"></i></a>
                 </div>
                 <div class="achv-cards">
-                    <div class="achv-card"><div class="ico-box"><i class="fa-solid fa-trophy"></i></div><span class="tag">Juara I</span><h3>Musabaqah Tilawatil Qur'an</h3><div class="lvl">Tingkat Kabupaten Padang Lawas • 2026</div><div class="who">Nama Santri · MA</div></div>
-                    <div class="achv-card"><div class="ico-box"><i class="fa-solid fa-trophy"></i></div><span class="tag">Juara II</span><h3>Musabaqah Qira'atil Kutub</h3><div class="lvl">Tingkat Provinsi • 2026</div><div class="who">Nama Santri · PDF Ulya</div></div>
-                    <div class="achv-card"><div class="ico-box"><i class="fa-solid fa-trophy"></i></div><span class="tag">Medali Emas</span><h3>Olimpiade Bahasa Arab</h3><div class="lvl">Tingkat Provinsi • 2026</div><div class="who">Nama Santri · MTS</div></div>
+                    @forelse ($prestasiTerbaru as $p)
+                        @php
+                            $lokasi = collect([$p->tingkat, $p->wilayah, $p->tahun])->filter()->implode(' • ');
+                            $pemilik = collect([$p->nama, $p->kelas])->filter()->implode(' · ');
+                        @endphp
+                        <div class="achv-card">
+                            <div class="ico-box"><i class="fa-solid fa-trophy"></i></div>
+                            @if ($p->label)<span class="tag">{{ $p->label }}</span>@endif
+                            <h3>{{ $p->judul }}</h3>
+                            <div class="lvl">{{ $lokasi }}</div>
+                            <div class="who">{{ $pemilik }}</div>
+                        </div>
+                    @empty
+                        <p style="grid-column:1/-1;color:var(--muted)">Belum ada data prestasi.</p>
+                    @endforelse
                 </div>
             </div>
         </section>
@@ -742,7 +904,7 @@
                         <p class="txt">Mari bertumbuh bersama keluarga Babul Hasanah. Pendaftaran terbuka untuk santri putra dan putri melalui seleksi sesuai jenjang pendidikan.</p>
                         <div class="btns">
                             <a href="{{ route('pendaftaran.index') }}" class="btn btn-light">Daftar Online Sekarang <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
-                            <a href="https://wa.me/" target="_blank" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.3)"><i class="fa-brands fa-whatsapp"></i> Hubungi Panitia</a>
+                            <a href="https://wa.me/" target="_blank" rel="noopener" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.3)"><i class="fa-brands fa-whatsapp"></i> Hubungi Panitia</a>
                         </div>
                         <div class="period"><i class="fa-regular fa-calendar"></i> Isi periode pendaftaran di sini</div>
                     </div>
@@ -763,7 +925,7 @@
                     <div class="eyebrow">Kontak</div>
                     <h2>Sapa kami.<br>Mari bersilaturahmi.</h2>
                     <p class="desc">Punya pertanyaan tentang pendidikan atau kehidupan di pesantren? Kami senang membantu Anda.</p>
-                    <a href="https://wa.me/" target="_blank" class="btn btn-primary">Hubungi via WhatsApp <i class="fa-brands fa-whatsapp"></i></a>
+                    <a href="https://wa.me/" target="_blank" rel="noopener" class="btn btn-primary">Hubungi via WhatsApp <i class="fa-brands fa-whatsapp"></i></a>
                 </div>
                 <div class="contact-info">
                     <div class="row">
@@ -801,23 +963,11 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
 
-            // Swiper program unggulan (konfigurasi tetap seperti semula)
-            new Swiper(".mySwiper", {
-                slidesPerView: 1,
-                spaceBetween: 24,
-                loop: true,
-                autoplay: { delay: 2000, disableOnInteraction: false },
-                pagination: { el: ".custom-swiper-pagination", clickable: true },
-                breakpoints: {
-                    640: { slidesPerView: 2, spaceBetween: 24 },
-                    1024: { slidesPerView: 3, spaceBetween: 32 },
-                },
-            });
-
             // Animasi muncul saat scroll
             const revealEls = document.querySelectorAll(
-                '.dh .hero2 .container > *, .dh .stats .container > *, .dh .profile-grid > *, .dh .feature, ' +
-                '.dh .program-card, .dh .news-card, .dh .level, .dh .time, .dh .g-item, .dh .achv-card, .dh .psb-box > *, .dh .contact .container > *'
+                '.dh .hero2 .container > *, .dh .stats .container > *, .dh .profile-grid > *, .dh .feature, .dh .quick, ' +
+                '.dh .program-card, .dh .news-card, .dh .level, .dh .org-card, .dh .time, .dh .g-item, .dh .achv-card, ' +
+                '.dh .psb-box > *, .dh .contact .container > *'
             );
             const revealObs = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {

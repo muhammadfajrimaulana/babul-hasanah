@@ -15,6 +15,7 @@ class PendaftaranController extends Controller
     public function index()
     {
         $pendaftar = PendaftaranOnline::latest()->get();
+        
         return view('dashboard.pendaftaran.index', compact('pendaftar'));
     }
 
@@ -45,7 +46,7 @@ class PendaftaranController extends Controller
             $rawPassword = 'babul' . rand(1000, 9999);
 
             $user = User::create([
-                'name' => $pendaftaran->nama_ortu_wali,
+                'name' => $pendaftaran->nama_lengkap,
                 'email' => $pendaftaran->email,
                 'password' => Hash::make($rawPassword),
                 'role' => 'wali_santri',
@@ -59,7 +60,7 @@ class PendaftaranController extends Controller
                 'jenjang_pendidikan' => $pendaftaran->jenjang_tujuan,
                 'kelas' => '1',
                 'alamat' => 'Asal sekolah: ' . $pendaftaran->asal_sekolah,
-                'nama_wali' => $pendaftaran->nama_ortu_wali,
+                'nama_wali' => $pendaftaran->nama_ayah ??$pendaftaran->nama_ibu,
             ]);
 
             $phone = $pendaftaran->no_hp_ortu;

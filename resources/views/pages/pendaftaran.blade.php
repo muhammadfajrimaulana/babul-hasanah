@@ -77,13 +77,49 @@
                                     placeholder="Contoh: Ahmad Zaky Al-Fatih">
                             </div>
 
-                            <!-- NIK -->
+                            <!-- Nama Panggilan -->
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1.5">NIK Santri / Kartu
-                                    Keluarga</label>
-                                <input type="text" name="nik" value="{{ old('nik') }}" required
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Panggilan</label>
+                                <input type="text" name="nama_panggilan" value="{{ old('nama_panggilan') }}"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
+                                    placeholder="Contoh: Ahmad">
+                            </div>
+
+                            <!-- NIK Santri -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">NIK Santri</label>
+                                <input type="text" name="nik_santri" value="{{ old('nik_santri') }}"
                                     class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
                                     placeholder="3201xxxxxxxxxxxx">
+                                <p class="text-xs text-slate-500 mt-1">Opsional, unik di seluruh pendaftar</p>
+                            </div>
+
+                            <!-- NISN -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">NISN (Nomor Induk Siswa Nasional)</label>
+                                <input type="text" name="nisn" value="{{ old('nisn') }}"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
+                                    placeholder="Contoh: 1234567890">
+                                <p class="text-xs text-slate-500 mt-1">Opsional</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <!-- Jenis Kelamin -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Jenis Kelamin</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="jenis_kelamin" value="Laki-laki" {{ old('jenis_kelamin') == 'Laki-laki' ? 'checked' : '' }}
+                                            class="w-4 h-4 rounded border-gray-300">
+                                        <span>Laki-laki</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="jenis_kelamin" value="Perempuan" {{ old('jenis_kelamin') == 'Perempuan' ? 'checked' : '' }}
+                                            class="w-4 h-4 rounded border-gray-300">
+                                        <span>Perempuan</span>
+                                    </label>
+                                </div>
                             </div>
 
                             <!-- Tempat, Tanggal Lahir -->
@@ -95,28 +131,28 @@
                                     placeholder="Contoh: Bogor, 12 Januari 2012">
                             </div>
 
-                            <!-- Jenjang Tujuan -->
+                            <!-- Asal Sekolah/Madrasah -->
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Jenjang Pendidikan
-                                    Tujuan</label>
-                                <select name="jenjang_tujuan" required
-                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none bg-white">
-                                    <option value="">-- Pilih Jenjang --</option>
-                                    <option value="MTs" {{ old('jenjang_tujuan') == 'MTs' ? 'selected' : '' }}>MTs
-                                        (Tingkat SLTP)</option>
-                                    <option value="MA" {{ old('jenjang_tujuan') == 'MA' ? 'selected' : '' }}>MA (Tingkat
-                                        SLTA)</option>
-                                    <option value="Diniyah" {{ old('jenjang_tujuan') == 'Diniyah' ? 'selected' : '' }}>
-                                        Madrasah Diniyah</option>
-                                </select>
-                            </div>
-
-                            <!-- Asal Sekolah -->
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Asal Sekolah Sebelumnya</label>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Asal Sekolah/Madrasah</label>
                                 <input type="text" name="asal_sekolah" value="{{ old('asal_sekolah') }}" required
                                     class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
                                     placeholder="Contoh: SD Negeri 01 Parung">
+                            </div>
+
+                            <!-- Jenjang Tujuan -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Jenjang Pendidikan Tujuan</label>
+                                <select name="jenjang_tujuan" required
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none bg-white">
+                                    <option value="">-- Pilih Jenjang --</option>
+                                    <option value="MTs">MTs (Tingkat SLTP)</option>
+                                    <option value="MA">MA (Tingkat SLTA)</option>
+                                    <option value="Madrasah Diniyah Takmiliyah">Madrasah Diniyah Takmiliyah</option>
+                                    <option value="PPS Wustha">PPS Wustha</option>
+                                    <option value="Diniyah Formal Wustha">Diniyah Formal Wustha</option>
+                                    <option value="Diniyah Formal Ulya">Diniyah Formal Ulya</option>
+                                    <option value="Ma'had 'Aly">Ma'had 'Aly</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -132,19 +168,48 @@
                         </div>
 
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <!-- Nama Ortu/Wali -->
+                            <!-- Nama Ayah -->
                             <div class="sm:col-span-2">
-                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Orang Tua / Wali</label>
-                                <input type="text" name="nama_ortu_wali" value="{{ old('nama_ortu_wali') }}" required
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Ayah</label>
+                                <input type="text" name="nama_ayah" value="{{ old('nama_ayah') }}"
                                     class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
                                     placeholder="Contoh: Budi Santoso">
                             </div>
 
-                            <!-- Email (Akun Login) -->
+                            <!-- Nama Ibu -->
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Email Aktif (Untuk Login
-                                    Portal)</label>
-                                <input type="email" name="email" value="{{ old('email') }}" required
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Ibu</label>
+                                <input type="text" name="nama_ibu" value="{{ old('nama_ibu') }}"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
+                                    placeholder="Contoh: Siti Fatimah">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <!-- NIK Orang Tua -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">NIK Orang Tua</label>
+                                <input type="text" name="nik_ortu" value="{{ old('nik_ortu') }}"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
+                                    placeholder="3201xxxxxxxxxxxx">
+                                <p class="text-xs text-slate-500 mt-1">Opsional</p>
+                            </div>
+
+                            <!-- Pekerjaan Orang Tua -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Pekerjaan Orang Tua</label>
+                                <input type="text" name="pekerjaan_ortu" value="{{ old('pekerjaan_ortu') }}"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
+                                    placeholder="Contoh: Pegawai Negeri Sipil">
+                            </div>
+                        </div>
+
+                        <!-- Email & No HP (ditambahkan) -->
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <!-- Email -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Email Aktif (Untuk Login Portal)</label>
+                                <input type="email" name="email" value="{{ old('email') }}"
                                     class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
                                     placeholder="budi@gmail.com">
                             </div>
@@ -152,9 +217,155 @@
                             <!-- No HP / WhatsApp -->
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1.5">Nomor WhatsApp Aktif</label>
-                                <input type="text" name="no_hp_ortu" value="{{ old('no_hp_ortu') }}" required
+                                <input type="text" name="no_hp_ortu" value="{{ old('no_hp_ortu') }}"
                                     class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
                                     placeholder="081234567890">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <!-- NIK Orang Tua -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">NIK Orang Tua</label>
+                                <input type="text" name="nik_ortu" value="{{ old('nik_ortu') }}"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
+                                    placeholder="3201xxxxxxxxxxxx">
+                                <p class="text-xs text-slate-500 mt-1">Opsional</p>
+                            </div>
+
+                            <!-- Pekerjaan Orang Tua -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Pekerjaan Orang Tua</label>
+                                <input type="text" name="pekerjaan_ortu" value="{{ old('pekerjaan_ortu') }}"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
+                                    placeholder="Contoh: Pegawai Negeri Sipil">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BAGIAN C: DATA ALAMAT -->
+                    <div class="space-y-4 pt-4">
+                        <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+                            <span
+                                class="flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-bold">3</span>
+                            <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
+                                Data Alamat
+                            </h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <!-- Alamat Lengkap (Jalan) -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Alamat Lengkap (Jalan)</label>
+                                <input type="text" name="alamat_jalan" value="{{ old('alamat_jalan') }}"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
+                                    placeholder="Contoh: Jl. Merdeka No. 15">
+                            </div>
+
+                            <!-- RT/RW -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">RT/RW</label>
+                                <input type="text" name="alamat_rt_rw" value="{{ old('alamat_rt_rw') }}"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
+                                    placeholder="Contoh: RT 01/RW 02">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <!-- Desa/Kelurahan -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Desa/Kelurahan</label>
+                                <input type="text" name="alamat_desa_kelurahan" value="{{ old('alamat_desa_kelurahan') }}"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
+                                    placeholder="Contoh: Kelurahan Kebun Beringin">
+                            </div>
+
+                            <!-- Kecamatan -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Kecamatan</label>
+                                <input type="text" name="alamat_kecamatan" value="{{ old('alamat_kecamatan') }}"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
+                                    placeholder="Contoh: Kecamatan Central">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <!-- Kabupaten/Kota -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Kabupaten/Kota</label>
+                                <input type="text" name="alamat_kabupaten_kota" value="{{ old('alamat_kabupaten_kota') }}"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
+                                    placeholder="Contoh: Kota Jakarta Selatan">
+                            </div>
+
+                            <!-- Provinsi -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Provinsi</label>
+                                <input type="text" name="alamat_provinsi" value="{{ old('alamat_provinsi') }}"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none"
+                                    placeholder="Contoh: DKI Jakarta">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BAGIAN D: BERKAS DIGITAL -->
+                    <div class="space-y-4 pt-4">
+                        <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+                            <span
+                                class="flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-bold">4</span>
+                            <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
+                                Berkas Digital
+                            </h3>
+                        </div>
+
+                        <p class="text-xs text-slate-500">
+                            Format gambar: JPG, PNG (maksimal 2 MB). Format berkas lainnya: PDF (maksimal 2 MB).
+                            <br>Berkas akan disimpan di server, nama file akan disimpan ke database.
+                        </p>
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <!-- Pasfoto Santri -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Pasfoto Santri</label>
+                                <input type="file" name="berkas_pasfoto"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none">
+                                <p class="text-xs text-slate-500 mt-1">Format: JPG/PNG, maksimal 2 MB</p>
+                            </div>
+
+                            <!-- Scan Kartu Keluarga -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Scan Kartu Keluarga (KK)</label>
+                                <input type="file" name="berkas_kk"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none">
+                                <p class="text-xs text-slate-500 mt-1">Format: PDF/JPG, maksimal 2 MB</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <!-- Scan Akta Kelahiran -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Scan Akta Kelahiran</label>
+                                <input type="file" name="berkas_akta_kelahiran"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none">
+                                <p class="text-xs text-slate-500 mt-1">Format: PDF/JPG, maksimal 2 MB</p>
+                            </div>
+
+                            <!-- Scan Ijazah/SKL -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Scan Ijazah Terakhir / SKL</label>
+                                <input type="file" name="berkas_ijazah"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none">
+                                <p class="text-xs text-slate-500 mt-1">Format: PDF/JPG, maksimal 2 MB</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <!-- Scan KTP Orang Tua -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Scan KTP Orang Tua/Wali</label>
+                                <input type="file" name="berkas_ktp_ortu"
+                                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition outline-none">
+                                <p class="text-xs text-slate-500 mt-1">Format: PDF/JPG, maksimal 2 MB</p>
                             </div>
                         </div>
                     </div>

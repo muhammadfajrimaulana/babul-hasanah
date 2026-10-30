@@ -20,6 +20,7 @@ use App\Http\Controllers\Public\GaleriController as PublicGaleriController;
 use App\Http\Controllers\Public\BeritaController as PublicBeritaController;
 use App\Http\Controllers\Public\StrukturOrganisasiController;
 use App\Http\Controllers\Admin\StrukturOrganisasiController as AdminStrukturController;
+use App\Http\Controllers\Admin\InfoHarianController as AdminInfoHarianController;
 
 // ==========================================
 // 1. PUBLIC ROUTES (Halaman Depan & Pendaftaran)
@@ -148,6 +149,14 @@ Route::middleware(['auth', \App\Http\Middleware\RoleAdmin::class])->prefix('admi
         ->parameters(['struktur-organisasi' => 'struktur'])
         ->except('show')
         ->names('struktur');
+
+    // Info harian beranda (khusus super admin): admin.info.index/create/store/edit/update/destroy
+    Route::middleware(\App\Http\Middleware\RoleSuperAdmin::class)->group(function () {
+        Route::resource('info-harian', AdminInfoHarianController::class)
+            ->parameters(['info-harian' => 'info'])
+            ->except('show')
+            ->names('info');
+    });
 });
 
 // ==========================================

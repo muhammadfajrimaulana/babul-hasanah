@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\PendaftaranOnline;
 use Illuminate\Http\Request;
 use App\Models\Santri;
 // Jika menggunakan Maatwebsite/Excel, uncomment baris di bawah:
@@ -13,20 +14,18 @@ class SantriController extends Controller
 {
     public function index()
     {
-        // Mengambil data santri dari database dengan pagination
         $santris = Santri::latest()->paginate(10);
 
         return view('dashboard.santri.index', compact('santris'));
     }
+
     public function detail($id)
     {
-        $santri = Santri::findOrFail($id);
-
-        return view('dashboard.santri.detail', compact('santri'));
+        $santri = Santri::with('user')->findOrFail($id);
+        $pendaftaranOnline = PendaftaranOnline::where('email', $santri->user->email)->first();
+        return view('dashboard.santri.detail', compact('santri', 'pendaftaranOnline'));
     }
-    /**
-     * Memproses file import excel data santri
-     */
+
     public function import(Request $request)
     {
         $request->validate([
@@ -45,12 +44,8 @@ class SantriController extends Controller
         }
     }
 
-    /**
-     * Mengunduh template excel untuk import santri
-     */
     public function downloadTemplate()
     {
-        // Path file template excel di dalam storage/public atau public folder
         $filePath = public_path('assets/template/template_data_santri.xlsx');
 
         if (file_exists($filePath)) {

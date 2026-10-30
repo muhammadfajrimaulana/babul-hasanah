@@ -110,7 +110,7 @@
             </div>
 
             <!-- MENU PENGELOLAAN -->
-            <div class="pt-2" x-data="{ open: {{ request()->routeIs('admin.konten.*') || request()->routeIs('admin.program.*') || request()->routeIs('admin.berita.*') || request()->routeIs('admin.kegiatan.*') || request()->routeIs('admin.galeri.*') || request()->routeIs('admin.prestasi.*') ? 'true' : 'false' }} }">
+            <div class="pt-2" x-data="{ open: {{ request()->routeIs('admin.konten.*') || request()->routeIs('admin.program.*') || request()->routeIs('admin.berita.*') || request()->routeIs('admin.info.*') || request()->routeIs('admin.kegiatan.*') || request()->routeIs('admin.galeri.*') || request()->routeIs('admin.prestasi.*') ? 'true' : 'false' }} }">
                 <button @click="if(!sidebarMinimize) { open = !open } else { sidebarMinimize = false; open = true; }"
                     class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-400 hover:bg-slate-800 transition relative group">
                     <div class="flex items-center gap-3">
@@ -146,6 +146,13 @@
                         <i class="fa-solid fa-newspaper w-4 text-xs flex-shrink-0"></i>
                         <span>Berita</span>
                     </a>
+                    @if (auth()->check() && auth()->user()->role == 'super_admin')
+                        <a href="{{ route('admin.info.index') }}" @click="sidebarOpen = false"
+                            class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.info.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
+                            <i class="fa-solid fa-bullhorn w-4 text-xs flex-shrink-0"></i>
+                            <span>Info Harian</span>
+                        </a>
+                    @endif
                     <a href="{{ route('admin.struktur.index') }}" @click="sidebarOpen = false"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.struktur.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
                         <i class="fa-solid fa-calendar-plus w-4 text-xs flex-shrink-0"></i>
