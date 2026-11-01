@@ -5,50 +5,12 @@
 @section('content')
 
 @php
-    /*
-     * FOTO: taruh file di public/images/sejarah/ lalu sesuaikan nama file.
-     * Jika file belum ada, otomatis tampil blok hijau + ikon.
-     */
-    $foto = fn ($f) => asset('images/sejarah/' . $f);
+    $jenjang = ['MDTA', 'PPS Wustha', 'MTs', 'MA', 'PDF Wustha', 'PDF Ulya', 'Ma’had ‘Aly'];
 
-    /* ==== TONGGAK SEJARAH — GANTI "19XX/20XX" DAN ISI DENGAN DATA ASLI PESANTREN ==== */
-    $tonggak = [
-        [
-            'waktu' => 'Tahun 19XX',
-            'judul' => 'Majelis pengajian di mushalla',
-            'isi'   => [
-                'Babul Hasanah bermula dari pengajian kitab yang dirintis para pendiri bersama masyarakat. Kegiatan berlangsung di mushalla dan rumah warga, didorong kepedulian terhadap pendidikan agama anak-anak sekitar.',
-            ],
-        ],
-        [
-            'waktu' => 'Tahun 19XX',
-            'judul' => 'Berdirinya pondok dan asrama santri',
-            'isi'   => [
-                'Jumlah santri dari luar daerah terus bertambah. Pesantren kemudian membangun asrama dan ruang belajar permanen sehingga santri dapat menetap dan belajar sepanjang hari.',
-            ],
-        ],
-        [
-            'waktu' => 'Tahun 20XX',
-            'judul' => 'Penataan jenjang kitab kuning',
-            'isi'   => [
-                'Pembelajaran disusun bertahap: nahwu-shorof sebagai dasar, dilanjutkan fiqih, tafsir, dan hadits. Jenjang yang jelas membuat perkembangan setiap santri lebih mudah dipantau.',
-                'Pada masa ini pesantren juga memperkuat pembinaan akhlak dan kegiatan kemandirian santri.',
-            ],
-        ],
-        [
-            'waktu' => 'Tahun 20XX',
-            'judul' => 'Pesantren terbuka dan melek teknologi',
-            'isi'   => [
-                'Dengan tetap memegang tradisi salaf, pesantren memanfaatkan teknologi untuk pendaftaran online, penyebaran informasi, dan dakwah digital. Hingga kini Babul Hasanah terus bertumbuh bersama santri, alumni, dan masyarakat.',
-            ],
-        ],
-    ];
-
-    /* ==== SEJARAH KEPENGASUHAN — GANTI DENGAN NAMA ASLI ==== */
-    $pengasuh = [
-        ['19XX – 19XX', 'Nama pendiri / pengasuh pertama'],
-        ['19XX – 20XX', 'Nama pengasuh kedua'],
-        ['20XX – sekarang', 'Nama pengasuh saat ini'],
+    $pilar = [
+        ['ikon' => 'fa-book-quran',           'judul' => 'Kitab kuning', 'isi' => 'Mendalami ilmu agama lewat kajian turats secara bertahap.'],
+        ['ikon' => 'fa-hand-holding-heart',   'judul' => 'Akhlak mulia', 'isi' => 'Adab dan keteladanan menjadi dasar setiap proses belajar.'],
+        ['ikon' => 'fa-hands-holding-circle', 'judul' => 'Pengabdian',   'isi' => 'Ilmu diamalkan untuk keluarga, masyarakat, dan bangsa.'],
     ];
 
     $budaya = [
@@ -92,227 +54,238 @@
         ],
     ];
 
-    $jadwal = [
-        ['03.45', 'Qiyamul lail dan shalat Subuh berjamaah'],
-        ['05.30', 'Setoran Al-Qur’an dan kajian pagi'],
-        ['07.30', 'Sarapan, lalu sekolah / madrasah diniyah'],
-        ['12.00', 'Shalat Dzuhur, makan siang, istirahat'],
-        ['15.30', 'Shalat Ashar dan kajian kitab'],
-        ['18.00', 'Shalat Maghrib, tadarus, dan kajian'],
-        ['19.30', 'Shalat Isya, belajar mandiri, muhadharah'],
-        ['21.30', 'Absensi kamar dan istirahat'],
+    $motivasi = [
+        ['“Barang siapa menempuh jalan untuk menuntut ilmu, Allah mudahkan baginya jalan menuju surga.”', 'HR. Muslim'],
+        ['“Menuntut ilmu itu wajib bagi setiap muslim.”', 'HR. Ibnu Majah'],
     ];
 @endphp
 
 <style>
-    /* ====== Dasar mandiri (tidak bergantung CSS layout) ====== */
-    .sj-page { --g800:#0f5132; --g700:#13693f; --g600:#15803d; --g500:#10b981; --g50:#f0fdf6;
-        --gold:#b7791f; --gold-text:#955f0f; --gold-soft:#fdf3dc; color:#1e293b; }
+    .sj-page { --g900:#0a3a24; --g800:#0f5132; --g700:#13693f; --g600:#15803d; --g500:#10b981; --g50:#f0fdf6;
+        --gold:#b7791f; --gold-text:#955f0f; --gold-soft:#fdf3dc; --gold-light:#fde68a; color:#1e293b; }
     .sj-page *, .sj-page *::before, .sj-page *::after { box-sizing: border-box; }
     .sj-wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 24px; }
-    .sj-narrow { max-width: 900px; margin: 0 auto; }
+    .sj-page section[id] { scroll-margin-top: 80px; }
 
-    .sj-photo { position: relative; overflow: hidden; background: linear-gradient(145deg, #15803d, #0f5132); }
-    .sj-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-    .sj-photo > i { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 64px; color: rgba(255,255,255,.22); }
+    .sj-eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--gold-text); margin-bottom: 14px; }
+    .sj-eyebrow::before { content: ""; width: 28px; height: 2px; background: var(--gold); }
+    .sj-eyebrow.light { color: var(--gold-light); }
+    .sj-eyebrow.light::before { background: var(--gold-light); }
 
-    /* ====== Judul halaman ====== */
-    .sj-top { background: var(--g50); padding: 48px 0 40px; border-bottom: 1px solid rgba(6,78,59,.1); }
-    .sj-crumb { font-size: 14px; color: #475569; margin-bottom: 14px; }
-    .sj-crumb a { color: var(--g700); text-decoration: none; }
+    /* ====== Hero (tanpa gambar, pola CSS) ====== */
+    .sj-hero { position: relative; overflow: hidden; color: #fff; padding: 56px 0 72px;
+        background:
+            radial-gradient(600px 300px at 90% 0%, rgba(253,230,138,.18), transparent 65%),
+            radial-gradient(500px 300px at 0% 100%, rgba(16,185,129,.28), transparent 65%),
+            linear-gradient(135deg, var(--g900), var(--g700)); }
+    .sj-hero::before { content: ""; position: absolute; inset: 0; opacity: .5;
+        background-image: radial-gradient(rgba(255,255,255,.14) 1.5px, transparent 1.5px); background-size: 26px 26px;
+        -webkit-mask-image: linear-gradient(to left, #000, transparent 70%); mask-image: linear-gradient(to left, #000, transparent 70%); }
+    .sj-hero .sj-wrap { position: relative; z-index: 1; }
+    .sj-crumb { font-size: 14px; color: rgba(255,255,255,.75); margin-bottom: 30px; }
+    .sj-crumb a { color: #fff; text-decoration: none; }
     .sj-crumb a:hover { text-decoration: underline; }
-    .sj-top h1 { margin: 0; font-size: clamp(2rem, 4.4vw, 3rem); line-height: 1.15; color: var(--g800); }
-
-    /* ====== Banner + pembuka ====== */
-    .sj-banner { margin-top: 36px; aspect-ratio: 21 / 9; border-radius: 24px; box-shadow: 0 22px 50px rgba(6,78,59,.18); }
-    .sj-intro { padding: 44px 0 20px; }
-    .sj-intro h2 { margin: 0 0 14px; font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.3; color: var(--g800); }
-    .sj-intro p { margin: 0 0 14px; font-size: 1.08rem; line-height: 1.85; color: #334155; }
-
-    /* ====== Tonggak sejarah ====== */
-    .sj-ms-list { padding-bottom: 20px; }
-    .sj-ms { display: grid; grid-template-columns: 210px 1fr; gap: 40px; padding: 34px 0; border-top: 1px solid rgba(6,78,59,.16); }
-    .sj-ms time { font-size: 1.25rem; font-weight: 700; color: var(--gold-text); line-height: 1.4; }
-    .sj-ms h3 { margin: 0 0 12px; font-size: 1.35rem; line-height: 1.35; color: var(--g800); }
-    .sj-ms p { margin: 0 0 12px; line-height: 1.85; color: #334155; font-size: 1.04rem; }
-    .sj-ms p:last-child { margin-bottom: 0; }
-
-    /* ====== Tabel kepengasuhan ====== */
-    .sj-table-box { margin-top: 20px; padding-bottom: 72px; }
-    .sj-table-box h3 { margin: 0 0 18px; font-size: 1.35rem; color: var(--g800); }
-    .sj-scroll { overflow-x: auto; border-radius: 16px; border: 1px solid rgba(6,78,59,.16); }
-    .sj-table { width: 100%; border-collapse: collapse; min-width: 440px; }
-    .sj-table th { background: var(--g800); color: #fff; text-align: left; padding: 14px 20px; font-weight: 600; }
-    .sj-table td { padding: 14px 20px; border-top: 1px solid rgba(6,78,59,.1); }
-    .sj-table tbody tr:nth-child(even) td { background: var(--g50); }
-    .sj-table td:first-child { width: 220px; white-space: nowrap; color: var(--gold-text); font-weight: 600; }
+    .sj-hero h1 { margin: 0 0 18px; font-size: clamp(2.2rem, 5vw, 3.6rem); line-height: 1.12; color: #fff; max-width: 18ch; }
+    .sj-hero h1 span { color: var(--gold-light); }
+    .sj-hero p { margin: 0 0 30px; max-width: 58ch; font-size: 1.1rem; line-height: 1.8; color: rgba(255,255,255,.88); }
+    .sj-nav { display: flex; flex-wrap: wrap; gap: 10px; }
+    .sj-nav a { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 999px; font-weight: 600; font-size: .95rem; text-decoration: none;
+        color: #fff; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.25); transition: all .25s ease; }
+    .sj-nav a:hover { background: #fff; color: var(--g800); }
+    .sj-nav a:focus-visible { outline: 3px solid var(--gold-light); outline-offset: 2px; }
 
     /* ====== Section umum ====== */
     .sj-sec { padding: 84px 0; }
     .sj-sec.alt { background: var(--g50); }
-    .sj-head { max-width: 640px; margin: 0 0 44px; }
+    .sj-head { max-width: 680px; margin: 0 0 48px; }
     .sj-head h2 { font-size: clamp(1.7rem, 3.2vw, 2.4rem); line-height: 1.25; margin: 0 0 12px; color: var(--g800); }
     .sj-head p { margin: 0; color: #475569; line-height: 1.75; font-size: 1.05rem; }
 
-    /* ====== Budaya ====== */
-    .sj-culture { display: grid; grid-template-columns: .85fr 1.15fr; gap: 64px; align-items: start; }
-    .sj-culture-intro .sj-photo { aspect-ratio: 4 / 3; border-radius: 24px; margin-top: 26px; }
-    .sj-list { list-style: none; margin: 0; padding: 0; }
-    .sj-list li { display: grid; grid-template-columns: 54px 1fr; gap: 18px; padding: 24px 0; border-bottom: 1px solid rgba(6,78,59,.14); }
-    .sj-list li:first-child { padding-top: 0; }
-    .sj-list li:last-child { border-bottom: 0; }
-    .sj-list .ico { width: 54px; height: 54px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: var(--gold-soft); color: var(--gold-text); font-size: 20px; }
-    .sj-list h3 { margin: 2px 0 6px; font-size: 1.12rem; color: var(--g800); }
-    .sj-list p { margin: 0; color: #475569; line-height: 1.7; }
+    /* ====== 1. Sejarah ====== */
+    .sj-story { display: grid; grid-template-columns: 300px 1fr; gap: 64px; align-items: start; }
+    .sj-year { position: sticky; top: 100px; }
+    .sj-year b { display: block; font-size: clamp(5rem, 11vw, 8rem); line-height: .9; font-weight: 800; letter-spacing: -.04em;
+        color: transparent; -webkit-text-stroke: 2px var(--gold); }
+    .sj-year span { display: block; margin-top: 14px; padding-top: 14px; border-top: 3px solid var(--gold); font-weight: 700; color: var(--g800); line-height: 1.5; max-width: 220px; }
+    .sj-story-body h2 { margin: 0 0 18px; font-size: clamp(1.6rem, 3vw, 2.2rem); line-height: 1.3; color: var(--g800); }
+    .sj-story-body p { margin: 0 0 16px; font-size: 1.08rem; line-height: 1.9; color: #334155; }
+    .sj-story-body p.first::first-letter { float: left; font-size: 3.6rem; line-height: .85; padding: 6px 12px 0 0; color: var(--gold-text); font-weight: 800; }
 
-    /* ====== Kajian (tab) ====== */
-    .sj-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
-    .sj-tab { border: 1.5px solid var(--g600); background: transparent; color: var(--g800); font: inherit; font-weight: 600; padding: 10px 22px; border-radius: 999px; cursor: pointer; }
-    .sj-tab:hover { background: rgba(16,185,129,.1); }
-    .sj-tab[aria-selected="true"] { background: var(--g700); color: #fff; border-color: transparent; }
+    .sj-pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 34px 0; }
+    .sj-pillar { background: var(--g50); border: 1px solid rgba(6,78,59,.12); border-radius: 18px; padding: 20px; }
+    .sj-pillar i { width: 42px; height: 42px; border-radius: 12px; background: var(--gold-soft); color: var(--gold-text); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+    .sj-pillar h3 { margin: 0 0 4px; font-size: 1rem; color: var(--g800); }
+    .sj-pillar p { margin: 0; font-size: .9rem; line-height: 1.6; color: #475569; }
+
+    .sj-name { position: relative; overflow: hidden; background: linear-gradient(135deg, var(--g800), var(--g600)); color: #fff; border-radius: 22px; padding: 28px 30px; }
+    .sj-name::after { content: "\f52f"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; right: -10px; bottom: -26px; font-size: 120px; opacity: .1; }
+    .sj-name small { display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-light); font-weight: 700; margin-bottom: 6px; }
+    .sj-story-body .sj-name p { position: relative; margin: 0; font-size: 1.1rem; line-height: 1.7; color: #fff; }
+    .sj-name strong { color: var(--gold-light); }
+
+    .sj-now { margin-top: 30px; }
+    .sj-now h3 { margin: 0 0 10px; font-size: 1.1rem; color: var(--g800); }
+    .sj-story-body .sj-now p { margin: 0 0 14px; font-size: 1rem; line-height: 1.8; }
+    .sj-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .sj-chips span { background: #fff; border: 1px solid rgba(6,78,59,.2); color: var(--g800); font-size: .88rem; font-weight: 600; padding: 7px 15px; border-radius: 999px; }
+
+    /* ====== 2. Budaya ====== */
+    .sj-culture { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; }
+    .sj-cc { grid-column: span 2; position: relative; background: #fff; border-radius: 22px; padding: 28px 26px 26px; border: 1px solid rgba(6,78,59,.1);
+        box-shadow: 0 10px 28px rgba(6,78,59,.07); overflow: hidden; transition: transform .3s ease, box-shadow .3s ease; }
+    .sj-cc:nth-child(n+4) { grid-column: span 3; }
+    .sj-cc:hover { transform: translateY(-5px); box-shadow: 0 18px 40px rgba(6,78,59,.14); }
+    .sj-cc .no { position: absolute; right: 18px; top: 6px; font-size: 4rem; font-weight: 800; color: rgba(183,121,31,.12); line-height: 1; }
+    .sj-cc .ico { width: 54px; height: 54px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: var(--gold-soft); color: var(--gold-text); font-size: 20px; margin-bottom: 18px; }
+    .sj-cc h3 { margin: 0 0 8px; font-size: 1.2rem; color: var(--g800); }
+    .sj-cc p { margin: 0; color: #475569; line-height: 1.75; }
+
+    /* ====== 3. Kajian (tab) ====== */
+    .sj-tabs { display: inline-flex; gap: 6px; flex-wrap: wrap; padding: 6px; background: var(--g50); border: 1px solid rgba(6,78,59,.12); border-radius: 999px; margin-bottom: 28px; }
+    .sj-tab { border: 0; background: transparent; color: var(--g800); font: inherit; font-weight: 600; padding: 10px 24px; border-radius: 999px; cursor: pointer; transition: all .2s ease; }
+    .sj-tab:hover { background: rgba(16,185,129,.12); }
+    .sj-tab[aria-selected="true"] { background: var(--g700); color: #fff; box-shadow: 0 6px 16px rgba(19,105,63,.3); }
     .sj-tab:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
     .sj-panel[hidden] { display: none; }
     .sj-panel-note { color: #475569; margin: 0 0 22px; max-width: 60ch; line-height: 1.7; }
     .sj-kitab { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-    .sj-kitab div { background: #fff; border-radius: 18px; padding: 22px 24px; border-left: 5px solid var(--gold); box-shadow: 0 6px 20px rgba(6,78,59,.07); }
+    .sj-kitab div { display: grid; grid-template-columns: 44px 1fr; column-gap: 16px; background: #fff; border-radius: 18px; padding: 22px 24px; border: 1px solid rgba(6,78,59,.1); border-left: 5px solid var(--gold); box-shadow: 0 6px 20px rgba(6,78,59,.07); }
+    .sj-kitab em { grid-row: span 2; width: 44px; height: 44px; border-radius: 12px; background: var(--g50); color: var(--g700); font-style: normal; font-weight: 800; display: flex; align-items: center; justify-content: center; }
     .sj-kitab b { display: block; font-size: 1.1rem; color: var(--g800); margin-bottom: 4px; }
     .sj-kitab span { color: #475569; line-height: 1.6; font-size: .98rem; }
 
-    /* ====== Sehari di Babul Hasanah ====== */
-    .sj-day { display: grid; grid-template-columns: 1fr 1.1fr; gap: 64px; align-items: center; }
-    .sj-day .sj-photo { aspect-ratio: 1 / 1; border-radius: 28px; }
-    .sj-clock { list-style: none; padding: 0; margin: 0; position: relative; }
-    .sj-clock::before { content: ""; position: absolute; left: 70px; top: 14px; bottom: 14px; width: 2px; background: rgba(6,78,59,.18); }
-    .sj-clock li { display: grid; grid-template-columns: 54px 36px 1fr; align-items: center; padding: 11px 0; }
-    .sj-clock time { font-weight: 700; color: var(--gold-text); }
-    .sj-clock i { width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 4px solid #10b981; position: relative; z-index: 1; margin-left: 9px; }
-    .sj-clock span { color: #1e293b; line-height: 1.5; }
+    /* ====== 4. Motivasi ====== */
+    .sj-motivasi { position: relative; overflow: hidden; color: #fff; padding: 84px 0;
+        background: radial-gradient(600px 300px at 15% 0%, rgba(253,230,138,.16), transparent 65%), linear-gradient(135deg, var(--g900), var(--g700)); }
+    .sj-motivasi::before { content: ""; position: absolute; inset: 0; opacity: .4;
+        background-image: radial-gradient(rgba(255,255,255,.12) 1.5px, transparent 1.5px); background-size: 26px 26px;
+        -webkit-mask-image: linear-gradient(to right, #000, transparent 70%); mask-image: linear-gradient(to right, #000, transparent 70%); }
+    .sj-motivasi .sj-wrap { position: relative; z-index: 1; }
+    .sj-motivasi .sj-head h2 { color: #fff; }
+    .sj-quotes { display: grid; grid-template-columns: 1.4fr 1fr; gap: 22px; }
+    .sj-quote { position: relative; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2); border-radius: 24px; padding: 40px 34px 32px; }
+    .sj-quote i { position: absolute; top: 18px; left: 22px; font-size: 2rem; color: var(--gold-light); opacity: .55; }
+    .sj-quote p { margin: 22px 0 18px; font-size: 1.35rem; line-height: 1.75; font-weight: 500; color: #fff; }
+    .sj-quote:nth-child(2) p { font-size: 1.2rem; }
+    .sj-quote span { color: var(--gold-light); font-weight: 700; font-size: .95rem; }
 
-    /* ====== Hadits & CTA ====== */
-    .quote-box { background: #0f5132; background: linear-gradient(135deg, #0f5132, #15803d); color: #fff; border-radius: 26px; padding: 50px 44px; position: relative; overflow: hidden; }
-    .quote-box i { position: absolute; font-size: 130px; opacity: .1; top: 6px; left: 22px; }
-    .quote-box p { position: relative; font-size: 1.3rem; line-height: 1.8; margin: 0 0 16px; font-weight: 500; color: #fff; }
-    .quote-box span { position: relative; color: #fde68a; font-weight: 700; }
-    .sj-cta { background: #0f5132; background: linear-gradient(135deg, #0f5132, #15803d); color: #fff; border-radius: 28px; padding: 56px 40px; text-align: center; }
-    .sj-cta h2 { margin: 0 0 12px; color: #fff; font-size: clamp(1.6rem, 3vw, 2.2rem); }
-    .sj-cta p { margin: 0 auto 26px; max-width: 54ch; color: rgba(255,255,255,.9); line-height: 1.7; }
-    .sj-btn { display: inline-flex; align-items: center; gap: 10px; background: #fff; color: var(--g800); font-weight: 700; padding: 14px 30px; border-radius: 14px; text-decoration: none; }
-    .sj-btn:hover { background: #fde68a; }
-    .sj-btn:focus-visible { outline: 3px solid #fde68a; outline-offset: 3px; }
+    /* ====== Animasi muncul ====== */
+    .sj-rv { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+    .sj-rv.in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) { .sj-rv { opacity: 1 !important; transform: none !important; transition: none !important; } }
 
     /* ====== Responsif ====== */
     @media (max-width: 960px) {
-        .sj-culture, .sj-day { grid-template-columns: 1fr; gap: 40px; }
-        .sj-day .sj-photo { aspect-ratio: 16 / 10; }
+        .sj-story { grid-template-columns: 1fr; gap: 28px; }
+        .sj-year { position: static; display: flex; align-items: flex-end; gap: 18px; }
+        .sj-year span { margin: 0 0 8px; padding-top: 0; border-top: 0; border-left: 3px solid var(--gold); padding-left: 14px; }
+        .sj-culture { grid-template-columns: repeat(2, 1fr); }
+        .sj-cc, .sj-cc:nth-child(n+4) { grid-column: span 1; }
+        .sj-cc:last-child { grid-column: span 2; }
+        .sj-quotes { grid-template-columns: 1fr; }
     }
     @media (max-width: 768px) {
-        .sj-sec { padding: 60px 0; }
-        .sj-banner { aspect-ratio: 16 / 10; border-radius: 18px; }
-        .sj-ms { grid-template-columns: 1fr; gap: 10px; padding: 28px 0; }
+        .sj-sec, .sj-motivasi { padding: 60px 0; }
+        .sj-hero { padding: 40px 0 56px; }
+        .sj-pillars { grid-template-columns: 1fr; }
+        .sj-culture { grid-template-columns: 1fr; }
+        .sj-cc:last-child { grid-column: span 1; }
         .sj-kitab { grid-template-columns: 1fr; }
-        .quote-box { padding: 40px 26px; }
-        .sj-cta { padding: 44px 24px; }
+        .sj-quote { padding: 36px 24px 26px; }
+        .sj-quote p, .sj-quote:nth-child(2) p { font-size: 1.12rem; }
     }
 </style>
 
 <div class="sj-page">
 
-    {{-- ============ JUDUL HALAMAN ============ --}}
-    <section class="sj-top">
+    {{-- ============ HERO ============ --}}
+    <header class="sj-hero">
         <div class="sj-wrap">
             <div class="sj-crumb">
                 <a href="{{ url('/') }}">Beranda</a> <i class="fa-solid fa-chevron-right" style="font-size:10px"></i>
                 Profil <i class="fa-solid fa-chevron-right" style="font-size:10px"></i> Sejarah
             </div>
-            <h1>Sejarah</h1>
+            <div class="sj-eyebrow light">Pondok Pesantren Babul Hasanah</div>
+            <h1>Dari majelis kecil, <span>tumbuh bersama umat.</span></h1>
+            <p>Berakar pada adab, bertumbuh dengan ilmu. Kenali sejarah, budaya, dan kajian yang menjadi denyut kehidupan santri Babul Hasanah.</p>
+            <nav class="sj-nav" aria-label="Isi halaman">
+                <a href="#sejarah"><i class="fa-solid fa-landmark"></i> Sejarah</a>
+                <a href="#budaya"><i class="fa-solid fa-people-group"></i> Budaya</a>
+                <a href="#kajian"><i class="fa-solid fa-book-open-reader"></i> Kajian</a>
+                <a href="#motivasi"><i class="fa-solid fa-star-and-crescent"></i> Motivasi</a>
+            </nav>
         </div>
-    </section>
+    </header>
 
-    {{-- ============ BANNER + PEMBUKA ============ --}}
-    <section>
+    {{-- ============ 1. SEJARAH PESANTREN ============ --}}
+    <section class="sj-sec" id="sejarah">
         <div class="sj-wrap">
-            <div class="sj-photo sj-banner">
-                <img src="{{ $foto('pesantren.jpg') }}" alt="Pondok Pesantren Babul Hasanah" onerror="this.remove()">
-                <i class="fa-solid fa-mosque"></i>
-            </div>
+            <div class="sj-story">
+                <div class="sj-year sj-rv">
+                    <b>1998</b>
+                    <span>Awal sebuah ikhtiar di Padang Lawas</span>
+                </div>
 
-            <div class="sj-narrow sj-intro">
-                <h2>Awal berdirinya Pondok Pesantren Babul Hasanah</h2>
-                <p>Babul Hasanah berdiri dari kepedulian para pendirinya terhadap pendidikan agama masyarakat sekitar. Dari majelis pengajian sederhana, pesantren ini tumbuh menjadi lembaga pendidikan Islam yang menekankan pendalaman kitab kuning, pembinaan akhlak, dan pengabdian kepada umat.</p>
-                <p>Nama <i>Babul Hasanah</i> berarti “pintu kebaikan”: harapan agar setiap santri yang masuk lewat pintu ini keluar sebagai pembawa kebaikan bagi keluarga, masyarakat, dan bangsa.</p>
-            </div>
-        </div>
-    </section>
+                <div class="sj-story-body">
+                    <div class="sj-eyebrow">Sejarah Pesantren</div>
+                    <h2>Awal berdirinya Pondok Pesantren Babul Hasanah</h2>
+                    <p class="first">Babul Hasanah bermula dari majelis pengajian sederhana di Padang Lawas pada 1998. Para perintisnya didorong kepedulian terhadap pendidikan agama anak-anak dan masyarakat sekitar.</p>
+                    <p>Dari majelis kecil itu, pesantren tumbuh menjadi lembaga pendidikan Islam yang memadukan tradisi keilmuan salaf dengan pendidikan yang relevan bagi masa depan. Setiap langkahnya terpusat pada tumbuh kembang santri, agar kelak menjadi insan berilmu, berakhlak mulia, dan berdaya guna.</p>
 
-    {{-- ============ TONGGAK SEJARAH ============ --}}
-    <section>
-        <div class="sj-wrap">
-            <div class="sj-narrow">
-                <div class="sj-ms-list">
-                    @foreach ($tonggak as $t)
-                        <article class="sj-ms">
-                            <time>{{ $t['waktu'] }}</time>
-                            <div>
-                                <h3>{{ $t['judul'] }}</h3>
-                                @foreach ($t['isi'] as $para)
-                                    <p>{{ $para }}</p>
-                                @endforeach
+                    <div class="sj-pillars">
+                        @foreach ($pilar as $p)
+                            <div class="sj-pillar sj-rv">
+                                <i class="fa-solid {{ $p['ikon'] }}"></i>
+                                <h3>{{ $p['judul'] }}</h3>
+                                <p>{{ $p['isi'] }}</p>
                             </div>
-                        </article>
-                    @endforeach
-                </div>
+                        @endforeach
+                    </div>
 
-                <div class="sj-table-box">
-                    <h3>Sejarah kepengasuhan</h3>
-                    <div class="sj-scroll">
-                        <table class="sj-table">
-                            <thead><tr><th>Periode</th><th>Pengasuh</th></tr></thead>
-                            <tbody>
-                                @foreach ($pengasuh as $p)
-                                    <tr><td>{{ $p[0] }}</td><td>{{ $p[1] }}</td></tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                    <div class="sj-name sj-rv">
+                        <small>Makna nama</small>
+                        <p><strong>Babul Hasanah</strong> berarti “pintu kebaikan”: harapan agar setiap santri yang masuk lewat pintu ini keluar sebagai pembawa kebaikan bagi keluarga, masyarakat, dan bangsa.</p>
+                    </div>
+
+                    <div class="sj-now">
+                        <h3>Hingga kini</h3>
+                        <p>Babul Hasanah melayani santri dari jenjang dasar hingga pendidikan tinggi pesantren, dikelola bersama dewan pengasuh dan tim pendidikan.</p>
+                        <div class="sj-chips">
+                            @foreach ($jenjang as $j)<span>{{ $j }}</span>@endforeach
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    {{-- ============ SATU PESANTREN, BANYAK BUDAYA ============ --}}
-    <section class="sj-sec alt">
-        <div class="sj-wrap">
-            <div class="sj-culture">
-                <div class="sj-culture-intro">
-                    <div class="sj-head" style="margin-bottom:0">
-                        <h2>Satu pesantren, banyak budaya</h2>
-                        <p>Di sini santri belajar bahwa perbedaan asal daerah bukan jarak. Tradisi pesantren dan seni Islam hidup berdampingan dalam keseharian.</p>
-                    </div>
-                    <div class="sj-photo">
-                        <img src="{{ $foto('budaya.jpg') }}" alt="Kegiatan budaya santri" loading="lazy" onerror="this.remove()">
-                        <i class="fa-solid fa-people-group"></i>
-                    </div>
-                </div>
-
-                <ul class="sj-list">
-                    @foreach ($budaya as $b)
-                        <li>
-                            <span class="ico"><i class="fa-solid {{ $b['ikon'] }}"></i></span>
-                            <div>
-                                <h3>{{ $b['judul'] }}</h3>
-                                <p>{{ $b['isi'] }}</p>
-                            </div>
-                        </li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    {{-- ============ KAJIAN DAN KITAB ============ --}}
-    <section class="sj-sec">
+    {{-- ============ 2. BUDAYA PESANTREN ============ --}}
+    <section class="sj-sec alt" id="budaya">
         <div class="sj-wrap">
             <div class="sj-head">
+                <div class="sj-eyebrow">Budaya Pesantren</div>
+                <h2>Satu pesantren, banyak budaya</h2>
+                <p>Di sini santri belajar bahwa perbedaan asal daerah bukan jarak. Tradisi pesantren dan seni Islam hidup berdampingan dalam keseharian.</p>
+            </div>
+
+            <div class="sj-culture">
+                @foreach ($budaya as $b)
+                    <article class="sj-cc sj-rv">
+                        <span class="no">{{ sprintf('%02d', $loop->iteration) }}</span>
+                        <span class="ico"><i class="fa-solid {{ $b['ikon'] }}"></i></span>
+                        <h3>{{ $b['judul'] }}</h3>
+                        <p>{{ $b['isi'] }}</p>
+                    </article>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- ============ 3. KAJIAN ============ --}}
+    <section class="sj-sec" id="kajian">
+        <div class="sj-wrap">
+            <div class="sj-head">
+                <div class="sj-eyebrow">Kajian</div>
                 <h2>Kajian dan kitab yang dipelajari</h2>
                 <p>Santri belajar bertahap, dari dasar bahasa Arab sampai tafsir dan tasawuf.</p>
             </div>
@@ -330,7 +303,7 @@
                         <p class="sj-panel-note">{{ $k['catatan'] }}</p>
                         <div class="sj-kitab">
                             @foreach ($k['items'] as $it)
-                                <div><b>{{ $it[0] }}</b><span>{{ $it[1] }}</span></div>
+                                <div><em>{{ $loop->iteration }}</em><b>{{ $it[0] }}</b><span>{{ $it[1] }}</span></div>
                             @endforeach
                         </div>
                     </div>
@@ -339,47 +312,21 @@
         </div>
     </section>
 
-    {{-- ============ SEHARI DI BABUL HASANAH ============ --}}
-    <section class="sj-sec alt">
+    {{-- ============ 4. KALIMAT MOTIVASI ============ --}}
+    <section class="sj-motivasi" id="motivasi">
         <div class="sj-wrap">
-            <div class="sj-day">
-                <div class="sj-photo">
-                    <img src="{{ $foto('kegiatan.jpg') }}" alt="Santri mengaji bersama" loading="lazy" onerror="this.remove()">
-                    <i class="fa-solid fa-book-quran"></i>
-                </div>
-                <div>
-                    <div class="sj-head" style="margin-bottom:22px">
-                        <h2>Sehari di Babul Hasanah</h2>
-                        <p>Hari santri tertata dari sebelum Subuh sampai waktu istirahat malam.</p>
-                    </div>
-                    <ol class="sj-clock">
-                        @foreach ($jadwal as $j)
-                            <li><time>{{ $j[0] }}</time><i></i><span>{{ $j[1] }}</span></li>
-                        @endforeach
-                    </ol>
-                </div>
+            <div class="sj-head">
+                <div class="sj-eyebrow light">Kalimat Motivasi</div>
+                <h2>Semangat menuntut ilmu</h2>
             </div>
-        </div>
-    </section>
-
-    {{-- ============ HADITS ============ --}}
-    <section class="sj-sec" style="padding-bottom:0">
-        <div class="sj-wrap">
-            <div class="quote-box">
-                <i class="fa-solid fa-quote-left"></i>
-                <p>“Barang siapa menempuh jalan untuk menuntut ilmu, Allah mudahkan baginya jalan menuju surga.”</p>
-                <span>— HR. Muslim</span>
-            </div>
-        </div>
-    </section>
-
-    {{-- ============ CTA ============ --}}
-    <section class="sj-sec">
-        <div class="sj-wrap">
-            <div class="sj-cta">
-                <h2>Jadilah bagian dari keluarga besar Babul Hasanah</h2>
-                <p>Daftarkan putra-putri Anda dan mulailah perjalanan menuntut ilmu yang penuh berkah.</p>
-                <a href="{{ url('/pendaftaran') }}" class="sj-btn">Daftar online <i class="fa-solid fa-arrow-right"></i></a>
+            <div class="sj-quotes">
+                @foreach ($motivasi as $m)
+                    <figure class="sj-quote sj-rv" style="margin:0">
+                        <i class="fa-solid fa-quote-left"></i>
+                        <p>{{ $m[0] }}</p>
+                        <span>— {{ $m[1] }}</span>
+                    </figure>
+                @endforeach
             </div>
         </div>
     </section>
@@ -387,24 +334,42 @@
 
 <script>
     (function () {
+        // Tab kajian
         var root = document.getElementById('sjKajian');
-        if (!root) return;
-        var tabs = Array.prototype.slice.call(root.querySelectorAll('.sj-tab'));
-        var activate = function (tab) {
-            tabs.forEach(function (t) {
-                var on = t === tab;
-                t.setAttribute('aria-selected', on ? 'true' : 'false');
-                t.tabIndex = on ? 0 : -1;
-                document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+        if (root) {
+            var tabs = Array.prototype.slice.call(root.querySelectorAll('.sj-tab'));
+            var activate = function (tab) {
+                tabs.forEach(function (t) {
+                    var on = t === tab;
+                    t.setAttribute('aria-selected', on ? 'true' : 'false');
+                    t.tabIndex = on ? 0 : -1;
+                    document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+                });
+                tab.focus();
+            };
+            tabs.forEach(function (tab, i) {
+                tab.addEventListener('click', function () { activate(tab); });
+                tab.addEventListener('keydown', function (e) {
+                    if (e.key === 'ArrowRight') activate(tabs[(i + 1) % tabs.length]);
+                    if (e.key === 'ArrowLeft') activate(tabs[(i - 1 + tabs.length) % tabs.length]);
+                });
             });
-            tab.focus();
-        };
-        tabs.forEach(function (tab, i) {
-            tab.addEventListener('click', function () { activate(tab); });
-            tab.addEventListener('keydown', function (e) {
-                if (e.key === 'ArrowRight') activate(tabs[(i + 1) % tabs.length]);
-                if (e.key === 'ArrowLeft') activate(tabs[(i - 1 + tabs.length) % tabs.length]);
+        }
+
+        // Animasi muncul saat scroll
+        var els = document.querySelectorAll('.sj-rv');
+        if (!('IntersectionObserver' in window)) {
+            els.forEach(function (el) { el.classList.add('in'); });
+            return;
+        }
+        var obs = new IntersectionObserver(function (entries) {
+            entries.forEach(function (en) {
+                if (en.isIntersecting) { en.target.classList.add('in'); obs.unobserve(en.target); }
             });
+        }, { threshold: 0.12 });
+        els.forEach(function (el, i) {
+            el.style.transitionDelay = ((i % 4) * 70) + 'ms';
+            obs.observe(el);
         });
     })();
 </script>

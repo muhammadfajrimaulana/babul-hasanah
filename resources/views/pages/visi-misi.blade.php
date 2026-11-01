@@ -5,17 +5,14 @@
 @section('content')
 
 @php
-    /* FOTO: taruh di public/images/profil/ (jika belum ada, tampil blok hijau + ikon). */
-    $foto = fn ($f) => asset('images/profil/' . $f);
-
     $visi = 'Membangun Generasi Unggul dalam Penguasaan Kitab Kuning, Berakhlak Mulia, dan Berwawasan Luas.';
 
     $misi = [
-        ['Pendalaman Ilmu Agama', 'Menyelenggarakan pendidikan kitab kuning secara berjenjang dan sistematis dengan sanad keilmuan yang jelas.'],
-        ['Pembinaan Akhlak & Karakter', 'Menanamkan adab, kedisiplinan, kemandirian, dan keteladanan dalam kehidupan santri sehari-hari.'],
-        ['Penguatan Wawasan & Keterampilan', 'Membekali santri dengan wawasan keilmuan, kemampuan berbahasa, dan keterampilan hidup yang relevan dengan zaman.'],
-        ['Lingkungan Pesantren yang Kondusif', 'Menciptakan suasana belajar yang aman, nyaman, dan islami untuk mendukung tumbuh kembang santri.'],
-        ['Pengabdian kepada Masyarakat', 'Mengembangkan dakwah dan kemaslahatan umat melalui kegiatan sosial, keagamaan, dan pendidikan.'],
+        ['fa-book-quran',            'Pendalaman Ilmu Agama', 'Menyelenggarakan pendidikan kitab kuning secara berjenjang dan sistematis dengan sanad keilmuan yang jelas.'],
+        ['fa-hand-holding-heart',    'Pembinaan Akhlak & Karakter', 'Menanamkan adab, kedisiplinan, kemandirian, dan keteladanan dalam kehidupan santri sehari-hari.'],
+        ['fa-lightbulb',             'Penguatan Wawasan & Keterampilan', 'Membekali santri dengan wawasan keilmuan, kemampuan berbahasa, dan keterampilan hidup yang relevan dengan zaman.'],
+        ['fa-house-mosque',          'Lingkungan Pesantren yang Kondusif', 'Menciptakan suasana belajar yang aman, nyaman, dan islami untuk mendukung tumbuh kembang santri.'],
+        ['fa-hands-holding-circle',  'Pengabdian kepada Masyarakat', 'Mengembangkan dakwah dan kemaslahatan umat melalui kegiatan sosial, keagamaan, dan pendidikan.'],
     ];
 
     $nilai = [
@@ -27,157 +24,187 @@
 @endphp
 
 <style>
-    /* ====== Dasar mandiri (tidak bergantung CSS layout) ====== */
-    .sj-page { --g800:#0f5132; --g700:#13693f; --g600:#15803d; --g500:#10b981; --g50:#f0fdf6;
-        --gold:#b7791f; --gold-text:#955f0f; --gold-soft:#fdf3dc; color:#1e293b; }
+    .sj-page { --g900:#0a3a24; --g800:#0f5132; --g700:#13693f; --g600:#15803d; --g500:#10b981; --g50:#f0fdf6;
+        --gold:#b7791f; --gold-text:#955f0f; --gold-soft:#fdf3dc; --gold-light:#fde68a; color:#1e293b; }
     .sj-page *, .sj-page *::before, .sj-page *::after { box-sizing: border-box; }
     .sj-wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 24px; }
-    .sj-narrow { max-width: 900px; margin: 0 auto; }
+    .sj-page section[id] { scroll-margin-top: 80px; }
 
-    .sj-photo { position: relative; overflow: hidden; background: linear-gradient(145deg, #15803d, #0f5132); }
-    .sj-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-    .sj-photo > i { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 64px; color: rgba(255,255,255,.22); }
+    .sj-eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--gold-text); margin-bottom: 14px; }
+    .sj-eyebrow::before { content: ""; width: 28px; height: 2px; background: var(--gold); }
+    .sj-eyebrow.light { color: var(--gold-light); }
+    .sj-eyebrow.light::before { background: var(--gold-light); }
 
-    /* ====== Judul halaman ====== */
-    .sj-top { background: var(--g50); padding: 48px 0 40px; border-bottom: 1px solid rgba(6,78,59,.1); }
-    .sj-crumb { font-size: 14px; color: #475569; margin-bottom: 14px; }
-    .sj-crumb a { color: var(--g700); text-decoration: none; }
+    /* ====== Hero ====== */
+    .sj-hero { position: relative; overflow: hidden; color: #fff; padding: 56px 0 72px;
+        background:
+            radial-gradient(600px 300px at 90% 0%, rgba(253,230,138,.18), transparent 65%),
+            radial-gradient(500px 300px at 0% 100%, rgba(16,185,129,.28), transparent 65%),
+            linear-gradient(135deg, var(--g900), var(--g700)); }
+    .sj-hero::before { content: ""; position: absolute; inset: 0; opacity: .5;
+        background-image: radial-gradient(rgba(255,255,255,.14) 1.5px, transparent 1.5px); background-size: 26px 26px;
+        -webkit-mask-image: linear-gradient(to left, #000, transparent 70%); mask-image: linear-gradient(to left, #000, transparent 70%); }
+    .sj-hero .sj-wrap { position: relative; z-index: 1; }
+    .sj-crumb { font-size: 14px; color: rgba(255,255,255,.75); margin-bottom: 30px; }
+    .sj-crumb a { color: #fff; text-decoration: none; }
     .sj-crumb a:hover { text-decoration: underline; }
-    .sj-top h1 { margin: 0 0 10px; font-size: clamp(2rem, 4.4vw, 3rem); line-height: 1.15; color: var(--g800); }
-    .sj-top p { margin: 0; max-width: 60ch; color: #475569; line-height: 1.75; font-size: 1.05rem; }
+    .sj-hero h1 { margin: 0 0 18px; font-size: clamp(2.2rem, 5vw, 3.6rem); line-height: 1.12; color: #fff; max-width: 18ch; }
+    .sj-hero h1 span { color: var(--gold-light); }
+    .sj-hero p { margin: 0 0 30px; max-width: 58ch; font-size: 1.1rem; line-height: 1.8; color: rgba(255,255,255,.88); }
+    .sj-nav { display: flex; flex-wrap: wrap; gap: 10px; }
+    .sj-nav a { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 999px; font-weight: 600; font-size: .95rem; text-decoration: none;
+        color: #fff; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.25); transition: all .25s ease; }
+    .sj-nav a:hover { background: #fff; color: var(--g800); }
+    .sj-nav a:focus-visible { outline: 3px solid var(--gold-light); outline-offset: 2px; }
 
+    /* ====== Section umum ====== */
     .sj-sec { padding: 84px 0; }
     .sj-sec.alt { background: var(--g50); }
-    .sj-head { max-width: 640px; margin: 0 0 44px; }
+    .sj-head { max-width: 680px; margin: 0 0 48px; }
     .sj-head h2 { font-size: clamp(1.7rem, 3.2vw, 2.4rem); line-height: 1.25; margin: 0 0 12px; color: var(--g800); }
     .sj-head p { margin: 0; color: #475569; line-height: 1.75; font-size: 1.05rem; }
 
-    /* ====== Visi ====== */
-    .visi { background: #0f5132; background: linear-gradient(140deg, #0b3f29, #15803d); color: #fff; border-radius: 30px;
-        padding: 64px 56px; display: grid; grid-template-columns: 1.25fr .75fr; gap: 56px; align-items: center;
-        position: relative; overflow: hidden; box-shadow: 0 30px 60px -25px rgba(20,83,45,.6); }
-    .visi::after { content: ""; position: absolute; right: -90px; bottom: -120px; width: 320px; height: 320px; border-radius: 50%;
-        border: 54px solid rgba(255,255,255,.05); pointer-events: none; }
-    .visi > * { position: relative; z-index: 1; }
-    .visi-label { display: inline-flex; align-items: center; gap: 10px; background: rgba(255,255,255,.14); color: #fde68a;
-        padding: 8px 18px; border-radius: 999px; font-weight: 700; font-size: 14px; margin-bottom: 22px; }
-    .visi h2 { margin: 0; color: #fff; font-size: clamp(1.5rem, 3.2vw, 2.3rem); line-height: 1.5; font-weight: 700; }
-    .visi .sj-photo { aspect-ratio: 4 / 5; max-width: 300px; margin-left: auto; width: 100%; border-radius: 999px 999px 24px 24px; box-shadow: 0 24px 50px rgba(0,0,0,.3); }
+    /* ====== 1. Visi ====== */
+    .sj-story { display: grid; grid-template-columns: 300px 1fr; gap: 64px; align-items: center; }
+    .sj-year { position: sticky; top: 100px; }
+    .sj-year b { display: block; font-size: clamp(4.5rem, 10vw, 7rem); line-height: .9; font-weight: 800; letter-spacing: -.04em;
+        color: transparent; -webkit-text-stroke: 2px var(--gold); }
+    .sj-year span { display: block; margin-top: 14px; padding-top: 14px; border-top: 3px solid var(--gold); font-weight: 700; color: var(--g800); line-height: 1.5; max-width: 220px; }
+    .sj-visi { position: relative; background: linear-gradient(135deg, var(--g800), var(--g600)); color: #fff; border-radius: 28px; padding: 52px 48px; overflow: hidden;
+        box-shadow: 0 26px 56px -24px rgba(20,83,45,.55); }
+    .sj-visi::after { content: ""; position: absolute; right: -80px; bottom: -110px; width: 300px; height: 300px; border-radius: 50%; border: 50px solid rgba(255,255,255,.06); }
+    .sj-visi > * { position: relative; z-index: 1; }
+    .sj-visi i { font-size: 2.2rem; color: var(--gold-light); opacity: .6; display: block; margin-bottom: 16px; }
+    .sj-visi h2 { margin: 0; color: #fff; font-size: clamp(1.4rem, 2.8vw, 2.1rem); line-height: 1.55; font-weight: 700; }
+    .sj-visi h2 mark { background: none; color: var(--gold-light); }
 
-    /* ====== Misi (baris bergaris, urut) ====== */
-    .misi { counter-reset: misi; }
-    .misi-row { display: grid; grid-template-columns: 110px 1fr; gap: 28px; padding: 30px 0; border-top: 1px solid rgba(6,78,59,.16); align-items: start; }
-    .misi-row:last-child { border-bottom: 1px solid rgba(6,78,59,.16); }
-    .misi-no { font-size: 3.2rem; font-weight: 800; line-height: 1; color: var(--gold-text); opacity: .85; font-variant-numeric: tabular-nums; }
-    .misi-row h3 { margin: 4px 0 8px; font-size: 1.3rem; line-height: 1.35; color: var(--g800); }
-    .misi-row p { margin: 0; line-height: 1.8; color: #334155; font-size: 1.04rem; max-width: 62ch; }
+    /* ====== 2. Misi ====== */
+    .sj-culture { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; }
+    .sj-cc { grid-column: span 2; position: relative; background: #fff; border-radius: 22px; padding: 28px 26px 26px; border: 1px solid rgba(6,78,59,.1);
+        box-shadow: 0 10px 28px rgba(6,78,59,.07); overflow: hidden; transition: transform .3s ease, box-shadow .3s ease; }
+    .sj-cc:nth-child(n+4) { grid-column: span 3; }
+    .sj-cc:hover { transform: translateY(-5px); box-shadow: 0 18px 40px rgba(6,78,59,.14); }
+    .sj-cc .no { position: absolute; right: 18px; top: 6px; font-size: 4rem; font-weight: 800; color: rgba(183,121,31,.12); line-height: 1; }
+    .sj-cc .ico { width: 54px; height: 54px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: var(--gold-soft); color: var(--gold-text); font-size: 20px; margin-bottom: 18px; }
+    .sj-cc h3 { margin: 0 0 8px; font-size: 1.2rem; line-height: 1.35; color: var(--g800); }
+    .sj-cc p { margin: 0; color: #475569; line-height: 1.75; }
 
-    /* ====== Nilai ====== */
-    .nilai { display: grid; grid-template-columns: repeat(4, 1fr); }
-    .nilai-item { padding: 8px 28px; border-left: 1px solid rgba(6,78,59,.16); }
-    .nilai-item:first-child { border-left: 0; padding-left: 0; }
-    .nilai-ico { width: 56px; height: 56px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
-        font-size: 22px; background: var(--gold-soft); color: var(--gold-text); margin-bottom: 18px; }
-    .nilai-item:nth-child(even) .nilai-ico { background: #dcfce7; color: var(--g700); }
-    .nilai-item h3 { margin: 0 0 8px; font-size: 1.2rem; color: var(--g800); }
-    .nilai-item p { margin: 0; color: #475569; line-height: 1.7; }
+    /* ====== 3. Nilai ====== */
+    .sj-values { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+    .sj-val { background: var(--g50); border: 1px solid rgba(6,78,59,.12); border-radius: 22px; padding: 28px 24px; transition: transform .3s ease, box-shadow .3s ease; }
+    .sj-val:hover { transform: translateY(-5px); box-shadow: 0 16px 36px rgba(6,78,59,.12); }
+    .sj-val .ico { width: 54px; height: 54px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 21px; background: var(--gold-soft); color: var(--gold-text); margin-bottom: 18px; }
+    .sj-val:nth-child(even) .ico { background: #dcfce7; color: var(--g700); }
+    .sj-val h3 { margin: 0 0 8px; font-size: 1.2rem; color: var(--g800); }
+    .sj-val p { margin: 0; color: #475569; line-height: 1.7; }
 
-    /* ====== Motto ====== */
-    .motto { text-align: center; padding: 64px 30px; border-radius: 28px; background: var(--g50); border: 2px dashed var(--g500); }
-    .motto small { display: block; color: var(--gold-text); font-weight: 700; margin-bottom: 10px; font-size: 1rem; }
-    .motto h2 { margin: 0; color: var(--g800); font-size: clamp(1.6rem, 3.6vw, 2.6rem); line-height: 1.35; font-weight: 800; }
+    /* ====== 4. Motto ====== */
+    .sj-motivasi { position: relative; overflow: hidden; color: #fff; padding: 84px 0; text-align: center;
+        background: radial-gradient(600px 300px at 15% 0%, rgba(253,230,138,.16), transparent 65%), linear-gradient(135deg, var(--g900), var(--g700)); }
+    .sj-motivasi::before { content: ""; position: absolute; inset: 0; opacity: .4;
+        background-image: radial-gradient(rgba(255,255,255,.12) 1.5px, transparent 1.5px); background-size: 26px 26px;
+        -webkit-mask-image: linear-gradient(to right, #000, transparent 70%); mask-image: linear-gradient(to right, #000, transparent 70%); }
+    .sj-motivasi .sj-wrap { position: relative; z-index: 1; }
+    .sj-motivasi .sj-eyebrow { justify-content: center; }
+    .sj-motivasi h2 { margin: 0 auto; max-width: 20ch; color: #fff; font-size: clamp(1.9rem, 4.4vw, 3.2rem); line-height: 1.3; font-weight: 800; }
+    .sj-motivasi h2 span { color: var(--gold-light); }
 
-    /* ====== CTA ====== */
-    .sj-cta { background: #0f5132; background: linear-gradient(135deg, #0f5132, #15803d); color: #fff; border-radius: 28px; padding: 56px 40px; text-align: center; }
-    .sj-cta h2 { margin: 0 0 12px; color: #fff; font-size: clamp(1.6rem, 3vw, 2.2rem); }
-    .sj-cta p { margin: 0 auto 26px; max-width: 54ch; color: rgba(255,255,255,.9); line-height: 1.7; }
-    .sj-btn { display: inline-flex; align-items: center; gap: 10px; background: #fff; color: var(--g800); font-weight: 700; padding: 14px 30px; border-radius: 14px; text-decoration: none; }
-    .sj-btn:hover { background: #fde68a; }
-    .sj-btn:focus-visible { outline: 3px solid #fde68a; outline-offset: 3px; }
+    /* ====== Animasi muncul ====== */
+    .sj-rv { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+    .sj-rv.in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) { .sj-rv { opacity: 1 !important; transform: none !important; transition: none !important; } }
 
     /* ====== Responsif ====== */
     @media (max-width: 960px) {
-        .visi { grid-template-columns: 1fr; padding: 48px 32px; gap: 40px; }
-        .visi .sj-photo { margin: 0 auto; max-width: 260px; }
-        .nilai { grid-template-columns: repeat(2, 1fr); row-gap: 36px; }
-        .nilai-item:nth-child(3) { border-left: 0; padding-left: 0; }
+        .sj-story { grid-template-columns: 1fr; gap: 28px; }
+        .sj-year { position: static; display: flex; align-items: flex-end; gap: 18px; }
+        .sj-year span { margin: 0 0 8px; padding-top: 0; border-top: 0; border-left: 3px solid var(--gold); padding-left: 14px; }
+        .sj-culture { grid-template-columns: repeat(2, 1fr); }
+        .sj-cc, .sj-cc:nth-child(n+4) { grid-column: span 1; }
+        .sj-cc:last-child { grid-column: span 2; }
+        .sj-values { grid-template-columns: repeat(2, 1fr); }
     }
-    @media (max-width: 640px) {
-        .sj-sec { padding: 60px 0; }
-        .visi { padding: 40px 24px; border-radius: 24px; }
-        .misi-row { grid-template-columns: 56px 1fr; gap: 16px; padding: 24px 0; }
-        .misi-no { font-size: 2.2rem; }
-        .nilai { grid-template-columns: 1fr; }
-        .nilai-item, .nilai-item:nth-child(3) { border-left: 0; padding: 0; }
-        .sj-cta { padding: 44px 24px; }
+    @media (max-width: 768px) {
+        .sj-sec, .sj-motivasi { padding: 60px 0; }
+        .sj-hero { padding: 40px 0 56px; }
+        .sj-visi { padding: 38px 26px; border-radius: 22px; }
+        .sj-culture { grid-template-columns: 1fr; }
+        .sj-cc:last-child { grid-column: span 1; }
+        .sj-values { grid-template-columns: 1fr; }
     }
 </style>
 
 <div class="sj-page">
 
-    {{-- ============ JUDUL HALAMAN ============ --}}
-    <section class="sj-top">
+    {{-- ============ HERO ============ --}}
+    <header class="sj-hero">
         <div class="sj-wrap">
             <div class="sj-crumb">
                 <a href="{{ url('/') }}">Beranda</a> <i class="fa-solid fa-chevron-right" style="font-size:10px"></i>
                 Profil <i class="fa-solid fa-chevron-right" style="font-size:10px"></i> Visi &amp; Misi
             </div>
-            <h1>Visi &amp; Misi</h1>
-            <p>Landasan cita-cita dan langkah nyata kami dalam membangun generasi unggul, berilmu, dan berakhlak mulia.</p>
+            <div class="sj-eyebrow light">Pondok Pesantren Babul Hasanah</div>
+            <h1>Cita-cita yang jelas, <span>langkah yang nyata.</span></h1>
+            <p>Landasan kami dalam membangun generasi unggul, berilmu, dan berakhlak mulia: dari visi, misi, hingga nilai yang kami tanamkan setiap hari.</p>
+            <nav class="sj-nav" aria-label="Isi halaman">
+                <a href="#visi"><i class="fa-solid fa-eye"></i> Visi</a>
+                <a href="#misi"><i class="fa-solid fa-bullseye"></i> Misi</a>
+                <a href="#nilai"><i class="fa-solid fa-gem"></i> Nilai</a>
+                <a href="#motto"><i class="fa-solid fa-star-and-crescent"></i> Motto</a>
+            </nav>
         </div>
-    </section>
+    </header>
 
-    {{-- ============ VISI ============ --}}
-    <section class="sj-sec">
+    {{-- ============ 1. VISI ============ --}}
+    <section class="sj-sec" id="visi">
         <div class="sj-wrap">
-            <div class="visi">
-                <div>
-                    <span class="visi-label"><i class="fa-solid fa-eye"></i> Visi kami</span>
+            <div class="sj-story">
+                <div class="sj-year sj-rv">
+                    <b>Visi</b>
+                    <span>Arah yang kami tuju bersama</span>
+                </div>
+                <div class="sj-visi sj-rv">
+                    <i class="fa-solid fa-quote-left"></i>
                     <h2>{{ $visi }}</h2>
                 </div>
-                <div class="sj-photo">
-                    <img src="{{ $foto('visi.jpg') }}" alt="Santri Babul Hasanah" loading="lazy" onerror="this.remove()">
-                    <i class="fa-solid fa-book-quran"></i>
-                </div>
             </div>
         </div>
     </section>
 
-    {{-- ============ MISI ============ --}}
-    <section class="sj-sec alt">
-        <div class="sj-wrap">
-            <div class="sj-narrow">
-                <div class="sj-head">
-                    <h2>Misi pondok pesantren</h2>
-                    <p>Untuk mewujudkan visi tersebut, kami menjalankan lima misi berikut dengan penuh komitmen.</p>
-                </div>
-
-                <div class="misi">
-                    @foreach ($misi as $m)
-                        <article class="misi-row">
-                            <div class="misi-no">{{ $loop->iteration }}</div>
-                            <div>
-                                <h3>{{ $m[0] }}</h3>
-                                <p>{{ $m[1] }}</p>
-                            </div>
-                        </article>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </section>
-
-    {{-- ============ NILAI-NILAI ============ --}}
-    <section class="sj-sec">
+    {{-- ============ 2. MISI ============ --}}
+    <section class="sj-sec alt" id="misi">
         <div class="sj-wrap">
             <div class="sj-head">
+                <div class="sj-eyebrow">Misi Pesantren</div>
+                <h2>Misi pondok pesantren</h2>
+                <p>Untuk mewujudkan visi tersebut, kami menjalankan lima misi berikut dengan penuh komitmen.</p>
+            </div>
+
+            <div class="sj-culture">
+                @foreach ($misi as $m)
+                    <article class="sj-cc sj-rv">
+                        <span class="no">{{ sprintf('%02d', $loop->iteration) }}</span>
+                        <span class="ico"><i class="fa-solid {{ $m[0] }}"></i></span>
+                        <h3>{{ $m[1] }}</h3>
+                        <p>{{ $m[2] }}</p>
+                    </article>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- ============ 3. NILAI-NILAI ============ --}}
+    <section class="sj-sec" id="nilai">
+        <div class="sj-wrap">
+            <div class="sj-head">
+                <div class="sj-eyebrow">Nilai Utama</div>
                 <h2>Nilai-nilai utama</h2>
                 <p>Empat pegangan yang kami tanamkan dalam keseharian santri.</p>
             </div>
-            <div class="nilai">
+            <div class="sj-values">
                 @foreach ($nilai as $n)
-                    <div class="nilai-item">
-                        <div class="nilai-ico"><i class="fa-solid {{ $n[0] }}"></i></div>
+                    <div class="sj-val sj-rv">
+                        <div class="ico"><i class="fa-solid {{ $n[0] }}"></i></div>
                         <h3>{{ $n[1] }}</h3>
                         <p>{{ $n[2] }}</p>
                     </div>
@@ -186,25 +213,31 @@
         </div>
     </section>
 
-    {{-- ============ MOTTO ============ --}}
-    <section style="padding-bottom:0">
+    {{-- ============ 4. MOTTO ============ --}}
+    <section class="sj-motivasi" id="motto">
         <div class="sj-wrap">
-            <div class="motto">
-                <small>Motto pesantren</small>
-                <h2>“Berilmu, Beramal, Berakhlak Mulia”</h2>
-            </div>
-        </div>
-    </section>
-
-    {{-- ============ CTA ============ --}}
-    <section class="sj-sec">
-        <div class="sj-wrap">
-            <div class="sj-cta">
-                <h2>Jadilah bagian dari keluarga besar Babul Hasanah</h2>
-                <p>Daftarkan putra-putri Anda dan mulailah perjalanan menuntut ilmu yang penuh berkah.</p>
-                <a href="{{ url('/pendaftaran') }}" class="sj-btn">Daftar online <i class="fa-solid fa-arrow-right"></i></a>
-            </div>
+            <div class="sj-eyebrow light">Motto Pesantren</div>
+            <h2 class="sj-rv">“Berilmu, Beramal, <span>Berakhlak Mulia</span>”</h2>
         </div>
     </section>
 </div>
+
+<script>
+    (function () {
+        var els = document.querySelectorAll('.sj-rv');
+        if (!('IntersectionObserver' in window)) {
+            els.forEach(function (el) { el.classList.add('in'); });
+            return;
+        }
+        var obs = new IntersectionObserver(function (entries) {
+            entries.forEach(function (en) {
+                if (en.isIntersecting) { en.target.classList.add('in'); obs.unobserve(en.target); }
+            });
+        }, { threshold: 0.12 });
+        els.forEach(function (el, i) {
+            el.style.transitionDelay = ((i % 4) * 70) + 'ms';
+            obs.observe(el);
+        });
+    })();
+</script>
 @endsection

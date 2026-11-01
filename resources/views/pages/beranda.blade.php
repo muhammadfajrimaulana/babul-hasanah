@@ -94,13 +94,36 @@
             position: relative; display: flex; align-items: center; min-height: min(720px, calc(100vh - 120px));
             color: #fff; overflow: hidden; background: #12261c; z-index: 1;
         }
-        .dh .hero2-bg {
-            position: absolute; inset: 0; z-index: 0;
+        .dh .hero2-slides { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+        .dh .hero2-slide {
+            position: absolute; inset: 0; opacity: 0; transform: scale(1.02);
             background-image: var(--hero-img, none),
                 radial-gradient(900px 500px at 78% 30%, rgba(255, 255, 255, .10), transparent 60%),
                 linear-gradient(135deg, #557a5b 0%, #2f4f3c 50%, #183024 100%);
-            background-size: cover; background-position: center; transform: scale(1.04);
+            background-size: cover; background-position: center;
+            transition: opacity 1.1s ease, transform 7s ease-out;
+            will-change: opacity, transform;
         }
+        .dh .hero2-slide.is-active { opacity: 1; transform: scale(1.12); }
+        .dh .hero2-nav {
+            position: absolute; z-index: 3; right: max(4%, 20px); bottom: 24px;
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(9, 24, 17, .45); border: 1px solid rgba(255, 255, 255, .16);
+            border-radius: 999px; padding: 7px 9px; backdrop-filter: blur(8px);
+        }
+        .dh .hero2-arrow {
+            width: 30px; height: 30px; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
+            display: grid; place-items: center; flex: none; font-size: 10px;
+            background: rgba(255, 255, 255, .14); color: #fff; transition: background .25s ease, transform .25s ease;
+        }
+        .dh .hero2-arrow:hover { background: rgba(255, 255, 255, .3); transform: scale(1.06); }
+        .dh .hero2-dots { display: flex; align-items: center; gap: 6px; }
+        .dh .hero2-dot {
+            width: 20px; height: 4px; border-radius: 999px; border: 0; padding: 0; cursor: pointer;
+            background: rgba(255, 255, 255, .32); transition: background .3s ease, width .3s ease;
+        }
+        .dh .hero2-dot:hover { background: rgba(255, 255, 255, .6); }
+        .dh .hero2-dot.is-active { background: #19d68f; width: 36px; }
         .dh .hero2::before {
             content: ""; position: absolute; inset: 0; z-index: 1;
             background:
@@ -146,19 +169,18 @@
         .dh .stat b { font-size: 28px; font-weight: 600; display: block; line-height: 1.1; }
         .dh .stat span { font-size: 11px; color: #a9c4b6; }
 
-        /* ---------- PROFIL ---------- */
+        /* ---------- PROFIL + SAMBUTAN PIMPINAN ---------- */
         .dh .profile { padding: 90px 0 70px; }
         .dh .profile-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 70px; align-items: center; }
-        .dh .profile-img { position: relative; aspect-ratio: 1 / 1.05; }
-        .dh .profile-img .ph { position: absolute; inset: 0; box-shadow: var(--shadow-lg); padding: 22px; display: flex; }
-        .dh .photo-slot {
-            flex: 1; border: 2px dashed rgba(255, 255, 255, .4); border-radius: 18px; background: rgba(10, 30, 20, .35);
-            display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-            color: rgba(255, 255, 255, .85); padding: 20px; gap: 6px;
+
+        /* Foto pimpinan (portrait 4:5, wajah tetap terlihat) */
+        .dh .profile-img { position: relative; aspect-ratio: 4 / 5; }
+        .dh .profile-img .ph { position: absolute; inset: 0; box-shadow: var(--shadow-lg); padding: 0; }
+        .dh .profile-img .ph img {
+            width: 100%; height: 100%; display: block;
+            object-fit: cover; object-position: center 15%;
         }
-        .dh .photo-slot i { font-size: 34px; color: rgba(255, 255, 255, .6); }
-        .dh .photo-slot strong { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
-        .dh .photo-slot span { font-size: 11px; color: rgba(255, 255, 255, .65); }
+
         .dh .badge-year {
             position: absolute; right: -20px; bottom: -20px; background: #fff; padding: 16px 20px;
             border-radius: 16px; max-width: 190px; box-shadow: var(--shadow-lg); z-index: 2;
@@ -166,8 +188,18 @@
         .dh .badge-year b { font-size: 26px; color: var(--green); display: block; line-height: 1; }
         .dh .badge-year span { font-size: 10.5px; color: var(--muted); line-height: 1.3; display: block; margin-top: 4px; }
         .dh .profile h2 { font-size: clamp(26px, 3.2vw, 38px); margin-bottom: 18px; }
-        .dh .profile .desc { color: var(--muted); font-size: 13.5px; margin-bottom: 24px; }
-        .dh .tab-note { font-size: 13px; color: var(--muted); }
+
+        /* Sambutan pimpinan */
+        .dh .sambutan h2 { margin-bottom: 20px; }
+        .dh .sambutan-quote { font-size: 26px; color: var(--gold); opacity: .35; margin-bottom: 8px; display: block; }
+        .dh .sambutan-text { font-size: 13.5px; color: var(--muted); line-height: 1.8; margin-bottom: 14px; }
+        .dh .sambutan-text em { color: var(--green); font-style: italic; }
+        .dh .sambutan-sign {
+            margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line);
+            display: flex; flex-direction: column; gap: 2px;
+        }
+        .dh .sambutan-sign strong { font-size: 15px; color: var(--green); font-weight: 600; }
+        .dh .sambutan-sign span { font-size: 11.5px; color: var(--gold); font-weight: 600; }
 
         .dh .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 60px; }
         .dh .feature {
@@ -461,6 +493,7 @@
         /* ---------- RESPONSIVE ---------- */
         @media (max-width: 1024px) {
             .dh .profile-grid { grid-template-columns: 1fr; gap: 50px; }
+            .dh .profile-img { max-width: 460px; width: 100%; margin-inline: auto; }
             .dh .stats .container { grid-template-columns: 1fr 1fr; gap: 20px; }
             .dh .features, .dh .news-grid { grid-template-columns: 1fr; }
             .dh .badge-year { right: 10px; bottom: -10px; }
@@ -474,6 +507,10 @@
         @media (max-width: 640px) {
             .dh .hero2-cta { flex-direction: column; width: 100%; }
             .dh .hero2-cta .btn { width: 100%; }
+            .dh .hero2 .container { padding: 56px 0 96px; }
+            .dh .hero2-nav { left: max(4%, 16px); right: max(4%, 16px); bottom: 20px; justify-content: center; }
+            .dh .hero2-dots { flex: 1; justify-content: center; }
+            .dh .hero2-dot { width: 16px; }
             .dh .stats .container { grid-template-columns: 1fr; }
             .dh .stat { border-left: 0; border-bottom: 1px solid rgba(255, 255, 255, .15); padding-left: 0; padding-bottom: 12px; }
             .dh .info-inner { border-radius: 16px; }
@@ -487,7 +524,9 @@
             .dh .map-card { position: static; max-width: none; border-radius: 0; box-shadow: none; order: 1; }
         }
         @media (prefers-reduced-motion: reduce) {
-            .dh .reveal, .dh .hero2-bg { transition: none !important; opacity: 1 !important; transform: none !important; }
+            .dh .reveal { transition: none !important; opacity: 1 !important; transform: none !important; }
+            .dh .hero2-slide { transition: none !important; }
+            .dh .hero2-slide.is-active { transform: none !important; }
         }
     </style>
 
@@ -507,8 +546,11 @@
         // Guard hasTable membuat beranda tetap tampil selama migrasi info_harian belum dijalankan.
         $infoHarian = collect();
         $jadwalHariIni = collect();
+        $jumlahInfoHarian = 0;
 
         if (\Illuminate\Support\Facades\Schema::hasTable('info_harian')) {
+            $jumlahInfoHarian = \App\Models\InfoHarian::info()->aktif()->berlaku()->sudahTerbit()->count();
+
             $infoHarian = \App\Models\InfoHarian::info()->aktif()->berlaku()->sudahTerbit()
                 ->orderByDesc('penting')->orderByDesc('tanggal')->orderByDesc('id')
                 ->take(4)->get();
@@ -518,6 +560,14 @@
         }
 
         $teksInfo = $infoHarian->where('penting', true)->pluck('judul')->implode('   •   ');
+
+        // ----- Angka statistik section "Bersama Babul Hasanah" (dihitung langsung dari data admin) -----
+        $jumlahSantri   = \Illuminate\Support\Facades\Schema::hasTable('santri')
+            ? \App\Models\Santri::count() : 0;
+        $jumlahPrestasi = \Illuminate\Support\Facades\Schema::hasTable('prestasi_santri')
+            ? \App\Models\PrestasiSantri::count() : 0;
+        $jumlahBerita   = \Illuminate\Support\Facades\Schema::hasTable('berita')
+            ? \App\Models\Berita::published()->count() : 0;
 
         // Prestasi: urutan sama dengan halaman /prestasi (tahun terbaru, juara 1-3 dulu, penghargaan di akhir)
         $prestasiTerbaru = \App\Models\PrestasiSantri::query()
@@ -551,10 +601,23 @@
 
     <div class="dh">
 
-        {{-- HERO SECTION --}}
+        {{-- HERO SECTION (slider 3 gambar, bergeser otomatis) --}}
+        @php
+            $heroSlides = [
+                ['file' => 'slide-1.png', 'alt' => 'Suasana Pondok Pesantren Babul Hasanah'],
+                ['file' => 'slide-2.jpg', 'alt' => 'Kegiatan belajar santri di kelas'],
+                ['file' => 'slide-3.jpg', 'alt' => 'Para ustaz dan pengurus pesantren'],
+            ];
+        @endphp
         <section class="hero2">
-            <div class="hero2-bg" style="--hero-img: url('{{ asset('assets/img/banner/banner.png') }}');" role="img"
-                aria-label="Suasana Pondok Pesantren Babul Hasanah"></div>
+            <div class="hero2-slides">
+                @foreach ($heroSlides as $i => $slide)
+                    <div class="hero2-slide {{ $i === 0 ? 'is-active' : '' }}"
+                        style="--hero-img: url('{{ asset('assets/img/banner/' . $slide['file']) }}');"
+                        role="img" aria-label="{{ $slide['alt'] }}"
+                        @if ($i > 0) aria-hidden="true" @endif></div>
+                @endforeach
+            </div>
             <div class="container">
                 <span class="hero2-badge">Selamat datang di official website</span>
                 <h1>Membangun Generasi Unggul Dalam Penguasaan <span class="accent">Kitab Kuning</span></h1>
@@ -564,8 +627,25 @@
                 </p>
                 <div class="hero2-cta">
                     <a href="{{ route('pendaftaran.index') }}" class="btn btn-emerald btn-lg">Daftar Santri Baru</a>
-                    <a href="#profil" class="btn btn-glass btn-lg">Pelajari Selengkapnya</a>
+                    <a href="{{ route('profil.sejarah') }}" class="btn btn-glass btn-lg">Pelajari Selengkapnya</a>
                 </div>
+            </div>
+
+            <div class="hero2-nav">
+                <button type="button" class="hero2-arrow" data-slide="prev" aria-label="Gambar sebelumnya">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <div class="hero2-dots" role="tablist" aria-label="Pilih gambar hero">
+                    @foreach ($heroSlides as $i => $slide)
+                        <button type="button" class="hero2-dot {{ $i === 0 ? 'is-active' : '' }}"
+                            data-slide="{{ $i }}" role="tab"
+                            aria-selected="{{ $i === 0 ? 'true' : 'false' }}"
+                            aria-label="Gambar {{ $i + 1 }}"></button>
+                    @endforeach
+                </div>
+                <button type="button" class="hero2-arrow" data-slide="next" aria-label="Gambar berikutnya">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
             </div>
         </section>
 
@@ -589,32 +669,29 @@
                     <div class="since">Mengabdi sejak 1998.</div>
                 </div>
                 <a href="{{ route('pendaftaran.index') }}" class="stat">
-                    <b data-count="500" data-suffix="+">500+</b><span>Santri Aktif</span>
+                    <b data-count="{{ $jumlahSantri }}">{{ number_format($jumlahSantri, 0, ',', '.') }}</b><span>Santri Aktif</span>
                 </a>
-                <a href="{{ route('profil.struktur-organisasi') }}" class="stat">
-                    <b data-count="30" data-suffix="+">30+</b><span>Ustadz / Ustadzah</span>
+                <a href="{{ route('prestasi.index') }}" class="stat">
+                    <b data-count="{{ $jumlahPrestasi }}">{{ number_format($jumlahPrestasi, 0, ',', '.') }}</b><span>Prestasi Santri</span>
                 </a>
-                <a href="#info" class="stat">
-                    <b data-count="{{ $infoHarian->count() }}">{{ $infoHarian->count() }}</b><span>Info Hari Ini</span>
+                <a href="{{ route('berita.index') }}" class="stat">
+                    <b data-count="{{ $jumlahBerita }}">{{ number_format($jumlahBerita, 0, ',', '.') }}</b><span>Berita</span>
                 </a>
-                <a href="#jenjang" class="stat">
-                    <b data-count="7">7</b><span>Jenjang Pendidikan</span>
+                <a href="{{ route('info-harian.index') }}" class="stat">
+                    <b data-count="{{ $jumlahInfoHarian }}">{{ number_format($jumlahInfoHarian, 0, ',', '.') }}</b><span>Info Harian</span>
                 </a>
             </div>
         </section>
 
-        {{-- PROFIL PESANTREN --}}
+        {{-- PROFIL PESANTREN + SAMBUTAN PIMPINAN --}}
         <section class="profile" id="profil">
             <div class="container">
                 <div class="profile-grid">
                     <div class="profile-img">
                         <div class="ph c">
-                            {{-- KOTAK DUMMY FOTO PIMPINAN (ganti dengan <img> jika sudah ada fotonya) --}}
-                            <div class="photo-slot">
-                                <i class="fa-solid fa-image"></i>
-                                <strong>[ Kotak Foto Pimpinan ]</strong>
-                                <span>Nanti bisa disesuaikan dengan tag &lt;img&gt;</span>
-                            </div>
+                            <img src="{{ asset('assets/img/banner/pimpinan.jpg') }}"
+                                 alt="Pimpinan Pondok Pesantren Babul Hasanah"
+                                 loading="lazy">
                         </div>
                         <div class="badge-year">
                             <b>1998</b>
@@ -622,16 +699,31 @@
                         </div>
                     </div>
 
-                    <div>
-                        <div class="eyebrow">Profil Pesantren</div>
+                    <div class="sambutan">
+                        <div class="eyebrow">Sambutan Pimpinan</div>
                         <h2>Berakar pada adab.<br>Bertumbuh dengan ilmu.</h2>
-                        <p class="desc">
-                            Berawal dari majelis kecil di Padang Lawas pada 1998, Babul Hasanah tumbuh menjadi lingkungan belajar yang memadukan tradisi keilmuan pesantren dengan pendidikan yang relevan bagi masa depan.
+
+                        <i class="fa-solid fa-quote-left sambutan-quote"></i>
+                        <p class="sambutan-text">
+                            <em>Assalamu'alaikum warahmatullahi wabarakatuh.</em> Puji syukur kita panjatkan ke hadirat Allah SWT
+                            atas segala nikmat-Nya. Selamat datang di website resmi Pondok Pesantren Babul Hasanah.
+                        </p>
+                        <p class="sambutan-text">
+                            Sejak berdiri pada 1998 di Padang Lawas, kami berikhtiar menjaga tradisi keilmuan pesantren,
+                            khususnya penguasaan kitab kuning dan Al-Qur'an, sambil membekali santri dengan pendidikan yang
+                            relevan bagi masa depan. Bagi kami, ilmu tanpa adab tidak sempurna, dan adab tanpa ilmu tidak
+                            cukup untuk berkhidmat kepada umat.
+                        </p>
+                        <p class="sambutan-text">
+                            Kepada para orang tua, kami mengucapkan terima kasih atas amanah yang dipercayakan. Semoga
+                            Babul Hasanah terus menjadi tempat tumbuhnya generasi berilmu, berakhlak mulia, dan berdaya guna.
+                            <em>Wassalamu'alaikum warahmatullahi wabarakatuh.</em>
                         </p>
 
-                        <p class="tab-note">
-                            Visi kami: melahirkan insan berilmu, berakhlak mulia, dan berdaya guna. Dikelola oleh dewan pengasuh bersama tim pendidikan, setiap langkah terpusat pada tumbuh kembang santri.
-                        </p>
+                        <div class="sambutan-sign">
+                            <strong>[ Nama Pimpinan ]</strong>
+                            <span>Pimpinan Pondok Pesantren Babul Hasanah</span>
+                        </div>
                     </div>
                 </div>
 
@@ -728,7 +820,10 @@
                 <div class="eyebrow">Info Harian</div>
                 <div class="head-row">
                     <h2 class="section-title" style="margin-bottom:0">Kabar &amp; jadwal pesantren hari ini.</h2>
-                    <span class="ih-date"><i class="fa-regular fa-calendar"></i> {{ now()->locale('id')->translatedFormat('l, d F Y') }}</span>
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                        <span class="ih-date"><i class="fa-regular fa-calendar"></i> {{ now()->locale('id')->translatedFormat('l, d F Y') }}</span>
+                        <a href="{{ route('info-harian.index') }}" class="btn btn-outline">Semua Info <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                    </div>
                 </div>
 
                 <div class="ih-grid">
@@ -1006,6 +1101,66 @@
             }, { threshold: 0.4 });
 
             document.querySelectorAll('.dh [data-count]').forEach(el => countObs.observe(el));
+
+            // ---------- Hero slider: 3 gambar bergeser otomatis ----------
+            const hero = document.querySelector('.dh .hero2');
+            if (hero) {
+                const heroSlides = Array.from(hero.querySelectorAll('.hero2-slide'));
+                const heroDots = Array.from(hero.querySelectorAll('.hero2-dot'));
+                const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                const DURASI = 6000;   // jeda antar gambar (ms)
+                let heroIndex = 0;
+                let heroTimer = null;
+
+                const showSlide = (i) => {
+                    heroIndex = (i + heroSlides.length) % heroSlides.length;
+                    heroSlides.forEach((s, n) => {
+                        s.classList.toggle('is-active', n === heroIndex);
+                        s.setAttribute('aria-hidden', n === heroIndex ? 'false' : 'true');
+                    });
+                    heroDots.forEach((d, n) => {
+                        const on = n === heroIndex;
+                        d.classList.toggle('is-active', on);
+                        d.setAttribute('aria-selected', on ? 'true' : 'false');
+                    });
+                };
+
+                const stopAuto = () => {
+                    if (heroTimer) {
+                        clearInterval(heroTimer);
+                        heroTimer = null;
+                    }
+                };
+
+                const startAuto = () => {
+                    stopAuto();
+                    if (reduceMotion || heroSlides.length < 2) return;
+                    heroTimer = setInterval(() => showSlide(heroIndex + 1), DURASI);
+                };
+
+                heroDots.forEach((dot, i) => dot.addEventListener('click', () => {
+                    showSlide(i);
+                    startAuto();
+                }));
+
+                hero.querySelector('[data-slide="prev"]')
+                    ?.addEventListener('click', () => { showSlide(heroIndex - 1); startAuto(); });
+                hero.querySelector('[data-slide="next"]')
+                    ?.addEventListener('click', () => { showSlide(heroIndex + 1); startAuto(); });
+
+                // Berhenti sejenak saat kursor/fokus di area hero, lanjut lagi setelahnya
+                hero.addEventListener('mouseenter', stopAuto);
+                hero.addEventListener('mouseleave', startAuto);
+                hero.addEventListener('focusin', stopAuto);
+                hero.addEventListener('focusout', (e) => {
+                    if (!hero.contains(e.relatedTarget)) startAuto();
+                });
+                document.addEventListener('visibilitychange', () => {
+                    document.hidden ? stopAuto() : startAuto();
+                });
+
+                startAuto();
+            }
         });
     </script>
 @endsection

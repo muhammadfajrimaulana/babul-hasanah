@@ -1,23 +1,19 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
+    /**
+     * Dibatalkan: kolom `jenjang_tujuan` masih dipakai oleh form PPDB,
+     * tabel admin, dan proses verifikasi menjadi data santri.
+     */
     public function up(): void
     {
-        Schema::table('pendaftaran_online', function (Blueprint $table) {
-            // Hapus kolom 'jenjang_tujuan' yang lama karena sudah diganti field alamat
-            $table->dropColumn('jenjang_tujuan');
-        });
+        // sengaja dikosongkan
     }
 
     public function down(): void
     {
-        // Kembalikan jika rollback (opsional)
-        Schema::table('pendaftaran_online', function (Blueprint $table) {
-            $table->string('jenjang_tujuan')->nullable();
-        });
+        // sengaja dikosongkan
     }
 };

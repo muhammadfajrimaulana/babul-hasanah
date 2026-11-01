@@ -15,6 +15,7 @@ class Santri extends Model
 
     protected $fillable = [
         'user_id',
+        'pendaftaran_online_id',
         'nomor_induk',
         'nama_lengkap',
         'jenjang_pendidikan',
@@ -27,6 +28,12 @@ class Santri extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    // Arsip pendaftaran online yang menjadi sumber data santri ini
+    public function pendaftaranOnline()
+    {
+        return $this->belongsTo(PendaftaranOnline::class, 'pendaftaran_online_id');
     }
 
     // Relasi ke tabel absensi

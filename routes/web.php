@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\PendaftaranController as AdminPendaftaranController;
 use App\Http\Controllers\Admin\SantriController as AdminDataSantriController;
+use App\Http\Controllers\Admin\SantriFormController as AdminSantriFormController;
 use App\Http\Controllers\Admin\KontenController as AdminKontenController;
 use App\Http\Controllers\Admin\ProgramController as AdminProgramController;
 use App\Http\Controllers\Admin\KegiatanController as AdminKegiatanController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Admin\PenggunaController as AdminPenggunaController;
 use App\Http\Controllers\Portal\PortalDashboardController as PortalDashboard;
 use App\Http\Controllers\Public\PendaftaranOnlineController;
 use App\Http\Controllers\Public\PrestasiController;
+use App\Http\Controllers\Public\InfoHarianController as PublicInfoHarianController;
 use App\Http\Controllers\Public\GaleriController as PublicGaleriController;
 use App\Http\Controllers\Public\BeritaController as PublicBeritaController;
 use App\Http\Controllers\Public\StrukturOrganisasiController;
@@ -60,6 +62,9 @@ Route::get('/kegiatan', function () {
 // ######## PRESTASI SANTRI ########### //
 Route::get('/prestasi', [PrestasiController::class, 'index'])->name('prestasi.index');
 
+// ######## INFO HARIAN (kabar & jadwal pesantren hari ini) ########### //
+Route::get('/info-harian', [PublicInfoHarianController::class, 'index'])->name('info-harian.index');
+
 // ######## PENDAFTARAN ONLINE ########### //
 Route::get('/pendaftaran', function () {
     return view('pages.pendaftaran');
@@ -98,13 +103,22 @@ Route::middleware(['auth', \App\Http\Middleware\RoleAdmin::class])->prefix('admi
 
     // Pendaftaran
     Route::get('/pendaftaran', [AdminPendaftaranController::class, 'index'])->name('pendaftaran.index');
-    Route::patch('/pendaftaran/{id}', [AdminPendaftaranController::class, 'updateStatus'])->name('pendaftaran.update');
+    Route::patch('/pendaftaran/{id}', [AdminPendaftaranController::class, 'updateStatus'])->name('pendaftaran.verifikasi');
+    Route::get('/pendaftaran/{id}/edit', [AdminPendaftaranController::class, 'edit'])->name('pendaftaran.edit');
+    Route::put('/pendaftaran/{id}', [AdminPendaftaranController::class, 'update'])->name('pendaftaran.update');
+    Route::delete('/pendaftaran/{id}', [AdminPendaftaranController::class, 'destroy'])->name('pendaftaran.destroy');
 
     // Santri
     Route::get('/santri', [AdminDataSantriController::class, 'index'])->name('santri.index');
     Route::get('/santri/template', [AdminDataSantriController::class, 'downloadTemplate'])->name('santri.template');
     Route::post('/santri/import', [AdminDataSantriController::class, 'import'])->name('santri.import');
+    // Input manual: /santri/tambah harus di atas /santri/{id}
+    Route::get('/santri/tambah', [AdminSantriFormController::class, 'create'])->name('santri.create');
+    Route::post('/santri', [AdminSantriFormController::class, 'store'])->name('santri.store');
     Route::get('/santri/{id}', [AdminDataSantriController::class, 'detail'])->name('santri.detail');
+    Route::get('/santri/{id}/edit', [AdminSantriFormController::class, 'edit'])->name('santri.edit');
+    Route::put('/santri/{id}', [AdminSantriFormController::class, 'update'])->name('santri.update');
+    Route::delete('/santri/{id}', [AdminDataSantriController::class, 'destroy'])->name('santri.destroy');
 
     // Alumni (CRUD): admin.alumni.index/create/store/edit/update/destroy
     Route::resource('data-alumni', AdminAlumniController::class)

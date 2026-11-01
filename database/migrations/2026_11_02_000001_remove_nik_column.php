@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        if (! Schema::hasColumn('pendaftaran_online', 'nik')) {
+            return;
+        }
+
         Schema::table('pendaftaran_online', function (Blueprint $table) {
             // Hapus kolom 'nik' yang lama karena diganti menjadi nik_santri
             $table->dropColumn('nik');

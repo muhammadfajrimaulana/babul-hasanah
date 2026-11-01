@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        // Migrasi ini WAJIB tetap membuat tabel. Penambahan kolom baru
+        // dilakukan oleh migrasi terpisah agar riwayat migrasi tetap valid.
         Schema::create('pendaftaran_online', function (Blueprint $table) {
             $table->id();
             $table->string('no_pendaftaran')->unique();

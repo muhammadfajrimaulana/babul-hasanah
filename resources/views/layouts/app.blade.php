@@ -81,10 +81,16 @@
         .site-brand strong { font-size: 18px; color: var(--green); font-weight: 600; display: block; line-height: 1.25; }
 
         .site-menu { display: flex; align-items: center; font-size: 14px; }
-        .menu-links { display: flex; align-items: center; gap: 28px; }
+        .menu-links { display: flex; align-items: center; gap: 22px; }
         .menu-links > a, .dd-btn {
             color: #4b5563; padding: 6px 2px; position: relative; display: inline-flex; align-items: center; gap: 6px;
-            background: none; border: 0; cursor: pointer; font-family: inherit; font-size: 14px; transition: color .2s ease;
+            background: none; border: 0; cursor: pointer; font-family: inherit; font-size: 13.5px; transition: color .2s ease;
+            white-space: nowrap;
+        }
+        /* Penanda kecil pada menu "Info Harian" */
+        .menu-info .nav-dot {
+            width: 6px; height: 6px; border-radius: 50%; background: var(--emerald); flex: none;
+            box-shadow: 0 0 0 3px rgba(18, 184, 134, .16);
         }
         .menu-links > a::after, .dd-btn::after {
             content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 2px;
@@ -100,6 +106,17 @@
         @media (min-width: 1025px) and (hover: hover) {
             .menu-links > a:hover, .dd-btn:hover { color: var(--emerald-d); font-weight: 500; }
             .menu-links > a:hover::after, .dd-btn:hover::after { transform: scaleX(1); }
+        }
+
+        /* Desktop sempit: rapatkan menu agar seluruh item tetap satu baris */
+        @media (min-width: 1025px) and (max-width: 1320px) {
+            .menu-links { gap: 14px; }
+            .menu-links > a, .dd-btn { font-size: 12.5px; gap: 5px; }
+            .site-brand-logo { width: 40px; height: 40px; }
+            .site-brand strong { font-size: 16.5px; }
+            .site-brand small { font-size: 10px; }
+            .site-btn { padding: 11px 16px; font-size: 12.5px; }
+            .site-login { padding: 9px 10px; font-size: 13px; }
         }
 
         /* Dropdown */
@@ -239,6 +256,7 @@
             .dd-btn .chev { margin-left: auto; color: var(--muted); }
             .menu-links > a.active, .dd-btn.active { background: #eaf7f1; color: var(--emerald-d); font-weight: 600; }
             .menu-links > a.active .mi, .dd-btn.active .mi { background: var(--emerald); color: #fff; }
+            .menu-info .nav-dot { display: none; }
 
             /* Submenu Profil / Jenjang */
             .dd { width: 100%; }
@@ -402,6 +420,10 @@
                     <a href="{{ route('kontak') }}" class="{{ request()->is('kontak*') ? 'active' : '' }}">
                         <span class="mi"><i class="fa-solid fa-address-book"></i></span>Kontak
                     </a>
+                    <a href="{{ route('info-harian.index') }}" class="menu-info {{ request()->is('info-harian*') ? 'active' : '' }}">
+                        <span class="mi"><i class="fa-solid fa-bullhorn"></i></span>Info Harian
+                        <span class="nav-dot" aria-hidden="true"></span>
+                    </a>
                 </div>
 
                 {{-- Tombol Masuk & Daftar (tampil di bagian bawah laci mobile) --}}
@@ -464,6 +486,7 @@
                     <ul>
                         <li><a href="{{ url('/profil/sejarah') }}">Tentang Pesantren</a></li>
                         <li><a href="{{ route('jenjang.show', 'mdta') }}">Jenjang Pendidikan</a></li>
+                        <li><a href="{{ route('info-harian.index') }}">Info Harian</a></li>
                         <li><a href="{{ route('pendaftaran.index') }}">Pendaftaran Santri Baru</a></li>
                         <li><a href="{{ route('login') }}">Portal Wali Santri</a></li>
                     </ul>
@@ -481,7 +504,7 @@
 
             <div class="foot-bottom">
                 <span>&copy; {{ date('Y') }} Pondok Pesantren Babul Hasanah. All rights reserved.</span>
-                <span>Developed with Laravel &amp; Tailwind CSS</span>
+                <span>Developed with Reactiflex Company</span>
             </div>
         </div>
     </footer>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\PendaftaranOnline;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Santri;
 // Jika menggunakan Maatwebsite/Excel, uncomment baris di bawah:
 // use App\Imports\SantriImport;
@@ -14,16 +15,41 @@ class SantriController extends Controller
 {
     public function index()
     {
-        $santris = Santri::latest()->paginate(10);
+        $santris = Santri::with(['user', 'pendaftaranOnline'])->latest()->paginate(10);
 
         return view('dashboard.santri.index', compact('santris'));
     }
 
     public function detail($id)
     {
-        $santri = Santri::with('user')->findOrFail($id);
-        $pendaftaranOnline = PendaftaranOnline::where('email', $santri->user->email)->first();
+        $santri = Santri::with(['user', 'pendaftaranOnline'])->findOrFail($id);
+
+        // Utamakan relasi pendaftaran_online_id; fallback ke email untuk
+        // data lama yang dibuat sebelum kolom relasi tersedia.
+        $pendaftaranOnline = $santri->pendaftaranOnline
+            ?: ($santri->user?->email
+                ? PendaftaranOnline::where('email', $santri->user->email)->latest()->first()
+                : null);
+
         return view('dashboard.santri.detail', compact('santri', 'pendaftaranOnline'));
+    }
+
+    /** Hapus data santri. Arsip pendaftarannya dikembalikan ke status pending. */
+    public function destroy($id)
+    {
+        $santri = Santri::with('pendaftaranOnline')->findOrFail($id);
+
+        DB::transaction(function () use ($santri) {
+            // Status pendaftaran dikembalikan ke pending supaya data bisa
+            // diverifikasi ulang bila santri dihapus karena kekeliruan.
+            $santri->pendaftaranOnline?->update(['status_pendaftaran' => 'pending']);
+
+            $santri->delete();
+        });
+
+        return redirect()
+            ->route('admin.santri.index')
+            ->with('success', 'Data santri berhasil dihapus.');
     }
 
     public function import(Request $request)

@@ -17,6 +17,9 @@ class InfoHarian extends Model
         'Libur'      => 'fa-mug-hot',
     ];
 
+    /** Berapa hari info kedaluwarsa masih ditampilkan di histori publik. */
+    public const HISTORI_HARI = 3;
+
     protected $fillable = [
         'jenis', 'kategori', 'judul', 'isi', 'jam',
         'tanggal', 'berlaku_sampai', 'penting', 'aktif', 'urutan',
@@ -46,6 +49,16 @@ class InfoHarian extends Model
     public function scopeSudahTerbit(Builder $q): Builder
     {
         return $q->where(fn ($w) => $w->whereNull('tanggal')->orWhereDate('tanggal', '<=', today()));
+    }
+
+    /**
+     * Histori: info yang masa berlakunya sudah lewat, tetapi belum melewati
+     * batas retensi. Lewat dari `$hari` hari, info tidak ditampilkan lagi.
+     */
+    public function scopeHistori(Builder $q, int $hari = self::HISTORI_HARI): Builder
+    {
+        return $q->whereDate('berlaku_sampai', '<', today())
+            ->whereDate('berlaku_sampai', '>=', today()->subDays($hari));
     }
 
     /* ------------------------------------------------------- Accessor */
