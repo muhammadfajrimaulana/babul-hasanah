@@ -61,6 +61,12 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="sm:col-span-2">
+                    <h2 class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Data Calon Santri
+                    </h2>
+                </div>
+
+                <div class="sm:col-span-2">
                     <label class="{{ $labelCls }}" for="nama_lengkap">Nama Lengkap <span class="text-rose-500">*</span></label>
                     <input id="nama_lengkap" type="text" name="nama_lengkap" required maxlength="255"
                         value="{{ old('nama_lengkap', $pendaftaran->nama_lengkap) }}" class="{{ $inputCls }}">
@@ -85,13 +91,7 @@
                         class="{{ $inputCls }}">{{ old('alamat_domisili', $pendaftaran->alamat_domisili) }}</textarea>
                 </div>
 
-                <div>
-                    <label class="{{ $labelCls }}" for="email">Email Aktif <span class="text-rose-500">*</span></label>
-                    <input id="email" type="email" name="email" required maxlength="255"
-                        value="{{ old('email', $pendaftaran->email) }}" class="{{ $inputCls }}">
-                </div>
-
-                <div>
+                <div class="sm:col-span-2">
                     <label class="{{ $labelCls }}" for="jenjang_tujuan">Pilihan Jenjang <span class="text-rose-500">*</span></label>
                     <select id="jenjang_tujuan" name="jenjang_tujuan" required class="{{ $inputCls }}">
                         <option value="">-- Pilih Jenjang --</option>
@@ -107,6 +107,12 @@
                     </select>
                 </div>
 
+                <div class="sm:col-span-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <h2 class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Data Orang Tua / Wali
+                    </h2>
+                </div>
+
                 <div>
                     <label class="{{ $labelCls }}" for="nama_ortu_wali">Nama Orang Tua (Wali) <span class="text-rose-500">*</span></label>
                     <input id="nama_ortu_wali" type="text" name="nama_ortu_wali" required maxlength="255"
@@ -117,6 +123,23 @@
                     <label class="{{ $labelCls }}" for="no_hp_ortu">Nomor Handphone Orang Tua <span class="text-rose-500">*</span></label>
                     <input id="no_hp_ortu" type="text" name="no_hp_ortu" required maxlength="30"
                         value="{{ old('no_hp_ortu', $pendaftaran->no_hp_ortu) }}" class="{{ $inputCls }}">
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="{{ $labelCls }}" for="email">Email Orang Tua / Wali <span class="text-rose-500">*</span></label>
+                    <input id="email" type="email" name="email" required maxlength="255" autocomplete="email"
+                        value="{{ old('email', $pendaftaran->email) }}" class="{{ $inputCls }}"
+                        placeholder="email.orangtua@gmail.com">
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                        Email milik orang tua/wali yang dipakai untuk <b>login Portal Wali Santri</b>. Santri tidak perlu email sendiri.
+                    </p>
+                    @error('email') <p class="text-[11px] text-rose-600 mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div class="sm:col-span-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <h2 class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Sekolah Asal
+                    </h2>
                 </div>
 
                 <div class="sm:col-span-2">

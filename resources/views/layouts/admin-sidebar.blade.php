@@ -1,7 +1,6 @@
 <!-- OVERLAY SIDEBAR MOBILE -->
 <div x-show="sidebarOpen" @click="sidebarOpen = false"
-    class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm md:hidden" x-transition.opacity style="display: none;">
-</div>
+    class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm md:hidden" x-transition.opacity style="display: none;"></div>
 
 <!-- SIDEBAR -->
 <aside
@@ -42,150 +41,164 @@
             </button>
         </div>
 
-        <!-- Daftar Menu Navigasi -->
+        <!-- Daftar Menu Navigasi (Flat List - Tanpa Dropdown) -->
         <div
-            class="p-4 space-y-1.5 overflow-y-auto max-h-[calc(100vh-13rem)] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-800 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-700">
+            class="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-13rem)] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-800 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-700">
 
             <p x-show="!sidebarMinimize"
-                class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Ringkasan</p>
+                class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3">Navigasi Utama</p>
 
-            <!-- Dashboard Menu -->
+            <!-- Dashboard -->
             <a href="{{ route('admin.dashboard') }}" @click="sidebarOpen = false"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('admin.dashboard') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 text-slate-400' }} font-semibold text-xs transition relative group">
+                class="flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('admin.dashboard') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 text-slate-400' }} font-semibold text-xs transition relative group">
                 <i class="fa-solid fa-chart-pie w-5 text-sm flex-shrink-0"></i>
-                <span x-show="!sidebarMinimize" class="whitespace-nowrap">DASHBOARD</span>
-
-                <!-- Tooltip saat minimized -->
+                <span x-show="!sidebarMinimize" class="whitespace-nowrap">Dashboard</span>
                 <div x-show="sidebarMinimize"
                     class="absolute left-full ml-3 px-2.5 py-1 bg-slate-800 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
                     Dashboard
                 </div>
             </a>
 
-            <!-- MENU UTAMA -->
-            <div class="pt-3" x-data="{ open: {{ request()->routeIs('admin.pendaftaran.*') || request()->routeIs('admin.santri.*') || request()->routeIs('admin.alumni.*') || request()->routeIs('super.pengguna.*') ? 'true' : 'false' }} }">
-                <button @click="if(!sidebarMinimize) { open = !open } else { sidebarMinimize = false; open = true; }"
-                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-400 hover:bg-slate-800 transition relative group">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-address-card w-5 text-sm flex-shrink-0"></i>
-                        <span x-show="!sidebarMinimize" class="whitespace-nowrap">Menu Utama</span>
-                    </div>
-                    <i x-show="!sidebarMinimize"
-                        class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"
-                        :class="open ? 'rotate-180 text-emerald-400' : ''"></i>
+            <!-- Pendaftaran -->
+            <a href="{{ route('admin.pendaftaran.index') }}" @click="sidebarOpen = false"
+                class="flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('admin.pendaftaran.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 text-slate-400' }} font-semibold text-xs transition relative group">
+                <i class="fa-solid fa-address-book w-5 text-sm flex-shrink-0"></i>
+                <span x-show="!sidebarMinimize" class="whitespace-nowrap">Pendaftaran</span>
+                <div x-show="sidebarMinimize"
+                    class="absolute left-full ml-3 px-2.5 py-1 bg-slate-800 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
+                    Pendaftaran
+                </div>
+            </a>
 
-                    <!-- Tooltip saat minimized -->
+            <!-- Data Santri -->
+            <a href="{{ route('admin.santri.index') }}" @click="sidebarOpen = false"
+                class="flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('admin.santri.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 text-slate-400' }} font-semibold text-xs transition relative group">
+                <i class="fa-solid fa-people-group w-5 text-sm flex-shrink-0"></i>
+                <span x-show="!sidebarMinimize" class="whitespace-nowrap">Data Santri</span>
+                <div x-show="sidebarMinimize"
+                    class="absolute left-full ml-3 px-2.5 py-1 bg-slate-800 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
+                    Data Santri
+                </div>
+            </a>
+
+            <!-- Data Alumni -->
+            <a href="{{ route('admin.alumni.index') }}" @click="sidebarOpen = false"
+                class="flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('admin.alumni.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 text-slate-400' }} font-semibold text-xs transition relative group">
+                <i class="fa-solid fa-user-graduate w-5 text-sm flex-shrink-0"></i>
+                <span x-show="!sidebarMinimize" class="whitespace-nowrap">Data Alumni</span>
+                <div x-show="sidebarMinimize"
+                    class="absolute left-full ml-3 px-2.5 py-1 bg-slate-800 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
+                    Data Alumni
+                </div>
+            </a>
+
+            <!-- Pengguna Dashboard (hanya super admin) -->
+            @if (auth()->check() && auth()->user()->role == 'super_admin')
+                <a href="{{ route('super.pengguna.index') }}" @click="sidebarOpen = false"
+                    class="flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('super.pengguna.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 text-slate-400' }} font-semibold text-xs transition relative group">
+                    <i class="fa-solid fa-users-gear w-5 text-sm flex-shrink-0"></i>
+                    <span x-show="!sidebarMinimize" class="whitespace-nowrap">Pengguna</span>
                     <div x-show="sidebarMinimize"
                         class="absolute left-full ml-3 px-2.5 py-1 bg-slate-800 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
-                        Menu Utama
+                        Pengguna
                     </div>
-                </button>
+                </a>
+            @endif
 
-                <!-- Sub-menu Dropdown -->
-                <div x-show="open && !sidebarMinimize" x-collapse
-                    class="pl-4 pt-1.5 space-y-1 border-l border-slate-800 ml-4">
-                    <a href="{{ route('admin.pendaftaran.index') }}" @click="sidebarOpen = false"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.pendaftaran.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
-                        <i class="fas fa-address-book w-4 text-xs flex-shrink-0"></i>
-                        <span>Pendaftaran</span>
-                    </a>
-                    <a href="{{ route('admin.santri.index') }}" @click="sidebarOpen = false"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.santri.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
-                        <i class="fa-solid fa-people-group w-4 text-xs flex-shrink-0"></i>
-                        <span>Data Santri</span>
-                    </a>
-                    <a href="{{ route('admin.alumni.index') }}" @click="sidebarOpen = false"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.alumni.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
-                        <i class="fa-solid fa-user-graduate w-4 text-xs flex-shrink-0"></i>
-                        <span>Data Alumni</span>
-                    </a>
-                    @if (auth()->check() && auth()->user()->role == 'super_admin')
-                        <a href="{{ route('super.pengguna.index') }}" @click="sidebarOpen = false"
-                            class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('super.pengguna.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
-                            <i class="fa-solid fa-users-gear w-4 text-xs flex-shrink-0"></i>
-                            <span>Pengguna Dashboard</span>
-                        </a>
-                    @endif
+            <p x-show="!sidebarMinimize"
+                class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3 mt-6">Pengelolaan</p>
+
+            <!-- Konten -->
+            <a href="{{ route('admin.konten.index') }}" @click="sidebarOpen = false"
+                class="flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('admin.konten.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 text-slate-400' }} font-semibold text-xs transition relative group">
+                <i class="fa-solid fa-blog w-5 text-sm flex-shrink-0"></i>
+                <span x-show="!sidebarMinimize" class="whitespace-nowrap">Konten</span>
+                <div x-show="sidebarMinimize"
+                    class="absolute left-full ml-3 px-2.5 py-1 bg-slate-800 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
+                    Konten
                 </div>
-            </div>
+            </a>
 
-            <!-- MENU PENGELOLAAN -->
-            <div class="pt-2" x-data="{ open: {{ request()->routeIs('admin.konten.*') || request()->routeIs('admin.program.*') || request()->routeIs('admin.berita.*') || request()->routeIs('admin.info.*') || request()->routeIs('admin.kegiatan.*') || request()->routeIs('admin.galeri.*') || request()->routeIs('admin.prestasi.*') ? 'true' : 'false' }} }">
-                <button @click="if(!sidebarMinimize) { open = !open } else { sidebarMinimize = false; open = true; }"
-                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-400 hover:bg-slate-800 transition relative group">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-layer-group w-5 text-sm flex-shrink-0"></i>
-                        <span x-show="!sidebarMinimize" class="whitespace-nowrap">Pengelolaan</span>
-                    </div>
-                    <i x-show="!sidebarMinimize"
-                        class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"
-                        :class="open ? 'rotate-180 text-emerald-400' : ''"></i>
+            <!-- Program -->
+            <a href="{{ route('admin.program.index') }}" @click="sidebarOpen = false"
+                class="flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('admin.program.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 text-slate-400' }} font-semibold text-xs transition relative group">
+                <i class="fa-solid fa-folder-tree w-5 text-sm flex-shrink-0"></i>
+                <span x-show="!sidebarMinimize" class="whitespace-nowrap">Program</span>
+                <div x-show="sidebarMinimize"
+                    class="absolute left-full ml-3 px-2.5 py-1 bg-slate-800 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
+                    Program
+                </div>
+            </a>
 
-                    <!-- Tooltip saat minimized -->
+            <!-- Berita -->
+            <a href="{{ route('admin.berita.index') }}" @click="sidebarOpen = false"
+                class="flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('admin.berita.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 text-slate-400' }} font-semibold text-xs transition relative group">
+                <i class="fa-solid fa-newspaper w-5 text-sm flex-shrink-0"></i>
+                <span x-show="!sidebarMinimize" class="whitespace-nowrap">Berita</span>
+                <div x-show="sidebarMinimize"
+                    class="absolute left-full ml-3 px-2.5 py-1 bg-slate-800 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
+                    Berita
+                </div>
+            </a>
+
+            <!-- Info Harian (hanya super admin) -->
+            @if (auth()->check() && auth()->user()->role == 'super_admin')
+                <a href="{{ route('admin.info.index') }}" @click="sidebarOpen = false"
+                    class="flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('admin.info.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 text-slate-400' }} font-semibold text-xs transition relative group">
+                    <i class="fa-solid fa-bullhorn w-5 text-sm flex-shrink-0"></i>
+                    <span x-show="!sidebarMinimize" class="whitespace-nowrap">Info Harian</span>
                     <div x-show="sidebarMinimize"
                         class="absolute left-full ml-3 px-2.5 py-1 bg-slate-800 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
-                        Pengelolaan
+                        Info Harian
                     </div>
-                </button>
+                </a>
+            @endif
 
-                <!-- Sub-menu Dropdown -->
-                <div x-show="open && !sidebarMinimize" x-collapse
-                    class="pl-4 pt-1.5 space-y-1 border-l border-slate-800 ml-4">
-                    <a href="{{ route('admin.konten.index') }}" @click="sidebarOpen = false"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.konten.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
-                        <i class="fa-solid fa-blog w-4 text-xs flex-shrink-0"></i>
-                        <span>Konten</span>
-                    </a>
-                    <a href="{{ route('admin.program.index') }}" @click="sidebarOpen = false"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.program.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
-                        <i class="fa-solid fa-folder-tree w-4 text-xs flex-shrink-0"></i>
-                        <span>Program</span>
-                    </a>
-                    <a href="{{ route('admin.berita.index') }}" @click="sidebarOpen = false"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.berita.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
-                        <i class="fa-solid fa-newspaper w-4 text-xs flex-shrink-0"></i>
-                        <span>Berita</span>
-                    </a>
-                    @if (auth()->check() && auth()->user()->role == 'super_admin')
-                        <a href="{{ route('admin.info.index') }}" @click="sidebarOpen = false"
-                            class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.info.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
-                            <i class="fa-solid fa-bullhorn w-4 text-xs flex-shrink-0"></i>
-                            <span>Info Harian</span>
-                        </a>
-                    @endif
-                    <a href="{{ route('admin.struktur.index') }}" @click="sidebarOpen = false"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.struktur.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
-                        <i class="fa-solid fa-calendar-plus w-4 text-xs flex-shrink-0"></i>
-                        <span>Struktur Organisasi</span>
-                    </a>
-                    
-                    <a href="{{ route('admin.galeri.index') }}" @click="sidebarOpen = false"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.galeri.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
-                        <i class="fa-solid fa-photo-film w-4 text-xs flex-shrink-0"></i>
-                        <span>Galeri</span>
-                    </a>
-                    <a href="{{ route('admin.prestasi.index') }}" @click="sidebarOpen = false"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.prestasi.*') ? 'bg-emerald-600/20 text-emerald-400 font-bold' : 'hover:bg-slate-800 text-slate-400' }} text-xs transition">
-                        <i class="fa-solid fa-trophy w-4 text-xs flex-shrink-0"></i>
-                        <span>Prestasi</span>
-                    </a>
+            <!-- Struktur Organisasi -->
+            <a href="{{ route('admin.struktur.index') }}" @click="sidebarOpen = false"
+                class="flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('admin.struktur.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 text-slate-400' }} font-semibold text-xs transition relative group">
+                <i class="fa-solid fa-sitemap w-5 text-sm flex-shrink-0"></i>
+                <span x-show="!sidebarMinimize" class="whitespace-nowrap">Struktur</span>
+                <div x-show="sidebarMinimize"
+                    class="absolute left-full ml-3 px-2.5 py-1 bg-slate-800 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
+                    Struktur
                 </div>
-            </div>
+            </a>
+
+            <!-- Galeri -->
+            <a href="{{ route('admin.galeri.index') }}" @click="sidebarOpen = false"
+                class="flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('admin.galeri.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 text-slate-400' }} font-semibold text-xs transition relative group">
+                <i class="fa-solid fa-photo-film w-5 text-sm flex-shrink-0"></i>
+                <span x-show="!sidebarMinimize" class="whitespace-nowrap">Galeri</span>
+                <div x-show="sidebarMinimize"
+                    class="absolute left-full ml-3 px-2.5 py-1 bg-slate-800 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
+                    Galeri
+                </div>
+            </a>
+
+            <!-- Prestasi -->
+            <a href="{{ route('admin.prestasi.index') }}" @click="sidebarOpen = false"
+                class="flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('admin.prestasi.*') ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/50' : 'hover:bg-slate-800 text-slate-400' }} font-semibold text-xs transition relative group">
+                <i class="fa-solid fa-trophy w-5 text-sm flex-shrink-0"></i>
+                <span x-show="!sidebarMinimize" class="whitespace-nowrap">Prestasi</span>
+                <div x-show="sidebarMinimize"
+                    class="absolute left-full ml-3 px-2.5 py-1 bg-slate-800 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
+                    Prestasi
+                </div>
+            </a>
 
         </div>
     </div>
 
     <!-- Bagian Bawah: Tombol Logout -->
-    <div class="p-4 border-t border-slate-800 flex items-center justify-between gap-2">
+    <div class="p-4 border-t border-slate-800">
         <button @click="logoutModalOpen = true; sidebarOpen = false;"
-            class="flex w-full items-center justify-center md:justify-start gap-3 px-4 py-3 rounded-xl bg-slate-800/50 hover:bg-red-600/20 hover:text-red-400 font-semibold text-xs transition text-slate-400 border border-slate-800 relative group">
+            class="flex w-full items-center justify-center md:justify-start gap-3 px-4 py-3.5 rounded-xl bg-slate-800/50 hover:bg-red-600/20 hover:text-red-400 font-semibold text-xs transition text-slate-400 border border-slate-800 relative group">
             <i class="fa-solid fa-right-from-bracket w-5 text-sm flex-shrink-0"></i>
-            <span x-show="!sidebarMinimize" class="whitespace-nowrap">Logout</span>
-
-            <!-- Tooltip saat minimized -->
+            <span x-show="!sidebarMinimize" class="whitespace-nowrap">Keluar</span>
             <div x-show="sidebarMinimize"
                 class="absolute left-full ml-3 px-2.5 py-1 bg-slate-800 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
-                Logout
+                Keluar
             </div>
         </button>
     </div>

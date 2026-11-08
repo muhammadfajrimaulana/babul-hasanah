@@ -66,7 +66,7 @@
                                 <td class="py-4 px-6 text-right">
                                     <div class="flex items-center justify-end gap-1">
                                         @if ($berita->status === 'published')
-                                            <a href="{{ route('berita.show', $berita) }}" target="_blank"
+                                            <a href="{{ route('berita.show', $berita->slug) }}" target="_blank"
                                                 class="px-2.5 py-1 bg-sky-50 text-sky-600 hover:bg-sky-100 rounded-lg text-[10px] font-bold transition">Lihat</a>
                                         @endif
                                         <a href="{{ route('admin.berita.edit', $berita) }}"

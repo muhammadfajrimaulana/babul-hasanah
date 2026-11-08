@@ -1,524 +1,1156 @@
 @extends('layouts.admin')
 
-@section('title', 'Dashboard Pondok Pesantren Babul Hasanah')
+@section('title', 'Dashboard | Pondok Pesantren Babul Hasanah')
 
 @section('content')
 
 @php
-    /*
-     * Semua data datang dari DashboardController:
-     * totalSantri, santriPutra, santriPutri, totalPendaftar, pendaftarMenunggu, pendaftarTerbaru,
-     * totalBerita, beritaBulanIni, totalAsatidz, jmlGaleri, jmlPrestasi, tahunAjaran, tren, komposisi, agenda
-     */
-    $namaDepan = \Illuminate\Support\Str::before(auth()->user()->name ?? 'Admin', ' ');
+    use Illuminate\Support\Facades\Route;
+    $user = auth()->user();
+    $namaDepan = \Illuminate\Support\Str::before($user->name ?? 'Admin', ' ');
     $tanggal   = now()->locale('id')->translatedFormat('l, d F Y');
-
-    $ada = fn (string $nama, array $param = []) => \Illuminate\Support\Facades\Route::has($nama) ? route($nama, $param) : null;
-
-    // Jumlah pengurus aktif di bagan (aman bila tabel belum dimigrasi)
-    $jmlStruktur = 0;
-    try {
-        $jmlStruktur = \App\Models\StrukturOrganisasi::aktif()->diKategori('bagan')->count();
-    } catch (\Throwable $e) {
-    }
-
-    // Kartu statistik: [label, angka, ikon, lencana, keterangan, warna]
-    $stat = [
-        ['Santri Aktif', $totalSantri,    'fa-user-graduate',   'Aktif',                      "Putra: {$santriPutra} | Putri: {$santriPutri}",   '#12a67a'],
-        ['Pendaftar',    $totalPendaftar, 'fa-file-invoice',    $pendaftarMenunggu . ' baru', 'Menunggu verifikasi',                              '#3b82c4'],
-        ['Berita',       $totalBerita,    'fa-newspaper',       'Publik',                     $beritaBulanIni . ' artikel terbit bulan ini',      '#c08a1c'],
-        ['Asatidz',      $totalAsatidz,   'fa-chalkboard-user', 'Staf',                       'Pengajar & Pembina',                               '#8b5cc6'],
-    ];
-
-    // Fitur website: [nama, ikon, warna, deskripsi, link kelola, link lihat, badge jumlah]
-    $fitur = [
-        ['Profil Pesantren',   'fa-landmark',         '#12a67a', 'Sejarah, visi & misi, struktur organisasi, dan pembelajaran.', $ada('admin.konten.index'),      url('/profil/sejarah'),                          null],
-        ['Struktur Organisasi', 'fa-sitemap',         '#0e9f8e', 'Bagan pengurus, ketua jenjang, dan bidang pelayanan beserta foto.', $ada('admin.struktur.index'), $ada('profil.struktur-organisasi'),          $jmlStruktur . ' pengurus'],
-        ['Jenjang Pendidikan', 'fa-book-open-reader', '#3b82c4', 'MDTA, PPS Wustha, MTs, MA, Diniyah Formal, dan Ma’had ‘Aly.', $ada('admin.program.index'),     $ada('jenjang.show', ['slug' => 'mdta']),        null],
-        ['Berita',             'fa-newspaper',        '#c08a1c', 'Kabar, pengumuman, dan artikel kegiatan pesantren.',            $ada('admin.berita.index'),      $ada('berita.index'),                            $totalBerita . ' berita'],
-        ['Galeri',             'fa-images',           '#8b5cc6', 'Album foto dan video dokumentasi kegiatan dan fasilitas.',      $ada('admin.galeri.index'),      $ada('galeri'),                                  $jmlGaleri . ' album'],
-        ['Kegiatan',           'fa-calendar-days',    '#0e9f8e', 'Agenda dan kegiatan santri di lingkungan pesantren.',           $ada('admin.kegiatan.index'),    $ada('kegiatan'),                                null],
-        ['Prestasi Santri',    'fa-trophy',           '#d6525a', 'Capaian dan penghargaan yang diraih santri.',                   $ada('admin.prestasi.index'),    $ada('prestasi.index'),                          $jmlPrestasi . ' prestasi'],
-        ['Pendaftaran Online', 'fa-file-signature',   '#12a67a', 'Formulir dan data calon santri baru.',                          $ada('admin.pendaftaran.index'), $ada('pendaftaran.index'),                       $totalPendaftar . ' pendaftar'],
-        ['Data Alumni',        'fa-user-graduate',    '#0e9f8e', 'Data lulusan, angkatan, dan kegiatan alumni setelah lulus.',    $ada('admin.alumni.index'),      null,                                            $totalAlumni . ' alumni'],
-        ['Pengguna Dashboard', 'fa-users-gear',       '#d6525a', 'Akun super admin, admin, dan wali santri yang dapat masuk panel.', $ada('super.pengguna.index'),    null,                                            $totalPengguna . ' akun'],
-        ['Kontak',             'fa-address-book',     '#3b82c4', 'Alamat, telepon, email, dan peta lokasi pesantren.',            null,                            $ada('kontak'),                                  null],
-    ];
-
-    // Pengguna Dashboard hanya tampil untuk Super Admin
-    $fitur = array_values(array_filter($fitur, fn ($f) => $f[0] !== 'Pengguna Dashboard' || $isSuperAdmin));
-
-    // Grafik tren pendaftar (data dari controller, skala otomatis)
-    $maks = max(10, (int) (ceil(max($tren) / 10) * 10));
-    $W = 600; $H = 230; $kiri = 34; $kanan = 12; $atas = 14; $bawah = 28;
-    $lebar = $W - $kiri - $kanan; $tinggi = $H - $atas - $bawah;
-    $n = count($tren); $i = 0; $pts = [];
-    foreach ($tren as $bln => $v) {
-        $pts[] = [round($kiri + $i * $lebar / max($n - 1, 1), 1), round($atas + $tinggi * (1 - $v / $maks), 1), $bln, $v];
-        $i++;
-    }
-    $garis = 'M ' . $pts[0][0] . ',' . $pts[0][1];
-    for ($k = 1; $k < $n; $k++) {
-        $xm = round(($pts[$k - 1][0] + $pts[$k][0]) / 2, 1);
-        $garis .= ' C ' . $xm . ',' . $pts[$k - 1][1] . ' ' . $xm . ',' . $pts[$k][1] . ' ' . $pts[$k][0] . ',' . $pts[$k][1];
-    }
-    $dasar = $atas + $tinggi;
-    $area  = $garis . ' L ' . $pts[$n - 1][0] . ',' . $dasar . ' L ' . $pts[0][0] . ',' . $dasar . ' Z';
-    $periode = array_key_first($tren) . ' – ' . array_key_last($tren);
+    $avatarUrl = $user->avatar ? asset('storage/' . $user->avatar) : asset('assets/img/logo/logo.png');
+    $ada = function ($nama, $param = []) { return Route::has($nama) ? route($nama, $param) : null; };
 @endphp
 
+<!-- Chart.js + Fonts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-    .ad {
-        --surface: #ffffff; --border: #e6e3d8; --text: #1f2a24; --muted: #6b756f; --head: #17402f;
-        --tint: #eef3ec; --chip: #f4f2ea; --beige: #f2e8d5; --gold: #a98532; --accent: #12b886;
-        --ok-bg: #e3f1e8; --ok-tx: #17603f; --wait-bg: #faecc9; --wait-tx: #8a5a0a; --bad-bg: #fbe3e3; --bad-tx: #a02b2b;
+    :root {
+        --ink: #0f172a;
+        --muted: #64748b;
+        --line: #e2e8f0;
+        --surface: #ffffff;
+        --tint: #f8fafc;
+        --chip: #f1f5f9;
+        --accent: #12a67a;
+        --accent-soft: #e0f2ee;
+        --gold: #b45309;
+        --gold-soft: #fff7e6;
+        --blue: #2563eb;
+        --blue-soft: #eef2ff;
+        --rose: #e11d48;
+        --rose-soft: #fff1f2;
+        --shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.06);
+        --shadow-lg: 0 20px 40px -10px rgba(15, 23, 42, 0.10);
+    }
+
+    .dark {
+        --ink: #f8fafc;
+        --muted: #94a3b8;
+        --line: #334155;
+        --surface: #0f172a;
+        --tint: #020617;
+        --chip: #1e293b;
+        --accent: #34d399;
+        --accent-soft: #064e3b;
+        --gold: #fbbf24;
+        --gold-soft: #451a03;
+        --blue: #60a5fa;
+        --blue-soft: #1e3a8a;
+        --rose: #fb7185;
+        --rose-soft: #490d14;
+        --shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.4);
+        --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    * { box-sizing: border-box; }
+
+    .db-page {
         font-family: 'Poppins', system-ui, -apple-system, sans-serif;
-        color: var(--text); display: flex; flex-direction: column; gap: 22px; padding-bottom: 12px;
+        color: var(--ink);
+        background: var(--tint);
+        min-height: 100%;
     }
-    .dark .ad {
-        --surface: #14201a; --border: #26362d; --text: #e8efe9; --muted: #9db0a5; --head: #e8efe9;
-        --tint: #1a2b23; --chip: #1c2c24; --beige: #2a2619; --gold: #d3b265; --accent: #2fe0a0;
-        --ok-bg: #12382a; --ok-tx: #6ee0ae; --wait-bg: #3a2f12; --wait-tx: #f0c36a; --bad-bg: #3d1c1e; --bad-tx: #f08c8c;
+
+    .db-page *, .db-page *::before, .db-page *::after { box-sizing: border-box; }
+    .db-page a { text-decoration: none; color: inherit; }
+    .db-page h1, .db-page h2, .db-page h3, .db-page h4, .db-page p { margin: 0; }
+
+    /* ===================== HEADER ===================== */
+    .db-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 8px;
     }
-    .ad *, .ad *::before, .ad *::after { box-sizing: border-box; }
-    .ad a { text-decoration: none; }
-    .ad h1, .ad h3, .ad h4, .ad h5, .ad p { margin: 0; }
 
-    .ad-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; }
-
-    .ad-ico {
-        --fc: #12a67a; width: 40px; height: 40px; border-radius: 12px; flex: none; display: grid; place-items: center;
-        font-size: 16px; color: var(--fc); background: color-mix(in srgb, var(--fc) 14%, transparent);
-        transition: all .25s ease;
+    .db-greeting { flex: 1; min-width: 280px; }
+    .db-title {
+        font-size: clamp(20px, 2.6vw, 26px);
+        font-weight: 700;
+        color: var(--ink);
+        line-height: 1.25;
+        letter-spacing: -0.02em;
     }
-    .ad-ico.sm { width: 34px; height: 34px; border-radius: 10px; font-size: 14px; }
-
-    .ad-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-    .ad-hello { font-size: clamp(22px, 3.4vw, 30px); font-weight: 600; color: var(--head); line-height: 1.25; }
-    .ad-hello span { color: var(--accent); }
-    .ad-sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
-    .ad-chips { display: flex; gap: 10px; flex-wrap: wrap; }
-    .ad-chip {
-        display: inline-flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 500; color: var(--text); background: var(--surface);
-        border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px;
+    .db-title span { color: var(--accent); }
+    .db-sub {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 6px;
+        line-height: 1.5;
     }
-    .ad-chip i { color: var(--accent); font-size: 13px; }
 
-    .ad-notice {
-        display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
-        background: var(--tint); border-radius: 14px; padding: 14px 18px; font-size: 13px;
+    .db-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-shrink: 0;
     }
-    .ad-notice > span { display: flex; align-items: center; gap: 12px; }
-    .ad-link { font-size: 12px; font-weight: 600; color: var(--head); display: inline-flex; align-items: center; gap: 8px; transition: gap .2s ease, color .2s ease; white-space: nowrap; }
-    .ad-link:hover { gap: 12px; color: var(--accent); }
-    .ad-link i { font-size: 10px; }
 
-    .ad-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-    .ad-stat { padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; transition: transform .2s ease, box-shadow .2s ease; }
-    .ad-stat:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(23, 64, 47, .1); }
-    .ad-stat-head { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 500; color: var(--muted); }
-    .ad-num { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .ad-num b { font-size: 34px; font-weight: 600; color: var(--head); line-height: 1; }
-    .ad-badge {
-        font-size: 11px; font-weight: 600; color: var(--fc, var(--gold)); padding: 3px 9px; border-radius: 999px;
-        background: color-mix(in srgb, var(--fc, var(--gold)) 14%, transparent);
+    .db-date {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--muted);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        padding: 8px 14px;
+        border-radius: 10px;
+        white-space: nowrap;
     }
-    .ad-stat small { font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 7px; }
-    .ad-stat small i { font-size: 10px; opacity: .7; }
 
-    .ad-sec { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
-    .ad-sec > div:first-child { display: flex; align-items: center; gap: 12px; }
-    .ad-ptitle { font-size: 15px; font-weight: 600; color: var(--head); }
-    .ad-psub { font-size: 12px; color: var(--muted); margin-top: 3px; }
-
-    .ad-feat { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px; }
-    .ad-f { padding: 20px; display: flex; flex-direction: column; gap: 14px; transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
-    .ad-f:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(23, 64, 47, .1); border-color: var(--fc); }
-    .ad-f:hover .ad-ico { background: var(--fc); color: #fff; }
-    .ad-f h4 { font-size: 14px; font-weight: 600; color: var(--head); }
-    .ad-f p { font-size: 12px; color: var(--muted); line-height: 1.65; margin-top: 4px; }
-    .ad-f-foot { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; }
-    .ad-f-foot a { font-weight: 600; display: inline-flex; align-items: center; gap: 7px; transition: color .2s ease; }
-    .ad-f-foot .kelola { color: var(--fc); }
-    .ad-f-foot .lihat { color: var(--muted); }
-    .ad-f-foot a:hover { color: var(--accent); }
-    .ad-f-foot i { font-size: 10px; }
-    .ad-f-foot .note { color: var(--muted); font-size: 11px; display: inline-flex; align-items: center; gap: 6px; }
-
-    .ad-row { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 22px; align-items: start; }
-    .ad-col { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
-    .ad-panel { padding: 24px 26px; }
-    .ad-period { font-size: 12px; font-weight: 500; color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; }
-    .ad-period i { color: var(--accent); }
-
-    .ad-big { display: flex; align-items: baseline; gap: 12px; margin: 20px 0 8px; flex-wrap: wrap; }
-    .ad-big b { font-size: 36px; font-weight: 600; color: var(--head); line-height: 1; }
-    .ad-big span { font-size: 12px; color: var(--muted); }
-
-    .ad-chart { width: 100%; height: auto; display: block; overflow: visible; }
-    .ad-chart text { font-size: 10px; fill: var(--muted); font-family: inherit; }
-    .ad-chart .grid { stroke: var(--border); stroke-width: 1; }
-    .ad-chart .ln { fill: none; stroke: var(--accent); stroke-width: 2.6; stroke-linecap: round; }
-    .ad-chart .dot { fill: var(--surface); stroke: var(--accent); stroke-width: 2; }
-    .ad-chart .dot.last { fill: var(--accent); }
-
-    .ad-seg { display: flex; gap: 4px; height: 10px; margin: 20px 0 18px; }
-    .ad-seg span { border-radius: 4px; }
-    .ad-leg { display: flex; flex-direction: column; gap: 14px; }
-    .ad-leg > div { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--muted); }
-    .ad-leg > div > span { display: flex; align-items: center; gap: 10px; }
-    .ad-leg b { color: var(--text); font-weight: 600; font-size: 12.5px; }
-
-    .ad-table-head { padding: 22px 26px 18px; display: flex; justify-content: space-between; align-items: center; gap: 14px; }
-    .ad-table-head > div:first-child { display: flex; align-items: center; gap: 12px; }
-    .ad-cols, .ad-line {
-        display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.3fr) 120px; gap: 14px; align-items: center; padding: 0 26px;
+    .db-avatar-wrap {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--line);
+        flex-shrink: 0;
+        cursor: pointer;
+        transition: all 0.2s ease;
     }
-    .ad-cols { background: var(--chip); height: 40px; font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-    .ad-line { min-height: 64px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--muted); transition: background .2s ease; }
-    .ad-line:hover { background: var(--chip); }
-    .ad-line .c-jenjang, .ad-line .c-asal { display: flex; align-items: center; gap: 8px; min-width: 0; }
-    .ad-line .c-jenjang i, .ad-line .c-asal i { color: var(--accent); font-size: 11px; flex: none; }
-    .ad-who { display: flex; align-items: center; gap: 12px; min-width: 0; }
-    .ad-av {
-        width: 38px; height: 38px; border-radius: 50%; background: var(--tint); color: var(--head); font-size: 11.5px; font-weight: 600;
-        display: grid; place-items: center; flex: none;
+    .db-avatar-wrap:hover { border-color: var(--accent); transform: scale(1.04); }
+    .db-avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ===================== STAT CARDS ===================== */
+    .db-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 26px;
     }
-    .ad-who h4 { font-size: 13px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .ad-who small { font-size: 11px; color: var(--muted); display: block; }
-    .ad-who .mob { display: none; }
-    .ad-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 5px 11px; border-radius: 999px; justify-self: start; }
-    .ad-pill i { font-size: 10px; }
-    .ad-pill.ok { background: var(--ok-bg); color: var(--ok-tx); }
-    .ad-pill.wait { background: var(--wait-bg); color: var(--wait-tx); }
-    .ad-pill.bad { background: var(--bad-bg); color: var(--bad-tx); }
-    .ad-empty { text-align: center; padding: 30px; font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--border); }
-    .ad-empty i { display: block; font-size: 26px; color: var(--border); margin-bottom: 10px; }
-    .ad-foot { padding: 14px 26px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
 
-    .ad-agenda { display: flex; flex-direction: column; gap: 18px; margin-top: 20px; }
-    .ad-ag { display: flex; align-items: center; gap: 14px; }
-    .ad-date { width: 46px; height: 50px; border-radius: 12px; background: var(--chip); display: flex; flex-direction: column; align-items: center; justify-content: center; flex: none; }
-    .ad-date b { font-size: 18px; font-weight: 600; color: var(--head); line-height: 1; }
-    .ad-date small { font-size: 9px; font-weight: 500; color: var(--muted); margin-top: 3px; letter-spacing: .06em; }
-    .ad-ag h5 { font-size: 13px; font-weight: 600; color: var(--text); }
-    .ad-ag p { font-size: 11px; color: var(--muted); margin-top: 4px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .ad-ag p span { display: inline-flex; align-items: center; gap: 5px; }
-    .ad-ag p i { font-size: 10px; color: var(--accent); }
-    .ad-none { font-size: 12px; color: var(--muted); margin-top: 18px; }
-
-    .ad-help { background: var(--beige); border-radius: 18px; padding: 20px 22px; display: flex; gap: 14px; align-items: flex-start; }
-    .ad-help h5 { font-size: 14px; font-weight: 600; color: var(--text); }
-    .ad-help p { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.65; }
-
-    .ad-quick { padding: 18px 26px; display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
-    .ad-quick > div:first-child { display: flex; align-items: center; gap: 12px; }
-    .ad-quick-btns { display: flex; gap: 12px; flex-wrap: wrap; }
-    .ad-btn {
-        display: inline-flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: var(--head);
-        background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 18px; transition: all .2s ease;
+    .db-stat {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 18px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        transition: all 0.25s ease;
+        position: relative;
+        overflow: hidden;
     }
-    .ad-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
-    .ad-btn.main { background: var(--head); border-color: var(--head); color: #fff; }
-    .ad-btn.main:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .dark .ad-btn.main { background: var(--accent); border-color: var(--accent); color: #0f2018; }
-    .ad-btn i { font-size: 13px; }
+    .db-stat:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--accent);
+    }
+    .db-stat::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 4px;
+        background: var(--accent);
+        opacity: 0.9;
+    }
+    .db-stat-blue::before { background: var(--blue); }
+    .db-stat-gold::before { background: var(--gold); }
+    .db-stat-rose::before { background: var(--rose); }
+    .db-stat-accent::before { background: var(--accent); }
 
-    @media (max-width: 1200px) { .ad-feat { grid-template-columns: repeat(2, 1fr); } }
+    /* ===================== RESPONSIVE MOBILE ===================== */
     @media (max-width: 1100px) {
-        .ad-stats { grid-template-columns: repeat(2, 1fr); }
-        .ad-row { grid-template-columns: 1fr; }
+        .db-stats { grid-template-columns: repeat(2, 1fr); }
+        .db-main { grid-template-columns: 1fr; gap: 16px; }
+        .db-right { position: static; }
     }
-    @media (max-width: 720px) {
-        .ad { gap: 16px; }
-        .ad-stats { gap: 12px; }
-        .ad-stat { padding: 16px; }
-        .ad-num b { font-size: 28px; }
-        .ad-panel { padding: 20px 18px; }
-        .ad-table-head { padding: 18px; }
-        .ad-cols { display: none; }
-        .ad-line { grid-template-columns: minmax(0, 1fr) auto; padding: 12px 18px; }
-        .ad-line .c-jenjang, .ad-line .c-asal { display: none; }
-        .ad-who .mob { display: block; }
-        .ad-foot { padding: 14px 18px; }
-        .ad-quick { padding: 18px; }
-        .ad-quick-btns { width: 100%; }
-        .ad-btn { flex: 1; justify-content: center; }
+
+    @media (max-width: 768px) {
+        .db-stats { grid-template-columns: 1fr; }
+        .db-charts-grid { grid-template-columns: 1fr; }
+        .db-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+        .db-meta { width: 100%; justify-content: space-between; }
+        .db-greeting { min-width: 100%; }
+        .db-panel-body { padding: 16px 18px; }
+        .db-panel-header { padding: 14px 18px; }
+        .db-stat { padding: 16px 18px; }
     }
-    @media (max-width: 560px) { .ad-feat { grid-template-columns: 1fr; } }
-    @media (max-width: 420px) { .ad-stats { grid-template-columns: 1fr; } }
+
+    @media (max-width: 560px) {
+        .db-page { padding: 0 8px; }
+        .db-stat { padding: 14px 16px; }
+        .db-stat-num { font-size: 24px; }
+        .db-panel-title { font-size: 14px; }
+        .db-panel-sub { font-size: 11px; }
+        .db-chart-box { height: 220px; }
+        .db-chart-bar { height: 140px; }
+        .db-cal-btn { width: 26px; height: 26px; font-size: 11px; }
+        .db-cal-day { font-size: 10px; }
+        .db-info-pill { font-size: 9px; padding: 2px 8px; }
+    }
+
+    .db-stat-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    .db-stat-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+    }
+    .db-stat-ico {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+        color: #fff;
+        flex-shrink: 0;
+        background: var(--accent);
+        box-shadow: 0 4px 12px -2px rgba(18, 166, 122, 0.35);
+    }
+    .db-stat-blue .db-stat-ico { background: var(--blue); box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.35); }
+    .db-stat-gold .db-stat-ico { background: var(--gold); box-shadow: 0 4px 12px -2px rgba(180, 83, 9, 0.35); }
+    .db-stat-rose .db-stat-ico { background: var(--rose); box-shadow: 0 4px 12px -2px rgba(225, 29, 72, 0.35); }
+
+    .db-stat-num {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--ink);
+        line-height: 1;
+        margin-top: 2px;
+    }
+    .db-stat-num span {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--accent);
+        margin-left: 6px;
+    }
+    .db-stat-blue .db-stat-num span { color: var(--blue); }
+    .db-stat-gold .db-stat-num span { color: var(--gold); }
+    .db-stat-rose .db-stat-num span { color: var(--rose); }
+
+    .db-stat-desc {
+        font-size: 11px;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 4px;
+    }
+    .db-stat-desc i { font-size: 10px; opacity: 0.7; }
+
+    /* ===================== MAIN LAYOUT ===================== */
+    .db-main {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 24px;
+        align-items: start;
+    }
+
+    .db-left { display: flex; flex-direction: column; gap: 20px; }
+    .db-right {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        position: sticky;
+        top: 20px;
+        align-self: start;
+    }
+
+    /* ===================== PANEL ===================== */
+    .db-panel {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow);
+        transition: all 0.25s ease;
+    }
+    .db-panel:hover { box-shadow: var(--shadow-lg); }
+
+    .db-panel-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .db-panel-left { display: flex; align-items: center; gap: 10px; }
+    .db-panel-ico {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        font-size: 15px;
+        color: #fff;
+        flex-shrink: 0;
+    }
+    .db-panel-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--ink);
+        display: block;
+    }
+    .db-panel-sub {
+        font-size: 11.5px;
+        color: var(--muted);
+        margin-top: 4px;
+        line-height: 1.4;
+        display: block;
+    }
+    .db-panel-link {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--accent);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+    .db-panel-link:hover { color: var(--ink); gap: 10px; }
+
+    .db-panel-body { padding: 22px 24px; }
+
+    /* ===================== CHART CONTAINER ===================== */
+    .db-chart-box { height: 240px; width: 100%; }
+    .db-chart-bar { height: 150px; }
+    .db-chart-caption {
+        font-size: 12px;
+        color: var(--muted);
+        text-align: center;
+        margin-top: 8px;
+    }
+
+    .db-charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    /* ===================== INFO HARIAN ===================== */
+    .db-info-list { display: flex; flex-direction: column; gap: 10px; }
+    .db-info-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        transition: all 0.2s ease;
+    }
+    .db-info-item:hover {
+        border-color: var(--accent);
+        transform: translateX(3px);
+    }
+    .db-info-ico {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+        color: #fff;
+        flex-shrink: 0;
+    }
+    .db-info-content { flex: 1; min-width: 0; }
+    .db-info-title {
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--ink);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .db-info-meta {
+        font-size: 10.5px;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 3px;
+    }
+    .db-info-meta i { font-size: 9px; color: var(--accent); }
+    .db-info-pill {
+        font-size: 9.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 3px 10px;
+        border-radius: 999px;
+        flex-shrink: 0;
+    }
+    .db-info-pill.jadwal { background: var(--accent-soft); color: var(--accent); }
+    .db-info-pill.penting { background: var(--rose-soft); color: var(--rose); }
+    .db-info-pill.aktif { background: var(--chip); color: var(--ink); }
+
+    .db-empty {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--muted);
+    }
+    .db-empty i {
+        font-size: 36px;
+        color: var(--line);
+        display: block;
+        margin-bottom: 12px;
+        opacity: 0.5;
+    }
+
+    /* ===================== KALENDER ===================== */
+    .db-cal-panel { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); }
+    .db-cal-header {
+        background: var(--ink);
+        color: #fff;
+        padding: 20px 22px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .dark .db-cal-header { background: var(--ink); }
+    .db-cal-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    .db-cal-title i { color: var(--gold); }
+    .db-cal-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .db-cal-month {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--gold);
+    }
+    .db-cal-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .db-cal-btn:hover { background: rgba(255,255,255,0.25); }
+
+    .db-cal-body { padding: 16px; }
+    .db-cal-week {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+        margin-bottom: 6px;
+    }
+    .db-cal-day-name {
+        font-size: 9.5px;
+        font-weight: 600;
+        text-align: center;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 4px 0;
+    }
+    .db-cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .db-cal-day {
+        aspect-ratio: 1;
+        border-radius: 10px;
+        border: 1px solid transparent;
+        background: var(--chip);
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 600;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .db-cal-day:hover { background: var(--tint); border-color: var(--accent); color: var(--ink); }
+    .db-cal-day.today {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+    }
+    .db-cal-day.other { color: var(--muted); opacity: 0.4; }
+    .db-cal-day.has-event { position: relative; }
+    .db-cal-day.has-event::after {
+        content: '';
+        position: absolute;
+        bottom: 6px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--gold);
+    }
+    .db-cal-day .day-num { font-weight: 700; }
+    .db-cal-day .day-events {
+        font-size: 8px;
+        font-weight: 600;
+        margin-top: 2px;
+        text-align: center;
+        line-height: 1.1;
+        display: -webkit-box;
+        overflow: hidden;
+    }
+    .db-cal-day .day-event-1 { color: var(--accent); }
+    .db-cal-day .day-event-2 { color: var(--gold); }
+
+    .db-cal-add {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 16px;
+        border-top: 1px solid var(--line);
+        background: var(--tint);
+    }
+    .db-cal-add-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        background: var(--ink);
+        color: #fff;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .db-cal-add-btn:hover { background: var(--accent); }
+
+    /* ===================== EVENT LIST ===================== */
+    .db-event-list { display: flex; flex-direction: column; gap: 8px; }
+    .db-event-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: var(--surface);
+        transition: all 0.2s ease;
+    }
+    .db-event-item:hover { border-color: var(--accent); transform: translateX(2px); }
+    .db-event-ico {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        font-size: 13px;
+        color: #fff;
+        flex-shrink: 0;
+    }
+    .db-event-content { flex: 1; min-width: 0; }
+    .db-event-title {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--ink);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .db-event-meta {
+        font-size: 10px;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 2px;
+    }
+    .db-event-meta i { font-size: 9px; }
+
+    /* ===================== ALERT ===================== */
+    .db-alert {
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 13px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    .db-alert.ok { background: var(--accent-soft); color: var(--accent); }
+    .db-alert.bad { background: var(--rose-soft); color: var(--rose); }
+
+    /* ===================== TOAST ===================== */
+    #db-toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 60;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 14px 18px;
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transform: translateY(120px);
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+    #db-toast.show { transform: translateY(0); opacity: 1; }
+    #db-toast.ok { border-left: 4px solid var(--accent); }
+    #db-toast i { color: var(--accent); font-size: 16px; }
+    #db-toast-msg { font-size: 13px; font-weight: 500; color: var(--ink); }
+    #db-toast-close { font-size: 11px; color: var(--muted); cursor: pointer; margin-left: auto; }
 </style>
 
-<div class="ad">
+<div class="db-page">
 
-    {{-- ===================== SAPAAN ===================== --}}
-    <div class="ad-top">
-        <div>
-            <h1 class="ad-hello">Assalamu’alaikum, <span>{{ $namaDepan }}</span> <i class="fa-solid fa-hands-praying" style="font-size:.7em;color:var(--gold)"></i></h1>
-            <p class="ad-sub">Berikut ringkasan aktivitas dan perkembangan pesantren hari ini.</p>
+    @if (session('success'))
+        <div class="db-alert ok"><i class="fa-solid fa-circle-check"></i>{{ session('success') }}</div>
+    @endif
+    @if (session('error'))
+        <div class="db-alert bad"><i class="fa-solid fa-circle-exclamation"></i>{{ session('error') }}</div>
+    @endif
+
+    {{-- ===================== HEADER ===================== --}}
+    <div class="db-header">
+        <div class="db-greeting">
+            <h1 class="db-title">Assalamu’alaikum, <span>{{ $namaDepan }}</span> <i class="fa-solid fa-hands-praying" style="font-size:0.75em;color:var(--gold)"></i></h1>
+            <p class="db-sub">Selamat datang kembali di Panel Admin Pondok Pesantren Babul Hasanah. Berikut ringkasan perkembangan pesantren hari ini.</p>
         </div>
-        <div class="ad-chips">
-            <span class="ad-chip"><i class="fa-solid fa-graduation-cap"></i> Tahun Ajaran {{ $tahunAjaran }}</span>
-            <span class="ad-chip"><i class="fa-regular fa-calendar"></i> {{ $tanggal }}</span>
+        <div class="db-meta">
+            <span class="db-date">{{ $tanggal }}</span>
+            <div class="db-avatar-wrap" @click="location.href='{{ route('admin.profil') }}'">
+                <img src="{{ $avatarUrl }}" alt="Profil" onerror="this.src='{{ asset('assets/img/logo/logo.png') }}'">
+            </div>
         </div>
     </div>
 
-    {{-- ===================== PEMBERITAHUAN ===================== --}}
-    <div class="ad-notice">
-        <span>
-            <span class="ad-ico sm" style="--fc:#12a67a"><i class="fa-solid fa-clipboard-check"></i></span>
-            @if ($pendaftarMenunggu > 0)
-                Ada {{ $pendaftarMenunggu }} pendaftaran yang menunggu verifikasi. Mari bantu calon santri melanjutkan langkahnya.
-            @else
-                Semua pendaftaran sudah diverifikasi.
-            @endif
-        </span>
-        <a href="{{ route('admin.pendaftaran.index') }}" class="ad-link">Tinjau Pendaftaran <i class="fa-solid fa-arrow-right"></i></a>
-    </div>
-
-    {{-- ===================== STATISTIK ===================== --}}
-    <div class="ad-stats">
-        @foreach ($stat as $s)
-            <div class="ad-card ad-stat" style="--fc: {{ $s[5] }}">
-                <div class="ad-stat-head"><span>{{ $s[0] }}</span><span class="ad-ico"><i class="fa-solid {{ $s[2] }}"></i></span></div>
-                <div class="ad-num"><b>{{ number_format($s[1], 0, ',', '.') }}</b><span class="ad-badge">{{ $s[3] }}</span></div>
-                <small><i class="fa-solid fa-circle"></i>{{ $s[4] }}</small>
+    {{-- ===================== STAT CARDS ===================== --}}
+    <div class="db-stats">
+        @php
+            $statCards = [
+                ['Santri Aktif', $totalSantri, 'fa-users', 'accent', "Putra: {$santriPutra} | Putri: {$santriPutri}"],
+                ['Pendaftar', $totalPendaftar, 'fa-file-invoice', 'blue', $pendaftarMenunggu . ' menunggu verifikasi'],
+                ['Berita', $totalBerita, 'fa-newspaper', 'gold', $beritaBulanIni . ' artikel bulan ini'],
+                ['Alumni', $totalAlumni, 'fa-user-graduate', 'rose', 'Lulusan tercatat'],
+            ];
+        @endphp
+        @foreach ($statCards as $index => $s)
+            @php
+                if ($s[3] === 'accent') { $badgeClass = 'db-stat-accent'; $icoColor = '#12a67a'; $icoTextColor = '#fff'; }
+                elseif ($s[3] === 'blue') { $badgeClass = 'db-stat-blue'; $icoColor = '#ffffff'; $icoTextColor = '#2563eb'; }
+                elseif ($s[3] === 'gold') { $badgeClass = 'db-stat-gold'; $icoColor = '#b45309'; $icoTextColor = '#fff'; }
+                else { $badgeClass = 'db-stat-rose'; $icoColor = '#e11d48'; $icoTextColor = '#fff'; }
+            @endphp
+            <div class="db-stat {{ $badgeClass }}">
+                <div class="db-stat-head">
+                    <span class="db-stat-label">{{ $s[0] }}</span>
+                    <span class="db-stat-ico" style="background: {{ $icoColor }}"><i class="fa-solid {{ $s[2] }}" style="color: {{ $icoTextColor }}"></i></span>
+                </div>
+                <div class="db-stat-num"><b>{{ number_format($s[1], 0, ',', '.') }}</b></div>
+                <small class="db-stat-desc"><i class="fa-solid fa-circle"></i>{{ $s[4] }}</small>
             </div>
         @endforeach
     </div>
 
-    {{-- ===================== FITUR WEBSITE ===================== --}}
-    <div>
-        <div class="ad-sec">
-            <div>
-                <span class="ad-ico" style="--fc:#12a67a"><i class="fa-solid fa-globe"></i></span>
-                <div>
-                    <h3 class="ad-ptitle">Fitur Website</h3>
-                    <p class="ad-psub">Halaman yang tampil di website, sesuai menu navigasi pesantren</p>
-                </div>
-            </div>
-            <a href="{{ url('/') }}" target="_blank" rel="noopener noreferrer" class="ad-link">Buka website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
-        </div>
+    {{-- ===================== MAIN LAYOUT ===================== --}}
+    <div class="db-main">
 
-        <div class="ad-feat">
-            @foreach ($fitur as $f)
-                <div class="ad-card ad-f" style="--fc: {{ $f[2] }}">
-                    <div style="display:flex;gap:14px;align-items:flex-start">
-                        <span class="ad-ico"><i class="fa-solid {{ $f[1] }}"></i></span>
+        {{-- KIRI: CHARTS & INFO ===================== --}}
+        <div class="db-left">
+
+            {{-- Grafik Pendaftar per Jenjang --}}
+            <div class="db-panel">
+                <div class="db-panel-header">
+                    <div class="db-panel-left">
+                        <span class="db-panel-ico" style="background: #2563eb"><i class="fa-solid fa-chart-bar"></i></span>
                         <div>
-                            <h4>{{ $f[0] }}
-                                @if (!empty($f[6]))
-                                    <span class="ad-badge" style="margin-left:6px">{{ $f[6] }}</span>
-                                @endif
-                            </h4>
-                            <p>{{ $f[3] }}</p>
+                            <h3 class="db-panel-title">Pendaftar per Jenjang</h3>
+                            <p class="db-panel-sub">Distribusi calon santri berdasarkan jenjang tujuan pendaftaran.</p>
                         </div>
                     </div>
-                    <div class="ad-f-foot">
-                        @if ($f[4])
-                            <a href="{{ $f[4] }}" class="kelola"><i class="fa-solid fa-sliders"></i> Kelola</a>
-                        @else
-                            <span class="note"><i class="fa-regular fa-eye"></i> Halaman publik</span>
-                        @endif
-                        @if ($f[5])
-                            <a href="{{ $f[5] }}" target="_blank" rel="noopener noreferrer" class="lihat">Lihat <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
-                        @endif
-                    </div>
+                    <a href="{{ $ada('admin.pendaftaran.index') }}" class="db-panel-link">Lihat semua <i class="fa-solid fa-arrow-right"></i></a>
                 </div>
-            @endforeach
-        </div>
-    </div>
-
-    {{-- ===================== GRAFIK + KOMPOSISI ===================== --}}
-    <div class="ad-row">
-
-        <div class="ad-card ad-panel">
-            <div class="ad-sec">
-                <div>
-                    <span class="ad-ico" style="--fc:#12a67a"><i class="fa-solid fa-chart-line"></i></span>
-                    <div>
-                        <h3 class="ad-ptitle">Statistik Tren Pendaftar Santri</h3>
-                        <p class="ad-psub">Jumlah calon santri baru per bulan</p>
+                <div class="db-panel-body" style="align-items: flex-start;">
+                    <div style="max-height: 170px; overflow: visible;">
+                        <canvas id="chartJenjang" class="db-chart-box db-chart-bar"></canvas>
                     </div>
-                </div>
-                <span class="ad-period"><i class="fa-regular fa-calendar-check"></i> 6 bulan terakhir ({{ $periode }})</span>
-            </div>
-
-            <div class="ad-big"><b>{{ max($tren) }}</b><span>puncak pendaftar masuk per bulan</span></div>
-
-            <svg class="ad-chart" viewBox="0 0 {{ $W }} {{ $H }}" role="img" aria-label="Grafik tren pendaftar per bulan">
-                <defs>
-                    <linearGradient id="adGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="#12b886" stop-opacity=".22" />
-                        <stop offset="100%" stop-color="#12b886" stop-opacity="0" />
-                    </linearGradient>
-                </defs>
-
-                @for ($g = 0; $g <= 5; $g++)
-                    @php $gy = round($atas + $tinggi * (1 - $g / 5), 1); @endphp
-                    <line class="grid" x1="{{ $kiri }}" x2="{{ $W - $kanan }}" y1="{{ $gy }}" y2="{{ $gy }}" />
-                    <text x="{{ $kiri - 10 }}" y="{{ $gy + 3 }}" text-anchor="end">{{ round($maks / 5 * $g) }}</text>
-                @endfor
-
-                <path d="{{ $area }}" fill="url(#adGrad)" />
-                <path d="{{ $garis }}" class="ln" />
-
-                @foreach ($pts as $idx => $p)
-                    <circle class="dot {{ $idx === $n - 1 ? 'last' : '' }}" cx="{{ $p[0] }}" cy="{{ $p[1] }}" r="{{ $idx === $n - 1 ? 4.5 : 3.5 }}" />
-                    <text x="{{ $p[0] }}" y="{{ $H - 8 }}" text-anchor="middle">{{ $p[2] }}</text>
-                @endforeach
-            </svg>
-        </div>
-
-        <div class="ad-card ad-panel">
-            <div class="ad-sec" style="flex-wrap:nowrap">
-                <div>
-                    <span class="ad-ico" style="--fc:#c08a1c"><i class="fa-solid fa-chart-pie"></i></span>
-                    <div>
-                        <h3 class="ad-ptitle">Komposisi Santri Aktif</h3>
-                        <p class="ad-psub">Berdasarkan tingkat jenjang</p>
-                    </div>
+                    <p class="db-chart-caption">Jumlah pendaftar yang telah dikumpulkan per jenjang pendidikan.</p>
                 </div>
             </div>
 
-            <div class="ad-big" style="margin-top:24px"><b>{{ number_format($totalSantri, 0, ',', '.') }}</b><span>total santri</span></div>
-
-            @if (count($komposisi))
-                <div class="ad-seg">
-                    @foreach ($komposisi as $k)
-                        <span style="width: {{ $k[1] }}%; background: {{ $k[3] }}"></span>
-                    @endforeach
-                </div>
-
-                <div class="ad-leg">
-                    @foreach ($komposisi as $k)
-                        <div>
-                            <span><span class="ad-ico sm" style="--fc: {{ $k[3] }}; width:30px; height:30px; font-size:12px"><i class="fa-solid {{ $k[4] }}"></i></span>{{ $k[0] }}</span>
-                            <b>{{ $k[1] }}% ({{ $k[2] }})</b>
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <p class="ad-none">Belum ada data santri.</p>
-            @endif
-        </div>
-    </div>
-
-    {{-- ===================== PENDAFTAR TERBARU + AGENDA ===================== --}}
-    <div class="ad-row">
-
-        <div class="ad-card" style="overflow:hidden">
-            <div class="ad-table-head">
-                <div>
-                    <span class="ad-ico" style="--fc:#3b82c4"><i class="fa-solid fa-user-plus"></i></span>
-                    <div>
-                        <h3 class="ad-ptitle">Pendaftar Terbaru</h3>
-                        <p class="ad-psub">Calon santri yang baru mengisi formulir</p>
-                    </div>
-                </div>
-                <a href="{{ route('admin.pendaftaran.index') }}" class="ad-link">Lihat semua <i class="fa-solid fa-arrow-right"></i></a>
-            </div>
-
-            <div class="ad-cols">
-                <span>Nama Calon Santri</span>
-                <span>Jenjang</span>
-                <span>Asal Sekolah</span>
-                <span>Status</span>
-            </div>
-
-            @forelse ($pendaftarTerbaru as $pendaftar)
-                @php
-                    $statusAsli = $pendaftar->status_pendaftaran ?: 'menunggu';
-                    $kelas = match (strtolower($statusAsli)) {
-                        'diterima' => 'ok',
-                        'ditolak'  => 'bad',
-                        default    => 'wait',
-                    };
-                    $ikonStatus = ['ok' => 'fa-circle-check', 'bad' => 'fa-circle-xmark', 'wait' => 'fa-clock'][$kelas];
-                    $inisial = collect(preg_split('/\s+/', trim($pendaftar->nama_lengkap)))
-                        ->take(2)->map(fn ($w) => mb_strtoupper(mb_substr($w, 0, 1)))->implode('');
-                @endphp
-                <div class="ad-line">
-                    <div class="ad-who">
-                        <span class="ad-av">{{ $inisial }}</span>
-                        <div style="min-width:0">
-                            <h4>{{ $pendaftar->nama_lengkap }}</h4>
-                            <small>ID: {{ $pendaftar->no_pendaftaran }}</small>
-                            <small class="mob">{{ $pendaftar->jenjang_tujuan }} • {{ $pendaftar->asal_sekolah }}</small>
-                        </div>
-                    </div>
-                    <span class="c-jenjang"><i class="fa-solid fa-school"></i>{{ $pendaftar->jenjang_tujuan }}</span>
-                    <span class="c-asal"><i class="fa-solid fa-building-columns"></i>{{ $pendaftar->asal_sekolah }}</span>
-                    <span class="ad-pill {{ $kelas }}"><i class="fa-solid {{ $ikonStatus }}"></i>{{ ucfirst($statusAsli) }}</span>
-                </div>
-            @empty
-                <div class="ad-empty"><i class="fa-regular fa-folder-open"></i>Belum ada data pendaftar terbaru.</div>
-            @endforelse
-
-            <div class="ad-foot"><i class="fa-solid fa-list-ul"></i> Menampilkan {{ count($pendaftarTerbaru) }} dari {{ $totalPendaftar }} pendaftar</div>
-        </div>
-
-        <div class="ad-col">
-            <div class="ad-card ad-panel">
-                <div class="ad-sec" style="flex-wrap:nowrap">
-                    <div>
-                        <span class="ad-ico" style="--fc:#8b5cc6"><i class="fa-solid fa-calendar-check"></i></span>
-                        <h3 class="ad-ptitle">Agenda Terdekat</h3>
-                    </div>
-                </div>
-                @if (count($agenda))
-                    <div class="ad-agenda">
-                        @foreach ($agenda as $a)
-                            <div class="ad-ag">
-                                <span class="ad-date"><b>{{ $a[0] }}</b><small>{{ $a[4] }}</small></span>
-                                <div>
-                                    <h5>{{ $a[1] }}</h5>
-                                    <p><span><i class="fa-regular fa-clock"></i>{{ $a[2] }}</span><span><i class="fa-solid fa-location-dot"></i>{{ $a[3] }}</span></p>
-                                </div>
+            {{-- Grafik Santri & Alumni --}}
+            <div class="db-charts-grid">
+                <div class="db-panel">
+                    <div class="db-panel-header">
+                        <div class="db-panel-left">
+                            <span class="db-panel-ico" style="background: #12a67a"><i class="fa-solid fa-people-group"></i></span>
+                            <div>
+                                <h3 class="db-panel-title">Data Santri Aktif</h3>
+                                <p class="db-panel-sub">Komposisi santri berdasarkan jenjang pendidikan.</p>
                             </div>
-                        @endforeach
+                        </div>
                     </div>
-                @else
-                    <p class="ad-none">Belum ada agenda mendatang.</p>
-                @endif
+                    <div class="db-panel-body">
+                        <canvas id="chartSantri" style="max-height: 220px"></canvas>
+                    </div>
+                </div>
+                <div class="db-panel">
+                    <div class="db-panel-header">
+                        <div class="db-panel-left">
+                            <span class="db-panel-ico" style="background: #b45309"><i class="fa-solid fa-user-graduate"></i></span>
+                            <div>
+                                <h3 class="db-panel-title">Data Alumni</h3>
+                                <p class="db-panel-sub">Distribusi alumni berdasarkan jenjang pendidikan.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="db-panel-body">
+                        <canvas id="chartAlumni" style="max-height: 220px"></canvas>
+                    </div>
+                </div>
             </div>
 
-            <div class="ad-help">
-                <span class="ad-ico" style="--fc:#c08a1c"><i class="fa-regular fa-circle-question"></i></span>
-                <div>
-                    <h5>Pusat Bantuan</h5>
-                    <p>Kendala server atau database? Hubungi tim pengembang internal.</p>
+            {{-- Info Harian --}}
+            <div class="db-panel">
+                <div class="db-panel-header">
+                    <div class="db-panel-left">
+                        <span class="db-panel-ico" style="background: #e11d48"><i class="fa-solid fa-bullhorn"></i></span>
+                        <div>
+                            <h3 class="db-panel-title">Info Harian</h3>
+                            <p class="db-panel-sub">Pengumuman dan jadwal terbaru dari pesantren.</p>
+                        </div>
+                    </div>
+                    <a href="{{ $ada('admin.info.index') }}" class="db-panel-link">Kelola Info <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+                <div class="db-panel-body">
+                    <div class="db-info-list">
+                        @if (count($infoHarian))
+                            @foreach ($infoHarian as $info)
+                                @php
+                                    if ($info->jenis === 'jadwal') {
+                                        $jenjangClass = 'jadwal';
+                                        $icoColor = '#12a67a';
+                                    } elseif ($info->penting) {
+                                        $jenjangClass = 'penting';
+                                        $icoColor = '#e11d48';
+                                    } else {
+                                        $jenjangClass = 'aktif';
+                                        $icoColor = '#12a67a';
+                                    }
+                                    $ikonInfo = $info->ikon ?? 'fa-circle-info';
+                                    $tglLabel = $info->waktu_label ?? '';
+                                    $kategoriLabel = $info->kategori ?? '-';
+                                @endphp
+                                <div class="db-info-item">
+                                    <span class="db-info-ico" style="background: {{ $icoColor }}"><i class="fa-solid {{ $ikonInfo }}"></i></span>
+                                    <div class="db-info-content">
+                                        <div class="db-info-title">{{ $info->judul }}</div>
+                                        <div class="db-info-meta">
+                                            <span><i class="fa-regular fa-calendar"></i>{{ $tglLabel }}</span>
+                                            <span><i class="fa-solid fa-tag"></i>{{ $kategoriLabel }}</span>
+                                        </div>
+                                    </div>
+                                    <span class="db-info-pill {{ $jenjangClass }}">{{ ucfirst($jenjangClass) }}</span>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="db-empty">
+                                <i class="fa-regular fa-bell"></i>
+                                <div>Belum ada info harian yang aktif.</div>
+                                @if ($user->role == 'super_admin')
+                                    <div class="mt-3"><a href="{{ $ada('admin.info.create') }}" class="db-panel-link">Tambah Info <i class="fa-solid fa-plus"></i></a></div>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        {{-- KANAN: KALENDER ===================== --}}
+        <div class="db-right">
+            <div class="db-cal-panel" x-data="kalenderApp()">
+                <div class="db-cal-header">
+                    <div class="db-cal-title"><i class="fa-solid fa-calendar-days"></i> Kalender Kegiatan</div>
+                    <div class="db-cal-nav">
+                        <button class="db-cal-btn" @click="prevMonth()">&lt;</button>
+                        <span class="db-cal-month" x-text="bulanTahun"></span>
+                        <button class="db-cal-btn" @click="nextMonth()">&gt;</button>
+                    </div>
+                </div>
+                <div class="db-cal-body">
+                    <div class="db-cal-week">
+                        <div class="db-cal-day-name">Min</div>
+                        <div class="db-cal-day-name">Sen</div>
+                        <div class="db-cal-day-name">Sel</div>
+                        <div class="db-cal-day-name">Rab</div>
+                        <div class="db-cal-day-name">Kam</div>
+                        <div class="db-cal-day-name">Jum</div>
+                        <div class="db-cal-day-name">Sab</div>
+                    </div>
+                    <div class="db-cal-days">
+                        <template x-for="i in hariSebelum" :key="i">
+                            <div class="db-cal-day other"></div>
+                        </template>
+                        <template x-for="i in jumlahHari" :key="i">
+                            <div class="db-cal-day"
+                                :class="{ 'today': isToday(i), 'has-event': eventsForDay(i).length > 0 }"
+                                @click="pilihHari(i)">
+                                <span class="day-num" x-text="i"></span>
+                                <template x-for="ev in eventsForDay(i)" :key="ev.id">
+                                    <span class="day-events" :class="ev.colorClass" x-text="ev.short"></span>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                <div class="db-cal-add">
+                    <button class="db-cal-add-btn" @click="tambahNote = !tambahNote">
+                        <i class="fa-solid fa-plus"></i> Tambah Note
+                    </button>
+                </div>
+
+                <!-- Form Tambah Note -->
+                <div x-show="tambahNote" x-cloak class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Judul Kegiatan</label>
+                            <input type="text" x-model="noteJudul" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500" placeholder="Contoh: Kegiatan Tahfidz">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Kategori</label>
+                            <select x-model="noteKategori" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500">
+                                <option value="Jadwal">Jadwal</option>
+                                <option value="Agenda">Agenda</option>
+                                <option value="Pengumuman">Pengumuman</option>
+                                <option value="Libur">Libur</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Waktu</label>
+                            <input type="time" x-model="noteWaktu" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div class="flex gap-2 pt-2">
+                            <button @click="simpanNote()" class="flex-1 px-3 py-2 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition">Simpan</button>
+                            <button @click="tambahNote = false" class="px-3 py-2 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition">Batal</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Event List --}}
+            <div class="mt-4">
+                <div class="db-panel-header" style="border-bottom: none; padding: 0;">
+                    <div class="db-panel-left">
+                        <span class="db-panel-ico" style="background: var(--ink)"><i class="fa-solid fa-list-check"></i></span>
+                        <div>
+                            <h3 class="db-panel-title">Kegiatan Mendatang</h3>
+                            <p class="db-panel-sub">Daftar kegiatan yang akan datang.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="db-panel-body" style="padding-top: 0;">
+                    <div class="db-event-list">
+                        @if (count($kalenderEvents))
+                            @foreach ($kalenderEvents as $ev)
+                                @php
+                                    if ($ev['category'] === 'Pengumuman') { $evColor = '#2563eb'; }
+                                    elseif ($ev['category'] === 'Jadwal') { $evColor = '#12a67a'; }
+                                    elseif ($ev['category'] === 'Agenda') { $evColor = '#b45309'; }
+                                    elseif ($ev['category'] === 'Libur') { $evColor = '#e11d48'; }
+                                    else { $evColor = '#8b5cc6'; }
+                                @endphp
+                                <div class="db-event-item">
+                                    <div class="db-event-ico" style="background: {{ $evColor }}20; color: {{ $evColor }}">
+                                        <i class="fa-solid fa-calendar-day"></i>
+                                    </div>
+                                    <div class="db-event-content">
+                                        <div class="db-event-title">{{ $ev['title'] }}</div>
+                                        <div class="db-event-meta">
+                                            <span><i class="fa-regular fa-clock"></i>{{ $ev['time'] }}</span>
+                                            <span><i class="fa-solid fa-tag"></i>{{ $ev['category'] }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="text-center py-6 text-slate-500 dark:text-slate-400 text-sm">
+                                <i class="fa-regular fa-calendar-check"></i>
+                                <p class="mt-2">Belum ada kegiatan mendatang.</p>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
 
-    {{-- ===================== AKSI CEPAT ===================== --}}
-    <div class="ad-card ad-quick">
-        <div>
-            <span class="ad-ico" style="--fc:#d6525a"><i class="fa-solid fa-bolt"></i></span>
-            <div>
-                <h3 class="ad-ptitle">Aksi Cepat</h3>
-                <p class="ad-psub">Pintasan menu operasional sistem</p>
-            </div>
-        </div>
-        <div class="ad-quick-btns">
-            <a href="#" class="ad-btn"><i class="fa-solid fa-user-plus"></i> Tambah Data Santri</a>
-            <a href="{{ $ada('admin.berita.create') ?? '#' }}" class="ad-btn"><i class="fa-regular fa-pen-to-square"></i> Tulis Berita Baru</a>
-            <a href="{{ $ada('admin.galeri.create') ?? '#' }}" class="ad-btn"><i class="fa-solid fa-images"></i> Tambah Album Galeri</a>
-            <a href="{{ $ada('admin.prestasi.create') ?? '#' }}" class="ad-btn"><i class="fa-solid fa-trophy"></i> Tambah Prestasi</a>
-            <a href="{{ $ada('admin.struktur.create') ?? '#' }}" class="ad-btn"><i class="fa-solid fa-sitemap"></i> Tambah Struktur</a>
-            <a href="{{ $ada('admin.alumni.create') ?? '#' }}" class="ad-btn"><i class="fa-solid fa-user-graduate"></i> Tambah Alumni</a>
-            @if ($isSuperAdmin)
-                <a href="{{ $ada('super.pengguna.create') ?? '#' }}" class="ad-btn"><i class="fa-solid fa-users-gear"></i> Tambah Pengguna</a>
-            @endif
-            <a href="#" class="ad-btn main"><i class="fa-solid fa-cloud-arrow-down"></i> Rekapitulasi Data</a>
-        </div>
+    {{-- ===================== TOAST ===================== --}}
+    <div id="db-toast">
+        <i class="fa-solid fa-check-circle"></i>
+        <span id="db-toast-msg">Berhasil disimpan.</span>
+        <span id="db-toast-close" onclick="hideDbToast()">&times;</span>
     </div>
+
+<script>
+/* ========== KALENDER ALPINE ========== */
+function kalenderApp() {
+    return {
+        tanggal: new Date(),
+        tambahNote: false,
+        noteJudul: '',
+        noteKategori: 'Jadwal',
+        noteWaktu: '',
+        events: @json($kalenderEvents),
+        userNotes: [],
+
+        get bulanTahun() {
+            const opts = { month: 'long', year: 'numeric' };
+            return this.tanggal.toLocaleDateString('id-ID', opts);
+        },
+
+        get hariSebelum() {
+            const awal = new Date(this.tanggal.getFullYear(), this.tanggal.getMonth(), 1);
+            return awal.getDay();
+        },
+
+        get jumlahHari() {
+            return new Date(this.tanggal.getFullYear(), this.tanggal.getMonth() + 1, 0).getDate();
+        },
+
+        isToday(d) {
+            const today = new Date();
+            return d === today.getDate() &&
+                this.tanggal.getMonth() === today.getMonth() &&
+                this.tanggal.getFullYear() === today.getFullYear();
+        },
+
+        eventsForDay(d) {
+            const tgl = new Date(this.tanggal.getFullYear(), this.tanggal.getMonth(), d).toISOString().split('T')[0];
+            return [...this.events, ...this.userNotes].filter(ev => ev.date === tgl);
+        },
+
+        prevMonth() {
+            this.tanggal = new Date(this.tanggal.getFullYear(), this.tanggal.getMonth() - 1, 1);
+        },
+        nextMonth() {
+            this.tanggal = new Date(this.tanggal.getFullYear(), this.tanggal.getMonth() + 1, 1);
+        },
+
+        pilihHari(d) {
+            // placeholder untuk interaksi lebih lanjut
+        },
+
+        warnaKategori(k) {
+            if (k === 'Pengumuman') return '#2563eb';
+            if (k === 'Jadwal') return '#12a67a';
+            if (k === 'Agenda') return '#b45309';
+            if (k === 'Libur') return '#e11d48';
+            return '#8b5cc6';
+        },
+
+        warnaClass(k) {
+            if (k === 'Pengumuman') return 'day-event-1';
+            if (k === 'Jadwal') return 'day-event-2';
+            if (k === 'Agenda') return 'day-event-1';
+            if (k === 'Libur') return 'day-event-2';
+            return 'day-event-1';
+        },
+
+        simpanNote() {
+            if (!this.noteJudul || !this.noteWaktu) {
+                this.showDbToast('Judul dan waktu wajib diisi.', 'bad');
+                return;
+            }
+            const tgl = new Date(this.tanggal.getFullYear(), this.tanggal.getMonth(), 1).toISOString().split('T')[0];
+            const note = {
+                id: Date.now(),
+                title: this.noteJudul,
+                date: tgl,
+                time: this.noteWaktu,
+                category: this.noteKategori,
+                color: this.warnaKategori(this.noteKategori),
+                colorClass: this.warnaClass(this.noteKategori),
+                short: this.noteJudul.length > 12 ? this.noteJudul.slice(0, 12) + '…' : this.noteJudul,
+            };
+            this.userNotes.push(note);
+            this.tambahNote = false;
+            this.noteJudul = '';
+            this.noteWaktu = '';
+            this.showDbToast('Note kegiatan ditambahkan ke kalender.');
+        },
+
+        showDbToast(msg, type = 'ok') {
+            const t = document.getElementById('db-toast');
+            document.getElementById('db-toast-msg').textContent = msg;
+            t.className = 'db-toast ' + (type === 'bad' ? 'bad' : 'ok') + ' show';
+            setTimeout(() => t.classList.remove('show'), 3000);
+        },
+    };
+}
+
+/* ========== CHART: PENDAFTAR PER JENJANG ========== */
+const ctxJenjang = document.getElementById('chartJenjang');
+if (ctxJenjang) {
+    const dataJenjang = @json($pendaftarPerJenjang);
+    const warnaJenjang = ['#17402f', '#b08d3e', '#2563eb', '#12a67a', '#e11d48', '#0e9f8e', '#9cb49d'];
+    new Chart(ctxJenjang, {
+        type: 'bar',
+        data: {
+            labels: dataJenjang.map(d => d.jenjang),
+            datasets: [{
+                label: 'Jumlah Pendaftar',
+                data: dataJenjang.map(d => d.jml),
+                backgroundColor: warnaJenjang,
+                borderRadius: 6,
+                barThickness: 26,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    titleFont: { size: 12, weight: '600' },
+                    bodyFont: { size: 12 },
+                    padding: 10,
+                    cornerRadius: 8,
+                    displayColors: false,
+                    callbacks: {
+                        label: ctx => ctx.parsed + ' pendaftar'
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    suggestedMax: Math.max(...dataJenjang.map(d => d.jml)) + 2,
+                    ticks: { stepSize: 1, font: { size: 11 }, color: '#64748b' },
+                    grid: { color: '#f1f5f9', drawBorder: false }
+                },
+                x: {
+                    ticks: { font: { size: 11 }, color: '#64748b' },
+                    grid: { display: false }
+                }
+            },
+            layout: {
+                padding: { top: 10, bottom: 10, left: 10, right: 10 }
+            }
+        }
+    });
+}
+
+/* ========== CHART: SANTRI (Donut) ========== */
+const ctxSantri = document.getElementById('chartSantri');
+if (ctxSantri) {
+    const dataSantri = @json($santriPerJenjang);
+    const warnaSantri = dataSantri.map((d, i) => ['#17402f', '#b08d3e', '#2563eb', '#12a67a', '#e11d48', '#0e9f8e', '#9cb49d'][i % 7]);
+    new Chart(ctxSantri, {
+        type: 'doughnut',
+        data: {
+            labels: dataSantri.map(d => d.jenjang),
+            datasets: [{
+                data: dataSantri.map(d => d.jml),
+                backgroundColor: warnaSantri,
+                borderWidth: 0,
+                hoverOffset: 24,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '72%',
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 16, boxWidth: 10 } },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    titleFont: { size: 12, weight: '600' },
+                    bodyFont: { size: 12 },
+                    padding: 10,
+                    cornerRadius: 8,
+                    displayColors: false,
+                    callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed + ' santri' }
+                }
+            }
+        }
+    });
+}
+
+/* ========== CHART: ALUMNI (Donut) ========== */
+const ctxAlumni = document.getElementById('chartAlumni');
+if (ctxAlumni) {
+    const dataAlumni = @json($alumniPerJenjang);
+    const warnaAlumni = dataAlumni.map((d, i) => ['#b45309', '#e11d48', '#12a67a', '#2563eb', '#8b5cc6', '#0e9f8e', '#9cb49d'][i % 7]);
+    new Chart(ctxAlumni, {
+        type: 'doughnut',
+        data: {
+            labels: dataAlumni.map(d => d.jenjang),
+            datasets: [{
+                data: dataAlumni.map(d => d.jml),
+                backgroundColor: warnaAlumni,
+                borderWidth: 0,
+                hoverOffset: 24,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '72%',
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 16, boxWidth: 10 } },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    titleFont: { size: 12, weight: '600' },
+                    bodyFont: { size: 12 },
+                    padding: 10,
+                    cornerRadius: 8,
+                    displayColors: false,
+                    callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed + ' alumni' }
+                }
+            }
+        }
+    });
+}
+
+function hideDbToast() {
+    document.getElementById('db-toast').classList.remove('show');
+}
+</script>
 
 </div>
 

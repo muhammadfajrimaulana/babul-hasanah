@@ -379,6 +379,7 @@
                             <a href="{{ url('/profil/visi-misi') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-bullseye"></i></span>Visi &amp; Misi</a>
                             <a href="{{ url('/profil/struktur-organisasi') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-sitemap"></i></span>Struktur Organisasi</a>
                             <a href="{{ url('/profil/pembelajaran') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-graduation-cap"></i></span>Pembelajaran</a>
+                            <a href="{{ route('alumni.index') }}" class="dd-item {{ request()->is('alumni*') ? 'active' : '' }}"><span class="ic"><i class="fa-solid fa-user-graduate"></i></span>Alumni</a>
                         </div>
                     </div>
 

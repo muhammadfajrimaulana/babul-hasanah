@@ -5,64 +5,116 @@
 @section('content')
 
 @php
-    $jenjang = ['MDTA', 'PPS Wustha', 'MTs', 'MA', 'PDF Wustha', 'PDF Ulya', 'Ma’had ‘Aly'];
+    // Ambil seluruh konten sekali jalan (1 query), lalu pakai fallback teks lama
+    // agar tampilan tidak berubah sebelum diedit dari dashboard.
+    $konten = \App\Models\Konten::allWithDefaults();
 
-    $pilar = [
-        ['ikon' => 'fa-book-quran',           'judul' => 'Kitab kuning', 'isi' => 'Mendalami ilmu agama lewat kajian turats secara bertahap.'],
-        ['ikon' => 'fa-hand-holding-heart',   'judul' => 'Akhlak mulia', 'isi' => 'Adab dan keteladanan menjadi dasar setiap proses belajar.'],
-        ['ikon' => 'fa-hands-holding-circle', 'judul' => 'Pengabdian',   'isi' => 'Ilmu diamalkan untuk keluarga, masyarakat, dan bangsa.'],
-    ];
+    $kv = fn (string $key, string $default = '') => $konten[$key] ?? $default;
 
-    $budaya = [
-        ['ikon' => 'fa-people-group',     'judul' => 'Santri dari berbagai daerah', 'isi' => 'Santri datang dari banyak kota dan suku. Bahasa daerah, makanan, dan kebiasaan yang berbeda justru mempererat persaudaraan.'],
-        ['ikon' => 'fa-drum',             'judul' => 'Hadrah dan rebana',           'isi' => 'Dilatih rutin dan tampil di Maulid Nabi, haflah, serta undangan masyarakat sekitar.'],
-        ['ikon' => 'fa-microphone-lines', 'judul' => 'Muhadharah',                  'isi' => 'Latihan pidato mingguan dalam bahasa Indonesia, Arab, dan Inggris agar santri berani tampil.'],
-        ['ikon' => 'fa-hands-holding',    'judul' => 'Gotong royong dan piket',     'isi' => 'Membersihkan asrama, masjid, dan dapur dikerjakan bersama. Kemandirian dilatih dari hal kecil.'],
-        ['ikon' => 'fa-person-running',   'judul' => 'Pencak silat',                'isi' => 'Seni bela diri tradisional untuk melatih disiplin, keberanian, dan sopan santun.'],
-    ];
+    // Baris daftar berformat "Judul | Keterangan".
+    $baris = function (string $key, string $default = '') use ($kv): array {
+        $raw = (string) $kv($key, $default);
+        $hasil = [];
+        foreach (preg_split('/\r\n|\r|\n/', $raw) as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+            $bagian = array_map('trim', explode('|', $line, 2));
+            $hasil[] = [$bagian[0], $bagian[1] ?? ''];
+        }
 
-    $kajian = [
+        return $hasil;
+    };
+
+    // Susunan & visibilitas section dari dashboard.
+    $layout = \App\Models\Konten::layoutFor('sejarah');
+    $visible = [];
+    $order = [];
+    foreach ($layout as $i => $section) {
+        $visible[$section['id']] = $section['visible'];
+        $order[$section['id']] = $i;
+    }
+
+    $heroEyebrow = $kv('sejarah_hero_eyebrow', 'Pondok Pesantren Babul Hasanah');
+    $heroTitle = $kv('sejarah_hero_title', 'Dari majelis kecil,');
+    $heroAccent = $kv('sejarah_hero_title_accent', 'tumbuh bersama umat.');
+    $heroDesc = $kv('sejarah_hero_desc', 'Berakar pada adab, bertumbuh dengan ilmu. Kenali sejarah, budaya, dan kajian yang menjadi denyut kehidupan santri Babul Hasanah.');
+
+    $tahun = $kv('sejarah_tahun', '1998');
+    $tahunCaption = $kv('sejarah_tahun_caption', 'Awal sebuah ikhtiar di Padang Lawas');
+    $fotoSejarah = $konten['sejarah_foto'] ?? null;
+    $sejarahHeading = $kv('sejarah_heading', 'Awal berdirinya Pondok Pesantren Babul Hasanah');
+    $sejarahP1 = $kv('sejarah_page_p1', 'Babul Hasanah bermula dari majelis pengajian sederhana di Padang Lawas pada 1998. Para perintisnya didorong kepedulian terhadap pendidikan agama anak-anak dan masyarakat sekitar.');
+    $sejarahP2 = $kv('sejarah_page_p2', 'Dari majelis kecil itu, pesantren tumbuh menjadi lembaga pendidikan Islam yang memadukan tradisi keilmuan salaf dengan pendidikan yang relevan bagi masa depan. Setiap langkahnya terpusat pada tumbuh kembang santri, agar kelak menjadi insan berilmu, berakhlak mulia, dan berdaya guna.');
+    $maknaNama = $kv('sejarah_makna_nama', 'berarti “pintu kebaikan”: harapan agar setiap santri yang masuk lewat pintu ini keluar sebagai pembawa kebaikan bagi keluarga, masyarakat, dan bangsa.');
+    $hinggaKini = $kv('sejarah_hinggakini_text', 'Babul Hasanah melayani santri dari jenjang dasar hingga pendidikan tinggi pesantren, dikelola bersama dewan pengasuh dan tim pendidikan.');
+
+    $jenjang = array_values(array_filter(
+        array_map('trim', explode(',', $kv('sejarah_jenjang', 'MDTA, PPS Wustha, MTs, MA, PDF Wustha, PDF Ulya, Ma’had ‘Aly'))),
+        fn ($v) => $v !== ''
+    ));
+
+    $pilarIkon = ['fa-book-quran', 'fa-hand-holding-heart', 'fa-hands-holding-circle'];
+    $pilar = [];
+    foreach ($baris('sejarah_pilar', "Kitab kuning|Mendalami ilmu agama lewat kajian turats secara bertahap.\nAkhlak mulia|Adab dan keteladanan menjadi dasar setiap proses belajar.\nPengabdian|Ilmu diamalkan untuk keluarga, masyarakat, dan bangsa.") as $i => $row) {
+        $pilar[] = ['ikon' => $pilarIkon[$i] ?? 'fa-circle', 'judul' => $row[0], 'isi' => $row[1]];
+    }
+
+    $budayaHeading = $kv('sejarah_budaya_heading', 'Satu pesantren, banyak budaya');
+    $budayaDesc = $kv('sejarah_budaya_desc', 'Di sini santri belajar bahwa perbedaan asal daerah bukan jarak. Tradisi pesantren dan seni Islam hidup berdampingan dalam keseharian.');
+
+    $budayaIkon = ['fa-people-group', 'fa-drum', 'fa-microphone-lines', 'fa-hands-holding', 'fa-person-running'];
+    $budaya = [];
+    foreach ($baris('sejarah_budaya', "Santri dari berbagai daerah|Santri datang dari banyak kota dan suku. Bahasa daerah, makanan, dan kebiasaan yang berbeda justru mempererat persaudaraan.\nHadrah dan rebana|Dilatih rutin dan tampil di Maulid Nabi, haflah, serta undangan masyarakat sekitar.\nMuhadharah|Latihan pidato mingguan dalam bahasa Indonesia, Arab, dan Inggris agar santri berani tampil.\nGotong royong dan piket|Membersihkan asrama, masjid, dan dapur dikerjakan bersama. Kemandirian dilatih dari hal kecil.\nPencak silat|Seni bela diri tradisional untuk melatih disiplin, keberanian, dan sopan santun.") as $i => $row) {
+        $budaya[] = ['ikon' => $budayaIkon[$i] ?? 'fa-circle', 'judul' => $row[0], 'isi' => $row[1]];
+    }
+
+    $kajianHeading = $kv('sejarah_kajian_heading', 'Kajian dan kitab yang dipelajari');
+    $kajianDesc = $kv('sejarah_kajian_desc', 'Santri belajar bertahap, dari dasar bahasa Arab sampai tafsir dan tasawuf.');
+
+    $kajian = [];
+    $kajianMeta = [
         'harian' => [
             'judul' => 'Setiap hari',
             'catatan' => 'Dasar-dasar yang dipelajari santri setelah shalat Subuh, Ashar, dan Maghrib.',
-            'items' => [
-                ['Al-Qur’an', 'Tahsin, tajwid, dan setoran hafalan'],
-                ['Nahwu & Shorof', 'Jurumiyah, Imrithi, hingga Alfiyah Ibnu Malik'],
-                ['Fiqih', 'Safinatun Najah, Fathul Qarib'],
-                ['Akhlak', 'Ta’lim Muta’allim, Washaya al-Aba’ lil Abna’'],
-            ],
+            'items' => "Al-Qur’an|Tahsin, tajwid, dan setoran hafalan\nNahwu & Shorof|Jurumiyah, Imrithi, hingga Alfiyah Ibnu Malik\nFiqih|Safinatun Najah, Fathul Qarib\nAkhlak|Ta’lim Muta’allim, Washaya al-Aba’ lil Abna’",
         ],
         'mingguan' => [
             'judul' => 'Setiap pekan',
             'catatan' => 'Kajian yang lebih luas, sebagian terbuka untuk masyarakat umum.',
-            'items' => [
-                ['Tafsir', 'Tafsir Jalalain'],
-                ['Hadits', 'Riyadhus Shalihin, Bulughul Maram'],
-                ['Tasawuf', 'Kajian kitab Ihya’ Ulumuddin'],
-                ['Pengajian umum', 'Malam Jumat bersama pengasuh dan tamu undangan'],
-            ],
+            'items' => "Tafsir|Tafsir Jalalain\nHadits|Riyadhus Shalihin, Bulughul Maram\nTasawuf|Kajian kitab Ihya’ Ulumuddin\nPengajian umum|Malam Jumat bersama pengasuh dan tamu undangan",
         ],
         'tahunan' => [
             'judul' => 'Sepanjang tahun',
             'catatan' => 'Kegiatan khusus pada waktu-waktu tertentu dalam kalender hijriah.',
-            'items' => [
-                ['Pesantren Kilat Ramadhan', 'Kajian intensif dan khataman kitab'],
-                ['Maulid Nabi', 'Pembacaan maulid, hadrah, dan ceramah'],
-                ['Haflah Akhirussanah', 'Wisuda santri dan pentas seni'],
-                ['Isra’ Mi’raj', 'Pengajian akbar bersama masyarakat'],
-            ],
+            'items' => "Pesantren Kilat Ramadhan|Kajian intensif dan khataman kitab\nMaulid Nabi|Pembacaan maulid, hadrah, dan ceramah\nHaflah Akhirussanah|Wisuda santri dan pentas seni\nIsra’ Mi’raj|Pengajian akbar bersama masyarakat",
         ],
     ];
 
-    $motivasi = [
-        ['“Barang siapa menempuh jalan untuk menuntut ilmu, Allah mudahkan baginya jalan menuju surga.”', 'HR. Muslim'],
-        ['“Menuntut ilmu itu wajib bagi setiap muslim.”', 'HR. Ibnu Majah'],
-    ];
+    foreach ($kajianMeta as $key => $meta) {
+        $items = [];
+        foreach ($baris("sejarah_kajian_{$key}_items", $meta['items']) as $row) {
+            $items[] = [$row[0], $row[1]];
+        }
+        $kajian[$key] = [
+            'judul' => $kv("sejarah_kajian_{$key}_judul", $meta['judul']),
+            'catatan' => $kv("sejarah_kajian_{$key}_catatan", $meta['catatan']),
+            'items' => $items,
+        ];
+    }
+
+    $motivasiHeading = $kv('sejarah_motivasi_heading', 'Semangat menuntut ilmu');
+    $motivasi = [];
+    foreach ($baris('sejarah_motivasi', "“Barang siapa menempuh jalan untuk menuntut ilmu, Allah mudahkan baginya jalan menuju surga.”|HR. Muslim\n“Menuntut ilmu itu wajib bagi setiap muslim.”|HR. Ibnu Majah") as $row) {
+        $motivasi[] = [$row[0], $row[1]];
+    }
 @endphp
 
 <style>
     .sj-page { --g900:#0a3a24; --g800:#0f5132; --g700:#13693f; --g600:#15803d; --g500:#10b981; --g50:#f0fdf6;
-        --gold:#b7791f; --gold-text:#955f0f; --gold-soft:#fdf3dc; --gold-light:#fde68a; color:#1e293b; }
+        --gold:#b7791f; --gold-text:#955f0f; --gold-soft:#fdf3dc; --gold-light:#fde68a; color:#1e293b;
+        display: flex; flex-direction: column; }
     .sj-page *, .sj-page *::before, .sj-page *::after { box-sizing: border-box; }
     .sj-wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 24px; }
     .sj-page section[id] { scroll-margin-top: 80px; }
@@ -110,6 +162,10 @@
     .sj-story-body h2 { margin: 0 0 18px; font-size: clamp(1.6rem, 3vw, 2.2rem); line-height: 1.3; color: var(--g800); }
     .sj-story-body p { margin: 0 0 16px; font-size: 1.08rem; line-height: 1.9; color: #334155; }
     .sj-story-body p.first::first-letter { float: left; font-size: 3.6rem; line-height: .85; padding: 6px 12px 0 0; color: var(--gold-text); font-weight: 800; }
+
+    .sj-foto { margin: 26px 0 30px; border-radius: 18px; overflow: hidden; border: 1px solid rgba(6,78,59,.14);
+        background: var(--g50); box-shadow: 0 16px 36px rgba(6,78,59,.12); }
+    .sj-foto img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
 
     .sj-pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 34px 0; }
     .sj-pillar { background: var(--g50); border: 1px solid rgba(6,78,59,.12); border-radius: 18px; padding: 20px; }
@@ -199,38 +255,57 @@
 <div class="sj-page">
 
     {{-- ============ HERO ============ --}}
-    <header class="sj-hero">
-        <div class="sj-wrap">
-            <div class="sj-crumb">
-                <a href="{{ url('/') }}">Beranda</a> <i class="fa-solid fa-chevron-right" style="font-size:10px"></i>
-                Profil <i class="fa-solid fa-chevron-right" style="font-size:10px"></i> Sejarah
+    @if ($visible['hero'] ?? true)
+        <header class="sj-hero" style="order: {{ $order['hero'] ?? 0 }}">
+            <div class="sj-wrap">
+                <div class="sj-crumb">
+                    <a href="{{ url('/') }}">Beranda</a> <i class="fa-solid fa-chevron-right"
+                        style="font-size:10px"></i>
+                    Profil <i class="fa-solid fa-chevron-right" style="font-size:10px"></i> Sejarah
+                </div>
+                <div class="sj-eyebrow light">{{ $heroEyebrow }}</div>
+                <h1>{{ $heroTitle }} <span>{{ $heroAccent }}</span></h1>
+                <p>{{ $heroDesc }}</p>
+                <nav class="sj-nav" aria-label="Isi halaman">
+                    @if ($visible['sejarah'] ?? true)
+                        <a href="#sejarah"><i class="fa-solid fa-landmark"></i> Sejarah</a>
+                    @endif
+                    @if ($visible['budaya'] ?? true)
+                        <a href="#budaya"><i class="fa-solid fa-people-group"></i> Budaya</a>
+                    @endif
+                    @if ($visible['kajian'] ?? true)
+                        <a href="#kajian"><i class="fa-solid fa-book-open-reader"></i> Kajian</a>
+                    @endif
+                    @if ($visible['motivasi'] ?? true)
+                        <a href="#motivasi"><i class="fa-solid fa-star-and-crescent"></i> Motivasi</a>
+                    @endif
+                </nav>
             </div>
-            <div class="sj-eyebrow light">Pondok Pesantren Babul Hasanah</div>
-            <h1>Dari majelis kecil, <span>tumbuh bersama umat.</span></h1>
-            <p>Berakar pada adab, bertumbuh dengan ilmu. Kenali sejarah, budaya, dan kajian yang menjadi denyut kehidupan santri Babul Hasanah.</p>
-            <nav class="sj-nav" aria-label="Isi halaman">
-                <a href="#sejarah"><i class="fa-solid fa-landmark"></i> Sejarah</a>
-                <a href="#budaya"><i class="fa-solid fa-people-group"></i> Budaya</a>
-                <a href="#kajian"><i class="fa-solid fa-book-open-reader"></i> Kajian</a>
-                <a href="#motivasi"><i class="fa-solid fa-star-and-crescent"></i> Motivasi</a>
-            </nav>
-        </div>
-    </header>
+        </header>
+    @endif
 
     {{-- ============ 1. SEJARAH PESANTREN ============ --}}
-    <section class="sj-sec" id="sejarah">
+    @if ($visible['sejarah'] ?? true)
+        <section class="sj-sec" id="sejarah" style="order: {{ $order['sejarah'] ?? 1 }}">
         <div class="sj-wrap">
             <div class="sj-story">
                 <div class="sj-year sj-rv">
-                    <b>1998</b>
-                    <span>Awal sebuah ikhtiar di Padang Lawas</span>
+                    <b>{{ $tahun }}</b>
+                    <span>{{ $tahunCaption }}</span>
                 </div>
 
                 <div class="sj-story-body">
                     <div class="sj-eyebrow">Sejarah Pesantren</div>
-                    <h2>Awal berdirinya Pondok Pesantren Babul Hasanah</h2>
-                    <p class="first">Babul Hasanah bermula dari majelis pengajian sederhana di Padang Lawas pada 1998. Para perintisnya didorong kepedulian terhadap pendidikan agama anak-anak dan masyarakat sekitar.</p>
-                    <p>Dari majelis kecil itu, pesantren tumbuh menjadi lembaga pendidikan Islam yang memadukan tradisi keilmuan salaf dengan pendidikan yang relevan bagi masa depan. Setiap langkahnya terpusat pada tumbuh kembang santri, agar kelak menjadi insan berilmu, berakhlak mulia, dan berdaya guna.</p>
+                    <h2>{{ $sejarahHeading }}</h2>
+                    <p class="first">{{ $sejarahP1 }}</p>
+                    <p>{{ $sejarahP2 }}</p>
+
+                    @if (!empty($fotoSejarah))
+                        <figure class="sj-foto sj-rv">
+                            <img src="{{ asset('storage/' . $fotoSejarah) }}"
+                                alt="Komplek Pondok Pesantren Babul Hasanah" loading="lazy">
+                        </figure>
+                    @endif
 
                     <div class="sj-pillars">
                         @foreach ($pilar as $p)
@@ -244,12 +319,12 @@
 
                     <div class="sj-name sj-rv">
                         <small>Makna nama</small>
-                        <p><strong>Babul Hasanah</strong> berarti “pintu kebaikan”: harapan agar setiap santri yang masuk lewat pintu ini keluar sebagai pembawa kebaikan bagi keluarga, masyarakat, dan bangsa.</p>
+                        <p><strong>Babul Hasanah</strong> {{ $maknaNama }}</p>
                     </div>
 
                     <div class="sj-now">
                         <h3>Hingga kini</h3>
-                        <p>Babul Hasanah melayani santri dari jenjang dasar hingga pendidikan tinggi pesantren, dikelola bersama dewan pengasuh dan tim pendidikan.</p>
+                        <p>{{ $hinggaKini }}</p>
                         <div class="sj-chips">
                             @foreach ($jenjang as $j)<span>{{ $j }}</span>@endforeach
                         </div>
@@ -258,14 +333,16 @@
             </div>
         </div>
     </section>
+    @endif
 
     {{-- ============ 2. BUDAYA PESANTREN ============ --}}
-    <section class="sj-sec alt" id="budaya">
+    @if ($visible['budaya'] ?? true)
+        <section class="sj-sec alt" id="budaya" style="order: {{ $order['budaya'] ?? 2 }}">
         <div class="sj-wrap">
             <div class="sj-head">
                 <div class="sj-eyebrow">Budaya Pesantren</div>
-                <h2>Satu pesantren, banyak budaya</h2>
-                <p>Di sini santri belajar bahwa perbedaan asal daerah bukan jarak. Tradisi pesantren dan seni Islam hidup berdampingan dalam keseharian.</p>
+                <h2>{{ $budayaHeading }}</h2>
+                <p>{{ $budayaDesc }}</p>
             </div>
 
             <div class="sj-culture">
@@ -280,14 +357,16 @@
             </div>
         </div>
     </section>
+    @endif
 
     {{-- ============ 3. KAJIAN ============ --}}
-    <section class="sj-sec" id="kajian">
+    @if ($visible['kajian'] ?? true)
+        <section class="sj-sec" id="kajian" style="order: {{ $order['kajian'] ?? 3 }}">
         <div class="sj-wrap">
             <div class="sj-head">
                 <div class="sj-eyebrow">Kajian</div>
-                <h2>Kajian dan kitab yang dipelajari</h2>
-                <p>Santri belajar bertahap, dari dasar bahasa Arab sampai tafsir dan tasawuf.</p>
+                <h2>{{ $kajianHeading }}</h2>
+                <p>{{ $kajianDesc }}</p>
             </div>
 
             <div id="sjKajian">
@@ -311,13 +390,15 @@
             </div>
         </div>
     </section>
+    @endif
 
     {{-- ============ 4. KALIMAT MOTIVASI ============ --}}
-    <section class="sj-motivasi" id="motivasi">
+    @if ($visible['motivasi'] ?? true)
+        <section class="sj-motivasi" id="motivasi" style="order: {{ $order['motivasi'] ?? 4 }}">
         <div class="sj-wrap">
             <div class="sj-head">
                 <div class="sj-eyebrow light">Kalimat Motivasi</div>
-                <h2>Semangat menuntut ilmu</h2>
+                <h2>{{ $motivasiHeading }}</h2>
             </div>
             <div class="sj-quotes">
                 @foreach ($motivasi as $m)
@@ -330,6 +411,7 @@
             </div>
         </div>
     </section>
+    @endif
 </div>
 
 <script>

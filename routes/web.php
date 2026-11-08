@@ -1,28 +1,32 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Admin\AlumniController as AdminAlumniController;
+use App\Http\Controllers\Admin\BeritaController as AdminBeritaController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
+use App\Http\Controllers\Admin\GaleriController as AdminGaleriController;
+use App\Http\Controllers\Admin\InfoHarianController as AdminInfoHarianController;
+use App\Http\Controllers\Admin\KegiatanController as AdminKegiatanController;
+use App\Http\Controllers\Admin\KontenController as AdminKontenController;
 use App\Http\Controllers\Admin\PendaftaranController as AdminPendaftaranController;
+use App\Http\Controllers\Admin\PenggunaController as AdminPenggunaController;
+use App\Http\Controllers\Admin\PrestasiAdminController;
+use App\Http\Controllers\Admin\ProgramController as AdminProgramController;
 use App\Http\Controllers\Admin\SantriController as AdminDataSantriController;
 use App\Http\Controllers\Admin\SantriFormController as AdminSantriFormController;
-use App\Http\Controllers\Admin\KontenController as AdminKontenController;
-use App\Http\Controllers\Admin\ProgramController as AdminProgramController;
-use App\Http\Controllers\Admin\KegiatanController as AdminKegiatanController;
-use App\Http\Controllers\Admin\BeritaController as AdminBeritaController;
-use App\Http\Controllers\Admin\GaleriController as AdminGaleriController;
-use App\Http\Controllers\Admin\PrestasiAdminController;
-use App\Http\Controllers\Admin\AlumniController as AdminAlumniController;
-use App\Http\Controllers\Admin\PenggunaController as AdminPenggunaController;
+use App\Http\Controllers\Admin\StrukturOrganisasiController as AdminStrukturController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Portal\PortalDashboardController as PortalDashboard;
+use App\Http\Controllers\Public\AlumniController as PublicAlumniController;
+use App\Http\Controllers\Public\BeritaController as PublicBeritaController;
+use App\Http\Controllers\Public\GaleriController as PublicGaleriController;
+use App\Http\Controllers\Public\InfoHarianController as PublicInfoHarianController;
 use App\Http\Controllers\Public\PendaftaranOnlineController;
 use App\Http\Controllers\Public\PrestasiController;
-use App\Http\Controllers\Public\InfoHarianController as PublicInfoHarianController;
-use App\Http\Controllers\Public\GaleriController as PublicGaleriController;
-use App\Http\Controllers\Public\BeritaController as PublicBeritaController;
 use App\Http\Controllers\Public\StrukturOrganisasiController;
-use App\Http\Controllers\Admin\StrukturOrganisasiController as AdminStrukturController;
-use App\Http\Controllers\Admin\InfoHarianController as AdminInfoHarianController;
+use App\Http\Middleware\RoleAdmin;
+use App\Http\Middleware\RoleSuperAdmin;
+use App\Http\Middleware\RoleWaliSantri;
+use Illuminate\Support\Facades\Route;
 
 // ==========================================
 // 1. PUBLIC ROUTES (Halaman Depan & Pendaftaran)
@@ -45,7 +49,7 @@ Route::prefix('profil')->name('profil.')->group(function () {
 
 // ######## JENJANG ########### //
 // Halaman tiap jenjang ada di resources/views/pages/jenjang/{slug}.blade.php
-Route::get('/jenjang/{slug}', fn (string $slug) => view('pages.jenjang.' . $slug))
+Route::get('/jenjang/{slug}', fn (string $slug) => view('pages.jenjang.'.$slug))
     ->whereIn('slug', ['mdta', 'pps-wustha', 'mts', 'ma', 'pdf-wustha', 'pdf-ulya', 'mahad-aly'])
     ->name('jenjang.show');
 
@@ -61,6 +65,9 @@ Route::get('/kegiatan', function () {
 
 // ######## PRESTASI SANTRI ########### //
 Route::get('/prestasi', [PrestasiController::class, 'index'])->name('prestasi.index');
+
+// ######## ALUMNI ########### //
+Route::get('/alumni', [PublicAlumniController::class, 'index'])->name('alumni.index');
 
 // ######## INFO HARIAN (kabar & jadwal pesantren hari ini) ########### //
 Route::get('/info-harian', [PublicInfoHarianController::class, 'index'])->name('info-harian.index');
@@ -85,7 +92,7 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name
 // ==========================================
 // 3. SUPER ADMIN ROUTES (Protected)
 // ==========================================
-Route::middleware(['auth', \App\Http\Middleware\RoleSuperAdmin::class])->prefix('super')->name('super.')->group(function () {
+Route::middleware(['auth', RoleSuperAdmin::class])->prefix('super')->name('super.')->group(function () {
     Route::get('/pengaturan-sistem', [AdminDashboard::class, 'settings'])->name('settings');
 
     // Pengguna dashboard (CRUD): super.pengguna.index/create/store/edit/update/destroy
@@ -98,8 +105,14 @@ Route::middleware(['auth', \App\Http\Middleware\RoleSuperAdmin::class])->prefix(
 // ==========================================
 // 4. ADMIN ROUTES (Protected)
 // ==========================================
-Route::middleware(['auth', \App\Http\Middleware\RoleAdmin::class])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', RoleAdmin::class])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
+
+    // Profil & Pengaturan Akun (ganti nama, email, foto, reset password)
+    Route::get('/profil-saya', [AdminDashboard::class, 'profil'])->name('profil');
+    Route::put('/profil-saya', [AdminDashboard::class, 'updateProfil'])->name('profil.update');
+    Route::put('/profil-saya/password', [AdminDashboard::class, 'updatePassword'])->name('profil.password');
+    Route::post('/profil-saya/avatar', [AdminDashboard::class, 'updateAvatar'])->name('profil.avatar');
 
     // Pendaftaran
     Route::get('/pendaftaran', [AdminPendaftaranController::class, 'index'])->name('pendaftaran.index');
@@ -128,11 +141,8 @@ Route::middleware(['auth', \App\Http\Middleware\RoleAdmin::class])->prefix('admi
 
     // Konten
     Route::get('/pengelolaan-konten', [AdminKontenController::class, 'index'])->name('konten.index');
+    Route::post('/konten', [AdminKontenController::class, 'store'])->name('konten.store');
     Route::put('/konten/update', [AdminKontenController::class, 'updateProfil'])->name('konten.update');
-
-    // Pengurus
-    Route::post('/pengurus', [AdminKontenController::class, 'storeKepengurusan'])->name('pengurus.store');
-    Route::delete('/pengurus/{id}', [AdminKontenController::class, 'destroyKepengurusan'])->name('pengurus.destroy');
 
     // Pengelolaan lainnya
     Route::get('/pengelolaan-program', [AdminProgramController::class, 'index'])->name('program.index');
@@ -143,6 +153,9 @@ Route::middleware(['auth', \App\Http\Middleware\RoleAdmin::class])->prefix('admi
         ->parameters(['pengelolaan-berita' => 'berita'])
         ->except('show')
         ->names('berita');
+
+    Route::post('/pengelolaan-berita/upload-gambar', [AdminBeritaController::class, 'uploadGambar'])
+        ->name('berita.upload-gambar');
 
     // Galeri (album foto & video)
     Route::get('/pengelolaan-galeri', [AdminGaleriController::class, 'index'])->name('galeri.index');
@@ -165,7 +178,7 @@ Route::middleware(['auth', \App\Http\Middleware\RoleAdmin::class])->prefix('admi
         ->names('struktur');
 
     // Info harian beranda (khusus super admin): admin.info.index/create/store/edit/update/destroy
-    Route::middleware(\App\Http\Middleware\RoleSuperAdmin::class)->group(function () {
+    Route::middleware(RoleSuperAdmin::class)->group(function () {
         Route::resource('info-harian', AdminInfoHarianController::class)
             ->parameters(['info-harian' => 'info'])
             ->except('show')
@@ -176,7 +189,7 @@ Route::middleware(['auth', \App\Http\Middleware\RoleAdmin::class])->prefix('admi
 // ==========================================
 // 5. PORTAL WALI SANTRI ROUTES (Protected)
 // ==========================================
-Route::middleware(['auth', \App\Http\Middleware\RoleWaliSantri::class])->prefix('portal')->name('portal.')->group(function () {
+Route::middleware(['auth', RoleWaliSantri::class])->prefix('portal')->name('portal.')->group(function () {
     Route::get('/dashboard', [PortalDashboard::class, 'index'])->name('dashboard');
 });
 

@@ -136,7 +136,7 @@
                             <dd class="font-bold text-slate-900 dark:text-white">{{ $santri->user->name }}</dd>
                         </div>
                         <div class="{{ $boxCls }}">
-                            <dt class="{{ $labelCls }}">Email</dt>
+                            <dt class="{{ $labelCls }}">Email Orang Tua / Wali</dt>
                             <dd class="font-medium text-slate-700 dark:text-slate-300 break-all">{{ $santri->user->email }}</dd>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
@@ -197,16 +197,16 @@
                         <dd class="font-medium text-slate-900 dark:text-white leading-relaxed">{{ $v($p->alamat_domisili) }}</dd>
                     </div>
                     <div class="{{ $boxCls }}">
-                        <dt class="{{ $labelCls }}">Email Aktif</dt>
-                        <dd class="font-medium text-slate-700 dark:text-slate-300 break-all">{{ $v($p->email) }}</dd>
-                    </div>
-                    <div class="{{ $boxCls }}">
                         <dt class="{{ $labelCls }}">Nama Orang Tua (Wali)</dt>
                         <dd class="font-bold text-slate-900 dark:text-white">{{ $v($p->nama_ortu_wali) }}</dd>
                     </div>
                     <div class="{{ $boxCls }}">
                         <dt class="{{ $labelCls }}">Nomor Handphone Orang Tua</dt>
                         <dd class="font-bold text-slate-900 dark:text-white font-mono">{{ $v($p->no_hp_ortu) }}</dd>
+                    </div>
+                    <div class="{{ $boxCls }}">
+                        <dt class="{{ $labelCls }}">Email Orang Tua / Wali <span class="font-normal">(login wali)</span></dt>
+                        <dd class="font-medium text-slate-700 dark:text-slate-300 break-all">{{ $v($p->email) }}</dd>
                     </div>
                     <div class="{{ $boxCls }}">
                         <dt class="{{ $labelCls }}">Pilihan Jenjang</dt>

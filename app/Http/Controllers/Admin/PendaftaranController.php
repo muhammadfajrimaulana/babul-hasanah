@@ -41,9 +41,9 @@ class PendaftaranController extends Controller
             return redirect()->back()->with('success', 'Status pendaftaran berhasil diperbarui.');
         }
 
-        // CEK 2: Email wajib ada untuk membuat akun portal (hanya saat diterima)
+        // CEK 2: Email orang tua/wali wajib ada untuk membuat akun portal (hanya saat diterima)
         if (empty($pendaftaran->email)) {
-            return redirect()->back()->with('error', 'Gagal membuat akun: Email pendaftar kosong!');
+            return redirect()->back()->with('error', 'Gagal membuat akun: Email orang tua/wali pendaftar masih kosong!');
         }
 
         // CEK 3: Email yang sudah dipakai akun non-wali tidak boleh dipakai ulang
@@ -52,7 +52,7 @@ class PendaftaranController extends Controller
         if ($userLama && $userLama->role !== 'wali_santri') {
             return redirect()->back()->with(
                 'error',
-                "Gagal: email {$pendaftaran->email} sudah dipakai akun lain (role: {$userLama->role}). Minta wali memakai email berbeda."
+                "Gagal: email orang tua/wali {$pendaftaran->email} sudah dipakai akun lain (role: {$userLama->role}). Minta wali memakai email berbeda."
             );
         }
 
@@ -170,8 +170,9 @@ class PendaftaranController extends Controller
             'tempat_tanggal_lahir.required' => 'Tempat tanggal lahir wajib diisi.',
             'no_hp_aktif.required'          => 'Nomor handphone aktif wajib diisi.',
             'alamat_domisili.required'      => 'Alamat tinggal (domisili) wajib diisi.',
-            'email.required'                => 'Email aktif wajib diisi.',
-            'email.unique'                  => 'Email ini sudah dipakai pendaftar lain.',
+            'email.required'                => 'Email orang tua/wali wajib diisi.',
+            'email.email'                   => 'Format email orang tua/wali tidak valid.',
+            'email.unique'                  => 'Email orang tua/wali ini sudah dipakai pendaftar lain.',
             'nama_ortu_wali.required'       => 'Nama orang tua/wali wajib diisi.',
             'no_hp_ortu.required'           => 'Nomor handphone orang tua wajib diisi.',
             'asal_sekolah.required'         => 'Sekolah asal wajib diisi.',
@@ -197,7 +198,7 @@ class PendaftaranController extends Controller
         $emailPemilik = User::where('email', $validated['email'])->first();
         if ($emailPemilik && $emailPemilik->id !== $userTertaut?->id) {
             return back()->withInput()->withErrors([
-                'email' => "Email {$validated['email']} sudah dipakai akun lain. Gunakan email berbeda.",
+                'email' => "Email orang tua/wali {$validated['email']} sudah dipakai akun lain. Gunakan email berbeda.",
             ]);
         }
 

@@ -5,27 +5,69 @@
 @section('content')
 
 @php
-    $visi = 'Membangun Generasi Unggul dalam Penguasaan Kitab Kuning, Berakhlak Mulia, dan Berwawasan Luas.';
+    // Ambil seluruh konten sekali jalan (1 query), dengan fallback teks lama.
+    $konten = \App\Models\Konten::allWithDefaults();
 
-    $misi = [
-        ['fa-book-quran',            'Pendalaman Ilmu Agama', 'Menyelenggarakan pendidikan kitab kuning secara berjenjang dan sistematis dengan sanad keilmuan yang jelas.'],
-        ['fa-hand-holding-heart',    'Pembinaan Akhlak & Karakter', 'Menanamkan adab, kedisiplinan, kemandirian, dan keteladanan dalam kehidupan santri sehari-hari.'],
-        ['fa-lightbulb',             'Penguatan Wawasan & Keterampilan', 'Membekali santri dengan wawasan keilmuan, kemampuan berbahasa, dan keterampilan hidup yang relevan dengan zaman.'],
-        ['fa-house-mosque',          'Lingkungan Pesantren yang Kondusif', 'Menciptakan suasana belajar yang aman, nyaman, dan islami untuk mendukung tumbuh kembang santri.'],
-        ['fa-hands-holding-circle',  'Pengabdian kepada Masyarakat', 'Mengembangkan dakwah dan kemaslahatan umat melalui kegiatan sosial, keagamaan, dan pendidikan.'],
-    ];
+    $kv = fn (string $key, string $default = '') => $konten[$key] ?? $default;
 
-    $nilai = [
-        ['fa-book-quran',            'Religius', 'Berpegang teguh pada Al-Qur’an, Sunnah, dan tradisi ulama salaf.'],
-        ['fa-heart',                 'Ikhlas',   'Belajar dan mengabdi semata-mata mengharap ridha Allah.'],
-        ['fa-hands-holding-circle',  'Mandiri',  'Melatih santri hidup sederhana, disiplin, dan bertanggung jawab.'],
-        ['fa-people-group',          'Ukhuwah',  'Menjalin persaudaraan yang erat antarsantri dan masyarakat.'],
-    ];
+    $baris = function (string $key, string $default = '') use ($kv): array {
+        $raw = (string) $kv($key, $default);
+        $hasil = [];
+        foreach (preg_split('/\r\n|\r|\n/', $raw) as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+            $bagian = array_map('trim', explode('|', $line, 2));
+            $hasil[] = [$bagian[0], $bagian[1] ?? ''];
+        }
+
+        return $hasil;
+    };
+
+    // Susunan & visibilitas section dari dashboard.
+    $layout = \App\Models\Konten::layoutFor('visi');
+    $visible = [];
+    $order = [];
+    foreach ($layout as $i => $section) {
+        $visible[$section['id']] = $section['visible'];
+        $order[$section['id']] = $i;
+    }
+
+    $heroEyebrow = $kv('visi_page_hero_eyebrow', 'Pondok Pesantren Babul Hasanah');
+    $heroTitle = $kv('visi_page_hero_title', 'Cita-cita yang jelas,');
+    $heroAccent = $kv('visi_page_hero_title_accent', 'langkah yang nyata.');
+    $heroDesc = $kv('visi_page_hero_desc', 'Landasan kami dalam membangun generasi unggul, berilmu, dan berakhlak mulia: dari visi, misi, hingga nilai yang kami tanamkan setiap hari.');
+
+    $visi = $kv('visi_page_visi', 'Membangun Generasi Unggul dalam Penguasaan Kitab Kuning, Berakhlak Mulia, dan Berwawasan Luas.');
+
+    $misiHeading = $kv('visi_page_misi_heading', 'Misi pondok pesantren');
+    $misiDesc = $kv('visi_page_misi_desc', 'Untuk mewujudkan visi tersebut, kami menjalankan lima misi berikut dengan penuh komitmen.');
+
+    $misiIkon = ['fa-book-quran', 'fa-hand-holding-heart', 'fa-lightbulb', 'fa-house-mosque', 'fa-hands-holding-circle'];
+    $misi = [];
+    foreach ($baris('visi_page_misi', "Pendalaman Ilmu Agama|Menyelenggarakan pendidikan kitab kuning secara berjenjang dan sistematis dengan sanad keilmuan yang jelas.\nPembinaan Akhlak & Karakter|Menanamkan adab, kedisiplinan, kemandirian, dan keteladanan dalam kehidupan santri sehari-hari.\nPenguatan Wawasan & Keterampilan|Membekali santri dengan wawasan keilmuan, kemampuan berbahasa, dan keterampilan hidup yang relevan dengan zaman.\nLingkungan Pesantren yang Kondusif|Menciptakan suasana belajar yang aman, nyaman, dan islami untuk mendukung tumbuh kembang santri.\nPengabdian kepada Masyarakat|Mengembangkan dakwah dan kemaslahatan umat melalui kegiatan sosial, keagamaan, dan pendidikan.") as $i => $row) {
+        $misi[] = [$misiIkon[$i] ?? 'fa-circle', $row[0], $row[1]];
+    }
+
+    $nilaiHeading = $kv('visi_page_nilai_heading', 'Nilai-nilai utama');
+    $nilaiDesc = $kv('visi_page_nilai_desc', 'Empat pegangan yang kami tanamkan dalam keseharian santri.');
+
+    $nilaiIkon = ['fa-book-quran', 'fa-heart', 'fa-hands-holding-circle', 'fa-people-group'];
+    $nilai = [];
+    foreach ($baris('visi_page_nilai', "Religius|Berpegang teguh pada Al-Qur’an, Sunnah, dan tradisi ulama salaf.\nIkhlas|Belajar dan mengabdi semata-mata mengharap ridha Allah.\nMandiri|Melatih santri hidup sederhana, disiplin, dan bertanggung jawab.\nUkhuwah|Menjalin persaudaraan yang erat antarsantri dan masyarakat.") as $i => $row) {
+        $nilai[] = [$nilaiIkon[$i] ?? 'fa-circle', $row[0], $row[1]];
+    }
+
+    $mottoLabel = $kv('visi_page_motto_label', 'Motto Pesantren');
+    $motto = $kv('visi_page_motto', '“Berilmu, Beramal,');
+    $mottoAccent = $kv('visi_page_motto_accent', 'Berakhlak Mulia”');
 @endphp
 
 <style>
     .sj-page { --g900:#0a3a24; --g800:#0f5132; --g700:#13693f; --g600:#15803d; --g500:#10b981; --g50:#f0fdf6;
-        --gold:#b7791f; --gold-text:#955f0f; --gold-soft:#fdf3dc; --gold-light:#fde68a; color:#1e293b; }
+        --gold:#b7791f; --gold-text:#955f0f; --gold-soft:#fdf3dc; --gold-light:#fde68a; color:#1e293b;
+        display: flex; flex-direction: column; }
     .sj-page *, .sj-page *::before, .sj-page *::after { box-sizing: border-box; }
     .sj-wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 24px; }
     .sj-page section[id] { scroll-margin-top: 80px; }
@@ -137,26 +179,38 @@
 <div class="sj-page">
 
     {{-- ============ HERO ============ --}}
-    <header class="sj-hero">
-        <div class="sj-wrap">
-            <div class="sj-crumb">
-                <a href="{{ url('/') }}">Beranda</a> <i class="fa-solid fa-chevron-right" style="font-size:10px"></i>
-                Profil <i class="fa-solid fa-chevron-right" style="font-size:10px"></i> Visi &amp; Misi
+    @if ($visible['hero'] ?? true)
+        <header class="sj-hero" style="order: {{ $order['hero'] ?? 0 }}">
+            <div class="sj-wrap">
+                <div class="sj-crumb">
+                    <a href="{{ url('/') }}">Beranda</a> <i class="fa-solid fa-chevron-right"
+                        style="font-size:10px"></i>
+                    Profil <i class="fa-solid fa-chevron-right" style="font-size:10px"></i> Visi &amp; Misi
+                </div>
+                <div class="sj-eyebrow light">{{ $heroEyebrow }}</div>
+                <h1>{{ $heroTitle }} <span>{{ $heroAccent }}</span></h1>
+                <p>{{ $heroDesc }}</p>
+                <nav class="sj-nav" aria-label="Isi halaman">
+                    @if ($visible['visi'] ?? true)
+                        <a href="#visi"><i class="fa-solid fa-eye"></i> Visi</a>
+                    @endif
+                    @if ($visible['misi'] ?? true)
+                        <a href="#misi"><i class="fa-solid fa-bullseye"></i> Misi</a>
+                    @endif
+                    @if ($visible['nilai'] ?? true)
+                        <a href="#nilai"><i class="fa-solid fa-gem"></i> Nilai</a>
+                    @endif
+                    @if ($visible['motto'] ?? true)
+                        <a href="#motto"><i class="fa-solid fa-star-and-crescent"></i> Motto</a>
+                    @endif
+                </nav>
             </div>
-            <div class="sj-eyebrow light">Pondok Pesantren Babul Hasanah</div>
-            <h1>Cita-cita yang jelas, <span>langkah yang nyata.</span></h1>
-            <p>Landasan kami dalam membangun generasi unggul, berilmu, dan berakhlak mulia: dari visi, misi, hingga nilai yang kami tanamkan setiap hari.</p>
-            <nav class="sj-nav" aria-label="Isi halaman">
-                <a href="#visi"><i class="fa-solid fa-eye"></i> Visi</a>
-                <a href="#misi"><i class="fa-solid fa-bullseye"></i> Misi</a>
-                <a href="#nilai"><i class="fa-solid fa-gem"></i> Nilai</a>
-                <a href="#motto"><i class="fa-solid fa-star-and-crescent"></i> Motto</a>
-            </nav>
-        </div>
-    </header>
+        </header>
+    @endif
 
     {{-- ============ 1. VISI ============ --}}
-    <section class="sj-sec" id="visi">
+    @if ($visible['visi'] ?? true)
+        <section class="sj-sec" id="visi" style="order: {{ $order['visi'] ?? 1 }}">
         <div class="sj-wrap">
             <div class="sj-story">
                 <div class="sj-year sj-rv">
@@ -170,14 +224,16 @@
             </div>
         </div>
     </section>
+    @endif
 
     {{-- ============ 2. MISI ============ --}}
-    <section class="sj-sec alt" id="misi">
+    @if ($visible['misi'] ?? true)
+        <section class="sj-sec alt" id="misi" style="order: {{ $order['misi'] ?? 2 }}">
         <div class="sj-wrap">
             <div class="sj-head">
                 <div class="sj-eyebrow">Misi Pesantren</div>
-                <h2>Misi pondok pesantren</h2>
-                <p>Untuk mewujudkan visi tersebut, kami menjalankan lima misi berikut dengan penuh komitmen.</p>
+                <h2>{{ $misiHeading }}</h2>
+                <p>{{ $misiDesc }}</p>
             </div>
 
             <div class="sj-culture">
@@ -192,14 +248,16 @@
             </div>
         </div>
     </section>
+    @endif
 
     {{-- ============ 3. NILAI-NILAI ============ --}}
-    <section class="sj-sec" id="nilai">
+    @if ($visible['nilai'] ?? true)
+        <section class="sj-sec" id="nilai" style="order: {{ $order['nilai'] ?? 3 }}">
         <div class="sj-wrap">
             <div class="sj-head">
                 <div class="sj-eyebrow">Nilai Utama</div>
-                <h2>Nilai-nilai utama</h2>
-                <p>Empat pegangan yang kami tanamkan dalam keseharian santri.</p>
+                <h2>{{ $nilaiHeading }}</h2>
+                <p>{{ $nilaiDesc }}</p>
             </div>
             <div class="sj-values">
                 @foreach ($nilai as $n)
@@ -212,14 +270,17 @@
             </div>
         </div>
     </section>
+    @endif
 
     {{-- ============ 4. MOTTO ============ --}}
-    <section class="sj-motivasi" id="motto">
+    @if ($visible['motto'] ?? true)
+        <section class="sj-motivasi" id="motto" style="order: {{ $order['motto'] ?? 4 }}">
         <div class="sj-wrap">
-            <div class="sj-eyebrow light">Motto Pesantren</div>
-            <h2 class="sj-rv">“Berilmu, Beramal, <span>Berakhlak Mulia</span>”</h2>
+            <div class="sj-eyebrow light">{{ $mottoLabel }}</div>
+            <h2 class="sj-rv">{{ $motto }} <span>{{ $mottoAccent }}</span></h2>
         </div>
     </section>
+    @endif
 </div>
 
 <script>

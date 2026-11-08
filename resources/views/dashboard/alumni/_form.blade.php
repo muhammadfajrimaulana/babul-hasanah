@@ -80,7 +80,10 @@
 
     <div class="sm:col-span-2">
         <label class="{{ $lb }}">Testimoni / pesan untuk pesantren</label>
-        <textarea name="testimoni" rows="3" class="{{ $in }}">{{ $v('testimoni') }}</textarea>
+        <textarea name="testimoni" rows="3" class="{{ $in }}" placeholder="Kesan dan pesan alumni tentang pesantren…">{{ $v('testimoni') }}</textarea>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Jika diisi, testimoni ini otomatis tampil pada slider <b>“Kata Alumni”</b> di halaman beranda.
+        </p>
         @error('testimoni') <p class="{{ $err }}">{{ $message }}</p> @enderror
     </div>
 

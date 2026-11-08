@@ -26,21 +26,42 @@
 @endphp
 
 <style>
-    /* ===== Halaman Kontak (memakai variabel warna dari layouts/app) ===== */
+    /* ===== Halaman Kontak (selaras dengan halaman Berita) ===== */
     .kt-hero {
-        position: relative; overflow: hidden; background: var(--cream); text-align: center;
-        padding: 64px 0 112px; border-radius: 0 0 36px 36px;
+        position: relative; overflow: hidden; padding: 56px 0 96px; color: #fff;
+        background: linear-gradient(125deg, var(--green) 0%, var(--green-2) 55%, #2a6a50 100%);
     }
-    .kt-hero::before, .kt-hero::after {
-        content: ""; position: absolute; border-radius: 50%; pointer-events: none;
+    .kt-hero::before {
+        content: ""; position: absolute; inset: 0; opacity: .10;
+        background-image: radial-gradient(#d1fae5 1px, transparent 1px); background-size: 20px 20px;
     }
-    .kt-hero::before { width: 360px; height: 360px; left: -120px; top: -140px; background: radial-gradient(circle, rgba(18, 184, 134, .16), transparent 70%); }
-    .kt-hero::after { width: 320px; height: 320px; right: -100px; bottom: -150px; background: radial-gradient(circle, rgba(183, 121, 31, .16), transparent 70%); }
+    .kt-hero::after {
+        content: "\f095"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute;
+        right: 2%; top: 50%; transform: translateY(-50%); pointer-events: none;
+        font-size: clamp(120px, 18vw, 230px); color: rgba(255, 255, 255, .06);
+    }
     .kt-hero .site-container { position: relative; z-index: 1; }
-    .kt-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
-    .kt-title { font-size: clamp(30px, 4.4vw, 46px); font-weight: 700; color: var(--green); line-height: 1.2; margin-top: 8px; }
-    .kt-title span { color: var(--emerald-d); }
-    .kt-sub { font-size: 14.5px; color: var(--muted); max-width: 560px; margin: 12px auto 0; line-height: 1.75; }
+    .kt-eyebrow {
+        display: inline-flex; align-items: center; gap: 10px; font-size: 11px; font-weight: 600;
+        letter-spacing: .14em; text-transform: uppercase; color: var(--gold);
+    }
+    .kt-eyebrow::before { content: ""; width: 26px; height: 1px; background: currentColor; }
+    .kt-hero .kt-eyebrow { color: #e6d3a3; }
+    .kt-title {
+        color: #fff; font-size: clamp(28px, 4.2vw, 44px); font-weight: 700; line-height: 1.18;
+        letter-spacing: -.01em; margin: 12px 0 10px;
+    }
+    .kt-title span { color: #19d68f; }
+    .kt-sub { color: rgba(255, 255, 255, .82); max-width: 620px; font-size: 13.5px; line-height: 1.75; }
+
+    .kt-hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .kt-meta-chip {
+        display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: #dcece3;
+        background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .16);
+        border-radius: 999px; padding: 8px 14px;
+    }
+    .kt-meta-chip i { color: #19d68f; font-size: 11px; }
+    .kt-meta-chip b { color: #fff; font-weight: 600; }
 
     /* Kartu info (menumpuk ke hero) */
     .kt-info { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: -64px; position: relative; z-index: 2; }
@@ -110,9 +131,13 @@
     .kt-social-list a:hover { background: var(--emerald); border-color: var(--emerald); transform: translateY(-3px); }
 
     /* FAQ */
-    .kt-sec-head { text-align: center; margin: 72px 0 28px; }
-    .kt-sec-title { font-size: 24px; font-weight: 600; color: var(--green); margin-top: 6px; }
-    .kt-faq { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+    .kt-sec-head {
+        display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+        margin: 64px 0 22px; padding-top: 30px; border-top: 1px solid var(--line);
+    }
+    .kt-sec-title { font-size: 22px; font-weight: 600; color: var(--green); margin-top: 4px; }
+    .kt-sec-note { font-size: 12px; color: var(--muted); }
+    .kt-faq { max-width: 860px; margin: 0; display: flex; flex-direction: column; gap: 12px; }
     .kt-q { background: #fff; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; transition: border-color .2s ease, box-shadow .2s ease; }
     .kt-q.open { border-color: var(--emerald); box-shadow: 0 10px 28px rgba(23, 64, 47, .08); }
     .kt-q button {
@@ -126,17 +151,24 @@
 
     /* CTA */
     .kt-cta {
-        margin: 72px 0 0; background: var(--green); border-radius: 30px; padding: 44px 36px; color: #cfe0d6;
+        margin: 64px 0 0; background: linear-gradient(150deg, var(--green), #2a6a50);
+        border-radius: 26px; padding: 40px 36px; color: #cfe0d6;
         display: flex; align-items: center; justify-content: space-between; gap: 28px; flex-wrap: wrap;
         position: relative; overflow: hidden; box-shadow: var(--shadow-lg);
     }
     .kt-cta::after {
-        content: ""; position: absolute; width: 300px; height: 300px; border-radius: 50%; right: -80px; top: -120px;
-        background: radial-gradient(circle, rgba(47, 224, 160, .22), transparent 70%); pointer-events: none;
+        content: "\f19d"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute;
+        right: 3%; bottom: -34px; font-size: 150px; color: rgba(255, 255, 255, .07); pointer-events: none;
     }
     .kt-cta > * { position: relative; z-index: 1; }
-    .kt-cta h3 { color: #fff; font-size: 24px; font-weight: 600; line-height: 1.3; }
+    .kt-cta h3 { color: #fff; font-size: clamp(20px, 2.4vw, 26px); font-weight: 600; line-height: 1.3; }
     .kt-cta p { font-size: 13.5px; line-height: 1.7; margin-top: 8px; max-width: 480px; }
+    .kt-cta-btn {
+        display: inline-flex; align-items: center; gap: 9px; background: #fff; color: var(--green);
+        font-size: 13px; font-weight: 700; padding: 13px 22px; border-radius: 13px; white-space: nowrap;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, .18); transition: transform .2s ease, color .2s ease;
+    }
+    .kt-cta-btn:hover { transform: translateY(-2px); color: var(--green); }
 
     .kt-wrap { padding-bottom: 72px; }
 
@@ -145,14 +177,15 @@
         .kt-main { grid-template-columns: 1fr; }
     }
     @media (max-width: 640px) {
-        .kt-hero { padding: 44px 0 96px; border-radius: 0 0 28px 28px; }
+        .kt-hero { padding: 44px 0 92px; }
+        .kt-hero::after { display: none; }
         .kt-info { grid-template-columns: 1fr; margin-top: -56px; gap: 14px; }
         .kt-card { padding: 24px 20px; border-radius: 22px; }
         .kt-row { grid-template-columns: 1fr; gap: 0; }
         .kt-actions .site-btn { min-width: 100%; }
         .kt-map iframe { height: 260px; }
         .kt-cta { padding: 32px 24px; border-radius: 24px; }
-        .kt-cta .site-btn { width: 100%; }
+        .kt-cta .kt-cta-btn { width: 100%; }
         .kt-sec-head { margin-top: 56px; }
     }
 </style>
@@ -185,6 +218,12 @@
         <span class="kt-eyebrow">Hubungi Kami</span>
         <h1 class="kt-title">Kami Siap <span>Membantu Anda</span></h1>
         <p class="kt-sub">Punya pertanyaan seputar pendaftaran, jenjang pendidikan, atau ingin berkunjung ke Pondok Pesantren Babul Hasanah? Silakan hubungi kami.</p>
+
+        <div class="kt-hero-meta">
+            <span class="kt-meta-chip"><i class="fa-brands fa-whatsapp"></i> {{ $telpTampil }}</span>
+            <span class="kt-meta-chip"><i class="fa-solid fa-envelope"></i> {{ $email }}</span>
+            <span class="kt-meta-chip"><i class="fa-regular fa-clock"></i> Senin–Sabtu, 08.00–16.00 WIB</span>
+        </div>
     </div>
 </section>
 
@@ -290,8 +329,11 @@
 
     {{-- ===================== FAQ ===================== --}}
     <div class="kt-sec-head">
-        <span class="kt-eyebrow">Sering Ditanyakan</span>
-        <h2 class="kt-sec-title">Pertanyaan Umum</h2>
+        <div>
+            <span class="kt-eyebrow">Sering Ditanyakan</span>
+            <h2 class="kt-sec-title">Pertanyaan Umum</h2>
+        </div>
+        <span class="kt-sec-note">{{ count($faq) }} pertanyaan</span>
     </div>
 
     <div class="kt-faq" x-data="{ buka: 0 }">
@@ -315,7 +357,7 @@
             <h3>Siap Bergabung Menjadi Santri Babul Hasanah?</h3>
             <p>Daftarkan putra-putri Anda secara online. Prosesnya mudah dan panitia siap membantu bila ada kendala.</p>
         </div>
-        <a href="{{ route('pendaftaran.index') }}" class="site-btn">Daftar Online Sekarang <i class="fa-solid fa-arrow-right"></i></a>
+        <a href="{{ route('pendaftaran.index') }}" class="kt-cta-btn">Daftar Online Sekarang <i class="fa-solid fa-arrow-right" style="font-size:11px"></i></a>
     </div>
 
 </div>

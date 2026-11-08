@@ -129,25 +129,97 @@
             'foto'      => $items->all(),
         ];
     })->filter(fn ($a) => count($a['foto']) > 0)->values()->all();
+
+    // Ringkasan untuk hero & header galeri
+    $totalAlbum    = count($albums);
+    $totalFoto     = collect($albums)->sum('jml_foto');
+    $totalVideo    = collect($albums)->sum('jml_video');
+    $totalKategori = collect($albums)->pluck('kategori')->filter()->unique()->count();
 @endphp
 
 <style>
-    /* ===== Halaman Galeri Album (memakai variabel warna dari layouts/app) ===== */
-    .gl-hero { background: var(--cream); padding: 56px 0 64px; border-radius: 0 0 36px 36px; text-align: center; }
-    .gl-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
-    .gl-title { font-size: clamp(28px, 4vw, 40px); font-weight: 700; color: var(--green); line-height: 1.2; margin-top: 8px; }
-    .gl-sub { font-size: 14px; color: var(--muted); max-width: 580px; margin: 10px auto 0; line-height: 1.7; }
-
-    .gl-body { padding: 40px 0 72px; }
-
-    .gl-filter { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 14px; }
-    .gl-chip {
-        font-family: inherit; font-size: 13px; font-weight: 500; padding: 9px 18px; border-radius: 999px; cursor: pointer;
-        background: #fff; color: #4b5563; border: 1px solid var(--line); transition: all .2s ease;
+    /* ===== Hero (selaras dengan halaman Berita) ===== */
+    .gl-hero {
+        position: relative; overflow: hidden; padding: 56px 0 62px; color: #fff;
+        background: linear-gradient(125deg, var(--green) 0%, var(--green-2) 55%, #2a6a50 100%);
     }
-    .gl-chip:hover { border-color: var(--emerald); color: var(--emerald-d); }
+    .gl-hero::before {
+        content: ""; position: absolute; inset: 0; opacity: .10;
+        background-image: radial-gradient(#d1fae5 1px, transparent 1px); background-size: 20px 20px;
+    }
+    .gl-hero::after {
+        content: "\f03e"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute;
+        right: 2%; top: 50%; transform: translateY(-50%); pointer-events: none;
+        font-size: clamp(120px, 18vw, 230px); color: rgba(255, 255, 255, .06);
+    }
+    .gl-hero .site-container { position: relative; z-index: 1; }
+    .gl-eyebrow {
+        display: inline-flex; align-items: center; gap: 10px; font-size: 11px; font-weight: 600;
+        letter-spacing: .14em; text-transform: uppercase; color: var(--gold);
+    }
+    .gl-eyebrow::before { content: ""; width: 26px; height: 1px; background: currentColor; }
+    .gl-hero .gl-eyebrow { color: #e6d3a3; }
+    .gl-title {
+        color: #fff; font-size: clamp(28px, 4.2vw, 44px); font-weight: 700; line-height: 1.18;
+        letter-spacing: -.01em; margin: 12px 0 10px; max-width: 800px;
+    }
+    .gl-title span { color: #19d68f; }
+    .gl-sub { color: rgba(255, 255, 255, .82); max-width: 620px; font-size: 13.5px; line-height: 1.75; }
+
+    .gl-hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .gl-meta-chip {
+        display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: #dcece3;
+        background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .16);
+        border-radius: 999px; padding: 8px 14px;
+    }
+    .gl-meta-chip i { color: #19d68f; font-size: 11px; }
+    .gl-meta-chip b { color: #fff; font-weight: 600; }
+
+    .gl-body { padding: 42px 0 72px; }
+
+    /* Ticker album terbaru */
+    .gl-ticker {
+        display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+        margin-bottom: 22px; padding: 13px 16px; border-radius: 16px;
+        background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--emerald);
+        box-shadow: 0 8px 24px rgba(23, 64, 47, .06);
+    }
+    .gl-ticker-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .gl-pill {
+        display: inline-flex; align-items: center; gap: 6px; flex: none;
+        background: var(--emerald); color: #fff; font-size: 9.5px; font-weight: 700;
+        letter-spacing: .09em; text-transform: uppercase; padding: 5px 11px; border-radius: 999px;
+    }
+    .gl-ticker-text {
+        font-size: 12.5px; font-weight: 500; color: var(--ink);
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .gl-ticker-btn {
+        display: inline-flex; align-items: center; gap: 7px; flex: none; cursor: pointer;
+        font-family: inherit; font-size: 12px; font-weight: 600; color: var(--emerald-d);
+        background: none; border: 0; padding: 0; transition: color .2s ease;
+    }
+    .gl-ticker-btn:hover { color: var(--green); }
+
+    /* Header daftar album */
+    .gl-sec-head {
+        display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
+        flex-wrap: wrap; margin: 0 0 20px;
+    }
+    .gl-sec-title { font-size: 22px; font-weight: 600; color: var(--green); margin-top: 4px; }
+    .gl-sec-note { font-size: 12px; color: var(--muted); }
+    .gl-sec-note b { color: var(--green); }
+
+    .gl-filter { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 22px; }
+    .gl-chip {
+        display: inline-flex; align-items: center; gap: 7px; font-family: inherit; font-size: 12px;
+        font-weight: 500; color: var(--muted); background: #fff; border: 1px solid var(--line);
+        border-radius: 999px; padding: 8px 16px; cursor: pointer;
+        transition: color .2s ease, border-color .2s ease, background .2s ease, transform .2s ease;
+    }
+    .gl-chip b { font-size: 10.5px; font-weight: 700; opacity: .75; }
+    .gl-chip:hover { border-color: var(--green); color: var(--green); transform: translateY(-1px); }
     .gl-chip.on { background: var(--green); border-color: var(--green); color: #fff; font-weight: 600; }
-    .gl-count { text-align: center; font-size: 12.5px; color: var(--muted); margin-bottom: 30px; }
 
     /* Kartu album */
     .gl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
@@ -156,7 +228,7 @@
         text-align: left; font-family: inherit; padding: 0; display: block; width: 100%;
         transition: transform .25s ease, box-shadow .25s ease;
     }
-    .gl-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+    .gl-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: #cfe3d8; }
     .gl-card:focus-visible { outline: 2px solid var(--emerald); outline-offset: 3px; }
     .gl-img { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--cream); }
     .gl-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
@@ -169,7 +241,11 @@
     .gl-badge i { color: var(--emerald-l); font-size: 11px; }
     .gl-badge-vid { right: auto; left: 14px; }
     .gl-info { padding: 16px 20px 20px; }
-    .gl-cat { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
+    .gl-cat {
+        display: inline-flex; align-items: center; gap: 7px; font-size: 10.5px; font-weight: 600;
+        letter-spacing: .1em; text-transform: uppercase; color: var(--gold);
+    }
+    .gl-cat::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
     .gl-date { font-size: 11.5px; color: var(--muted); font-weight: 400; letter-spacing: 0; text-transform: none; }
     .gl-h { font-size: 15px; font-weight: 600; color: var(--green); line-height: 1.4; margin: 6px 0; transition: color .2s ease; }
     .gl-card:hover .gl-h { color: var(--emerald-d); }
@@ -182,7 +258,10 @@
         border: 1px solid var(--line); padding: 12px 28px; border-radius: 12px; transition: all .25s ease;
     }
     .gl-more button:hover { background: var(--emerald); border-color: var(--emerald); color: #fff; transform: translateY(-2px); }
-    .gl-empty { text-align: center; color: var(--muted); font-size: 14px; padding: 60px 0; }
+    .gl-empty {
+        text-align: center; color: var(--muted); font-size: 13.5px; padding: 54px 22px;
+        background: #fff; border: 1px dashed var(--line); border-radius: 22px;
+    }
     .gl-empty i { display: block; font-size: 32px; color: var(--line); margin-bottom: 12px; }
 
     /* Lightbox album */
@@ -247,7 +326,8 @@
 
     @media (max-width: 1024px) { .gl-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 640px) {
-        .gl-hero { padding: 40px 0 48px; border-radius: 0 0 28px 28px; }
+        .gl-hero { padding: 44px 0 50px; }
+        .gl-hero::after { display: none; }
         .gl-body { padding: 30px 0 56px; }
         .gl-grid { grid-template-columns: 1fr; }
         .gl-lb { --h: 42vh; --hp: 56vh; padding: 64px 14px 14px; align-items: flex-start; }
@@ -304,8 +384,15 @@
 <section class="gl-hero">
     <div class="site-container">
         <span class="gl-eyebrow">Dokumentasi Visual</span>
-        <h1 class="gl-title">Galeri Kegiatan &amp; Fasilitas Pesantren</h1>
+        <h1 class="gl-title">Galeri Kegiatan &amp; <span>Fasilitas Pesantren</span></h1>
         <p class="gl-sub">Album foto dan video dokumentasi momen kebersamaan, kegiatan belajar mengajar, ekstrakurikuler, serta suasana asrama di Pondok Pesantren Babul Hasanah.</p>
+
+        <div class="gl-hero-meta">
+            <span class="gl-meta-chip"><i class="fa-regular fa-images"></i> <b>{{ $totalAlbum }}</b> album</span>
+            <span class="gl-meta-chip"><i class="fa-solid fa-camera-retro"></i> <b>{{ $totalFoto }}</b> foto</span>
+            <span class="gl-meta-chip"><i class="fa-solid fa-circle-play"></i> <b>{{ $totalVideo }}</b> video</span>
+            <span class="gl-meta-chip"><i class="fa-solid fa-tags"></i> <b>{{ $totalKategori }}</b> kategori</span>
+        </div>
     </div>
 </section>
 
@@ -317,15 +404,37 @@
          @keydown.window.arrow-right="album && maju()"
          @keydown.window.arrow-left="album && mundur()">
 
+        {{-- Ticker album terbaru --}}
+        <div class="gl-ticker" x-show="albums.length > 0" x-cloak>
+            <div class="gl-ticker-left">
+                <span class="gl-pill"><i class="fa-solid fa-bolt"></i> Terbaru</span>
+                <span class="gl-ticker-text" x-text="albums.length ? albums[0].judul : ''"></span>
+            </div>
+            <button type="button" class="gl-ticker-btn" @click="aktif = 'Semua'; batas = langkah; buka(0)">
+                Lihat album <i class="fa-solid fa-arrow-right" style="font-size:11px"></i>
+            </button>
+        </div>
+
         {{-- Filter kategori --}}
         <div class="gl-filter">
             <template x-for="k in kategori" :key="k">
-                <button type="button" class="gl-chip" :class="{ 'on': aktif === k }" @click="pilih(k)" x-text="k"></button>
+                <button type="button" class="gl-chip" :class="{ 'on': aktif === k }" @click="pilih(k)">
+                    <span x-text="k"></span>
+                    <b x-text="k === 'Semua' ? albums.length : albums.filter(x => x.kategori === k).length"></b>
+                </button>
             </template>
         </div>
-        <p class="gl-count">
-            Menampilkan <b x-text="tampil.length"></b> dari <b x-text="tersaring.length"></b> album
-        </p>
+
+        {{-- Header daftar album --}}
+        <div class="gl-sec-head">
+            <div>
+                <span class="gl-eyebrow">Album</span>
+                <h2 class="gl-sec-title">Jelajahi Galeri</h2>
+            </div>
+            <span class="gl-sec-note">
+                Menampilkan <b x-text="tampil.length"></b> dari <b x-text="tersaring.length"></b> album
+            </span>
+        </div>
 
         {{-- Grid album --}}
         <div class="gl-grid">
@@ -354,7 +463,7 @@
         {{-- Kosong --}}
         <div class="gl-empty" x-show="tersaring.length === 0" x-cloak>
             <i class="fa-regular fa-images"></i>
-            Belum ada album pada kategori ini.
+            <span x-text="albums.length === 0 ? 'Belum ada album yang dipublikasikan.' : 'Belum ada album pada kategori ini.'"></span>
         </div>
 
         {{-- Muat lebih banyak --}}

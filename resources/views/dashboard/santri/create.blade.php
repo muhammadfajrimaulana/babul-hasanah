@@ -102,7 +102,7 @@
                 </div>
                 <div>
                     <h2 class="text-base font-black text-slate-900 dark:text-white">Wali Santri & Akun Portal</h2>
-                    <p class="text-[11px] text-slate-400">Isi email jika wali perlu akun login portal</p>
+                    <p class="text-[11px] text-slate-400">Email milik orang tua/wali dipakai untuk login Portal Wali Santri</p>
                 </div>
             </div>
 
@@ -114,7 +114,7 @@
                 </div>
 
                 <div>
-                    <label class="{{ $labelCls }}" for="email_wali">Email Wali (Login Portal)</label>
+                    <label class="{{ $labelCls }}" for="email_wali">Email Orang Tua / Wali (Login Portal)</label>
                     <input id="email_wali" type="email" name="email_wali" value="{{ old('email_wali') }}"
                         class="{{ $inputCls }}" placeholder="budi@gmail.com">
                     <p class="{{ $hintCls }}">Jika diisi, akun portal wali dibuat otomatis. Jika email sudah terdaftar sebagai wali, santri ditautkan ke akun itu.</p>

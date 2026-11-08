@@ -72,7 +72,7 @@
                 @forelse($pendaftar as $item)
                     @php
                         $statusMobile = strtolower($item->status_pendaftaran ?? 'pending');
-                        $keyword = $item->nama_lengkap . ' ' . $item->no_pendaftaran . ' ' . $item->nisn . ' ' . $item->asal_sekolah;
+                        $keyword = $item->nama_lengkap . ' ' . $item->no_pendaftaran . ' ' . $item->nisn . ' ' . $item->asal_sekolah . ' ' . $item->email . ' ' . $item->nama_ortu_wali;
                     @endphp
                     <div class="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 space-y-3.5 shadow-sm searchable-item"
                         data-keyword="{{ strtolower($keyword) }}">
@@ -92,9 +92,9 @@
                             <div><dt class="font-bold text-slate-500 dark:text-slate-400">Tempat Tanggal Lahir</dt><dd class="text-slate-800 dark:text-slate-200">{{ $item->tempat_tanggal_lahir ?? '-' }}</dd></div>
                             <div><dt class="font-bold text-slate-500 dark:text-slate-400">No. HP Aktif (WA)</dt><dd class="text-slate-800 dark:text-slate-200">{{ $item->no_hp_aktif ?? '-' }}</dd></div>
                             <div><dt class="font-bold text-slate-500 dark:text-slate-400">Alamat Tinggal (Domisili)</dt><dd class="text-slate-800 dark:text-slate-200">{{ $item->alamat_domisili ?? '-' }}</dd></div>
-                            <div><dt class="font-bold text-slate-500 dark:text-slate-400">Email Aktif</dt><dd class="text-slate-800 dark:text-slate-200 break-all">{{ $item->email ?? '-' }}</dd></div>
                             <div><dt class="font-bold text-slate-500 dark:text-slate-400">Nama Orang Tua (Wali)</dt><dd class="text-slate-800 dark:text-slate-200">{{ $item->nama_ortu_wali ?? '-' }}</dd></div>
                             <div><dt class="font-bold text-slate-500 dark:text-slate-400">No. HP Orang Tua</dt><dd class="text-slate-800 dark:text-slate-200">{{ $item->no_hp_ortu ?? '-' }}</dd></div>
+                            <div><dt class="font-bold text-slate-500 dark:text-slate-400">Email Orang Tua / Wali <span class="font-normal normal-case">(login wali)</span></dt><dd class="text-slate-800 dark:text-slate-200 break-all">{{ $item->email ?? '-' }}</dd></div>
                             <div><dt class="font-bold text-slate-500 dark:text-slate-400">Sekolah Asal</dt><dd class="text-slate-800 dark:text-slate-200">{{ $item->asal_sekolah ?? '-' }}</dd></div>
                             <div><dt class="font-bold text-slate-500 dark:text-slate-400">Alamat Sekolah Asal</dt><dd class="text-slate-800 dark:text-slate-200">{{ $item->alamat_sekolah ?? '-' }}</dd></div>
                             <div class="grid grid-cols-2 gap-2">
@@ -159,9 +159,9 @@
                             <th class="py-3 px-3.5">Tempat Tanggal Lahir</th>
                             <th class="py-3 px-3.5">No. HP Aktif (WA)</th>
                             <th class="py-3 px-3.5">Alamat Tinggal (Domisili)</th>
-                            <th class="py-3 px-3.5">Email Aktif</th>
                             <th class="py-3 px-3.5">Nama Orang Tua (Wali)</th>
                             <th class="py-3 px-3.5">No. HP Orang Tua</th>
+                            <th class="py-3 px-3.5">Email Orang Tua / Wali</th>
                             <th class="py-3 px-3.5">Sekolah Asal</th>
                             <th class="py-3 px-3.5">Alamat Sekolah Asal</th>
                             <th class="py-3 px-3.5">Tahun Lulus</th>
@@ -175,7 +175,7 @@
                         @forelse($pendaftar as $item)
                             @php
                                 $statusDesktop = strtolower($item->status_pendaftaran ?? 'pending');
-                                $keyword = $item->nama_lengkap . ' ' . $item->no_pendaftaran . ' ' . $item->nisn . ' ' . $item->asal_sekolah;
+                                $keyword = $item->nama_lengkap . ' ' . $item->no_pendaftaran . ' ' . $item->nisn . ' ' . $item->asal_sekolah . ' ' . $item->email . ' ' . $item->nama_ortu_wali;
                             @endphp
                             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition searchable-item"
                                 data-keyword="{{ strtolower($keyword) }}">
@@ -184,9 +184,9 @@
                                 <td class="py-3.5 px-3.5">{{ $item->tempat_tanggal_lahir ?? '-' }}</td>
                                 <td class="py-3.5 px-3.5 font-mono">{{ $item->no_hp_aktif ?? '-' }}</td>
                                 <td class="py-3.5 px-3.5 max-w-xs whitespace-normal">{{ $item->alamat_domisili ?? '-' }}</td>
-                                <td class="py-3.5 px-3.5 text-slate-500">{{ $item->email ?? '-' }}</td>
                                 <td class="py-3.5 px-3.5">{{ $item->nama_ortu_wali ?? '-' }}</td>
                                 <td class="py-3.5 px-3.5 font-mono">{{ $item->no_hp_ortu ?? '-' }}</td>
+                                <td class="py-3.5 px-3.5 text-slate-500">{{ $item->email ?? '-' }}</td>
                                 <td class="py-3.5 px-3.5">{{ $item->asal_sekolah ?? '-' }}</td>
                                 <td class="py-3.5 px-3.5 max-w-xs whitespace-normal">{{ $item->alamat_sekolah ?? '-' }}</td>
                                 <td class="py-3.5 px-3.5 text-center">{{ $item->tahun_lulus ?? '-' }}</td>

@@ -21,8 +21,8 @@
                 </span>
                 <h1 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Pendaftaran Santri Baru</h1>
                 <p class="text-slate-600 text-xs sm:text-sm max-w-xl mx-auto leading-relaxed">
-                    Isi data berikut dengan benar. Setelah diverifikasi admin, data akan masuk ke Data Santri dan akun
-                    portal wali santri diaktifkan.
+                    Isi data berikut dengan benar. Gunakan <b>email orang tua/wali</b> yang aktif — email tersebut menjadi
+                    akun login Portal Wali Santri setelah pendaftaran diverifikasi admin.
                 </p>
             </div>
 
@@ -100,15 +100,7 @@
                                 @error('alamat_domisili') <p class="{{ $errorCls }}">{{ $message }}</p> @enderror
                             </div>
 
-                            <div>
-                                <label class="{{ $labelCls }}" for="email">Email Aktif <span class="text-rose-500">*</span></label>
-                                <input id="email" type="email" name="email" value="{{ old('email') }}" required maxlength="255"
-                                    class="{{ $inputCls }}" placeholder="nama@gmail.com">
-                                <p class="text-xs text-slate-500 mt-1">Dipakai untuk login Portal Wali Santri.</p>
-                                @error('email') <p class="{{ $errorCls }}">{{ $message }}</p> @enderror
-                            </div>
-
-                            <div>
+                            <div class="sm:col-span-2">
                                 <label class="{{ $labelCls }}" for="jenjang_tujuan">Pilihan Jenjang <span class="text-rose-500">*</span></label>
                                 <select id="jenjang_tujuan" name="jenjang_tujuan" required class="{{ $inputCls }} bg-white">
                                     <option value="">-- Pilih Jenjang --</option>
@@ -143,6 +135,17 @@
                                 <input id="no_hp_ortu" type="text" name="no_hp_ortu" value="{{ old('no_hp_ortu') }}" required
                                     maxlength="30" class="{{ $inputCls }}" placeholder="Contoh: 081234567890">
                                 @error('no_hp_ortu') <p class="{{ $errorCls }}">{{ $message }}</p> @enderror
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="{{ $labelCls }}" for="email">Email Orang Tua / Wali <span class="text-rose-500">*</span></label>
+                                <input id="email" type="email" name="email" value="{{ old('email') }}" required maxlength="255"
+                                    class="{{ $inputCls }}" placeholder="email.orangtua@gmail.com" autocomplete="email">
+                                <p class="text-xs text-slate-500 mt-1">
+                                    Email milik orang tua/wali. Dipakai untuk <b>login Portal Wali Santri</b> setelah pendaftaran diverifikasi.
+                                    Santri tidak perlu memiliki email sendiri.
+                                </p>
+                                @error('email') <p class="{{ $errorCls }}">{{ $message }}</p> @enderror
                             </div>
                         </div>
                     </div>

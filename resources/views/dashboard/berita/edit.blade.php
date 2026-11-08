@@ -1,12 +1,11 @@
 @extends('layouts.admin')
-@section('title', 'Edit Berita')
+
+@section('title', 'Edit Berita - Pondok Pesantren Babul Hasanah')
 
 @section('content')
-    <div class="space-y-6">
-        <h2 class="text-xl font-black text-slate-900 dark:text-white">Edit Berita</h2>
-        <form action="{{ route('admin.berita.update', $berita) }}" method="POST" enctype="multipart/form-data">
-            @csrf @method('PUT')
-            @include('dashboard.berita._form', ['berita' => $berita])
-        </form>
-    </div>
+    @include('dashboard.berita._form', [
+        'berita' => $berita,
+        'action' => route('admin.berita.update', $berita),
+        'method' => 'PUT',
+    ])
 @endsection

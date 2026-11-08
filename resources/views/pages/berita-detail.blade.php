@@ -32,7 +32,7 @@
                 <span class="bd-cat">{{ $berita->kategori }}</span>
                 <h1 class="bd-title">{{ $berita->judul }}</h1>
                 <div class="bd-meta">
-                    <span><i class="fa-regular fa-calendar"></i> {{ $berita->published_at->translatedFormat('d F Y') }}</span>
+                    <span><i class="fa-regular fa-calendar"></i> {{ $berita->tanggal_terbit->translatedFormat('d F Y') }}</span>
                     <span><i class="fa-regular fa-user"></i> {{ $berita->penulis }}</span>
                     <span><i class="fa-regular fa-eye"></i> {{ number_format($berita->views) }}x dibaca</span>
                 </div>
@@ -42,7 +42,7 @@
                 <img src="{{ $berita->gambar_url }}" alt="{{ $berita->judul }}" class="bd-img">
             @endif
 
-            <div class="bd-body">{{ $berita->isi }}</div>
+            <div class="bd-body">{!! $berita->isi !!}</div>
         </article>
 
         @if ($terkait->count())

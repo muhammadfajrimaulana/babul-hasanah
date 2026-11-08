@@ -122,9 +122,9 @@
                             <th class="py-3 px-4 font-extrabold">Tempat Tanggal Lahir</th>
                             <th class="py-3 px-4 font-extrabold">No. HP Aktif (WA)</th>
                             <th class="py-3 px-4 font-extrabold">Alamat Tinggal (Domisili)</th>
-                            <th class="py-3 px-4 font-extrabold">Email Aktif</th>
                             <th class="py-3 px-4 font-extrabold">Nama Orang Tua (Wali)</th>
                             <th class="py-3 px-4 font-extrabold">No. HP Orang Tua</th>
+                            <th class="py-3 px-4 font-extrabold">Email Orang Tua / Wali</th>
                             <th class="py-3 px-4 font-extrabold">Sekolah Asal</th>
                             <th class="py-3 px-4 font-extrabold">Alamat Sekolah Asal</th>
                             <th class="py-3 px-4 font-extrabold">Tahun Lulus</th>
@@ -163,16 +163,16 @@
                                     {{ $v($p->alamat_domisili ?? ($santri->alamat ?: null)) }}
                                 </td>
 
-                                {{-- Email Aktif --}}
-                                <td class="py-4 px-4 text-slate-500 break-all">
-                                    {{ $v($p->email ?? ($santri->user->email ?? null)) }}
-                                </td>
-
                                 {{-- Nama Orang Tua (Wali) --}}
                                 <td class="py-4 px-4">{{ $v($p->nama_ortu_wali ?? ($santri->nama_wali ?: null)) }}</td>
 
                                 {{-- No. HP Orang Tua --}}
                                 <td class="py-4 px-4 font-mono">{{ $v($p->no_hp_ortu ?? null) }}</td>
+
+                                {{-- Email Orang Tua / Wali (akun login) --}}
+                                <td class="py-4 px-4 text-slate-500 break-all">
+                                    {{ $v($p->email ?? ($santri->user->email ?? null)) }}
+                                </td>
 
                                 {{-- Sekolah Asal --}}
                                 <td class="py-4 px-4">{{ $v($p->asal_sekolah ?? null) }}</td>

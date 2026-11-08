@@ -5,51 +5,113 @@
 @section('content')
 
 @php
-    /* ==== TIGA JALUR BELAJAR ==== */
-    $jalur = [
-        ['fa-book-open',          'Kajian kitab kuning', 'Santri mempelajari kitab-kitab klasik secara bertahap sesuai kemampuan.'],
-        ['fa-school',             'Pendidikan formal',   'Jenjang madrasah dan diniyah formal berjalan beriringan dengan pengajian pesantren.'],
-        ['fa-hand-holding-heart', 'Pembinaan karakter',  'Adab, bahasa, dan keterampilan dilatih lewat kegiatan harian dan ekstrakurikuler.'],
-    ];
+    // Konten dari dashboard (1 query) + fallback teks lama.
+    $konten = \App\Models\Konten::allWithDefaults();
+    $kv = fn (string $key, string $default = '') => $konten[$key] ?? $default;
 
-    /* ==== BIDANG KAJIAN & KITAB (dari data lama; silakan tambah/ubah) ==== */
-    $kajian = [
-        ['ikon' => 'fa-spell-check',      'judul' => 'Nahwu & Shorof',   'isi' => 'Fondasi membaca kitab gundul: tata bahasa dan perubahan kata dalam bahasa Arab.',   'kitab' => ['Jurumiyah', 'Imrithi', 'Alfiyah', 'Amtsilati Tasrifiyah']],
-        ['ikon' => 'fa-scale-balanced',   'judul' => 'Fiqih',            'isi' => 'Hukum ibadah dan muamalah menurut mazhab Syafi’i secara mendalam dan praktis.',     'kitab' => ['Safinatun Najah', 'Fathul Qorib', 'Fathul Mu’in']],
-        ['ikon' => 'fa-star-and-crescent','judul' => 'Tauhid / Aqidah',  'isi' => 'Memperkokoh keyakinan sesuai ajaran Ahlussunnah wal Jama’ah.',                     'kitab' => ['Aqidatul Awam', 'Kifayatul Awam', 'Tijan Ad-Darari']],
-        ['ikon' => 'fa-heart-pulse',      'judul' => 'Akhlak & Tasawuf', 'isi' => 'Menata adab, hati, dan perilaku sebagai penuntut ilmu.',                             'kitab' => ['Ta’lim Muta’allim', 'Akhlaq lil Banin', 'Bidayatul Hidayah']],
-        ['ikon' => 'fa-scroll',           'judul' => 'Hadits & Tafsir',  'isi' => 'Memahami sabda Nabi dan kandungan Al-Qur’an melalui kajian para ulama.',            'kitab' => ['Arba’in Nawawi', 'Riyadhus Shalihin', 'Tafsir Jalalain']],
-        ['ikon' => 'fa-book-quran',       'judul' => 'Al-Qur’an',        'isi' => 'Tahsin, tajwid, dan program tahfidz bagi santri yang berminat.',                    'kitab' => ['Tahsin', 'Tajwid', 'Tahfidz']],
-    ];
+    $baris = function (string $key, string $default = '', int $parts = 2) use ($kv): array {
+        $raw = (string) $kv($key, $default);
+        $hasil = [];
+        foreach (preg_split('/\r\n|\r|\n/', $raw) as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+            $bagian = array_map('trim', explode('|', $line, $parts));
+            $hasil[] = $bagian;
+        }
 
-    /* ==== JENJANG & PROGRAM (PPBH) — SESUAIKAN DESKRIPSI DENGAN KURIKULUM ASLI ==== */
-    $jalurDiniyah = [
-        ['MDTA',        'Madrasah Diniyah Takmiliyah',      'Pengenalan dasar membaca Al-Qur’an, ibadah, akhlak, dan pengantar bahasa Arab.'],
-        ['PPS Wustha',  'Program pesantren jenjang Wustha', 'Pendalaman nahwu-shorof, fiqih, dan tauhid dengan kitab tingkat menengah.'],
-        ['PDF Wustha',  'Pendidikan Diniyah Formal Wustha', 'Pendidikan diniyah formal jenjang Wustha dengan kurikulum kitab terstruktur.'],
-        ['PDF Ulya',    'Pendidikan Diniyah Formal Ulya',   'Kajian lanjutan fiqih, tafsir, hadits, serta pelatihan bahtsul masail.'],
-        ['Ma’had ‘Aly', 'Pendidikan tinggi pesantren',      'Pendalaman keilmuan tingkat lanjut bagi santri yang ingin menjadi ahli di bidang kitab.'],
-    ];
-    $jalurMadrasah = [
-        ['MTs', 'Madrasah Tsanawiyah', 'Pendidikan menengah pertama yang memadukan kurikulum madrasah dengan kegiatan pesantren.'],
-        ['MA',  'Madrasah Aliyah',     'Pendidikan menengah atas yang menyiapkan santri melanjutkan studi dan berkhidmat di masyarakat.'],
-    ];
+        return $hasil;
+    };
 
-    /* ==== METODE ==== */
-    $metode = [
-        ['fa-user-group',      'Sorogan',        'Santri membaca kitab satu per satu di hadapan ustadz untuk dikoreksi langsung.'],
-        ['fa-chalkboard-user', 'Bandongan',      'Ustadz membacakan dan menjelaskan kitab, santri menyimak dan memberi makna.'],
-        ['fa-brain',           'Muhafazhah',     'Menghafal nazham dan matan kitab untuk memperkuat penguasaan ilmu.'],
-        ['fa-comments',        'Bahtsul masail', 'Diskusi kajian hukum untuk melatih nalar dan kemampuan merujuk kitab.'],
-    ];
+    // Susunan & visibilitas section dari dashboard.
+    $layout = \App\Models\Konten::layoutFor('pembelajaran');
+    $visible = [];
+    $order = [];
+    foreach ($layout as $i => $section) {
+        $visible[$section['id']] = $section['visible'];
+        $order[$section['id']] = $i;
+    }
+
+    // ==== HERO ====
+    $heroEyebrow = $kv('pembelajaran_hero_eyebrow');
+    $heroTitle = $kv('pembelajaran_hero_title');
+    $heroAccent = $kv('pembelajaran_hero_title_accent');
+    $heroDesc = $kv('pembelajaran_hero_desc');
+
+    // ==== TIGA JALUR BELAJAR ====
+    $jalurEyebrow = $kv('pembelajaran_jalur_eyebrow');
+    $jalurHeading = $kv('pembelajaran_jalur_heading');
+    $jalurDesc = $kv('pembelajaran_jalur_desc');
+
+    $jalurIkon = ['fa-book-open', 'fa-school', 'fa-hand-holding-heart'];
+    $jalur = [];
+    foreach ($baris('pembelajaran_jalur', '', 2) as $i => $row) {
+        $jalur[] = [$jalurIkon[$i] ?? 'fa-circle', $row[0], $row[1] ?? ''];
+    }
+
+    // ==== BIDANG KAJIAN & KITAB ====
+    $kajianEyebrow = $kv('pembelajaran_kajian_eyebrow');
+    $kajianHeading = $kv('pembelajaran_kajian_heading');
+    $kajianDesc = $kv('pembelajaran_kajian_desc');
+
+    $kajianIkon = ['fa-spell-check', 'fa-scale-balanced', 'fa-star-and-crescent', 'fa-heart-pulse', 'fa-scroll', 'fa-book-quran'];
+    $kajian = [];
+    foreach ($baris('pembelajaran_kajian', '', 3) as $i => $row) {
+        $kitab = array_values(array_filter(array_map('trim', explode(',', $row[2] ?? ''))));
+        $kajian[] = [
+            'ikon' => $kajianIkon[$i] ?? 'fa-circle',
+            'judul' => $row[0],
+            'isi' => $row[1] ?? '',
+            'kitab' => $kitab,
+        ];
+    }
+
+    // ==== JENJANG & PROGRAM ====
+    $jenjangEyebrow = $kv('pembelajaran_jenjang_eyebrow');
+    $jenjangHeading = $kv('pembelajaran_jenjang_heading');
+    $jenjangDesc = $kv('pembelajaran_jenjang_desc');
+
+    $diniyahTitle = $kv('pembelajaran_diniyah_title');
+    $diniyahNote = $kv('pembelajaran_diniyah_note');
+    $jalurDiniyah = [];
+    foreach ($baris('pembelajaran_diniyah', '', 3) as $row) {
+        $jalurDiniyah[] = [$row[0], $row[1] ?? '', $row[2] ?? ''];
+    }
+
+    $madrasahTitle = $kv('pembelajaran_madrasah_title');
+    $madrasahNote = $kv('pembelajaran_madrasah_note');
+    $jalurMadrasah = [];
+    foreach ($baris('pembelajaran_madrasah', '', 3) as $row) {
+        $jalurMadrasah[] = [$row[0], $row[1] ?? '', $row[2] ?? ''];
+    }
+
+    // ==== METODE ====
+    $metodeEyebrow = $kv('pembelajaran_metode_eyebrow');
+    $metodeHeading = $kv('pembelajaran_metode_heading');
+    $metodeDesc = $kv('pembelajaran_metode_desc');
+
+    $metodeIkon = ['fa-user-group', 'fa-chalkboard-user', 'fa-brain', 'fa-comments'];
+    $metode = [];
+    foreach ($baris('pembelajaran_metode', '', 2) as $i => $row) {
+        $metode[] = [$metodeIkon[$i] ?? 'fa-circle', $row[0], $row[1] ?? ''];
+    }
+
+    // ==== CTA ====
+    $ctaTitle = $kv('pembelajaran_cta_title');
+    $ctaDesc = $kv('pembelajaran_cta_desc');
+    $ctaButton = $kv('pembelajaran_cta_button');
+    $ctaUrl = $kv('pembelajaran_cta_url');
+    $ctaHref = str_starts_with($ctaUrl, 'http') ? $ctaUrl : url($ctaUrl);
 @endphp
 
 <style>
     .sj-page { --g900:#0a3a24; --g800:#0f5132; --g700:#13693f; --g600:#15803d; --g500:#10b981; --g50:#f0fdf6;
-        --gold:#b7791f; --gold-text:#955f0f; --gold-soft:#fdf3dc; --gold-light:#fde68a; color:#1e293b; }
+        --gold:#b7791f; --gold-text:#955f0f; --gold-soft:#fdf3dc; --gold-light:#fde68a; color:#1e293b;
+        display: flex; flex-direction: column; }
     .sj-page *, .sj-page *::before, .sj-page *::after { box-sizing: border-box; }
     .sj-wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 24px; }
-    .sj-page section[id] { scroll-margin-top: 80px; }
+    .sj-page section[id], .sj-page div[id] { scroll-margin-top: 80px; }
 
     .sj-eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--gold-text); margin-bottom: 14px; }
     .sj-eyebrow::before { content: ""; width: 28px; height: 2px; background: var(--gold); }
@@ -189,156 +251,180 @@
 <div class="sj-page">
 
     {{-- ============ HERO ============ --}}
-    <header class="sj-hero">
-        <div class="sj-wrap">
-            <div class="sj-crumb">
-                <a href="{{ url('/') }}">Beranda</a> <i class="fa-solid fa-chevron-right" style="font-size:10px"></i>
-                Profil <i class="fa-solid fa-chevron-right" style="font-size:10px"></i> Pembelajaran
+    @if ($visible['hero'] ?? true)
+        <header class="sj-hero" style="order: {{ $order['hero'] ?? 0 }}">
+            <div class="sj-wrap">
+                <div class="sj-crumb">
+                    <a href="{{ url('/') }}">Beranda</a> <i class="fa-solid fa-chevron-right"
+                        style="font-size:10px"></i>
+                    Profil <i class="fa-solid fa-chevron-right" style="font-size:10px"></i> Pembelajaran
+                </div>
+                <div class="sj-eyebrow light">{{ $heroEyebrow }}</div>
+                <h1>{{ $heroTitle }} <span>{{ $heroAccent }}</span></h1>
+                <p>{{ $heroDesc }}</p>
+                <nav class="sj-nav" aria-label="Isi halaman">
+                    @if ($visible['jalur'] ?? true)
+                        <a href="#jalur"><i class="fa-solid fa-route"></i> Jalur belajar</a>
+                    @endif
+                    @if ($visible['kajian'] ?? true)
+                        <a href="#kajian"><i class="fa-solid fa-book-open-reader"></i> Kajian</a>
+                    @endif
+                    @if ($visible['jenjang'] ?? true)
+                        <a href="#jenjang"><i class="fa-solid fa-graduation-cap"></i> Jenjang</a>
+                    @endif
+                    @if ($visible['metode'] ?? true)
+                        <a href="#metode"><i class="fa-solid fa-chalkboard-user"></i> Metode</a>
+                    @endif
+                </nav>
             </div>
-            <div class="sj-eyebrow light">Pondok Pesantren Babul Hasanah</div>
-            <h1>Belajar bertahap, <span>dari kitab hingga akhlak.</span></h1>
-            <p>Kurikulum terpadu yang memadukan tradisi keilmuan salaf, pembinaan akhlak, dan kegiatan penunjang untuk membentuk santri berilmu dan beradab.</p>
-            <nav class="sj-nav" aria-label="Isi halaman">
-                <a href="#jalur"><i class="fa-solid fa-route"></i> Jalur belajar</a>
-                <a href="#kajian"><i class="fa-solid fa-book-open-reader"></i> Kajian</a>
-                <a href="#jenjang"><i class="fa-solid fa-graduation-cap"></i> Jenjang</a>
-                <a href="#metode"><i class="fa-solid fa-chalkboard-user"></i> Metode</a>
-            </nav>
-        </div>
-    </header>
+        </header>
+    @endif
 
     {{-- ============ 1. TIGA JALUR BELAJAR ============ --}}
-    <section class="sj-sec" id="jalur">
-        <div class="sj-wrap">
-            <div class="sj-lead">
-                <div>
-                    <div class="sj-eyebrow">Sistem Pembelajaran</div>
-                    <h2>Pembelajaran dan kajian kitab kuning</h2>
+    @if ($visible['jalur'] ?? true)
+        <section class="sj-sec" id="jalur" style="order: {{ $order['jalur'] ?? 1 }}">
+            <div class="sj-wrap">
+                <div class="sj-lead">
+                    <div>
+                        <div class="sj-eyebrow">{{ $jalurEyebrow }}</div>
+                        <h2>{{ $jalurHeading }}</h2>
+                    </div>
+                    <p>{{ $jalurDesc }}</p>
                 </div>
-                <p>Seluruh pelajaran di Babul Hasanah disampaikan melalui kitab-kitab klasik yang diajarkan bertahap sesuai kemampuan santri. Pengajian pesantren berjalan bersama pendidikan formal, sehingga santri tumbuh kuat dalam ilmu agama sekaligus siap menghadapi zamannya.</p>
-            </div>
 
-            <div class="sj-lanes3">
-                @foreach ($jalur as $j)
-                    <article class="sj-l3 sj-rv">
-                        <span class="no">{{ sprintf('%02d', $loop->iteration) }}</span>
-                        <div class="ico"><i class="fa-solid {{ $j[0] }}"></i></div>
-                        <h3>{{ $j[1] }}</h3>
-                        <p>{{ $j[2] }}</p>
-                    </article>
-                @endforeach
+                <div class="sj-lanes3">
+                    @foreach ($jalur as $j)
+                        <article class="sj-l3 sj-rv">
+                            <span class="no">{{ sprintf('%02d', $loop->iteration) }}</span>
+                            <div class="ico"><i class="fa-solid {{ $j[0] }}"></i></div>
+                            <h3>{{ $j[1] }}</h3>
+                            <p>{{ $j[2] }}</p>
+                        </article>
+                    @endforeach
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    @endif
 
     {{-- ============ 2. BIDANG KAJIAN ============ --}}
-    <section class="sj-sec alt">
-        <div class="sj-wrap">
-            <div class="sj-head">
-                <div class="sj-eyebrow">Kajian &amp; Kitab</div>
-                <h2>Ilmu yang dipelajari santri</h2>
-                <p>Pilih bidang ilmu untuk melihat penjelasan dan kitab yang dikaji.</p>
-            </div>
-
-            <div class="kj" id="kajian">
-                <div class="kj-tabs" role="tablist" aria-label="Bidang kajian">
-                    @foreach ($kajian as $i => $k)
-                        <button type="button" class="kj-tab" role="tab" id="kt-{{ $i }}" aria-controls="kp-{{ $i }}"
-                                aria-selected="{{ $loop->first ? 'true' : 'false' }}" tabindex="{{ $loop->first ? '0' : '-1' }}">
-                            <i class="fa-solid {{ $k['ikon'] }}"></i>{{ $k['judul'] }}
-                        </button>
-                    @endforeach
+    @if ($visible['kajian'] ?? true)
+        <section class="sj-sec alt" style="order: {{ $order['kajian'] ?? 2 }}">
+            <div class="sj-wrap">
+                <div class="sj-head">
+                    <div class="sj-eyebrow">{{ $kajianEyebrow }}</div>
+                    <h2>{{ $kajianHeading }}</h2>
+                    <p>{{ $kajianDesc }}</p>
                 </div>
 
-                <div>
-                    @foreach ($kajian as $i => $k)
-                        <div class="kj-panel" role="tabpanel" id="kp-{{ $i }}" aria-labelledby="kt-{{ $i }}">
-                            <div class="big"><i class="fa-solid {{ $k['ikon'] }}"></i></div>
-                            <h3>{{ $k['judul'] }}</h3>
-                            <p>{{ $k['isi'] }}</p>
-                            <h4>Kitab yang dikaji</h4>
-                            <div class="kitab">
-                                @foreach ($k['kitab'] as $kt)
-                                    <span>{{ $kt }}</span>
-                                @endforeach
+                <div class="kj" id="kajian">
+                    <div class="kj-tabs" role="tablist" aria-label="Bidang kajian">
+                        @foreach ($kajian as $i => $k)
+                            <button type="button" class="kj-tab" role="tab" id="kt-{{ $i }}"
+                                aria-controls="kp-{{ $i }}" aria-selected="{{ $loop->first ? 'true' : 'false' }}"
+                                tabindex="{{ $loop->first ? '0' : '-1' }}">
+                                <i class="fa-solid {{ $k['ikon'] }}"></i>{{ $k['judul'] }}
+                            </button>
+                        @endforeach
+                    </div>
+
+                    <div>
+                        @foreach ($kajian as $i => $k)
+                            <div class="kj-panel" role="tabpanel" id="kp-{{ $i }}"
+                                aria-labelledby="kt-{{ $i }}">
+                                <div class="big"><i class="fa-solid {{ $k['ikon'] }}"></i></div>
+                                <h3>{{ $k['judul'] }}</h3>
+                                <p>{{ $k['isi'] }}</p>
+                                <h4>Kitab yang dikaji</h4>
+                                <div class="kitab">
+                                    @foreach ($k['kitab'] as $kt)
+                                        <span>{{ $kt }}</span>
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    @endif
 
     {{-- ============ 3. JENJANG PENDIDIKAN ============ --}}
-    <section class="sj-sec" id="jenjang">
-        <div class="sj-wrap">
-            <div class="sj-head">
-                <div class="sj-eyebrow">Jenjang Pendidikan</div>
-                <h2>Jenjang dan program pendidikan</h2>
-                <p>Tujuh jenjang di bawah naungan Yayasan Pondok Pesantren Babul Hasanah, terbagi dalam dua jalur.</p>
-            </div>
+    @if ($visible['jenjang'] ?? true)
+        <section class="sj-sec" id="jenjang" style="order: {{ $order['jenjang'] ?? 3 }}">
+            <div class="sj-wrap">
+                <div class="sj-head">
+                    <div class="sj-eyebrow">{{ $jenjangEyebrow }}</div>
+                    <h2>{{ $jenjangHeading }}</h2>
+                    <p>{{ $jenjangDesc }}</p>
+                </div>
 
-            <div class="lane">
-                <h3 class="lane-title"><i class="fa-solid fa-kaaba"></i> Jalur diniyah</h3>
-                <p class="lane-note">Pendidikan berbasis kitab, dari tingkat dasar hingga Ma’had ‘Aly.</p>
-                <div class="jj-grid">
-                    @foreach ($jalurDiniyah as $j)
-                        <article class="jj-card sj-rv">
-                            <span class="jj-code">{{ $j[0] }}</span>
-                            <h4>{{ $j[1] }}</h4>
-                            <p>{{ $j[2] }}</p>
-                        </article>
-                    @endforeach
+                <div class="lane">
+                    <h3 class="lane-title"><i class="fa-solid fa-kaaba"></i> {{ $diniyahTitle }}</h3>
+                    <p class="lane-note">{{ $diniyahNote }}</p>
+                    <div class="jj-grid">
+                        @foreach ($jalurDiniyah as $j)
+                            <article class="jj-card sj-rv">
+                                <span class="jj-code">{{ $j[0] }}</span>
+                                <h4>{{ $j[1] }}</h4>
+                                <p>{{ $j[2] }}</p>
+                            </article>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="lane madrasah">
+                    <h3 class="lane-title"><i class="fa-solid fa-school"></i> {{ $madrasahTitle }}</h3>
+                    <p class="lane-note">{{ $madrasahNote }}</p>
+                    <div class="jj-grid">
+                        @foreach ($jalurMadrasah as $j)
+                            <article class="jj-card sj-rv">
+                                <span class="jj-code">{{ $j[0] }}</span>
+                                <h4>{{ $j[1] }}</h4>
+                                <p>{{ $j[2] }}</p>
+                            </article>
+                        @endforeach
+                    </div>
                 </div>
             </div>
-
-            <div class="lane madrasah">
-                <h3 class="lane-title"><i class="fa-solid fa-school"></i> Jalur madrasah</h3>
-                <p class="lane-note">Pendidikan formal yang berjalan bersama kegiatan pesantren.</p>
-                <div class="jj-grid">
-                    @foreach ($jalurMadrasah as $j)
-                        <article class="jj-card sj-rv">
-                            <span class="jj-code">{{ $j[0] }}</span>
-                            <h4>{{ $j[1] }}</h4>
-                            <p>{{ $j[2] }}</p>
-                        </article>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </section>
+        </section>
+    @endif
 
     {{-- ============ 4. METODE ============ --}}
-    <section class="sj-sec alt" id="metode">
-        <div class="sj-wrap">
-            <div class="sj-head">
-                <div class="sj-eyebrow">Metode Pembelajaran</div>
-                <h2>Cara santri belajar</h2>
-                <p>Empat metode khas pesantren yang dipakai bergantian sesuai jenis kitab dan tingkat santri.</p>
+    @if ($visible['metode'] ?? true)
+        <section class="sj-sec alt" id="metode" style="order: {{ $order['metode'] ?? 4 }}">
+            <div class="sj-wrap">
+                <div class="sj-head">
+                    <div class="sj-eyebrow">{{ $metodeEyebrow }}</div>
+                    <h2>{{ $metodeHeading }}</h2>
+                    <p>{{ $metodeDesc }}</p>
+                </div>
+                <div class="metode">
+                    @foreach ($metode as $m)
+                        <article class="metode-item sj-rv">
+                            <span class="no">{{ sprintf('%02d', $loop->iteration) }}</span>
+                            <i class="fa-solid {{ $m[0] }}"></i>
+                            <h3>{{ $m[1] }}</h3>
+                            <p>{{ $m[2] }}</p>
+                        </article>
+                    @endforeach
+                </div>
             </div>
-            <div class="metode">
-                @foreach ($metode as $m)
-                    <article class="metode-item sj-rv">
-                        <span class="no">{{ sprintf('%02d', $loop->iteration) }}</span>
-                        <i class="fa-solid {{ $m[0] }}"></i>
-                        <h3>{{ $m[1] }}</h3>
-                        <p>{{ $m[2] }}</p>
-                    </article>
-                @endforeach
-            </div>
-        </div>
-    </section>
+        </section>
+    @endif
 
     {{-- ============ CTA ============ --}}
-    <section class="sj-sec">
-        <div class="sj-wrap">
-            <div class="sj-cta">
-                <h2>Siap belajar bersama kami?</h2>
-                <p>Mulai langkah pertama menuju ilmu yang bermanfaat dan akhlak yang mulia.</p>
-                <a href="{{ url('/pendaftaran') }}" class="sj-btn">Daftar online <i class="fa-solid fa-arrow-right"></i></a>
+    @if ($visible['cta'] ?? true)
+        <section class="sj-sec" style="order: {{ $order['cta'] ?? 5 }}">
+            <div class="sj-wrap">
+                <div class="sj-cta">
+                    <h2>{{ $ctaTitle }}</h2>
+                    <p>{{ $ctaDesc }}</p>
+                    <a href="{{ $ctaHref }}" class="sj-btn">{{ $ctaButton }} <i
+                            class="fa-solid fa-arrow-right"></i></a>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    @endif
 </div>
 
 <script>

@@ -23,6 +23,7 @@
             --emerald-d: #0e9f73;
             --emerald-l: #2fe0a0;
             --radius: 22px;
+            --sec: 44px; /* jarak vertikal antar-section */
             --shadow: 0 10px 30px rgba(23, 64, 47, 0.07);
             --shadow-lg: 0 22px 50px rgba(23, 64, 47, 0.14);
             font-family: 'Poppins', system-ui, -apple-system, sans-serif;
@@ -170,7 +171,7 @@
         .dh .stat span { font-size: 11px; color: #a9c4b6; }
 
         /* ---------- PROFIL + SAMBUTAN PIMPINAN ---------- */
-        .dh .profile { padding: 90px 0 70px; }
+        .dh .profile { padding: 56px 0 var(--sec); }
         .dh .profile-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 70px; align-items: center; }
 
         /* Foto pimpinan (portrait 4:5, wajah tetap terlihat) */
@@ -201,7 +202,7 @@
         .dh .sambutan-sign strong { font-size: 15px; color: var(--green); font-weight: 600; }
         .dh .sambutan-sign span { font-size: 11.5px; color: var(--gold); font-weight: 600; }
 
-        .dh .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 60px; }
+        .dh .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 48px; }
         .dh .feature {
             display: flex; gap: 16px; align-items: flex-start; background: #fff; border: 1px solid var(--line);
             border-radius: var(--radius); padding: 20px; transition: transform .3s ease, box-shadow .3s ease;
@@ -214,22 +215,8 @@
         .dh .feature h3 { font-size: 14px; margin-bottom: 4px; }
         .dh .feature p { font-size: 11.5px; color: var(--muted); }
 
-        /* ---------- PINTASAN PROFIL ---------- */
-        .dh .quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 40px; }
-        .dh .quick {
-            background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px;
-            display: flex; flex-direction: column; gap: 8px; transition: all .3s ease;
-        }
-        .dh .quick:hover { transform: translateY(-5px); box-shadow: var(--shadow); border-color: var(--gold); }
-        .dh .quick .q-ico {
-            width: 40px; height: 40px; border-radius: 12px; background: var(--cream); color: var(--green);
-            display: grid; place-items: center;
-        }
-        .dh .quick h3 { font-size: 15px; }
-        .dh .quick p { font-size: 11.5px; color: var(--muted); }
-
         /* ---------- JENJANG / LEVELS ---------- */
-        .dh .levels { background: var(--cream); padding: 80px 0; border-radius: 36px; margin: 0 1.5%; }
+        .dh .levels { background: var(--cream); padding: var(--sec) 0; border-radius: 36px; margin: 0 1.5%; }
         .dh .section-title { font-size: clamp(26px, 3.4vw, 38px); margin-bottom: 12px; }
         .dh .section-sub { color: var(--muted); font-size: 13.5px; margin-bottom: 36px; max-width: 600px; }
         .dh .level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
@@ -257,7 +244,7 @@
         .dh .level-cta p { font-size: 11.5px; color: #b9d0c4; }
 
         /* ---------- STRUKTUR ORGANISASI (BERANDA) ---------- */
-        .dh .org { padding: 80px 0 20px; }
+        .dh .org { padding: 0 0 var(--sec); }
         .dh .org-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
         .dh .org-card {
             background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 20px;
@@ -307,37 +294,61 @@
         .dh .custom-swiper-pagination .swiper-pagination-bullet-active { background: var(--emerald); opacity: 1; width: 22px; border-radius: 99px; }
 
         /* ---------- INFO HARIAN ---------- */
-        .dh .ih-sec { padding: 80px 0 40px; }
+        .dh .ih-sec { padding: 0 0 var(--sec); }
+        .dh .ih-shell {
+            position: relative; overflow: hidden; border-radius: 32px; padding: 42px 40px 40px;
+            background: linear-gradient(150deg, var(--green) 0%, var(--green-2) 60%, #2a6a50 100%);
+            box-shadow: var(--shadow-lg); color: #fff;
+        }
+        .dh .ih-shell::before {
+            content: ""; position: absolute; inset: 0; opacity: .10; pointer-events: none;
+            background-image: radial-gradient(#d1fae5 1px, transparent 1px); background-size: 20px 20px;
+        }
+        .dh .ih-shell::after {
+            content: "\f017"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute;
+            right: 2%; bottom: -44px; font-size: 190px; line-height: 1; color: rgba(255, 255, 255, .05);
+            pointer-events: none;
+        }
+        .dh .ih-shell > * { position: relative; z-index: 1; }
+        .dh .ih-shell .eyebrow { color: #e6d3a3; }
+        .dh .ih-shell .eyebrow::before { background: #e6d3a3; }
+        .dh .ih-shell .section-title { color: #fff; }
         .dh .ih-date {
-            display: inline-flex; align-items: center; gap: 8px; background: var(--cream); color: var(--green);
+            display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, .1);
+            border: 1px solid rgba(255, 255, 255, .16); color: #eaf5ef;
             font-size: 12px; font-weight: 600; padding: 9px 16px; border-radius: 999px;
         }
-        .dh .ih-date i { color: var(--gold); }
-        .dh .ih-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 24px; align-items: stretch; }
+        .dh .ih-date i { color: #19d68f; }
+        .dh .ih-shell .btn-outline { color: #fff; border-color: rgba(255, 255, 255, .34); background: rgba(255, 255, 255, .06); }
+        .dh .ih-shell .btn-outline:hover { background: #fff; color: var(--green); border-color: #fff; }
+        .dh .ih-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 22px; align-items: stretch; }
+
+        /* Kotak "Jadwal Hari Ini" — putih di atas latar hijau */
         .dh .ih-today {
-            background: linear-gradient(150deg, var(--green), var(--green-2)); color: #fff; border-radius: 28px;
-            padding: 28px; box-shadow: var(--shadow-lg);
+            background: #fff; color: var(--ink); border-radius: 22px; padding: 24px 24px 18px;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, .16);
         }
-        .dh .ih-today-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+        .dh .ih-today-head { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
         .dh .ih-today-head > i {
-            width: 44px; height: 44px; border-radius: 14px; background: rgba(255, 255, 255, .12);
-            display: grid; place-items: center; color: var(--emerald-l); font-size: 18px;
+            width: 44px; height: 44px; border-radius: 14px; background: rgba(18, 184, 134, .12);
+            display: grid; place-items: center; color: var(--emerald-d); font-size: 18px;
         }
-        .dh .ih-today-head small { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #a9c4b6; display: block; }
-        .dh .ih-today-head h3 { color: #fff; font-size: 20px; }
+        .dh .ih-today-head small { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); display: block; }
+        .dh .ih-today-head h3 { color: var(--green); font-size: 20px; }
         .dh .ih-row {
             display: flex; gap: 16px; align-items: baseline; padding: 12px 0;
-            border-top: 1px solid rgba(255, 255, 255, .12); transition: transform .25s ease;
+            border-top: 1px solid var(--line); transition: transform .25s ease;
         }
         .dh .ih-row:hover { transform: translateX(6px); }
-        .dh .ih-row b { font-size: 15px; font-weight: 600; min-width: 52px; color: #e6d3a3; }
-        .dh .ih-row span { font-size: 12.5px; color: #d8e8df; }
+        .dh .ih-row b { font-size: 15px; font-weight: 600; min-width: 52px; color: var(--emerald-d); }
+        .dh .ih-row span { font-size: 12.5px; color: #4b5b52; }
+
         .dh .ih-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .dh .ih-card {
-            background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px;
+            background: #fff; border: 1px solid rgba(255, 255, 255, .4); border-radius: var(--radius); padding: 20px;
             display: flex; flex-direction: column; gap: 8px; transition: all .3s ease;
         }
-        .dh .ih-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); border-color: var(--gold); }
+        .dh .ih-card:hover { transform: translateY(-5px); box-shadow: 0 16px 32px rgba(0, 0, 0, .18); border-color: var(--emerald); }
         .dh .ih-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
         .dh .ih-chip {
             display: inline-flex; align-items: center; gap: 7px; font-size: 10px; letter-spacing: .08em;
@@ -354,11 +365,19 @@
         .dh .ih-card h3 { font-size: 15px; line-height: 1.4; }
         .dh .ih-card p { font-size: 12px; color: var(--muted); flex: 1; }
         .dh .ih-time { font-size: 11px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
-        @media (max-width: 1024px) { .dh .ih-grid { grid-template-columns: 1fr; } }
-        @media (max-width: 640px) { .dh .ih-cards { grid-template-columns: 1fr; } .dh .ih-today { padding: 22px; } }
+        @media (max-width: 1024px) {
+            .dh .ih-grid { grid-template-columns: 1fr; }
+            .dh .ih-shell { padding: 34px 30px 30px; }
+        }
+        @media (max-width: 640px) {
+            .dh .ih-cards { grid-template-columns: 1fr; }
+            .dh .ih-shell { padding: 26px 20px 24px; border-radius: 22px; }
+            .dh .ih-shell::after { display: none; }
+            .dh .ih-today { padding: 20px 18px 14px; }
+        }
 
         /* ---------- BERITA ---------- */
-        .dh .news { padding: 80px 0; }
+        .dh .news { padding: var(--sec) 0; }
         .dh .head-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 34px; }
         .dh .news-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
         .dh .news-card { transition: transform .3s ease; }
@@ -376,26 +395,8 @@
         .dh .link-more { font-size: 12px; font-weight: 600; color: var(--green); display: inline-flex; gap: 6px; align-items: center; }
         .dh .link-more:hover { color: var(--emerald-d); }
 
-        /* ---------- KEHIDUPAN SANTRI ---------- */
-        .dh .life {
-            background: linear-gradient(130deg, var(--green), var(--green-2)); color: #fff; padding: 70px 0;
-            border-radius: 36px; margin: 0 1.5%; position: relative; overflow: hidden;
-        }
-        .dh .life .container { display: grid; grid-template-columns: 1fr 2fr; gap: 60px; align-items: start; }
-        .dh .life h2 { color: #fff; font-size: clamp(26px, 3vw, 36px); margin-bottom: 14px; }
-        .dh .life .intro { font-size: 13px; color: #b9d0c4; }
-        .dh .times { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .dh .time {
-            background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .12);
-            border-radius: 20px; padding: 22px; transition: all .3s ease;
-        }
-        .dh .time:hover { background: rgba(255, 255, 255, .12); transform: translateY(-4px); }
-        .dh .time b { font-size: 26px; font-weight: 600; display: block; margin-bottom: 8px; }
-        .dh .time h4 { color: #fff; font-size: 13px; margin-bottom: 6px; }
-        .dh .time p { font-size: 11.5px; color: #b9d0c4; }
-
         /* ---------- GALERI ---------- */
-        .dh .gallery { padding: 80px 0; }
+        .dh .gallery { padding: 0 0 var(--sec); }
         .dh .gallery-grid { display: grid; grid-template-columns: 1.8fr 1fr 1fr; gap: 20px; }
         .dh .g-item { margin: 0; }
         .dh .g-item .ph { height: 300px; position: relative; transition: transform .4s ease, box-shadow .3s ease; }
@@ -418,7 +419,7 @@
         .dh .g-video .play { pointer-events: none; }
 
         /* ---------- PRESTASI ---------- */
-        .dh .achv { padding: 60px 0; }
+        .dh .achv { padding: 0 0 var(--sec); }
         .dh .achv .container { display: grid; grid-template-columns: .8fr 2.2fr; gap: 40px; align-items: center; }
         .dh .achv h2 { font-size: clamp(26px, 3vw, 36px); margin-bottom: 12px; }
         .dh .achv .intro { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
@@ -437,7 +438,7 @@
         .dh .achv-card .who { font-size: 11px; color: var(--green); font-weight: 600; border-top: 1px solid var(--line); padding-top: 10px; }
 
         /* ---------- PENERIMAAN SANTRI BARU ---------- */
-        .dh .psb { padding: 60px 0 80px; }
+        .dh .psb { padding: 0 0 var(--sec); }
         .dh .psb-box {
             background: linear-gradient(135deg, var(--green), var(--green-2)); border-radius: 32px; padding: 50px;
             display: grid; grid-template-columns: 1.1fr 1fr; gap: 50px; color: #fff; box-shadow: var(--shadow-lg);
@@ -460,7 +461,7 @@
         .dh .step p { font-size: 11px; color: #b9d0c4; }
 
         /* ---------- KONTAK & PETA ---------- */
-        .dh .contact { padding: 30px 0 60px; }
+        .dh .contact { padding: 0 0 var(--sec); }
         .dh .contact .container { display: grid; grid-template-columns: .9fr 1.1fr; gap: 60px; align-items: start; }
         .dh .contact h2 { font-size: clamp(26px, 3.4vw, 38px); margin-bottom: 16px; }
         .dh .contact .desc { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
@@ -473,7 +474,7 @@
         .dh .contact-two b { font-weight: 600; font-size: 14px; color: var(--green); }
         .dh .hours { background: var(--cream); border-radius: 999px; padding: 12px 22px; font-size: 12px; display: flex; gap: 10px; align-items: center; }
         .dh .hours i { color: var(--gold); }
-        .dh .map-section { padding: 0 0 80px; }
+        .dh .map-section { padding: 0 0 var(--sec); }
         .dh .map-wrap {
             position: relative; border-radius: 32px; overflow: hidden; box-shadow: var(--shadow-lg);
             border: 1px solid var(--line); background: var(--cream); height: 400px;
@@ -486,6 +487,75 @@
         .dh .map-card h3 { font-size: 18px; margin-bottom: 6px; }
         .dh .map-card p { font-size: 11.5px; color: var(--muted); margin-bottom: 14px; }
 
+        /* ---------- TESTIMONI ALUMNI ---------- */
+        .dh .alum { padding: 0 0 var(--sec); }
+        .dh .alum-box {
+            position: relative; overflow: hidden; border-radius: 32px; padding: 48px 40px 38px;
+            background: linear-gradient(140deg, #fff 0%, var(--cream) 100%);
+            border: 1px solid var(--line); box-shadow: var(--shadow);
+        }
+        .dh .alum-box::after {
+            content: "\f10e"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute;
+            right: 26px; top: 0; font-size: 150px; line-height: 1; color: rgba(23, 64, 47, .05);
+            pointer-events: none;
+        }
+        .dh .alum-head {
+            position: relative; z-index: 1; display: flex; align-items: flex-end; justify-content: space-between;
+            gap: 24px; flex-wrap: wrap; margin-bottom: 30px;
+        }
+        .dh .alum-head h2 { font-size: clamp(24px, 3vw, 34px); }
+        .dh .alum-head .sub { font-size: 13px; color: var(--muted); margin-top: 10px; max-width: 460px; line-height: 1.7; }
+        .dh .alum-nav { display: flex; gap: 8px; }
+        .dh .alum-nav button {
+            width: 42px; height: 42px; border-radius: 50%; background: #fff; border: 1px solid var(--line);
+            color: var(--green); display: grid; place-items: center; cursor: pointer; font-size: 13px;
+            transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease;
+        }
+        .dh .alum-nav button:hover { background: var(--green); border-color: var(--green); color: #fff; transform: translateY(-2px); }
+
+        .dh .alum-viewport { position: relative; z-index: 1; overflow: hidden; padding: 10px 4px; margin: -10px -4px; }
+        .dh .alum-track {
+            display: flex; gap: 20px; transition: transform .65s cubic-bezier(.22, .7, .2, 1);
+            will-change: transform;
+        }
+        .dh .alum-card {
+            flex: 0 0 calc((100% - 40px) / 3); display: flex; flex-direction: column; gap: 14px;
+            background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 26px 24px 22px;
+            transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+        }
+        .dh .alum-card:hover {
+            border-color: #cfe3d8; box-shadow: 0 16px 34px rgba(23, 64, 47, .1); transform: translateY(-3px);
+        }
+        .dh .alum-badge {
+            display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+            font-size: 9.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+            color: var(--gold); background: rgba(183, 121, 31, .1); border-radius: 999px; padding: 4px 11px;
+        }
+        .dh .alum-quote { color: var(--emerald); font-size: 18px; opacity: .55; }
+        .dh .alum-text {
+            flex: 1; font-size: 13px; line-height: 1.85; color: #33413a; margin: 0;
+            display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .dh .alum-meta { display: flex; gap: 12px; align-items: center; border-top: 1px dashed var(--line); padding-top: 16px; }
+        .dh .alum-ava {
+            width: 48px; height: 48px; border-radius: 50%; flex: none; object-fit: cover;
+            border: 2px solid #fff; box-shadow: 0 3px 12px rgba(23, 64, 47, .18);
+        }
+        .dh .alum-ava.is-initial {
+            display: grid; place-items: center; background: linear-gradient(140deg, var(--green), var(--green-2));
+            color: #fff; font-size: 15px; font-weight: 600; letter-spacing: .02em;
+        }
+        .dh .alum-meta strong { display: block; font-size: 13px; color: var(--green); }
+        .dh .alum-meta small { display: block; font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+        .dh .alum-dots { position: relative; z-index: 1; display: flex; gap: 7px; justify-content: center; margin-top: 24px; }
+        .dh .alum-dot {
+            width: 8px; height: 8px; padding: 0; border: 0; border-radius: 999px; background: var(--line);
+            cursor: pointer; transition: width .25s ease, background .25s ease;
+        }
+        .dh .alum-dot.is-active { width: 26px; background: var(--emerald); }
+        .dh .alum-foot { position: relative; z-index: 1; display: flex; justify-content: center; margin-top: 20px; }
+        .dh .alum-box.is-static .alum-nav, .dh .alum-box.is-static .alum-dots { display: none; }
+
         /* ---------- ANIMASI SCROLL ---------- */
         .dh .reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s ease, transform .8s cubic-bezier(.2, .7, .2, 1); }
         .dh .reveal.in { opacity: 1; transform: none; }
@@ -494,27 +564,36 @@
         @media (max-width: 1024px) {
             .dh .profile-grid { grid-template-columns: 1fr; gap: 50px; }
             .dh .profile-img { max-width: 460px; width: 100%; margin-inline: auto; }
-            .dh .stats .container { grid-template-columns: 1fr 1fr; gap: 20px; }
+            .dh .stats .container { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+            .dh .stats .container > div:first-child { grid-column: 1 / -1; }
+            .dh .stat { border-left: 0; padding-left: 0; }
+            .dh .stat:nth-child(3), .dh .stat:nth-child(5) {
+                border-left: 1px solid rgba(255, 255, 255, .15); padding-left: 16px;
+            }
+            .dh .stat:nth-child(4), .dh .stat:nth-child(5) {
+                border-top: 1px solid rgba(255, 255, 255, .15); padding-top: 16px;
+            }
             .dh .features, .dh .news-grid { grid-template-columns: 1fr; }
             .dh .badge-year { right: 10px; bottom: -10px; }
             .dh .levels { margin: 0; border-radius: 0; }
             .dh .head-row { flex-direction: column; align-items: flex-start; }
-            .dh .level-grid, .dh .org-grid, .dh .quick-grid { grid-template-columns: repeat(2, 1fr); }
-            .dh .life .container, .dh .achv .container, .dh .psb-box, .dh .contact .container { grid-template-columns: 1fr; gap: 40px; }
-            .dh .times, .dh .achv-cards, .dh .gallery-grid { grid-template-columns: 1fr; }
-            .dh .life { margin: 0; border-radius: 0; }
+            .dh .level-grid, .dh .org-grid { grid-template-columns: repeat(2, 1fr); }
+            .dh .achv .container, .dh .psb-box, .dh .contact .container { grid-template-columns: 1fr; gap: 40px; }
+            .dh .achv-cards, .dh .gallery-grid { grid-template-columns: 1fr; }
+            .dh .alum-card { flex-basis: calc((100% - 20px) / 2); }
+            .dh .alum-box { padding: 40px 30px 32px; }
         }
         @media (max-width: 640px) {
+            .dh { --sec: 36px; }
             .dh .hero2-cta { flex-direction: column; width: 100%; }
             .dh .hero2-cta .btn { width: 100%; }
             .dh .hero2 .container { padding: 56px 0 96px; }
             .dh .hero2-nav { left: max(4%, 16px); right: max(4%, 16px); bottom: 20px; justify-content: center; }
             .dh .hero2-dots { flex: 1; justify-content: center; }
             .dh .hero2-dot { width: 16px; }
-            .dh .stats .container { grid-template-columns: 1fr; }
-            .dh .stat { border-left: 0; border-bottom: 1px solid rgba(255, 255, 255, .15); padding-left: 0; padding-bottom: 12px; }
+            .dh .stats .container { gap: 18px; }
             .dh .info-inner { border-radius: 16px; }
-            .dh .level-grid, .dh .org-grid, .dh .quick-grid, .dh .contact-two { grid-template-columns: 1fr; }
+            .dh .level-grid, .dh .org-grid, .dh .contact-two { grid-template-columns: 1fr; }
             .dh .psb-box { padding: 28px 20px; border-radius: 20px; }
             .dh .psb .btns { flex-direction: column; }
             .dh .psb .btn { width: 100%; }
@@ -522,17 +601,22 @@
             .dh .map-wrap { height: auto; display: flex; flex-direction: column; }
             .dh .map-wrap iframe { height: 280px; order: 2; }
             .dh .map-card { position: static; max-width: none; border-radius: 0; box-shadow: none; order: 1; }
+            .dh .alum-box { padding: 30px 20px 26px; border-radius: 22px; }
+            .dh .alum-box::after { font-size: 96px; right: 12px; }
+            .dh .alum-head { gap: 16px; margin-bottom: 22px; }
+            .dh .alum-card { flex-basis: 100%; }
         }
         @media (prefers-reduced-motion: reduce) {
             .dh .reveal { transition: none !important; opacity: 1 !important; transform: none !important; }
             .dh .hero2-slide { transition: none !important; }
             .dh .hero2-slide.is-active { transform: none !important; }
+            .dh .alum-track { transition: none !important; }
         }
     </style>
 
     @php
         // ----- Data dinamis dari database -----
-        $beritaTerbaru = \App\Models\Berita::published()->latest('published_at')->take(3)->get();
+        $beritaTerbaru = \App\Models\Berita::published()->terbaru()->take(3)->get();
         $warna = ['', 'c', 'd'];
 
         // Kolom diasumsikan: nama, jabatan, foto. Sesuaikan jika berbeda di model StrukturOrganisasi.
@@ -546,11 +630,8 @@
         // Guard hasTable membuat beranda tetap tampil selama migrasi info_harian belum dijalankan.
         $infoHarian = collect();
         $jadwalHariIni = collect();
-        $jumlahInfoHarian = 0;
 
         if (\Illuminate\Support\Facades\Schema::hasTable('info_harian')) {
-            $jumlahInfoHarian = \App\Models\InfoHarian::info()->aktif()->berlaku()->sudahTerbit()->count();
-
             $infoHarian = \App\Models\InfoHarian::info()->aktif()->berlaku()->sudahTerbit()
                 ->orderByDesc('penting')->orderByDesc('tanggal')->orderByDesc('id')
                 ->take(4)->get();
@@ -568,6 +649,8 @@
             ? \App\Models\PrestasiSantri::count() : 0;
         $jumlahBerita   = \Illuminate\Support\Facades\Schema::hasTable('berita')
             ? \App\Models\Berita::published()->count() : 0;
+        $jumlahAlumni   = \Illuminate\Support\Facades\Schema::hasTable('alumni')
+            ? \App\Models\Alumni::count() : 0;
 
         // Prestasi: urutan sama dengan halaman /prestasi (tahun terbaru, juara 1-3 dulu, penghargaan di akhir)
         $prestasiTerbaru = \App\Models\PrestasiSantri::query()
@@ -597,6 +680,19 @@
             $poster = $a->media->first(fn ($m) => ! empty($m->poster));
             return $poster ? \Illuminate\Support\Facades\Storage::url($poster->poster) : $gambarDefault;
         };
+
+        // Testimoni alumni: hanya data yang kolom testimoni-nya terisi (dikelola lewat
+        // dashboard admin Data Alumni). Section disembunyikan bila belum ada testimoni.
+        $testimoniAlumni = collect();
+        if (\Illuminate\Support\Facades\Schema::hasTable('alumni')) {
+            $testimoniAlumni = \App\Models\Alumni::query()
+                ->whereNotNull('testimoni')
+                ->where('testimoni', '<>', '')
+                ->orderByDesc('tahun_lulus')
+                ->orderBy('nama')
+                ->take(12)
+                ->get();
+        }
     @endphp
 
     <div class="dh">
@@ -677,8 +773,8 @@
                 <a href="{{ route('berita.index') }}" class="stat">
                     <b data-count="{{ $jumlahBerita }}">{{ number_format($jumlahBerita, 0, ',', '.') }}</b><span>Berita</span>
                 </a>
-                <a href="{{ route('info-harian.index') }}" class="stat">
-                    <b data-count="{{ $jumlahInfoHarian }}">{{ number_format($jumlahInfoHarian, 0, ',', '.') }}</b><span>Info Harian</span>
+                <a href="{{ route('alumni.index') }}" class="stat">
+                    <b data-count="{{ $jumlahAlumni }}">{{ number_format($jumlahAlumni, 0, ',', '.') }}</b><span>Alumni</span>
                 </a>
             </div>
         </section>
@@ -741,48 +837,57 @@
                         <div><h3>Adab Keseharian</h3><p>Pembiasaan ibadah, kemandirian, dan kepedulian sosial.</p></div>
                     </div>
                 </div>
-
-                {{-- PINTASAN HALAMAN PROFIL --}}
-                <div class="quick-grid">
-                    <a href="{{ route('profil.sejarah') }}" class="quick">
-                        <span class="q-ico"><i class="fa-solid fa-landmark"></i></span>
-                        <h3>Sejarah</h3><p>Perjalanan pesantren sejak 1998.</p>
-                    </a>
-                    <a href="{{ route('profil.visi-misi') }}" class="quick">
-                        <span class="q-ico"><i class="fa-solid fa-bullseye"></i></span>
-                        <h3>Visi &amp; Misi</h3><p>Arah dan tujuan pendidikan kami.</p>
-                    </a>
-                    <a href="{{ route('profil.struktur-organisasi') }}" class="quick">
-                        <span class="q-ico"><i class="fa-solid fa-sitemap"></i></span>
-                        <h3>Struktur Organisasi</h3><p>Pengurus, jenjang, dan bidang.</p>
-                    </a>
-                    <a href="{{ route('profil.pembelajaran') }}" class="quick">
-                        <span class="q-ico"><i class="fa-solid fa-book-open-reader"></i></span>
-                        <h3>Pembelajaran</h3><p>Sistem dan kurikulum belajar santri.</p>
-                    </a>
-                </div>
             </div>
         </section>
 
-        {{-- JENJANG PENDIDIKAN --}}
-        <section class="levels" id="jenjang">
+        {{-- INFO HARIAN --}}
+        <section class="ih-sec" id="info">
             <div class="container">
-                <div class="eyebrow">Jenjang Pendidikan</div>
-                <h2 class="section-title">Setiap tahap, jalan menuju kebermanfaatan.</h2>
-                <p class="section-sub">Tujuh pilihan pendidikan yang saling melengkapi. Temukan jalur yang sesuai dengan perjalanan putra-putri Anda.</p>
-                <div class="level-grid">
-                    <a href="{{ route('jenjang.show', 'mdta') }}" class="level"><div class="top"><span>Diniyah Nonformal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>MDTA</h3><div class="sub">Madrasah Diniyah Takmiliyah</div><p>Fondasi mengaji, ibadah, dan akhlak untuk usia sekolah dasar.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 4 tahun</div></a>
-                    <a href="{{ route('jenjang.show', 'pps-wustha') }}" class="level"><div class="top"><span>Ketarbiyahan</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>PPS WUSTHA</h3><div class="sub">Pendidikan Pesantren Salafiyah</div><p>Kajian kepesantrenan dengan pendidikan kesetaraan tingkat SMP.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
-                    <a href="{{ route('jenjang.show', 'mts') }}" class="level"><div class="top"><span>Pendidikan Formal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>MTS</h3><div class="sub">Madrasah Tsanawiyah</div><p>Ilmu agama dan pengetahuan umum dalam budaya belajar santri.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
-                    <a href="{{ route('jenjang.show', 'ma') }}" class="level"><div class="top"><span>Pendidikan Formal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>MA</h3><div class="sub">Madrasah Aliyah</div><p>Penguatan akademik, karakter, dan persiapan studi lanjutan.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
-                    <a href="{{ route('jenjang.show', 'pdf-wustha') }}" class="level"><div class="top"><span>Diniyah Formal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>PDF Wustha</h3><div class="sub">Pendidikan Diniyah Formal</div><p>Pendalaman kitab turats pada jenjang menengah pertama.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
-                    <a href="{{ route('jenjang.show', 'pdf-ulya') }}" class="level"><div class="top"><span>Diniyah Formal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>PDF ULYA</h3><div class="sub">Pendidikan Diniyah Formal</div><p>Penguasaan ilmu syariah dan tradisi keilmuan tingkat lanjutan.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
-                    <a href="{{ route('jenjang.show', 'mahad-aly') }}" class="level"><div class="top"><span>Pendidikan Tinggi</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>MA'HAD 'ALY</h3><div class="sub">Pendidikan Tinggi Pesantren</div><p>Mengkaji fikih dan usul fikih untuk calon kader ulama.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 4 tahun</div></a>
-                    <div class="level-cta">
-                        <i class="fa-regular fa-comments" style="font-size:22px"></i>
-                        <h3>Masih mencari jenjang yang tepat?</h3>
-                        <p>Tim kami siap mendampingi Anda memilih program.</p>
-                        <a href="#kontak" class="btn btn-light" style="align-self:flex-start">Konsultasi <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                <div class="ih-shell">
+                    <div class="eyebrow">Info Harian</div>
+                    <div class="head-row">
+                        <h2 class="section-title" style="margin-bottom:0">Kabar &amp; jadwal pesantren hari ini.</h2>
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                            <span class="ih-date"><i class="fa-regular fa-calendar"></i> {{ now()->locale('id')->translatedFormat('l, d F Y') }}</span>
+                            <a href="{{ route('info-harian.index') }}" class="btn btn-outline">Semua Info <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="ih-grid">
+                        {{-- Kotak putih "Jadwal Hari Ini" di dalam kotak hijau --}}
+                        <div class="ih-today">
+                            <div class="ih-today-head">
+                                <i class="fa-regular fa-clock"></i>
+                                <div><small>Jadwal</small><h3>Hari Ini</h3></div>
+                            </div>
+                            @forelse ($jadwalHariIni as $j)
+                                <div class="ih-row"><b>{{ $j->jam }}</b><span>{{ $j->judul }}</span></div>
+                            @empty
+                                <div class="ih-row"><span>Belum ada jadwal hari ini.</span></div>
+                            @endforelse
+                        </div>
+
+                        <div class="ih-cards">
+                            @forelse ($infoHarian as $info)
+                                <article class="ih-card">
+                                    <div class="ih-top">
+                                        <span class="ih-chip"><i class="fa-solid {{ $info->ikon }}"></i>{{ $info->kategori }}</span>
+                                        @if ($info->penting)<span class="ih-pin">Penting</span>@endif
+                                    </div>
+                                    <h3>{{ $info->judul }}</h3>
+                                    @if ($info->isi)<p>{{ $info->isi }}</p>@endif
+                                    <div class="ih-time"><i class="fa-regular fa-clock"></i>{{ $info->waktu_label }}</div>
+                                </article>
+                            @empty
+                                <article class="ih-card">
+                                    <div class="ih-top">
+                                        <span class="ih-chip"><i class="fa-solid fa-circle-info"></i>Info</span>
+                                    </div>
+                                    <h3>Belum ada info hari ini</h3>
+                                    <p>Pengumuman dan agenda pesantren akan tampil di sini.</p>
+                                </article>
+                            @endforelse
+                        </div>
                     </div>
                 </div>
             </div>
@@ -814,51 +919,25 @@
             </section>
         @endif
 
-        {{-- INFO HARIAN (pengganti Program Unggulan) --}}
-        <section class="ih-sec" id="info">
+        {{-- JENJANG PENDIDIKAN --}}
+        <section class="levels" id="jenjang">
             <div class="container">
-                <div class="eyebrow">Info Harian</div>
-                <div class="head-row">
-                    <h2 class="section-title" style="margin-bottom:0">Kabar &amp; jadwal pesantren hari ini.</h2>
-                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                        <span class="ih-date"><i class="fa-regular fa-calendar"></i> {{ now()->locale('id')->translatedFormat('l, d F Y') }}</span>
-                        <a href="{{ route('info-harian.index') }}" class="btn btn-outline">Semua Info <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
-                    </div>
-                </div>
-
-                <div class="ih-grid">
-                    <div class="ih-today">
-                        <div class="ih-today-head">
-                            <i class="fa-regular fa-clock"></i>
-                            <div><small>Jadwal</small><h3>Hari Ini</h3></div>
-                        </div>
-                        @forelse ($jadwalHariIni as $j)
-                            <div class="ih-row"><b>{{ $j->jam }}</b><span>{{ $j->judul }}</span></div>
-                        @empty
-                            <div class="ih-row"><span>Belum ada jadwal hari ini.</span></div>
-                        @endforelse
-                    </div>
-
-                    <div class="ih-cards">
-                        @forelse ($infoHarian as $info)
-                            <article class="ih-card">
-                                <div class="ih-top">
-                                    <span class="ih-chip"><i class="fa-solid {{ $info->ikon }}"></i>{{ $info->kategori }}</span>
-                                    @if ($info->penting)<span class="ih-pin">Penting</span>@endif
-                                </div>
-                                <h3>{{ $info->judul }}</h3>
-                                @if ($info->isi)<p>{{ $info->isi }}</p>@endif
-                                <div class="ih-time"><i class="fa-regular fa-clock"></i>{{ $info->waktu_label }}</div>
-                            </article>
-                        @empty
-                            <article class="ih-card">
-                                <div class="ih-top">
-                                    <span class="ih-chip"><i class="fa-solid fa-circle-info"></i>Info</span>
-                                </div>
-                                <h3>Belum ada info hari ini</h3>
-                                <p>Pengumuman dan agenda pesantren akan tampil di sini.</p>
-                            </article>
-                        @endforelse
+                <div class="eyebrow">Jenjang Pendidikan</div>
+                <h2 class="section-title">Setiap tahap, jalan menuju kebermanfaatan.</h2>
+                <p class="section-sub">Tujuh pilihan pendidikan yang saling melengkapi. Temukan jalur yang sesuai dengan perjalanan putra-putri Anda.</p>
+                <div class="level-grid">
+                    <a href="{{ route('jenjang.show', 'mdta') }}" class="level"><div class="top"><span>Diniyah Nonformal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>MDTA</h3><div class="sub">Madrasah Diniyah Takmiliyah</div><p>Fondasi mengaji, ibadah, dan akhlak untuk usia sekolah dasar.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 4 tahun</div></a>
+                    <a href="{{ route('jenjang.show', 'pps-wustha') }}" class="level"><div class="top"><span>Ketarbiyahan</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>PPS WUSTHA</h3><div class="sub">Pendidikan Pesantren Salafiyah</div><p>Kajian kepesantrenan dengan pendidikan kesetaraan tingkat SMP.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
+                    <a href="{{ route('jenjang.show', 'mts') }}" class="level"><div class="top"><span>Pendidikan Formal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>MTS</h3><div class="sub">Madrasah Tsanawiyah</div><p>Ilmu agama dan pengetahuan umum dalam budaya belajar santri.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
+                    <a href="{{ route('jenjang.show', 'ma') }}" class="level"><div class="top"><span>Pendidikan Formal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>MA</h3><div class="sub">Madrasah Aliyah</div><p>Penguatan akademik, karakter, dan persiapan studi lanjutan.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
+                    <a href="{{ route('jenjang.show', 'pdf-wustha') }}" class="level"><div class="top"><span>Diniyah Formal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>PDF Wustha</h3><div class="sub">Pendidikan Diniyah Formal</div><p>Pendalaman kitab turats pada jenjang menengah pertama.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
+                    <a href="{{ route('jenjang.show', 'pdf-ulya') }}" class="level"><div class="top"><span>Diniyah Formal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>PDF ULYA</h3><div class="sub">Pendidikan Diniyah Formal</div><p>Penguasaan ilmu syariah dan tradisi keilmuan tingkat lanjutan.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
+                    <a href="{{ route('jenjang.show', 'mahad-aly') }}" class="level"><div class="top"><span>Pendidikan Tinggi</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>MA'HAD 'ALY</h3><div class="sub">Pendidikan Tinggi Pesantren</div><p>Mengkaji fikih dan usul fikih untuk calon kader ulama.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 4 tahun</div></a>
+                    <div class="level-cta">
+                        <i class="fa-regular fa-comments" style="font-size:22px"></i>
+                        <h3>Masih mencari jenjang yang tepat?</h3>
+                        <p>Tim kami siap mendampingi Anda memilih program.</p>
+                        <a href="#kontak" class="btn btn-light" style="align-self:flex-start">Konsultasi <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                     </div>
                 </div>
             </div>
@@ -881,7 +960,7 @@
                             </a>
                             <div class="news-meta">
                                 <span class="cat">{{ $b->kategori }}</span>
-                                <span class="date">{{ $b->published_at->translatedFormat('d F Y') }}</span>
+                                <span class="date">{{ $b->tanggal_terbit->translatedFormat('d F Y') }}</span>
                             </div>
                             <h3>{{ $b->judul }}</h3>
                             <p>{{ \Illuminate\Support\Str::limit($b->ringkasan_otomatis, 110) }}</p>
@@ -890,22 +969,6 @@
                     @empty
                         <p style="grid-column:1/-1;color:var(--muted)">Belum ada berita.</p>
                     @endforelse
-                </div>
-            </div>
-        </section>
-
-        {{-- KEHIDUPAN SANTRI --}}
-        <section class="life">
-            <div class="container">
-                <div>
-                    <div class="eyebrow light">Kehidupan Santri</div>
-                    <h2>Belajar bukan hanya di dalam kelas.</h2>
-                    <p class="intro">Dari subuh hingga malam, setiap kebiasaan menjadi bekal untuk hidup yang lebih bermakna.</p>
-                </div>
-                <div class="times">
-                    <div class="time"><b>04.00</b><h4>Mengawali dengan Doa</h4><p>Qiyamul lail, subuh berjamaah, dan halaqah Al-Qur'an.</p></div>
-                    <div class="time"><b>07.00</b><h4>Menjelajah Ilmu</h4><p>Pembelajaran madrasah, diskusi, dan pengembangan diri.</p></div>
-                    <div class="time"><b>18.00</b><h4>Menjaga Tradisi</h4><p>Kajian kitab, murajaah, dan belajar bersama.</p></div>
                 </div>
             </div>
         </section>
@@ -989,6 +1052,81 @@
             </div>
         </section>
 
+        {{-- TESTIMONI ALUMNI (slider otomatis) --}}
+        @if ($testimoniAlumni->isNotEmpty())
+            <section class="alum" id="alumni">
+                <div class="container">
+                    <div class="alum-box" data-testi>
+                        <div class="alum-head">
+                            <div>
+                                <div class="eyebrow">Kata Alumni</div>
+                                <h2>Jejak mereka, cerita yang tinggal.</h2>
+                                <p class="sub">Kesan dan pesan para alumni tentang pengalaman menimba ilmu di Pondok Pesantren Babul Hasanah.</p>
+                            </div>
+                            <div class="alum-nav">
+                                <button type="button" data-testi-prev aria-label="Testimoni sebelumnya">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                <button type="button" data-testi-next aria-label="Testimoni berikutnya">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="alum-viewport">
+                            <div class="alum-track" data-testi-track>
+                                @foreach ($testimoniAlumni as $al)
+                                    @php
+                                        $inisial = collect(preg_split('/\s+/', trim((string) $al->nama)))
+                                            ->filter()->take(2)
+                                            ->map(fn ($w) => mb_strtoupper(mb_substr($w, 0, 1)))
+                                            ->implode('');
+                                        $metaAlumni = collect([
+                                            $al->jenjang,
+                                            $al->tahun_lulus ? 'Angkatan ' . $al->tahun_lulus : null,
+                                        ])->filter()->implode(' • ');
+                                        $kegiatanAlumni = collect([$al->kegiatan, $al->instansi])->filter()->implode(' • ');
+                                    @endphp
+                                    <article class="alum-card">
+                                        @if ($al->tahun_lulus)
+                                            <span class="alum-badge">
+                                                <i class="fa-solid fa-graduation-cap"></i> Alumni {{ $al->tahun_lulus }}
+                                            </span>
+                                        @endif
+                                        <i class="fa-solid fa-quote-left alum-quote" aria-hidden="true"></i>
+                                        <p class="alum-text">&ldquo;{!! nl2br(e($al->testimoni)) !!}&rdquo;</p>
+                                        <div class="alum-meta">
+                                            @if ($al->foto_url)
+                                                <img src="{{ $al->foto_url }}" alt="Foto {{ $al->nama }}"
+                                                    class="alum-ava" loading="lazy">
+                                            @else
+                                                <span class="alum-ava is-initial" aria-hidden="true">{{ $inisial ?: 'A' }}</span>
+                                            @endif
+                                            <div>
+                                                <strong>{{ $al->nama }}</strong>
+                                                <small>{{ $metaAlumni ?: 'Alumni Babul Hasanah' }}</small>
+                                                @if ($kegiatanAlumni)
+                                                    <small>{{ $kegiatanAlumni }}</small>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </article>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="alum-dots" data-testi-dots aria-label="Navigasi testimoni"></div>
+
+                        <div class="alum-foot">
+                            <a href="{{ route('alumni.index') }}" class="link-more">
+                                Lihat semua alumni <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        @endif
+
         {{-- PENERIMAAN SANTRI BARU --}}
         <section class="psb" id="psb">
             <div class="container">
@@ -1060,8 +1198,8 @@
 
             // Animasi muncul saat scroll
             const revealEls = document.querySelectorAll(
-                '.dh .hero2 .container > *, .dh .stats .container > *, .dh .profile-grid > *, .dh .feature, .dh .quick, ' +
-                '.dh .program-card, .dh .news-card, .dh .level, .dh .org-card, .dh .time, .dh .g-item, .dh .achv-card, ' +
+                '.dh .hero2 .container > *, .dh .stats .container > *, .dh .profile-grid > *, .dh .feature, ' +
+                '.dh .program-card, .dh .news-card, .dh .level, .dh .org-card, .dh .ih-card, .dh .ih-today, .dh .g-item, .dh .achv-card, ' +
                 '.dh .psb-box > *, .dh .contact .container > *'
             );
             const revealObs = new IntersectionObserver((entries) => {
@@ -1160,6 +1298,118 @@
                 });
 
                 startAuto();
+            }
+
+            // ---------- Slider testimoni alumni ----------
+            const testi = document.querySelector('.dh [data-testi]');
+            if (testi) {
+                const track = testi.querySelector('[data-testi-track]');
+                const cards = track ? Array.from(track.children) : [];
+                const dotsBox = testi.querySelector('[data-testi-dots]');
+                const btnPrev = testi.querySelector('[data-testi-prev]');
+                const btnNext = testi.querySelector('[data-testi-next]');
+                const viewport = testi.querySelector('.alum-viewport');
+                const reduceTesti = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                const DURASI_TESTI = 5500;   // jeda antar kartu (ms)
+                let testiIndex = 0;
+                let testiTimer = null;
+                let maxIndex = 0;
+
+                const perView = () => {
+                    const w = window.innerWidth;
+                    if (w <= 640) return 1;
+                    if (w <= 1024) return 2;
+                    return 3;
+                };
+
+                const langkah = () => {
+                    if (!cards.length) return 0;
+                    const gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 20;
+                    return cards[0].getBoundingClientRect().width + gap;
+                };
+
+                const buatDots = () => {
+                    if (!dotsBox) return;
+                    maxIndex = Math.max(0, cards.length - perView());
+                    dotsBox.innerHTML = '';
+                    for (let i = 0; i <= maxIndex; i++) {
+                        const b = document.createElement('button');
+                        b.type = 'button';
+                        b.className = 'alum-dot';
+                        b.setAttribute('aria-label', 'Testimoni ' + (i + 1));
+                        b.addEventListener('click', () => { tampil(i); mulai(); });
+                        dotsBox.appendChild(b);
+                    }
+                    testi.classList.toggle('is-static', maxIndex === 0);
+                };
+
+                const tampil = (i) => {
+                    if (!cards.length) return;
+                    maxIndex = Math.max(0, cards.length - perView());
+                    testiIndex = i > maxIndex ? 0 : (i < 0 ? maxIndex : i);
+                    track.style.transform = 'translateX(' + (-testiIndex * langkah()) + 'px)';
+                    Array.from(dotsBox ? dotsBox.children : []).forEach((d, n) => {
+                        const on = n === testiIndex;
+                        d.classList.toggle('is-active', on);
+                        d.setAttribute('aria-current', on ? 'true' : 'false');
+                    });
+                };
+
+                const stopTesti = () => {
+                    if (testiTimer) {
+                        clearInterval(testiTimer);
+                        testiTimer = null;
+                    }
+                };
+
+                const mulai = () => {
+                    stopTesti();
+                    if (reduceTesti || maxIndex < 1) return;
+                    testiTimer = setInterval(() => tampil(testiIndex + 1), DURASI_TESTI);
+                };
+
+                btnPrev?.addEventListener('click', () => { tampil(testiIndex - 1); mulai(); });
+                btnNext?.addEventListener('click', () => { tampil(testiIndex + 1); mulai(); });
+
+                // Geser dengan usapan (mobile)
+                if (viewport) {
+                    let startX = null;
+                    viewport.addEventListener('pointerdown', (e) => { startX = e.clientX; });
+                    viewport.addEventListener('pointerup', (e) => {
+                        if (startX === null) return;
+                        const delta = e.clientX - startX;
+                        startX = null;
+                        if (Math.abs(delta) < 40) return;
+                        tampil(testiIndex + (delta < 0 ? 1 : -1));
+                        mulai();
+                    });
+                    viewport.addEventListener('pointercancel', () => { startX = null; });
+                }
+
+                // Berhenti sejenak saat kursor/fokus di area testimoni
+                testi.addEventListener('mouseenter', stopTesti);
+                testi.addEventListener('mouseleave', mulai);
+                testi.addEventListener('focusin', stopTesti);
+                testi.addEventListener('focusout', (e) => {
+                    if (!testi.contains(e.relatedTarget)) mulai();
+                });
+                document.addEventListener('visibilitychange', () => {
+                    document.hidden ? stopTesti() : mulai();
+                });
+
+                buatDots();
+                tampil(0);
+
+                let resizeTimer = null;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(() => {
+                        buatDots();
+                        tampil(testiIndex);
+                    }, 150);
+                });
+
+                mulai();
             }
         });
     </script>
