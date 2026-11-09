@@ -25,11 +25,11 @@ class PendaftaranOnlineController extends Controller
         $validated = $request->validate([
             'nama_lengkap'         => ['required', 'string', 'max:255'],
             'tempat_tanggal_lahir' => ['required', 'string', 'max:255'],
-            'no_hp_aktif'          => ['required', 'string', 'max:30'],
+            'no_hp_aktif'          => ['required', 'string', 'regex:/^[0-9\+\-\s]+$/', 'max:16'],
             'alamat_domisili'      => ['required', 'string', 'max:1000'],
-            'email'                => ['required', 'email', 'max:255', 'unique:pendaftaran_online,email'],
+            'email'                => ['required', 'email', 'max:255'], // <--- DI SINI: unique dihapus agar bisa multi-anak
             'nama_ortu_wali'       => ['required', 'string', 'max:255'],
-            'no_hp_ortu'           => ['required', 'string', 'max:30'],
+            'no_hp_ortu'           => ['required', 'string', 'regex:/^[0-9\+\-\s]+$/', 'max:16'],
             'asal_sekolah'         => ['required', 'string', 'max:255'],
             'alamat_sekolah'       => ['required', 'string', 'max:1000'],
             'tahun_lulus'          => ['required', 'digits:4'],
@@ -42,7 +42,7 @@ class PendaftaranOnlineController extends Controller
             'alamat_domisili.required'      => 'Alamat tinggal (domisili) wajib diisi.',
             'email.required'                => 'Email orang tua/wali wajib diisi.',
             'email.email'                   => 'Format email orang tua/wali tidak valid.',
-            'email.unique'                  => 'Email orang tua/wali ini sudah pernah dipakai untuk mendaftar.',
+            // Pesan 'email.unique' sudah tidak diperlukan lagi
             'nama_ortu_wali.required'       => 'Nama orang tua/wali wajib diisi.',
             'no_hp_ortu.required'           => 'Nomor handphone orang tua wajib diisi.',
             'asal_sekolah.required'         => 'Sekolah asal wajib diisi.',
@@ -85,7 +85,7 @@ class PendaftaranOnlineController extends Controller
         return redirect()->back()->with(
             'success',
             'Pendaftaran berhasil dikirim! Nomor Pendaftaran Anda: ' . $noPendaftaran
-            . '. Silakan menunggu proses verifikasi dari pihak pesantren.'
+                . '. Silakan menunggu proses verifikasi dari pihak pesantren.'
         );
     }
 }

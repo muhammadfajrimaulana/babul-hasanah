@@ -3,18 +3,18 @@
 namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class PortalDashboardController extends Controller
 {
     public function index()
     {
+        /** @var User $user */
         $user = Auth::user();
 
-        // Nanti di sini bisa diload relasi data santri yang terhubung ke wali santri yang sedang login
-        // Contoh: $santri = $user->santri;
+        $daftarAnak = $user->santri()->with(['pendaftaranOnline', 'absensi'])->get(); 
 
-        return view('portal.dashboard', compact('user'));
+        return view('portal.dashboard', compact('user', 'daftarAnak'));
     }
 }

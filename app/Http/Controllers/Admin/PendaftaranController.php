@@ -69,7 +69,8 @@ class PendaftaranController extends Controller
                 $user = $userLama;
                 $rawPassword = null;
             } else {
-                $rawPassword = 'babul' . rand(1000, 9999);
+                $rawPassword = 'babul2026';
+                // $rawPassword = 'babul' . rand(1000, 9999);
 
                 $user = User::create([
                     'name'     => $namaWali,
