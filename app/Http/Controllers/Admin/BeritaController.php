@@ -66,11 +66,11 @@ class BeritaController extends Controller
      */
     public function uploadGambar(Request $request)
     {
-        $request->validate(['gambar' => 'required|image|max:4096']);
+        $request->validate(['gambar' => 'required|image|max:2048']);
 
         $path = $request->file('gambar')->store('berita/isi', 'public');
 
-        return response()->json(['url' => Storage::url($path)]);
+        return response()->json(['url' => asset('storage/' . $path)]);
     }
 
     private function data(Request $request, ?Berita $berita = null): array

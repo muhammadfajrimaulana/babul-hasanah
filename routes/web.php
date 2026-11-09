@@ -7,10 +7,10 @@ use App\Http\Controllers\Admin\GaleriController as AdminGaleriController;
 use App\Http\Controllers\Admin\InfoHarianController as AdminInfoHarianController;
 use App\Http\Controllers\Admin\KegiatanController as AdminKegiatanController;
 use App\Http\Controllers\Admin\KontenController as AdminKontenController;
+use App\Http\Controllers\Admin\JenjangController as AdminJenjangController;
 use App\Http\Controllers\Admin\PendaftaranController as AdminPendaftaranController;
 use App\Http\Controllers\Admin\PenggunaController as AdminPenggunaController;
 use App\Http\Controllers\Admin\PrestasiAdminController;
-use App\Http\Controllers\Admin\ProgramController as AdminProgramController;
 use App\Http\Controllers\Admin\SantriController as AdminDataSantriController;
 use App\Http\Controllers\Admin\SantriFormController as AdminSantriFormController;
 use App\Http\Controllers\Admin\StrukturOrganisasiController as AdminStrukturController;
@@ -147,7 +147,12 @@ Route::middleware(['auth', 'role:super_admin,admin,pengasuh,pembina'])->prefix('
     Route::put('/konten/update', [AdminKontenController::class, 'updateProfil'])->name('konten.update');
 
     // Pengelolaan lainnya
-    Route::get('/pengelolaan-program', [AdminProgramController::class, 'index'])->name('program.index');
+    Route::get('/pengelolaan-jenjang', [AdminJenjangController::class, 'index'])->name('jenjang.index');
+    Route::get('/pengelolaan-jenjang/{jenjang}', [AdminJenjangController::class, 'show'])->name('jenjang.show');
+
+    // Nama lama dipertahankan agar tautan/bookmark lama tetap berfungsi.
+    Route::get('/pengelolaan-program', fn () => redirect()->route('admin.jenjang.index'))->name('program.index');
+
     Route::get('/pengelolaan-kegiatan', [AdminKegiatanController::class, 'index'])->name('kegiatan.index');
 
     // Berita (CRUD)

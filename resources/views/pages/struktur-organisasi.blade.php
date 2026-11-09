@@ -52,46 +52,48 @@
     .sj-head h2 { font-size: clamp(1.7rem, 3.2vw, 2.4rem); line-height: 1.25; margin: 0 0 12px; color: var(--g800); }
     .sj-head p { margin: 0; color: #475569; line-height: 1.75; font-size: 1.05rem; }
 
-    /* ====== Bagan: pohon dengan penghubung otomatis (dipakai partial struktur-node) ====== */
-    .tree { overflow-x: auto; padding: 4px 0 14px; }
-    .tree ul { list-style: none; margin: 0; padding: 34px 0 0; display: flex; justify-content: center; position: relative; }
-    .tree > ul { padding-top: 0; min-width: max-content; margin: 0 auto; }
-    .tree li { position: relative; padding: 34px 14px 0; text-align: center; }
-    .tree > ul > li { padding-top: 0; }
-    .tree ul ul::before { content: ""; position: absolute; top: 0; left: 50%; height: 34px; border-left: 2px solid var(--line); }
-    .tree li::before, .tree li::after { content: ""; position: absolute; top: 0; right: 50%; width: 50%; height: 34px; border-top: 2px solid var(--line); }
-    .tree li::after { right: auto; left: 50%; border-left: 2px solid var(--line); }
-    .tree li:only-child::before, .tree li:only-child::after { display: none; }
-    .tree li:only-child { padding-top: 0; }
-    .tree li:first-child::before, .tree li:last-child::after { border: 0; }
-    .tree li:last-child::before { border-right: 2px solid var(--line); border-radius: 0 14px 0 0; }
-    .tree li:first-child::after { border-radius: 14px 0 0 0; }
-    .tree > ul > li::before, .tree > ul > li::after { display: none; }
-    .tree .person::before { content: ""; position: absolute; top: -6px; left: 50%; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--g500); border: 2px solid #fff; box-shadow: 0 0 0 1px var(--line); }
-    .tree > ul > li > .person::before { display: none; }
+    /* ====== Bagan: level bertumpuk (mengacu pada struktur manajemen) ====== */
+    .org-tree { display: flex; flex-direction: column; align-items: center; gap: 40px; width: 100%; max-width: 1120px; margin: 0 auto; position: relative; }
+    .tree-level { position: relative; display: flex; flex-wrap: wrap; justify-content: center; align-items: stretch; gap: 40px 18px; width: 100%; }
+    /* Level berisi banyak kartu: rapatkan baris agar terbaca sebagai satu kelompok */
+    .tree-level.is-grid { gap: 18px; }
 
-    .person { position: relative; display: inline-block; width: 240px; background: #fff; border-radius: 22px; padding: 26px 18px 22px;
-        border: 1px solid rgba(6,78,59,.14); border-top: 4px solid var(--g500); box-shadow: 0 14px 30px -16px rgba(20,83,45,.28); transition: transform .25s ease, box-shadow .25s ease; }
-    .person:hover { transform: translateY(-4px); box-shadow: 0 22px 40px -16px rgba(20,83,45,.4); }
-    .avatar { position: relative; width: 92px; height: 92px; border-radius: 50%; margin: 0 auto 14px; overflow: hidden;
-        display: flex; align-items: center; justify-content: center; font-size: 36px; color: #fff;
-        background: linear-gradient(135deg, #10b981, #0f5132); border: 5px solid #dcfce7; }
+    .person { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; width: 220px;
+        background: #fff; padding: 22px 18px 20px; border-radius: 20px; border: 1px solid rgba(6,78,59,.12);
+        box-shadow: 0 10px 28px -18px rgba(20,83,45,.35); text-align: center;
+        transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease; }
+    .person:hover { transform: translateY(-6px); border-color: var(--g500); box-shadow: 0 18px 36px -18px rgba(20,83,45,.45); }
+
+    .avatar { position: relative; width: 88px; height: 88px; border-radius: 50%; margin: 0 auto 14px; overflow: hidden;
+        display: flex; align-items: center; justify-content: center; font-size: 32px; color: #fff;
+        background: linear-gradient(135deg, #10b981, #0f5132); border: 4px solid #fff; box-shadow: 0 6px 16px rgba(20,83,45,.18); }
     .avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-    .person h3 { margin: 0 0 8px; font-size: 1.05rem; line-height: 1.35; color: #0f172a; overflow-wrap: anywhere; }
-    .person span { display: inline-block; font-size: 13px; font-weight: 600; color: var(--g700); background: var(--g50); padding: 5px 14px; border-radius: 999px; }
-    .person.gold { border-color: rgba(183,121,31,.3); border-top-color: var(--gold); }
-    .person.gold .avatar { background: linear-gradient(135deg, #d99a2b, #b7791f); border-color: var(--gold-soft); }
-    .person.gold span { color: var(--gold-text); background: var(--gold-soft); }
 
-    /* Pimpinan: kartu paling besar, dengan motif bintang segi delapan */
-    .person.top { width: 300px; border: 0; padding: 32px 22px 28px; overflow: hidden;
-        background: linear-gradient(140deg, #0b3f29, #15803d); box-shadow: 0 26px 50px -22px rgba(20,83,45,.7); }
+    .person span { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+        color: var(--g700); line-height: 1.45; margin-bottom: 7px; min-height: 30px; }
+    .person h3 { margin: 0; font-size: .98rem; font-weight: 800; line-height: 1.35; color: #0f172a; overflow-wrap: anywhere; }
+
+    /* Pimpinan puncak */
+    .person.top { width: 270px; padding: 28px 20px 24px; overflow: hidden; border: 0;
+        background: linear-gradient(140deg, #0b3f29, #15803d); box-shadow: 0 24px 46px -22px rgba(20,83,45,.7); }
     .person.top > * { position: relative; z-index: 1; }
-    .person.top::after { content: ""; position: absolute; right: -52px; bottom: -52px; width: 190px; height: 190px; z-index: 0;
+    .person.top::after { content: ""; position: absolute; right: -48px; bottom: -48px; width: 170px; height: 170px; z-index: 0;
         background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.28' stroke-width='1'%3E%3Crect x='20' y='20' width='60' height='60'/%3E%3Crect x='20' y='20' width='60' height='60' transform='rotate(45 50 50)'/%3E%3Ccircle cx='50' cy='50' r='30'/%3E%3Ccircle cx='50' cy='50' r='14'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat; }
-    .person.top h3 { color: #fff; font-size: 1.25rem; }
-    .person.top span { color: var(--gold-light); background: rgba(255,255,255,.16); }
-    .person.top .avatar { width: 112px; height: 112px; border-color: rgba(255,255,255,.35); background: linear-gradient(135deg, #d99a2b, #b7791f); }
+    .person.top .avatar { width: 96px; height: 96px; border-color: rgba(255,255,255,.35); background: linear-gradient(135deg, #d99a2b, #b7791f); }
+    .person.top span { color: var(--gold-light); }
+    .person.top h3 { color: #fff; font-size: 1.1rem; }
+
+    /* Garis penghubung (desktop) */
+    @media (min-width: 769px) {
+        .tree-level:not(:last-child)::after { content: ""; position: absolute; bottom: -20px; left: 50%; width: 2px; height: 20px; background: var(--line); }
+        .tree-level.multi-items::before { content: ""; position: absolute; top: -20px; left: 12%; right: 12%; height: 2px; background: var(--line); }
+        .person::before { content: ""; position: absolute; top: -20px; left: 50%; width: 2px; height: 20px; background: var(--line); }
+        .tree-level:first-child .person::before { display: none; }
+
+        /* Level dengan banyak kartu (wrap 2 baris): cukup satu rel penghubung */
+        .tree-level.is-grid::before { left: 8%; right: 8%; }
+        .tree-level.is-grid .person::before { display: none; }
+    }
 
     .tree-empty { text-align: center; color: #64748b; padding: 40px 0; }
     .tree-empty i { display: block; font-size: 32px; color: #a7d8bd; margin-bottom: 12px; }
@@ -140,16 +142,7 @@
     /* ====== Responsif ====== */
     @media (max-width: 1080px) { .jenjang { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 960px) { .bidang { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 820px) {
-        .tree { overflow: visible; }
-        .tree > ul { min-width: 0; }
-        .tree ul { flex-direction: column; align-items: center; padding-top: 26px; }
-        .tree li { padding: 26px 0 0; }
-        .tree ul > li:first-child { padding-top: 0; }
-        .tree li::before, .tree li::after { display: none; }
-        .tree ul ul::before { height: 26px; }
-        .person, .person.top { width: 100%; max-width: 320px; }
-    }
+    @media (max-width: 860px) { .person { width: 190px; padding: 18px 14px; } .avatar { width: 74px; height: 74px; font-size: 26px; } }
     @media (max-width: 760px) { .jenjang { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 640px) {
         .sj-sec { padding: 60px 0; }
@@ -157,6 +150,15 @@
         .sj-hero::after { width: 240px; height: 240px; right: -70px; bottom: -70px; }
         .bidang { grid-template-columns: 1fr; }
         .sj-cta { padding: 44px 24px; }
+
+        /* Bagan: satu kolom, kartu menyesuaikan layar */
+        .org-tree { gap: 26px; }
+        .tree-level { flex-direction: column; align-items: center; flex-wrap: nowrap; gap: 14px; }
+        .person, .person.top { width: 100%; max-width: 340px; padding: 18px 16px; }
+        .avatar { width: 72px; height: 72px; font-size: 26px; margin-bottom: 12px; }
+        .person.top .avatar { width: 84px; height: 84px; }
+        .person span { min-height: 0; font-size: 10px; }
+        .person h3 { font-size: .95rem; }
     }
     @media (max-width: 480px) { .jenjang { grid-template-columns: 1fr; } }
     @media (prefers-reduced-motion: reduce) {
@@ -200,12 +202,39 @@
             </div>
 
             @if ($bagan->isNotEmpty())
-                <div class="tree">
-                    <ul>
-                        @foreach ($bagan as $akar)
-                            @include('pages.partials.struktur-node', ['node' => $akar, 'level' => 0])
-                        @endforeach
-                    </ul>
+                @php
+                    // Ratakan bagan per kedudukan (level) agar bisa ditampilkan
+                    // bertumpuk ke bawah seperti bagan struktur manajemen.
+                    $levelBagan = [];
+                    $ratakan = function ($nodes, $depth) use (&$ratakan, &$levelBagan) {
+                        foreach ($nodes as $n) {
+                            $levelBagan[$depth][] = $n;
+                            if ($n->anak->isNotEmpty()) {
+                                $ratakan($n->anak, $depth + 1);
+                            }
+                        }
+                    };
+                    $ratakan($bagan, 0);
+                    ksort($levelBagan);
+                @endphp
+
+                <div class="org-tree">
+                    @foreach ($levelBagan as $depth => $nodes)
+                        <div class="tree-level {{ count($nodes) > 1 ? 'multi-items' : '' }} {{ count($nodes) > 4 ? 'is-grid' : '' }}">
+                            @foreach ($nodes as $node)
+                                <article class="person {{ $depth === 0 ? 'top' : '' }}">
+                                    <div class="avatar">
+                                        <i class="fa-solid {{ $node->ikon ?: ($depth === 0 ? 'fa-user-tie' : 'fa-user') }}"></i>
+                                        @if ($node->foto)
+                                            <img src="{{ $node->foto_url }}" alt="{{ $node->nama }}" @if ($depth > 1) loading="lazy" @endif onerror="this.remove()">
+                                        @endif
+                                    </div>
+                                    <span>{{ $node->jabatan }}</span>
+                                    <h3>{{ $node->nama }}</h3>
+                                </article>
+                            @endforeach
+                        </div>
+                    @endforeach
                 </div>
             @else
                 <div class="tree-empty"><i class="fa-solid fa-sitemap"></i>Susunan pengurus belum diisi.</div>

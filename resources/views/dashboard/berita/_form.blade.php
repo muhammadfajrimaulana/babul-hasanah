@@ -76,7 +76,7 @@
     }
 </style>
 
-<form id="berita-form" action="{{ $action }}" method="POST" novalidate>
+<form id="berita-form" action="{{ $action }}" method="POST" enctype="multipart/form-data" novalidate>
     @csrf
     @if ($method !== 'POST') @method($method) @endif
     <input type="hidden" name="status" id="status-input" value="{{ $statusNow }}">
@@ -252,8 +252,7 @@
                         </span>
                         <span class="text-[10px] text-slate-400 dark:text-slate-500">JPG, PNG, WebP</span>
                     </label>
-                    <input type="file" name="gambar" id="gambar-input" accept="image/*" class="hidden"
-                        onchange="previewGambar(this)">
+                    <input type="file" name="gambar" id="gambar-input" accept="image/*" class="hidden">
                     @error('gambar') <p class="{{ $errCls }}">{{ $message }}</p> @enderror
                 </div>
             </div>
@@ -660,7 +659,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const rememberIndex = () => { const r = quill.getSelection(); return r ? r.index : Math.max(0, quill.getLength() - 1); };
     const handleFile = (f, index) => {
         if (!f || !f.type.startsWith('image/')) { alert('File harus berupa gambar.'); return; }
-        if (f.size > 15 * 1024 * 1024) { alert('Ukuran gambar terlalu besar (maks. 15 MB).'); return; }
+        if (f.size > 2 * 1024 * 1024) { alert('Ukuran gambar terlalu besar (maks. 2 MB).'); return; }
         openCrop(f, { index });
     };
     openPicker = () => { fileInput._index = rememberIndex(); fileInput.click(); };
@@ -689,6 +688,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ---- Kirim form: cek dulu isian wajib ----
     const flag = (el, msg) => { el.focus(); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); alert(msg); };
     form.addEventListener('submit', e => {
+        if (gambarBusy) { e.preventDefault(); return alert('Gambar utama sedang diproses. Tunggu sebentar lalu simpan lagi.'); }
         if (!judul.value.trim()) { e.preventDefault(); return flag(judul, 'Judul berita belum diisi.'); }
         if (isEmpty()) {
             e.preventDefault();
@@ -716,18 +716,68 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ---- Preview gambar utama ----
+    const gambarInput = $('gambar-input');
+    const MAKS_GAMBAR = 2 * 1024 * 1024; // samakan dengan batas unggah PHP (2 MB)
+    let gambarBusy = false;
+
+    // Kompres gambar besar (mis. foto HP) agar tetap bisa diunggah.
+    const kompresGambar = file => new Promise(resolve => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            const maks = 1600;
+            const skala = Math.min(1, maks / Math.max(img.width, img.height));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(img.width * skala);
+            canvas.height = Math.round(img.height * skala);
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.82);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+        img.src = url;
+    });
+
+    const tampilkanPreview = file => {
+        const preview = $('preview-gambar');
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    };
+
     function previewGambar(input) {
         const file = input.files[0];
-        const preview = $('preview-gambar');
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                preview.src = e.target.result;
-                preview.classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
+
+        if (file.size <= MAKS_GAMBAR) {
+            tampilkanPreview(file);
+            return;
         }
+
+        gambarBusy = true;
+        setStatus('Mengompres gambar…');
+        kompresGambar(file).then(blob => {
+            gambarBusy = false;
+            setStatus('');
+            if (!blob || blob.size > MAKS_GAMBAR) {
+                input.value = '';
+                alert('Gambar gagal dikompres hingga di bawah 2 MB. Pilih gambar lain.');
+                return;
+            }
+            const nama = (file.name || 'gambar').replace(/\.[^.]+$/, '') + '.jpg';
+            const dt = new DataTransfer();
+            dt.items.add(new File([blob], nama, { type: 'image/jpeg' }));
+            input.files = dt.files;
+            tampilkanPreview(dt.files[0]);
+        });
     }
+    gambarInput.addEventListener('change', () => previewGambar(gambarInput));
 
     // ---- Slug otomatis ----
     const slugify = s => s.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');

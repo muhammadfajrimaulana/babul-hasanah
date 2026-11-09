@@ -65,9 +65,16 @@ class Berita extends Model
 
     public function getGambarUrlAttribute(): string
     {
-        return $this->gambar
-            ? asset('storage/' . $this->gambar)
-            : asset('assets/img/banner/banner.png');
+        if ($this->gambar) {
+            return asset('storage/' . $this->gambar);
+        }
+
+        // Fallback: pakai gambar pertama yang disisipkan di dalam isi berita.
+        if (preg_match('/<img[^>]+src\s*=\s*["\']([^"\']+)["\']/i', (string) $this->isi, $cocok)) {
+            return $cocok[1];
+        }
+
+        return asset('assets/img/banner/banner.png');
     }
 
     public function getRingkasanOtomatisAttribute(): string

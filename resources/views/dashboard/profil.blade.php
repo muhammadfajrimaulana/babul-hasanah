@@ -64,6 +64,10 @@
     }
 
     .pf-avatar-actions { margin-top: 10px; display: flex; gap: 10px; }
+    .pf-avatar-form { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .pf-avatar-form .pf-avatar-actions { margin-top: 0; }
+    .pf-file { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+        clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
     .pf-btn-upload {
         display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600;
         background: var(--head); color: #fff; border: none; padding: 10px 18px; border-radius: 12px;
@@ -126,6 +130,16 @@
     @if (session('error'))
         <div class="pf-alert bad"><i class="fa-solid fa-circle-exclamation"></i>{{ session('error') }}</div>
     @endif
+    @if ($errors->any())
+        <div class="pf-alert bad">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <div>
+                @foreach ($errors->all() as $pesan)
+                    <div>{{ $pesan }}</div>
+                @endforeach
+            </div>
+        </div>
+    @endif
 
     <div class="pf-top">
         <div class="pf-title">
@@ -140,18 +154,23 @@
         <div class="pf-card">
             <div class="pf-avatar-wrap">
                 <img src="{{ $avatarUrl }}" alt="Foto Profil" class="pf-avatar" onerror="this.src='{{ asset('assets/img/logo/logo.png') }}'">
-                <div class="pf-avatar-edit" title="Ubah Foto Profil" @click="document.getElementById('avatarInput').click()">
+                <label for="avatarInput" class="pf-avatar-edit" title="Ubah Foto Profil">
                     <i class="fa-solid fa-camera"></i>
-                </div>
-                <form method="POST" action="{{ route('admin.profil.avatar') }}" enctype="multipart/form-data" @submit.prevent="uploadAvatar">
+                </label>
+                <form method="POST" action="{{ route('admin.profil.avatar') }}" enctype="multipart/form-data" class="pf-avatar-form">
                     @csrf
-                    <input type="file" id="avatarInput" name="avatar" accept="image/*" class="hidden">
+                    <input type="file" id="avatarInput" name="avatar" accept="image/jpeg,image/png,image/webp"
+                        class="pf-file" onchange="this.form.submit()">
+                    <div class="pf-avatar-actions">
+                        <label for="avatarInput" class="pf-btn-upload">
+                            <i class="fa-solid fa-image"></i> Pilih Foto
+                        </label>
+                        <noscript>
+                            <button type="submit" class="pf-btn-upload"><i class="fa-solid fa-upload"></i> Unggah</button>
+                        </noscript>
+                    </div>
+                    <span class="pf-hint">JPG, PNG, atau WEBP &middot; maks. 2 MB</span>
                 </form>
-                <div class="pf-avatar-actions">
-                    <button type="button" class="pf-btn-upload" @click="document.getElementById('avatarInput').click()">
-                        <i class="fa-solid fa-image"></i> Pilih Foto
-                    </button>
-                </div>
                 <h2 class="pf-name">{{ $user->name }}</h2>
                 <span class="pf-email">{{ $user->email }}</span>
                 <span class="pf-role">{{ ucfirst(str_replace('_', ' ', $user->role ?? '')) }}</span>
@@ -222,28 +241,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        function uploadAvatar(event) {
-            event.preventDefault();
-            const form = event.target;
-            const formData = new FormData(form);
-            fetch(form.action, {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
-                body: formData
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert(data.message || 'Gagal mengunggah foto.');
-                }
-            })
-            .catch(() => alert('Terjadi kesalahan jaringan.'));
-        }
-    </script>
 
 </div>
 

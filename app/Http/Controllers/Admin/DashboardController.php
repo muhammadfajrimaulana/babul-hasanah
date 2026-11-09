@@ -3,20 +3,23 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Album;
 use App\Models\Alumni;
 use App\Models\Berita;
 use App\Models\InfoHarian;
 use App\Models\Kepengurusan;
 use App\Models\PendaftaranOnline;
 use App\Models\PrestasiSantri;
+use App\Models\Program;
 use App\Models\Santri;
 use App\Models\User;
+use App\Support\RekapJenjang;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Hash;
 
 class DashboardController extends Controller
 {
@@ -39,13 +42,13 @@ class DashboardController extends Controller
             ->count();
 
         $totalAsatidz = $this->hitung(Kepengurusan::class);
-        $jmlGaleri = $this->hitung(\App\Models\Album::class);
+        $jmlGaleri = $this->hitung(Album::class);
         $totalAlumni = $this->hitung(Alumni::class);
         $totalPengguna = $this->hitung(User::class);
         $isSuperAdmin = in_array(strtolower((string) (auth()->user()->role ?? '')), ['super_admin', 'superadmin', 'super admin', 'super'], true);
         $jmlPrestasi = $this->hitung(PrestasiSantri::class);
         // ---- Ambil nama jenjang berdasarkan relasi program atau kolom user ----
-        $user = auth()->user()->load('program'); 
+        $user = auth()->user()->load('program');
 
         // Deteksi nama jenjang secara bertingkat agar tidak pernah meleset:
         $namaJenjang = 'Pusat / Umum'; // Default
@@ -53,18 +56,18 @@ class DashboardController extends Controller
         if ($user->program) {
             // 1. Jika relasi program_id terhubung dengan benar
             $namaJenjang = $user->program->nama_program;
-        } elseif (!empty($user->jenjang)) {
+        } elseif (! empty($user->jenjang)) {
             // 2. Jika kolom 'jenjang' diisi slug (misal: 'mahad-aly') atau nama langsung
-            $foundProgram = \App\Models\Program::where('slug', $user->jenjang)
-                ->orWhere('nama_program', 'LIKE', '%' . $user->jenjang . '%')
+            $foundProgram = Program::where('slug', $user->jenjang)
+                ->orWhere('nama_program', 'LIKE', '%'.$user->jenjang.'%')
                 ->first();
-                
+
             $namaJenjang = $foundProgram ? $foundProgram->nama_program : ucwords(str_replace('-', ' ', $user->jenjang));
         }
 
         $tahunAjaran = $now->month >= 7
-            ? $now->year . '/' . ($now->year + 1)
-            : ($now->year - 1) . '/' . $now->year;
+            ? $now->year.'/'.($now->year + 1)
+            : ($now->year - 1).'/'.$now->year;
 
         // ---- Grafik: Pendaftar per Jenjang ----
         $pendaftarPerJenjang = $this->pendaftarPerJenjang();
@@ -74,6 +77,9 @@ class DashboardController extends Controller
 
         // ---- Grafik: Alumni per Jenjang ----
         $alumniPerJenjang = $this->alumniPerJenjang($totalAlumni);
+
+        // ---- Ringkasan data seluruh 7 jenjang ----
+        $jenjangStats = RekapJenjang::ringkasan();
 
         // ---- Grafik: Tren pendaftar 6 bulan ----
         $tren = $this->trenPendaftar();
@@ -136,6 +142,7 @@ class DashboardController extends Controller
             'pendaftarPerJenjang' => $pendaftarPerJenjang,
             'santriPerJenjang' => $santriPerJenjang,
             'alumniPerJenjang' => $alumniPerJenjang,
+            'jenjangStats' => $jenjangStats,
             'infoHarian' => $infoHarian,
             'kalenderEvents' => $kalenderEvents,
             'userAvatar' => auth()->user()->avatar ?? null,
@@ -160,7 +167,7 @@ class DashboardController extends Controller
 
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'required|email|max:255|unique:users,email,'.$user->id,
         ];
         if ($isSuperAdmin = in_array(strtolower((string) ($user->role ?? '')), ['super_admin', 'superadmin', 'super admin', 'super'], true)) {
             $rules['role'] = 'required|in:super_admin,admin,wali_santri';
@@ -200,16 +207,28 @@ class DashboardController extends Controller
 
         $request->validate([
             'avatar' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ], [
+            'avatar.required' => 'Pilih file foto terlebih dahulu.',
+            'avatar.image' => 'File yang dipilih bukan gambar.',
+            'avatar.mimes' => 'Format foto harus JPG, JPEG, PNG, atau WEBP.',
+            'avatar.max' => 'Ukuran foto maksimal 2 MB.',
+            'avatar.uploaded' => 'Foto gagal diunggah (melebihi batas server).',
         ]);
 
-        // Hapus avatar lama jika ada
-        if ($user->avatar) {
-            Storage::disk('public')->delete($user->avatar);
+        $lama = $user->avatar;
+        $path = $request->file('avatar')->store('avatars', 'public');
+
+        if (! $path) {
+            return back()->with('error', 'Foto gagal diunggah. Silakan coba lagi.');
         }
 
-        $path = $request->file('avatar')->store('avatars', 'public');
         $user->avatar = $path;
         $user->save();
+
+        // Hapus foto lama hanya setelah foto baru benar-benar tersimpan.
+        if ($lama && $lama !== $path) {
+            Storage::disk('public')->delete($lama);
+        }
 
         return back()->with('success', 'Foto profil berhasil diperbarui.');
     }
@@ -227,11 +246,11 @@ class DashboardController extends Controller
     /** Hitung data dengan aman. */
     private function hitung(string $model, ?callable $filter = null): int
     {
-        if (!$this->modelAda($model)) {
+        if (! $this->modelAda($model)) {
             return 0;
         }
         $instance = new $model;
-        if (!Schema::hasTable($instance->getTable())) {
+        if (! Schema::hasTable($instance->getTable())) {
             return 0;
         }
         try {
@@ -239,6 +258,7 @@ class DashboardController extends Controller
             if ($filter) {
                 $filter($query);
             }
+
             return $query->count();
         } catch (\Throwable $e) {
             return 0;
@@ -249,7 +269,7 @@ class DashboardController extends Controller
     private function pendaftarPerJenjang(): array
     {
         $model = PendaftaranOnline::class;
-        if (!$this->modelAda($model) || !Schema::hasTable((new $model)->getTable())) {
+        if (! $this->modelAda($model) || ! Schema::hasTable((new $model)->getTable())) {
             return [];
         }
         try {
@@ -272,7 +292,7 @@ class DashboardController extends Controller
     private function santriPerJenjang(int $total): array
     {
         $model = Santri::class;
-        if ($total === 0 || !$this->modelAda($model)) {
+        if ($total === 0 || ! $this->modelAda($model)) {
             return [];
         }
         try {
@@ -301,7 +321,7 @@ class DashboardController extends Controller
     private function alumniPerJenjang(int $total): array
     {
         $model = Alumni::class;
-        if ($total === 0 || !$this->modelAda($model)) {
+        if ($total === 0 || ! $this->modelAda($model)) {
             return [];
         }
         try {
@@ -329,6 +349,7 @@ class DashboardController extends Controller
             $label = $awal->copy()->locale('id')->translatedFormat('M');
             $tren[$label] = PendaftaranOnline::whereBetween('created_at', [$awal, $awal->copy()->endOfMonth()])->count();
         }
+
         return $tren;
     }
 
@@ -336,13 +357,15 @@ class DashboardController extends Controller
     private function agendaTerdekat(): array
     {
         try {
-            if (!class_exists(InfoHarian::class) || !Schema::hasTable((new InfoHarian)->getTable())) {
+            if (! class_exists(InfoHarian::class) || ! Schema::hasTable((new InfoHarian)->getTable())) {
                 return [];
             }
+
             return InfoHarian::jenis('jadwal')->aktif()->berlaku()->sudahTerbit()
                 ->orderBy('tanggal')->orderBy('jam')
                 ->take(3)->get()->map(function ($k) {
-                    $tgl = \Illuminate\Support\Carbon::parse($k->tanggal)->locale('id');
+                    $tgl = Carbon::parse($k->tanggal)->locale('id');
+
                     return [
                         $tgl->format('d'),
                         $k->judul ?? 'Kegiatan',
