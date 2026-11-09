@@ -17,6 +17,8 @@ class PenggunaController extends Controller
     public const ROLES = [
         'super_admin' => 'Super Admin',
         'admin'       => 'Admin',
+        'pengasuh'       => 'Pengasuh',
+        'pembina'       => 'Pembina',
         'wali_santri' => 'Wali Santri',
     ];
 

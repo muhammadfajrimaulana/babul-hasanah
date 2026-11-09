@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleAndUserSeeder::class,
+            ProgramSeeder::class,
+            InfoHarianSeeder::class,
         ]);
 
         \App\Models\Konten::insert([

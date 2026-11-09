@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['super_admin', 'admin', 'wali_santri'])->default('wali_santri');
+            $table->enum('role', ['super_admin', 'admin', 'pengasuh', 'pembina', 'wali_santri'])->default('wali_santri');
             $table->string('phone')->nullable();
             $table->rememberToken();
             $table->timestamps();
