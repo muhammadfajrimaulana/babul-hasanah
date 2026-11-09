@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Santri;
 use App\Models\User;
+use App\Support\Akses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -28,8 +29,16 @@ class SantriFormController extends Controller
 
     public function create()
     {
+        $user = auth()->user();
+        $jenjangList = self::JENJANG;
+
+        // Admin Jenjang hanya boleh memilih jenjang yang ditanganinya.
+        if (Akses::dibatasiJenjang($user)) {
+            $jenjangList = [Akses::namaJenjang($user)];
+        }
+
         return view('dashboard.santri.create', [
-            'jenjangList' => self::JENJANG,
+            'jenjangList' => $jenjangList,
         ]);
     }
 
@@ -45,6 +54,13 @@ class SantriFormController extends Controller
             'email_wali'         => ['nullable', 'email', 'max:255'],
             'no_hp_wali'         => ['nullable', 'string', 'max:20'],
         ]);
+
+        // Admin Jenjang tidak boleh menambah santri di luar jenjangnya.
+        abort_unless(
+            Akses::cocokJenjang(auth()->user(), $data['jenjang_pendidikan']),
+            403,
+            'Jenjang yang dipilih berada di luar wewenang Anda.'
+        );
 
         // Jika email wali diisi, cek apakah sudah dipakai akun lain
         $userLama = null;
@@ -129,12 +145,24 @@ class SantriFormController extends Controller
     {
         $santri = Santri::findOrFail($id);
 
+        abort_unless(
+            Akses::cocokJenjang(auth()->user(), $santri->jenjang_pendidikan),
+            403,
+            'Data santri ini berada di luar jenjang yang Anda tangani.'
+        );
+
         return view('dashboard.santri.edit', compact('santri'));
     }
 
     public function update(Request $request, $id)
     {
         $santri = Santri::findOrFail($id);
+
+        abort_unless(
+            Akses::cocokJenjang(auth()->user(), $santri->jenjang_pendidikan),
+            403,
+            'Data santri ini berada di luar jenjang yang Anda tangani.'
+        );
 
         $data = $request->validate([
             'nomor_induk'        => ['nullable', 'string', 'max:50', 'unique:santri,nomor_induk,' . $santri->id],
@@ -144,6 +172,13 @@ class SantriFormController extends Controller
             'nama_wali'          => ['nullable', 'string', 'max:255'],
             'alamat'             => ['nullable', 'string'],
         ]);
+
+        // Jenjang baru juga harus tetap di dalam wewenang user.
+        abort_unless(
+            Akses::cocokJenjang(auth()->user(), $data['jenjang_pendidikan']),
+            403,
+            'Jenjang yang dipilih berada di luar wewenang Anda.'
+        );
 
         $santri->update($data);
 

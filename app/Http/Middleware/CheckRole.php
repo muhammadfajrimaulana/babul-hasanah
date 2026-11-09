@@ -24,8 +24,18 @@ class CheckRole
 
         $user = Auth::user();
 
-        // 2. Cek apakah role user ada di dalam daftar $roles yang diizinkan
-        if (in_array($user->role, $roles)) {
+        // 2. Cek apakah role user ada di dalam daftar $roles yang diizinkan.
+        //    Normalisasi agar "Super Admin", "superadmin", atau "SUPER_ADMIN"
+        //    tetap dianggap sama dan tidak salah jalur.
+        $roleUser = strtolower(str_replace([' ', '-'], '_', trim((string) $user->role)));
+        $roleUser = $roleUser === 'superadmin' ? 'super_admin' : $roleUser;
+
+        $daftarRole = array_map(
+            fn ($role) => strtolower(str_replace([' ', '-'], '_', trim((string) $role))),
+            $roles
+        );
+
+        if (in_array($roleUser, $daftarRole, true)) {
             return $next($request);
         }
 

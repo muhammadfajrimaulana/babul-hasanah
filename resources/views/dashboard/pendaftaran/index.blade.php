@@ -104,43 +104,49 @@
                             <div><dt class="font-bold text-slate-500 dark:text-slate-400">Pilihan Jenjang</dt><dd class="text-slate-800 dark:text-slate-200">{{ $item->jenjang_tujuan ?? '-' }}</dd></div>
                         </dl>
 
-                        <div class="pt-1">
-                            @if ($statusMobile == 'pending' || ! $item->status_pendaftaran)
-                                <form action="{{ route('admin.pendaftaran.verifikasi', $item->id) }}" method="POST"
-                                    class="grid grid-cols-2 gap-2">
+                        @if (auth()->user()->bisa('pendaftaran.ubah'))
+                            <div class="pt-1">
+                                @if ($statusMobile == 'pending' || ! $item->status_pendaftaran)
+                                    <form action="{{ route('admin.pendaftaran.verifikasi', $item->id) }}" method="POST"
+                                        class="grid grid-cols-2 gap-2">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" name="status_pendaftaran" value="diterima"
+                                            class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
+                                            <i class="fa-solid fa-check"></i> Terima
+                                        </button>
+                                        <button type="submit" name="status_pendaftaran" value="ditolak"
+                                            class="bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 active:scale-95 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                            <i class="fa-solid fa-xmark"></i> Tolak
+                                        </button>
+                                    </form>
+                                @else
+                                    <div class="text-center py-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-400 dark:text-slate-500 text-xs font-medium italic">
+                                        <i class="fa-solid fa-lock text-[10px] mr-1"></i> Selesai Diproses
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="{{ route('admin.pendaftaran.edit', $item->id) }}"
+                                    class="bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-pen"></i> Edit
+                                </a>
+                                <form action="{{ route('admin.pendaftaran.destroy', $item->id) }}" method="POST"
+                                    onsubmit="return confirm('Hapus data pendaftaran ini secara permanen? Data santri hasil verifikasi juga akan dihapus.');">
                                     @csrf
-                                    @method('PATCH')
-                                    <button type="submit" name="status_pendaftaran" value="diterima"
-                                        class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
-                                        <i class="fa-solid fa-check"></i> Terima
-                                    </button>
-                                    <button type="submit" name="status_pendaftaran" value="ditolak"
-                                        class="bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 active:scale-95 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
-                                        <i class="fa-solid fa-xmark"></i> Tolak
+                                    @method('DELETE')
+                                    <button type="submit"
+                                        class="w-full bg-slate-50 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-slate-200 dark:border-slate-700 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                        <i class="fa-solid fa-trash"></i> Hapus
                                     </button>
                                 </form>
-                            @else
-                                <div class="text-center py-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-400 dark:text-slate-500 text-xs font-medium italic">
-                                    <i class="fa-solid fa-lock text-[10px] mr-1"></i> Selesai Diproses
-                                </div>
-                            @endif
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-2">
-                            <a href="{{ route('admin.pendaftaran.edit', $item->id) }}"
-                                class="bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
-                                <i class="fa-solid fa-pen"></i> Edit
-                            </a>
-                            <form action="{{ route('admin.pendaftaran.destroy', $item->id) }}" method="POST"
-                                onsubmit="return confirm('Hapus data pendaftaran ini secara permanen? Data santri hasil verifikasi juga akan dihapus.');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit"
-                                    class="w-full bg-slate-50 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-slate-200 dark:border-slate-700 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
-                                    <i class="fa-solid fa-trash"></i> Hapus
-                                </button>
-                            </form>
-                        </div>
+                            </div>
+                        @else
+                            <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-center text-[11px] font-bold text-slate-500 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
+                                <i class="fa-solid fa-eye mr-1"></i> Mode monitoring — verifikasi hanya oleh Admin Jenjang.
+                            </div>
+                        @endif
                     </div>
                 @empty
                     <div class="text-center py-12 text-slate-400 dark:text-slate-500 italic text-xs">
@@ -201,39 +207,45 @@
                                 </td>
                                 <td class="py-3.5 px-3.5 text-center">
                                     <div class="inline-flex items-center gap-1">
-                                        @if ($statusDesktop == 'pending' || ! $item->status_pendaftaran)
-                                            <form action="{{ route('admin.pendaftaran.verifikasi', $item->id) }}" method="POST"
-                                                class="inline-flex gap-1">
+                                        @if (auth()->user()->bisa('pendaftaran.ubah'))
+                                            @if ($statusDesktop == 'pending' || ! $item->status_pendaftaran)
+                                                <form action="{{ route('admin.pendaftaran.verifikasi', $item->id) }}" method="POST"
+                                                    class="inline-flex gap-1">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" name="status_pendaftaran" value="diterima"
+                                                        class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-[11px] font-bold transition">
+                                                        Terima
+                                                    </button>
+                                                    <button type="submit" name="status_pendaftaran" value="ditolak"
+                                                        class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1 rounded text-[11px] font-bold transition">
+                                                        Tolak
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <span class="text-slate-400 dark:text-slate-500 text-[11px] italic">Selesai</span>
+                                            @endif
+
+                                            <a href="{{ route('admin.pendaftaran.edit', $item->id) }}"
+                                                class="bg-amber-100 dark:bg-amber-500/20 hover:bg-amber-200 dark:hover:bg-amber-500/30 text-amber-800 dark:text-amber-300 px-2.5 py-1 rounded text-[11px] font-bold transition">
+                                                Edit
+                                            </a>
+
+                                            <form action="{{ route('admin.pendaftaran.destroy', $item->id) }}" method="POST"
+                                                class="inline-flex"
+                                                onsubmit="return confirm('Hapus data pendaftaran ini secara permanen? Data santri hasil verifikasi juga akan dihapus.');">
                                                 @csrf
-                                                @method('PATCH')
-                                                <button type="submit" name="status_pendaftaran" value="diterima"
-                                                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-[11px] font-bold transition">
-                                                    Terima
-                                                </button>
-                                                <button type="submit" name="status_pendaftaran" value="ditolak"
-                                                    class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1 rounded text-[11px] font-bold transition">
-                                                    Tolak
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    class="bg-slate-100 dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 px-2.5 py-1 rounded text-[11px] font-bold transition">
+                                                    Hapus
                                                 </button>
                                             </form>
                                         @else
-                                            <span class="text-slate-400 dark:text-slate-500 text-[11px] italic">Selesai</span>
+                                            <span class="text-slate-400 dark:text-slate-500 text-[11px] italic">
+                                                <i class="fa-solid fa-eye mr-1"></i> Hanya baca
+                                            </span>
                                         @endif
-
-                                        <a href="{{ route('admin.pendaftaran.edit', $item->id) }}"
-                                            class="bg-amber-100 dark:bg-amber-500/20 hover:bg-amber-200 dark:hover:bg-amber-500/30 text-amber-800 dark:text-amber-300 px-2.5 py-1 rounded text-[11px] font-bold transition">
-                                            Edit
-                                        </a>
-
-                                        <form action="{{ route('admin.pendaftaran.destroy', $item->id) }}" method="POST"
-                                            class="inline-flex"
-                                            onsubmit="return confirm('Hapus data pendaftaran ini secara permanen? Data santri hasil verifikasi juga akan dihapus.');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                class="bg-slate-100 dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 px-2.5 py-1 rounded text-[11px] font-bold transition">
-                                                Hapus
-                                            </button>
-                                        </form>
                                     </div>
                                 </td>
                             </tr>

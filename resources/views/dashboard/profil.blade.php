@@ -6,7 +6,7 @@
 @php
     $user = auth()->user();
     $avatarUrl = $user->avatar ? asset('storage/' . $user->avatar) : asset('assets/img/logo/logo.png');
-    $isSuperAdmin = in_array(strtolower((string) ($user->role ?? '')), ['super_admin', 'superadmin', 'super admin', 'super'], true);
+    $dashboardUrl = route(\App\Support\Akses::dashboardRoute($user));
 @endphp
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -146,7 +146,7 @@
             <h1>Pengaturan Akun</h1>
             <p>Kelola nama, email, foto profil, dan password Anda.</p>
         </div>
-        <a href="{{ route('admin.dashboard') }}" class="pf-back"><i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard</a>
+        <a href="{{ $dashboardUrl }}" class="pf-back"><i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard</a>
     </div>
 
     <div class="pf-grid">
@@ -173,7 +173,7 @@
                 </form>
                 <h2 class="pf-name">{{ $user->name }}</h2>
                 <span class="pf-email">{{ $user->email }}</span>
-                <span class="pf-role">{{ ucfirst(str_replace('_', ' ', $user->role ?? '')) }}</span>
+                <span class="pf-role">{{ \App\Support\Akses::label($user->role) }}</span>
             </div>
         </div>
 
@@ -195,17 +195,11 @@
                             <input type="email" name="email" class="pf-input" value="{{ old('email', $user->email) }}" required>
                             <span class="pf-hint">Email ini digunakan untuk masuk ke panel admin.</span>
                         </div>
-                        @if ($isSuperAdmin)
                         <div class="pf-field full">
-                            <label class="pf-label">Role Akun</label>
-                            <select name="role" class="pf-input">
-                                <option value="super_admin" {{ $user->role === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
-                                <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
-                                <option value="wali_santri" {{ $user->role === 'wali_santri' ? 'selected' : '' }}>Wali Santri</option>
-                            </select>
-                            <span class="pf-hint">Hanya Super Admin yang dapat mengubah role.</span>
+                            <label class="pf-label">Peran Akun</label>
+                            <input type="text" class="pf-input" value="{{ \App\Support\Akses::label($user->role) }}" disabled>
+                            <span class="pf-hint">Peran hanya dapat diubah oleh Super Admin melalui menu Pengguna.</span>
                         </div>
-                        @endif
                     </div>
                     <div class="pf-actions">
                         <button type="submit" class="pf-btn-save"><i class="fa-solid fa-save"></i> Simpan Perubahan</button>

@@ -1,16 +1,24 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Pengguna - Pondok Pesantren Babul Hasanah')
+@php
+    $bolehSemua = \App\Support\Akses::superAdmin(auth()->user());
+    $kembali = route('super.pengguna.index', $bolehSemua ? [] : ['kategori' => 'wali_santri']);
+@endphp
+
+@section('title', ($bolehSemua ? 'Edit Pengguna' : 'Edit Wali Santri').' - Pondok Pesantren Babul Hasanah')
 
 @section('content')
     <div class="max-w-2xl space-y-6">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <a href="{{ route('super.pengguna.index') }}"
+                <a href="{{ $kembali }}"
                     class="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-400 hover:text-emerald-600 transition mb-1">
-                    <i class="fa-solid fa-arrow-left"></i> Kembali ke daftar pengguna
+                    <i class="fa-solid fa-arrow-left"></i>
+                    {{ $bolehSemua ? 'Kembali ke daftar pengguna' : 'Kembali ke daftar wali santri' }}
                 </a>
-                <h2 class="text-xl font-black text-slate-900 dark:text-white">Edit Pengguna</h2>
+                <h2 class="text-xl font-black text-slate-900 dark:text-white">
+                    {{ $bolehSemua ? 'Edit Pengguna' : 'Edit Wali Santri' }}
+                </h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400">
                     Perbarui data akun <span class="font-bold text-slate-700 dark:text-slate-200">{{ $pengguna->name }}</span>.
                 </p>
@@ -37,7 +45,7 @@
                 @include('dashboard.pengguna._form', ['pengguna' => $pengguna])
                 <div class="flex gap-2 pt-2">
                     <button class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition">Simpan Perubahan</button>
-                    <a href="{{ route('super.pengguna.index') }}" class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold px-5 py-2.5 rounded-xl">Batal</a>
+                    <a href="{{ $kembali }}" class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold px-5 py-2.5 rounded-xl">Batal</a>
                 </div>
             </form>
         </div>

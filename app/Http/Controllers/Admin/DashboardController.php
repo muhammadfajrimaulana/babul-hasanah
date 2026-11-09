@@ -13,6 +13,7 @@ use App\Models\PrestasiSantri;
 use App\Models\Program;
 use App\Models\Santri;
 use App\Models\User;
+use App\Support\Akses;
 use App\Support\RekapJenjang;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -25,6 +26,12 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Halaman ini khusus Super Admin. Role lain diarahkan ke dashboard-nya
+        // sendiri agar tidak pernah melihat data/layout yang salah.
+        if (! Akses::superAdmin(auth()->user())) {
+            return redirect()->route(Akses::dashboardRoute(auth()->user()));
+        }
+
         $now = now();
 
         $totalSantri = $this->hitung(Santri::class);
@@ -160,26 +167,24 @@ class DashboardController extends Controller
         ]);
     }
 
-    /** Update nama, email, dan role (hanya super_admin yang boleh ganti role). */
+    /**
+     * Update nama & email akun sendiri.
+     *
+     * Role sengaja TIDAK bisa diubah dari halaman ini. Perubahan role hanya
+     * boleh lewat halaman Super Admin > Pengguna agar ada pemeriksaan
+     * "Super Admin terakhir" dan tidak terjadi eskalasi hak akses.
+     */
     public function updateProfil(Request $request)
     {
         $user = auth()->user();
 
-        $rules = [
+        $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,'.$user->id,
-        ];
-        if ($isSuperAdmin = in_array(strtolower((string) ($user->role ?? '')), ['super_admin', 'superadmin', 'super admin', 'super'], true)) {
-            $rules['role'] = 'required|in:super_admin,admin,wali_santri';
-        }
-
-        $request->validate($rules);
+        ]);
 
         $user->name = $request->name;
         $user->email = $request->email;
-        if (isset($rules['role'])) {
-            $user->role = $request->role;
-        }
         $user->save();
 
         return back()->with('success', 'Profil berhasil diperbarui.');

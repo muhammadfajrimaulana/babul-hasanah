@@ -54,19 +54,21 @@
                 </div>
             </div>
             <div class="flex flex-wrap items-center gap-2 self-start sm:self-center">
-                <a href="{{ route('admin.santri.edit', $santri->id) }}"
-                    class="bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
-                    <i class="fa-solid fa-pen"></i> Edit
-                </a>
-                <form action="{{ route('admin.santri.destroy', $santri->id) }}" method="POST"
-                    onsubmit="return confirm('Hapus data santri ini? Status pendaftaran terkait akan kembali menjadi Pending.');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                        class="bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
-                        <i class="fa-solid fa-trash"></i> Hapus
-                    </button>
-                </form>
+                @if (auth()->user()->bisa('santri.ubah'))
+                    <a href="{{ route('admin.santri.edit', $santri->id) }}"
+                        class="bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                        <i class="fa-solid fa-pen"></i> Edit
+                    </a>
+                    <form action="{{ route('admin.santri.destroy', $santri->id) }}" method="POST"
+                        onsubmit="return confirm('Hapus data santri ini? Status pendaftaran terkait akan kembali menjadi Pending.');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                            class="bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                            <i class="fa-solid fa-trash"></i> Hapus
+                        </button>
+                    </form>
+                @endif
                 <a href="{{ route('admin.santri.index') }}"
                     class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
                     <i class="fa-solid fa-arrow-left"></i> Kembali

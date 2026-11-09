@@ -7,6 +7,7 @@ use App\Http\Controllers\Public\PendaftaranOnlineController as PublicPendaftaran
 use App\Models\PendaftaranOnline;
 use App\Models\Santri;
 use App\Models\User;
+use App\Support\Akses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -16,9 +17,33 @@ class PendaftaranController extends Controller
 {
     public function index()
     {
-        $pendaftar = PendaftaranOnline::latest()->get();
+        $user = auth()->user();
+        $query = PendaftaranOnline::latest();
+
+        // Admin Jenjang hanya melihat pendaftar pada jenjangnya.
+        if (Akses::dibatasiJenjang($user)) {
+            $query->whereIn(
+                'jenjang_tujuan',
+                Akses::nilaiJenjangDb($user, PendaftaranOnline::class, 'jenjang_tujuan') ?: ['__tidak_ada__']
+            );
+        }
+
+        $pendaftar = $query->get();
 
         return view('dashboard.pendaftaran.index', compact('pendaftar'));
+    }
+
+    /**
+     * Tolak akses bila data pendaftar berada di luar jenjang user.
+     * Role global (Super Admin, Pengasuh, Pembina) selalu lolos.
+     */
+    private function pastikanJenjang(PendaftaranOnline $pendaftaran): void
+    {
+        abort_unless(
+            Akses::cocokJenjang(auth()->user(), $pendaftaran->jenjang_tujuan),
+            403,
+            'Data pendaftar ini berada di luar jenjang yang Anda tangani.'
+        );
     }
 
     public function updateStatus(Request $request, $id)
@@ -28,6 +53,7 @@ class PendaftaranController extends Controller
         ]);
 
         $pendaftaran = PendaftaranOnline::findOrFail($id);
+        $this->pastikanJenjang($pendaftaran);
 
         // CEK 1: Jika sudah pernah diterima sebelumnya, tolak proses duplikasi
         if ($pendaftaran->status_pendaftaran === 'diterima') {
@@ -141,6 +167,7 @@ class PendaftaranController extends Controller
     public function edit($id)
     {
         $pendaftaran = PendaftaranOnline::findOrFail($id);
+        $this->pastikanJenjang($pendaftaran);
 
         return view('dashboard.pendaftaran.edit', [
             'pendaftaran' => $pendaftaran,
@@ -152,6 +179,7 @@ class PendaftaranController extends Controller
     public function update(Request $request, $id)
     {
         $pendaftaran = PendaftaranOnline::findOrFail($id);
+        $this->pastikanJenjang($pendaftaran);
 
         $validated = $request->validate([
             'nama_lengkap'         => ['required', 'string', 'max:255'],
@@ -250,6 +278,7 @@ class PendaftaranController extends Controller
     public function destroy($id)
     {
         $pendaftaran = PendaftaranOnline::findOrFail($id);
+        $this->pastikanJenjang($pendaftaran);
 
         DB::transaction(function () use ($pendaftaran) {
             // Santri yang lahir dari pendaftaran ini ikut dihapus agar tidak

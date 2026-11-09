@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Support\Akses;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -39,5 +40,40 @@ class User extends Authenticatable
     public function program()
     {
         return $this->belongsTo(Program::class, 'program_id');
+    }
+
+    /** Apakah user boleh membuka modul tertentu (lihat App\Support\Akses). */
+    public function bisa(string $modul): bool
+    {
+        return Akses::bisa($this, $modul);
+    }
+
+    /** Nama route dashboard sesuai role user. */
+    public function dashboardRoute(): string
+    {
+        return Akses::dashboardRoute($this);
+    }
+
+    /** Slug jenjang yang ditangani (khusus admin jenjang). */
+    public function jenjangSlug(): ?string
+    {
+        return Akses::jenjangSlug($this);
+    }
+
+    /** Label jenjang untuk header dashboard. */
+    public function namaJenjang(): string
+    {
+        return Akses::namaJenjang($this);
+    }
+
+    /** Label role yang ramah dibaca. */
+    public function roleLabel(): string
+    {
+        return Akses::label($this->role);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return Akses::superAdmin($this);
     }
 }

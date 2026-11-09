@@ -9,10 +9,16 @@
                 <h2 class="text-xl font-black text-slate-900 dark:text-white">Data Alumni</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Kelola data lulusan Pondok Pesantren Babul Hasanah beserta kegiatan mereka setelah lulus.</p>
             </div>
-            <a href="{{ route('admin.alumni.create') }}"
-                class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-sm">
-                <i class="fa-solid fa-plus"></i> Tambah Alumni
-            </a>
+            @if (auth()->user()->bisa('alumni.ubah'))
+                <a href="{{ route('admin.alumni.create') }}"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-plus"></i> Tambah Alumni
+                </a>
+            @else
+                <span class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-[11px] font-bold text-slate-500 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
+                    <i class="fa-solid fa-eye mr-1"></i> Mode monitoring (hanya baca)
+                </span>
+            @endif
         </div>
 
         @if (session('success'))
@@ -84,12 +90,16 @@
                                 </td>
                                 <td class="py-4 px-6 text-right">
                                     <div class="flex items-center justify-end gap-1">
-                                        <a href="{{ route('admin.alumni.edit', $a) }}"
-                                            class="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/50 text-amber-600 hover:bg-amber-100 rounded-lg text-[10px] font-bold transition">Edit</a>
-                                        <form action="{{ route('admin.alumni.destroy', $a) }}" method="POST" onsubmit="return confirm('Hapus data alumni ini?')">
-                                            @csrf @method('DELETE')
-                                            <button class="px-2.5 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-[10px] font-bold transition">Hapus</button>
-                                        </form>
+                                        @if (auth()->user()->bisa('alumni.ubah'))
+                                            <a href="{{ route('admin.alumni.edit', $a) }}"
+                                                class="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/50 text-amber-600 hover:bg-amber-100 rounded-lg text-[10px] font-bold transition">Edit</a>
+                                            <form action="{{ route('admin.alumni.destroy', $a) }}" method="POST" onsubmit="return confirm('Hapus data alumni ini?')">
+                                                @csrf @method('DELETE')
+                                                <button class="px-2.5 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-[10px] font-bold transition">Hapus</button>
+                                            </form>
+                                        @else
+                                            <span class="text-[10px] italic text-slate-400">Hanya baca</span>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

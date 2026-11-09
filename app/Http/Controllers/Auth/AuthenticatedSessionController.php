@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Support\Akses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -51,14 +52,16 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
-        // 5. Redirection cerdas berdasarkan Role Pengguna
-        return match ($user->role) {
-            'super_admin', 'admin' => redirect()->intended(route('admin.dashboard')),
-            'pengasuh'             => redirect()->intended(route('admin.dashboard')),
-            'pembina'              => redirect()->intended(route('admin.dashboard')),
-            'wali_santri'          => redirect()->intended(route('portal.dashboard')),
-            default                => $this->logoutInvalidUser($request),
-        };
+        // 5. Redirection cerdas berdasarkan Role Pengguna.
+        //    Pemetaan role -> dashboard ada di satu tempat (App\Support\Akses)
+        //    supaya jalur login tidak pernah tertukar.
+        $tujuan = Akses::ruteSetelahLogin($user);
+
+        if (! $tujuan) {
+            return $this->logoutInvalidUser($request);
+        }
+
+        return redirect()->intended(route($tujuan));
     }
 
     /**

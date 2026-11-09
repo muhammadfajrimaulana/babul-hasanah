@@ -11,6 +11,11 @@
         'MTs', 'MA', 'Madrasah Diniyah Takmiliyah', 'PPS Wustha',
         'Diniyah Formal Wustha', 'Diniyah Formal Ulya', "Ma'had 'Aly",
     ];
+
+    // Admin Jenjang hanya melihat jenjangnya sendiri di pilihan.
+    if (\App\Support\Akses::dibatasiJenjang(auth()->user())) {
+        $jenjangList = [$santri->jenjang_pendidikan ?: \App\Support\Akses::namaJenjang(auth()->user())];
+    }
 @endphp
 
 <div class="max-w-3xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-6">

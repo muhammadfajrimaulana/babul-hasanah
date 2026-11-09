@@ -11,16 +11,22 @@
                     Babul Hasanah dari semua jenjang.</p>
             </div>
             <div class="flex items-center gap-2">
-                <!-- Tombol Trigger Modal Import -->
-                <button @click="importModalOpen = true"
-                    class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-sm">
-                    <i class="fa-solid fa-file-excel"></i> Import Excel
-                </button>
+                @if (auth()->user()->bisa('santri.ubah'))
+                    <!-- Tombol Trigger Modal Import -->
+                    <button @click="importModalOpen = true"
+                        class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-file-excel"></i> Import Excel
+                    </button>
 
-                <a href="{{ route('admin.santri.create') }}"
-                    class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-sm">
-                    <i class="fa-solid fa-plus"></i> Tambah Santri Baru
-                </a>
+                    <a href="{{ route('admin.santri.create') }}"
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-plus"></i> Tambah Santri Baru
+                    </a>
+                @else
+                    <span class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-[11px] font-bold text-slate-500 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
+                        <i class="fa-solid fa-eye mr-1"></i> Mode monitoring (hanya baca)
+                    </span>
+                @endif
             </div>
         </div>
 
@@ -214,16 +220,18 @@
                                 <td class="py-4 px-4 text-right space-x-1 whitespace-nowrap">
                                     <a href="{{ route('admin.santri.detail', $santri->id) }}"
                                         class="px-2.5 py-1 bg-sky-50 dark:bg-sky-950/50 text-sky-600 hover:bg-sky-100 rounded-lg text-[10px] font-bold transition">Detail</a>
-                                    <a href="{{ route('admin.santri.edit', $santri->id) }}"
-                                        class="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/50 text-amber-600 hover:bg-amber-100 rounded-lg text-[10px] font-bold transition">Edit</a>
-                                    <form action="{{ route('admin.santri.destroy', $santri->id) }}" method="POST"
-                                        class="inline-block"
-                                        onsubmit="return confirm('Hapus data santri ini? Status pendaftaran terkait akan kembali menjadi Pending.');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            class="px-2.5 py-1 bg-rose-50 dark:bg-rose-950/50 text-rose-600 hover:bg-rose-100 rounded-lg text-[10px] font-bold transition">Hapus</button>
-                                    </form>
+                                    @if (auth()->user()->bisa('santri.ubah'))
+                                        <a href="{{ route('admin.santri.edit', $santri->id) }}"
+                                            class="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/50 text-amber-600 hover:bg-amber-100 rounded-lg text-[10px] font-bold transition">Edit</a>
+                                        <form action="{{ route('admin.santri.destroy', $santri->id) }}" method="POST"
+                                            class="inline-block"
+                                            onsubmit="return confirm('Hapus data santri ini? Status pendaftaran terkait akan kembali menjadi Pending.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="px-2.5 py-1 bg-rose-50 dark:bg-rose-950/50 text-rose-600 hover:bg-rose-100 rounded-lg text-[10px] font-bold transition">Hapus</button>
+                                        </form>
+                                    @endif
                                 </td>
                             </tr>
                         @empty

@@ -10,10 +10,16 @@
             <h2 class="text-xl font-bold text-slate-900 dark:text-white">Prestasi Santri</h2>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Kelola capaian dan penghargaan yang tampil di website.</p>
         </div>
-        <a href="{{ route('admin.prestasi.create') }}"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition">
-            <i class="fa-solid fa-plus"></i> Tambah Prestasi
-        </a>
+        @if (auth()->user()->bisa('prestasi.ubah'))
+            <a href="{{ route('admin.prestasi.create') }}"
+                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition">
+                <i class="fa-solid fa-plus"></i> Tambah Prestasi
+            </a>
+        @else
+            <span class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-[11px] font-bold text-slate-500 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
+                <i class="fa-solid fa-eye"></i> Mode monitoring
+            </span>
+        @endif
     </div>
 
     @if (session('success'))
@@ -49,17 +55,21 @@
                             </td>
                             <td class="px-5 py-3">
                                 <div class="flex justify-end gap-2">
-                                    <a href="{{ route('admin.prestasi.edit', $p) }}"
-                                        class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-600 hover:text-white transition font-semibold">
-                                        <i class="fa-regular fa-pen-to-square"></i> Edit
-                                    </a>
-                                    <form action="{{ route('admin.prestasi.destroy', $p) }}" method="POST"
-                                        onsubmit="return confirm('Hapus prestasi ini?')">
-                                        @csrf @method('DELETE')
-                                        <button class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-red-600 hover:text-white transition font-semibold">
-                                            <i class="fa-regular fa-trash-can"></i> Hapus
-                                        </button>
-                                    </form>
+                                    @if (auth()->user()->bisa('prestasi.ubah'))
+                                        <a href="{{ route('admin.prestasi.edit', $p) }}"
+                                            class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-600 hover:text-white transition font-semibold">
+                                            <i class="fa-regular fa-pen-to-square"></i> Edit
+                                        </a>
+                                        <form action="{{ route('admin.prestasi.destroy', $p) }}" method="POST"
+                                            onsubmit="return confirm('Hapus prestasi ini?')">
+                                            @csrf @method('DELETE')
+                                            <button class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-red-600 hover:text-white transition font-semibold">
+                                                <i class="fa-regular fa-trash-can"></i> Hapus
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="text-[11px] italic text-slate-400">Hanya baca</span>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
