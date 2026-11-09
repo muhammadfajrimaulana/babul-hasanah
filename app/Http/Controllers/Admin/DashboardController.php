@@ -44,6 +44,23 @@ class DashboardController extends Controller
         $totalPengguna = $this->hitung(User::class);
         $isSuperAdmin = in_array(strtolower((string) (auth()->user()->role ?? '')), ['super_admin', 'superadmin', 'super admin', 'super'], true);
         $jmlPrestasi = $this->hitung(PrestasiSantri::class);
+        // ---- Ambil nama jenjang berdasarkan relasi program atau kolom user ----
+        $user = auth()->user()->load('program'); 
+
+        // Deteksi nama jenjang secara bertingkat agar tidak pernah meleset:
+        $namaJenjang = 'Pusat / Umum'; // Default
+
+        if ($user->program) {
+            // 1. Jika relasi program_id terhubung dengan benar
+            $namaJenjang = $user->program->nama_program;
+        } elseif (!empty($user->jenjang)) {
+            // 2. Jika kolom 'jenjang' diisi slug (misal: 'mahad-aly') atau nama langsung
+            $foundProgram = \App\Models\Program::where('slug', $user->jenjang)
+                ->orWhere('nama_program', 'LIKE', '%' . $user->jenjang . '%')
+                ->first();
+                
+            $namaJenjang = $foundProgram ? $foundProgram->nama_program : ucwords(str_replace('-', ' ', $user->jenjang));
+        }
 
         $tahunAjaran = $now->month >= 7
             ? $now->year . '/' . ($now->year + 1)
@@ -122,6 +139,7 @@ class DashboardController extends Controller
             'infoHarian' => $infoHarian,
             'kalenderEvents' => $kalenderEvents,
             'userAvatar' => auth()->user()->avatar ?? null,
+            'namaJenjang' => $namaJenjang,
         ];
 
         return view('dashboard.index', $data);

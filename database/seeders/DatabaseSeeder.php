@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             RoleAndUserSeeder::class,
             ProgramSeeder::class,
             InfoHarianSeeder::class,
+            StrukturOrganisasiSeeder::class,
         ]);
 
         \App\Models\Konten::insert([

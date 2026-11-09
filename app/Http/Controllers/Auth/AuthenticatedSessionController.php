@@ -54,7 +54,7 @@ class AuthenticatedSessionController extends Controller
         // 5. Redirection cerdas berdasarkan Role Pengguna
         return match ($user->role) {
             'super_admin', 'admin' => redirect()->intended(route('admin.dashboard')),
-            'pengasuh'             => redirect()->intended(route('admin.dashboard')), // atau route('pengasuh.dashboard')
+            'pengasuh'             => redirect()->intended(route('admin.dashboard')),
             'pembina'              => redirect()->intended(route('admin.dashboard')),
             'wali_santri'          => redirect()->intended(route('portal.dashboard')),
             default                => $this->logoutInvalidUser($request),

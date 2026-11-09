@@ -20,17 +20,91 @@ class RoleAndUserSeeder extends Seeder
             ]
         );
 
-        // 2. Akun Admin / Pengurus (Akses Operasional Pesantren)
+        // 2. Akun Pengasuh
         User::updateOrCreate(
-            ['email' => 'admin@babulhasanah.sch.id'],
+            ['email' => 'pengasuh@babulhasanah.sch.id'],
             [
-                'name' => 'Admin Pesantren',
+                'name' => 'Pengasuh Pesantren',
                 'password' => Hash::make('babul2026'),
-                'role' => 'admin', // Role admin biasa
+                'role' => 'pengasuh',
             ]
         );
 
-        // 3. Akun Wali Santri
+        // 3. Akun Pembina
+        User::updateOrCreate(
+            ['email' => 'pembina@babulhasanah.sch.id'],
+            [
+                'name' => 'Pembina Asrama',
+                'password' => Hash::make('babul2026'),
+                'role' => 'pembina',
+            ]
+        );
+
+        // 4. Akun Admin per Jenjang
+        User::updateOrCreate(
+            ['email' => 'mdta@babulhasanah.sch.id'], // MDTA
+            [
+                'name' => 'Admin MDTA',
+                'password' => Hash::make('babul2026'),
+                'role' => 'admin',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'ppsw@babulhasanah.sch.id'], // PPS WUSTHA
+            [
+                'name' => 'Admin PPS WUSTHA',
+                'password' => Hash::make('babul2026'),
+                'role' => 'admin',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'mts@babulhasanah.sch.id'], // MTS
+            [
+                'name' => 'Admin MTS',
+                'password' => Hash::make('babul2026'),
+                'role' => 'admin',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'mas@babulhasanah.sch.id'], // MAS
+            [
+                'name' => 'Admin MAS',
+                'password' => Hash::make('babul2026'),
+                'role' => 'admin',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'pdfw@babulhasanah.sch.id'], // PDF WUSTHA
+            [
+                'name' => 'Admin PDF WUSTHA',
+                'password' => Hash::make('babul2026'),
+                'role' => 'admin',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'pdfu@babulhasanah.sch.id'], // PDF ULYA
+            [
+                'name' => 'Admin PDF ULYA',
+                'password' => Hash::make('babul2026'),
+                'role' => 'admin',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'ma@babulhasanah.sch.id'], // MAHAD ALY
+            [
+                'name' => 'Admin Mahad Aly',
+                'password' => Hash::make('babul2026'),
+                'role' => 'admin',
+            ]
+        );
+
+        // 5. Akun Wali Santri
         User::updateOrCreate(
             ['email' => 'walisantri@gmail.com'],
             [

@@ -35,4 +35,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Santri::class, 'user_id');
     }
+
+    public function program()
+    {
+        return $this->belongsTo(Program::class, 'program_id');
+    }
 }
