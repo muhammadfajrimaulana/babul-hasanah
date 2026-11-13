@@ -159,6 +159,13 @@ class DashboardController extends Controller
         return view('dashboard.index', $data);
     }
 
+    /** Halaman pengaturan sistem Super Admin (dipakai route `super.settings`). */
+    public function settings()
+    {
+        // TODO: Buat view dashboard/settings.blade.php atau arahkan ke dashboard
+        return redirect()->route('admin.dashboard')->with('info', 'Halaman pengaturan akan segera tersedia.');
+    }
+
     /** Halaman pengaturan profil pengguna yang login. */
     public function profil()
     {

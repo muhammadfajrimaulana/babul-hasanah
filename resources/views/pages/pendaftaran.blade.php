@@ -138,14 +138,14 @@
                             </div>
 
                             <div class="sm:col-span-2">
-                                <label class="{{ $labelCls }}" for="email">Email Orang Tua / Wali <span class="text-rose-500">*</span></label>
-                                <input id="email" type="email" name="email" value="{{ old('email') }}" required maxlength="255"
+                                <label class="{{ $labelCls }}" for="parent_email">Email Orang Tua / Wali <span class="text-rose-500">*</span></label>
+                                <input id="parent_email" type="email" name="parent_email" value="{{ old('parent_email', old('email')) }}" required maxlength="255"
                                     class="{{ $inputCls }}" placeholder="email.orangtua@gmail.com" autocomplete="email">
                                 <p class="text-xs text-slate-500 mt-1">
                                     Email milik orang tua/wali. Dipakai untuk <b>login Portal Wali Santri</b> setelah pendaftaran diverifikasi.
                                     Santri tidak perlu memiliki email sendiri.
                                 </p>
-                                @error('email') <p class="{{ $errorCls }}">{{ $message }}</p> @enderror
+                                @error('parent_email') <p class="{{ $errorCls }}">{{ $message }}</p> @enderror
                             </div>
                         </div>
                     </div>

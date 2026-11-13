@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Santri;
 use App\Models\User;
 use App\Support\Akses;
+use App\Support\RoleSistem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -45,14 +46,14 @@ class SantriFormController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'nama_lengkap'       => ['required', 'string', 'max:255'],
-            'nomor_induk'        => ['nullable', 'string', 'max:50', 'unique:santri,nomor_induk'],
+            'nama_lengkap' => ['required', 'string', 'max:255'],
+            'nomor_induk' => ['nullable', 'string', 'max:50', 'unique:santri,nomor_induk'],
             'jenjang_pendidikan' => ['required', 'string', 'max:100'],
-            'kelas'              => ['nullable', 'string', 'max:50'],
-            'nama_wali'          => ['nullable', 'string', 'max:255'],
-            'alamat'             => ['nullable', 'string'],
-            'email_wali'         => ['nullable', 'email', 'max:255'],
-            'no_hp_wali'         => ['nullable', 'string', 'max:20'],
+            'kelas' => ['nullable', 'string', 'max:50'],
+            'nama_wali' => ['nullable', 'string', 'max:255'],
+            'alamat' => ['nullable', 'string'],
+            'email_wali' => ['nullable', 'email', 'max:255'],
+            'no_hp_wali' => ['nullable', 'string', 'max:20'],
         ]);
 
         // Admin Jenjang tidak boleh menambah santri di luar jenjangnya.
@@ -67,9 +68,9 @@ class SantriFormController extends Controller
         if (! empty($data['email_wali'])) {
             $userLama = User::where('email', $data['email_wali'])->first();
 
-            if ($userLama && $userLama->role !== 'wali_santri') {
+            if ($userLama && $userLama->peranSistem() !== 'walisantri') {
                 return back()->withInput()->withErrors([
-                    'email_wali' => "Email ini sudah dipakai akun lain (role: {$userLama->role}). Gunakan email berbeda.",
+                    'email_wali' => "Email ini sudah dipakai akun lain (peran: {$userLama->labelPeran()}). Gunakan email berbeda.",
                 ]);
             }
         }
@@ -83,15 +84,20 @@ class SantriFormController extends Controller
                     // Wali sudah punya akun (misalnya anak kedua): tautkan saja
                     $user = $userLama;
                 } else {
-                    $rawPassword = 'babul' . Str::random(6);
+                    // Kata sandi acak unik per akun wali; ditampilkan sekali ke admin.
+                    $rawPassword = Str::password(12, symbols: false);
 
                     $user = User::create([
-                        'name'     => $data['nama_wali'] ?: $data['nama_lengkap'],
-                        'email'    => $data['email_wali'],
+                        'name' => $data['nama_wali'] ?: $data['nama_lengkap'],
+                        'email' => $data['email_wali'],
                         'password' => Hash::make($rawPassword),
-                        'role'     => 'wali_santri',
-                        'phone'    => $data['no_hp_wali'] ?? null,
+                        'role' => 'wali_santri',
+                        'status' => 'active',
+                        'phone' => $data['no_hp_wali'] ?? null,
                     ]);
+
+                    $user->forceFill(['email_verified_at' => now()])->save();
+                    RoleSistem::sinkron($user, 'walisantri');
                 }
             }
 
@@ -99,18 +105,18 @@ class SantriFormController extends Controller
             $nomorInduk = $data['nomor_induk'] ?? null;
             if (! $nomorInduk) {
                 do {
-                    $nomorInduk = 'SANTRI-' . date('Y') . '-' . strtoupper(Str::random(4));
+                    $nomorInduk = 'SANTRI-'.date('Y').'-'.strtoupper(Str::random(4));
                 } while (Santri::where('nomor_induk', $nomorInduk)->exists());
             }
 
             Santri::create([
-                'user_id'            => $user?->id,
-                'nomor_induk'        => $nomorInduk,
-                'nama_lengkap'       => $data['nama_lengkap'],
+                'user_id' => $user?->id,
+                'nomor_induk' => $nomorInduk,
+                'nama_lengkap' => $data['nama_lengkap'],
                 'jenjang_pendidikan' => $data['jenjang_pendidikan'],
-                'kelas'              => $data['kelas'] ?? null,
-                'alamat'             => $data['alamat'] ?? null,
-                'nama_wali'          => $data['nama_wali'] ?? null,
+                'kelas' => $data['kelas'] ?? null,
+                'alamat' => $data['alamat'] ?? null,
+                'nama_wali' => $data['nama_wali'] ?? null,
             ]);
 
             return ['rawPassword' => $rawPassword];
@@ -124,16 +130,16 @@ class SantriFormController extends Controller
         if ($hasil['rawPassword'] && ! empty($data['no_hp_wali'])) {
             $phone = preg_replace('/\D/', '', $data['no_hp_wali']);
             if (str_starts_with($phone, '0')) {
-                $phone = '62' . substr($phone, 1);
+                $phone = '62'.substr($phone, 1);
             }
 
             $pesan = "Assalamu'alaikum, data santri atas nama *{$data['nama_lengkap']}* telah terdaftar di Pesantren Babul Hasanah.\n\n"
-                . "Silakan login ke Portal Wali Santri:\n"
-                . "Email: {$data['email_wali']}\n"
-                . "Password: {$hasil['rawPassword']}\n\n"
-                . "Link login:\n" . route('login');
+                ."Silakan login ke Portal Wali Santri:\n"
+                ."Email: {$data['email_wali']}\n"
+                ."Password: {$hasil['rawPassword']}\n\n"
+                ."Link login:\n".route('login');
 
-            $flash['wa_link'] = "https://wa.me/{$phone}?text=" . urlencode($pesan);
+            $flash['wa_link'] = "https://wa.me/{$phone}?text=".urlencode($pesan);
             $flash['nama_santri'] = $data['nama_lengkap'];
             $flash['success'] .= ' Akun portal wali telah dibuat.';
         }
@@ -165,12 +171,12 @@ class SantriFormController extends Controller
         );
 
         $data = $request->validate([
-            'nomor_induk'        => ['nullable', 'string', 'max:50', 'unique:santri,nomor_induk,' . $santri->id],
-            'nama_lengkap'       => ['required', 'string', 'max:255'],
+            'nomor_induk' => ['nullable', 'string', 'max:50', 'unique:santri,nomor_induk,'.$santri->id],
+            'nama_lengkap' => ['required', 'string', 'max:255'],
             'jenjang_pendidikan' => ['required', 'string', 'max:100'],
-            'kelas'              => ['nullable', 'string', 'max:50'],
-            'nama_wali'          => ['nullable', 'string', 'max:255'],
-            'alamat'             => ['nullable', 'string'],
+            'kelas' => ['nullable', 'string', 'max:50'],
+            'nama_wali' => ['nullable', 'string', 'max:255'],
+            'alamat' => ['nullable', 'string'],
         ]);
 
         // Jenjang baru juga harus tetap di dalam wewenang user.

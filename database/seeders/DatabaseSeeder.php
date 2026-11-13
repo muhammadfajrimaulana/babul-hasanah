@@ -4,33 +4,35 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Konten;
 
+/**
+ * Seeder awal aplikasi — hanya data master, tanpa data contoh/dummy.
+ *
+ * Yang dibuat:
+ * - Peran sistem (Spatie Permission) dan sinkronisasi akun lama.
+ * - Daftar program/jenjang pendidikan.
+ * - Master mata pelajaran per jenjang.
+ *
+ * Akun pengguna, santri, nilai, berita, galeri, dan konten halaman TIDAK
+ * dibuat di sini. Semua data tersebut diisi melalui panel admin atau
+ * ditambahkan oleh pengelola sesuai data nyata pesantren.
+ *
+ * Seeder tambahan untuk akun dummy bisa dipanggil dengan:
+ *   php artisan db:seed --class=DummyUserSeeder
+ */
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         $this->call([
-            RoleAndUserSeeder::class,
+            RoleSeeder::class,
             ProgramSeeder::class,
-            InfoHarianSeeder::class,
-            StrukturOrganisasiSeeder::class,
+            MataPelajaranSeeder::class,
         ]);
 
-        \App\Models\Konten::insert([
-            ['key' => 'profil_hero_title', 'value' => 'Profil & Visi Misi Pondok Pesantren', 'type' => 'text'],
-            ['key' => 'profil_hero_desc', 'value' => 'Mengenal lebih dekat sejarah, landasan hukum, struktur kepengurusan, serta cita-cita luhur Pondok Pesantren Babul Hasanah.', 'type' => 'textarea'],
-            ['key' => 'sejarah_judul', 'value' => 'Menyalakan Lentera Ilmu di Tanah Padang Lawas', 'type' => 'text'],
-            ['key' => 'sejarah_p1', 'value' => 'Pondok Pesantren Babul Hasanah didirikan dengan niat tulus...', 'type' => 'textarea'],
-            ['key' => 'sejarah_p2', 'value' => 'Terletak di Jalan Lintas Pinarik Papaso Km. 14...', 'type' => 'textarea'],
-            ['key' => 'sejarah_foto', 'value' => null, 'type' => 'image'],
-            ['key' => 'visi', 'value' => 'Terwujudnya lembaga pendidikan Islam yang unggul...', 'type' => 'textarea'],
-            ['key' => 'misi', 'value' => '1. Menyelenggarakan pendidikan Islam terpadu...\n2. Menanamkan kecintaan terhadap Al-Qur\'an...', 'type' => 'textarea'],
-        ]);
+        // Jalankan seeder akun dummy (password default: babul2026)
+        $this->call(DummyUserSeeder::class);
     }
 }

@@ -1,7 +1,7 @@
 @php
     $u = auth()->user();
     $dashRoute = \App\Support\Akses::dashboardRoute($u);
-    $roleLabel = \App\Support\Akses::label($u?->role);
+    $roleLabel = $u?->labelPeran() ?? \App\Support\Akses::label($u?->role);
 @endphp
 
 <!-- OVERLAY SIDEBAR MOBILE -->
@@ -74,6 +74,19 @@
                 </a>
             @endif
 
+            @if ($u?->bisa('pendaftaran.ubah'))
+                <!-- Kelulusan PPDB -->
+                <a href="{{ route('admin.ppdb.kelulusan') }}" @click="sidebarOpen = false"
+                    class="flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('admin.ppdb.kelulusan') || request()->routeIs('admin.ppdb.verifikasi') ? 'bg-white text-emerald-900 shadow-lg shadow-emerald-950/40' : 'hover:bg-white/10 text-emerald-50/80 hover:text-white' }} font-semibold text-xs transition relative group">
+                    <i class="fa-solid fa-user-check w-5 text-sm flex-shrink-0"></i>
+                    <span x-show="!sidebarMinimize" class="whitespace-nowrap">Kelulusan PPDB</span>
+                    <div x-show="sidebarMinimize"
+                        class="absolute left-full ml-3 px-2.5 py-1 bg-emerald-950 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
+                        Kelulusan PPDB
+                    </div>
+                </a>
+            @endif
+
             @if ($u?->bisa('santri.lihat'))
                 <!-- Data Santri -->
                 <a href="{{ route('admin.santri.index') }}" @click="sidebarOpen = false"
@@ -85,6 +98,80 @@
                         Data Santri
                     </div>
                 </a>
+            @endif
+
+            @if ($u?->bisa('santri.ubah'))
+                <!-- Plotting Santri ke Kelas -->
+                <a href="{{ route('admin.ppdb.plotting') }}" @click="sidebarOpen = false"
+                    class="flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('admin.ppdb.plotting') || request()->routeIs('admin.ppdb.plot') ? 'bg-white text-emerald-900 shadow-lg shadow-emerald-950/40' : 'hover:bg-white/10 text-emerald-50/80 hover:text-white' }} font-semibold text-xs transition relative group">
+                    <i class="fa-solid fa-layer-group w-5 text-sm flex-shrink-0"></i>
+                    <span x-show="!sidebarMinimize" class="whitespace-nowrap">Plotting Kelas</span>
+                    <div x-show="sidebarMinimize"
+                        class="absolute left-full ml-3 px-2.5 py-1 bg-emerald-950 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
+                        Plotting Kelas
+                    </div>
+                </a>
+
+                <!-- Import Santri (Excel) -->
+                <a href="{{ route('admin.santri.import.index') }}" @click="sidebarOpen = false"
+                    class="flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('admin.santri.import.*') ? 'bg-white text-emerald-900 shadow-lg shadow-emerald-950/40' : 'hover:bg-white/10 text-emerald-50/80 hover:text-white' }} font-semibold text-xs transition relative group">
+                    <i class="fa-solid fa-file-import w-5 text-sm flex-shrink-0"></i>
+                    <span x-show="!sidebarMinimize" class="whitespace-nowrap">Import Santri</span>
+                    <div x-show="sidebarMinimize"
+                        class="absolute left-full ml-3 px-2.5 py-1 bg-emerald-950 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
+                        Import Santri
+                    </div>
+                </a>
+            @endif
+
+            @if ($u?->bisa('akademik.lihat'))
+                <!-- Akademik: Nilai, Transkrip, Mata Pelajaran -->
+                <div x-data="{ akOpen: {{ request()->routeIs('admin.akademik.*') ? 'true' : 'false' }} }">
+                    <div
+                        class="flex items-center rounded-xl {{ request()->routeIs('admin.akademik.*') ? 'bg-white text-emerald-900 shadow-lg shadow-emerald-950/40' : 'text-emerald-50/80 hover:bg-white/10 hover:text-white' }} font-semibold text-xs transition relative group">
+                        <a href="{{ route('admin.akademik.nilai.index') }}" @click="sidebarOpen = false"
+                            class="flex flex-1 items-center gap-3 px-4 py-3.5 min-w-0">
+                            <i class="fa-solid fa-book-open-reader w-5 text-sm flex-shrink-0"></i>
+                            <span x-show="!sidebarMinimize" class="whitespace-nowrap">Akademik</span>
+                        </a>
+                        <button type="button" x-show="!sidebarMinimize" @click="akOpen = !akOpen"
+                            :aria-expanded="akOpen" aria-label="Buka menu akademik"
+                            class="px-3 py-3.5 text-emerald-100/70 hover:text-white transition">
+                            <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"
+                                :class="akOpen && 'rotate-180'"></i>
+                        </button>
+                        <div x-show="sidebarMinimize"
+                            class="absolute left-full ml-3 px-2.5 py-1 bg-emerald-950 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
+                            Akademik
+                        </div>
+                    </div>
+
+                    <div x-show="akOpen && !sidebarMinimize" x-transition
+                        class="mt-1 ml-4 space-y-0.5 border-l border-white/15 pl-2">
+                        <a href="{{ route('admin.akademik.nilai.index') }}" @click="sidebarOpen = false"
+                            class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[11px] font-semibold transition {{ request()->routeIs('admin.akademik.nilai.*') ? 'bg-white/15 text-white' : 'text-emerald-100/70 hover:bg-white/10 hover:text-white' }}">
+                            <i class="fa-solid fa-pen-to-square w-3.5"></i>
+                            <span class="truncate">Nilai Akademik</span>
+                        </a>
+                        <a href="{{ route('admin.akademik.transkrip.index') }}" @click="sidebarOpen = false"
+                            class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[11px] font-semibold transition {{ request()->routeIs('admin.akademik.transkrip.*') ? 'bg-white/15 text-white' : 'text-emerald-100/70 hover:bg-white/10 hover:text-white' }}">
+                            <i class="fa-solid fa-file-lines w-3.5"></i>
+                            <span class="truncate">Transkrip Nilai</span>
+                        </a>
+                        <a href="{{ route('admin.akademik.kenaikan-kelas.index') }}" @click="sidebarOpen = false"
+                            class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[11px] font-semibold transition {{ request()->routeIs('admin.akademik.kenaikan-kelas.*') ? 'bg-white/15 text-white' : 'text-emerald-100/70 hover:bg-white/10 hover:text-white' }}">
+                            <i class="fa-solid fa-arrow-up-right-dots w-3.5"></i>
+                            <span class="truncate">Kenaikan Kelas</span>
+                        </a>
+                        @if ($u?->bisa('akademik.mapel'))
+                            <a href="{{ route('admin.akademik.mapel.index') }}" @click="sidebarOpen = false"
+                                class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[11px] font-semibold transition {{ request()->routeIs('admin.akademik.mapel.*') ? 'bg-white/15 text-white' : 'text-emerald-100/70 hover:bg-white/10 hover:text-white' }}">
+                                <i class="fa-solid fa-list-check w-3.5"></i>
+                                <span class="truncate">Mata Pelajaran</span>
+                            </a>
+                        @endif
+                    </div>
+                </div>
             @endif
 
             @if ($u?->bisa('alumni.lihat'))

@@ -3,36 +3,44 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\PendaftaranOnline;
 use App\Models\Santri;
 use App\Models\User;
+use App\Support\AkunPengguna;
 use App\Support\Akses;
 use App\Support\Jenjang;
+use App\Support\Ppdb;
+use App\Support\RoleSistem;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 
 /**
- * Kelola akun dashboard.
+ * Kelola akun dashboard & portal.
+ *
+ * Sumber peran: Spatie Permission (6 peran resmi, lihat App\Support\RoleSistem).
+ * Kolom lama `users.role` + `users.jenjang` selalu disinkronkan agar modul yang
+ * belum dimigrasi tetap berjalan.
  *
  * Pembagian hak:
- * - Super Admin  : semua akun (Super Admin, Admin Jenjang, Pengasuh, Pembina, Wali Santri).
- * - Admin Jenjang: hanya akun Wali Santri yang terhubung ke santri di jenjangnya.
- * - Pengasuh & Pembina: hanya akun Wali Santri (seluruh pesantren).
+ * - Super Admin      : semua akun, semua peran.
+ * - Pengasuh/Pembina : akun Admin Jenjang + Wali Santri, serta mengaktifkan
+ *                      akun wali yang masih pending.
+ * - Admin Jenjang    : hanya akun Wali Santri pada jenjangnya.
  *
- * Pengaman tambahan:
- * - Super Admin terakhir tidak boleh diturunkan/dihapus.
- * - Akun sendiri tidak boleh dihapus atau diturunkan perannya.
- * - Jenjang wajib diisi untuk role "admin" agar dashboard-nya terarah.
- * - Akun wali bisa ditautkan ke satu santri sekaligus (santri.user_id).
+ * Pengaman:
+ * - Super Admin terakhir tidak boleh diturunkan perannya atau dihapus.
+ * - Akun sendiri tidak boleh dihapus.
+ * - Admin Jenjang wajib memiliki satu jenjang (disimpan di users.jenjang).
  */
 class PenggunaController extends Controller
 {
-    /** Label role (sumber tunggal: App\Support\Akses). */
-    public const ROLES = Akses::ROLE_LABELS;
+    /** Label peran resmi (name => label). */
+    public const ROLES = RoleSistem::ROLES;
 
     /**
-     * Kategori tab pada halaman daftar pengguna.
-     * Urutan array = urutan tab yang tampil.
+     * Kategori tab daftar pengguna.
+     * `roles` = nilai kolom lama (users.role) agar query tetap sederhana.
      */
     public const KATEGORI = [
         'super_admin' => [
@@ -47,14 +55,14 @@ class PenggunaController extends Controller
             'roles' => ['admin'],
             'ikon' => 'fa-layer-group',
             'warna' => 'emerald',
-            'deskripsi' => 'Mengelola data operasional pada jenjang masing-masing.',
+            'deskripsi' => 'Admin MDTA, PPS Wustha, MTs, MA, PDF Wustha/Ulya, dan Ma\'had \'Aly.',
         ],
-        'pengasuh' => [
-            'label' => 'Pengurus & Pembina',
+        'pengurus' => [
+            'label' => 'Pengasuh & Pembina',
             'roles' => ['pengasuh', 'pembina'],
             'ikon' => 'fa-mosque',
             'warna' => 'amber',
-            'deskripsi' => 'Monitoring pesantren; hanya boleh mengelola akun wali santri.',
+            'deskripsi' => 'Monitoring pesantren dan pendaftaran akun Admin Jenjang/Wali Santri.',
         ],
         'wali_santri' => [
             'label' => 'Wali Santri',
@@ -62,6 +70,13 @@ class PenggunaController extends Controller
             'ikon' => 'fa-people-roof',
             'warna' => 'sky',
             'deskripsi' => 'Hanya memantau data anak yang dikirim oleh Admin Jenjang.',
+        ],
+        'alumni' => [
+            'label' => 'Alumni',
+            'roles' => ['alumni'],
+            'ikon' => 'fa-graduation-cap',
+            'warna' => 'violet',
+            'deskripsi' => 'Akun alumni untuk mengakses halaman alumni.',
         ],
     ];
 
@@ -77,32 +92,27 @@ class PenggunaController extends Controller
     {
         $user = auth()->user();
         $bolehSemua = Akses::superAdmin($user);
+        $punyaStatus = Schema::hasColumn('users', 'status');
 
-        // Tab yang boleh dilihat sesuai peran.
-        $tabs = [];
-        if ($bolehSemua) {
-            $tabs['semua'] = [
-                'label' => 'Semua Pengguna',
-                'roles' => array_keys(self::ROLES),
-                'ikon' => 'fa-users',
-                'warna' => 'slate',
-                'deskripsi' => 'Seluruh akun yang dapat masuk ke sistem.',
-            ];
-        }
-        $tabs += $bolehSemua ? self::KATEGORI : ['wali_santri' => self::KATEGORI['wali_santri']];
+        $tabs = $this->tabs($user);
 
         $kategoriAktif = (string) $request->kategori;
         if (! array_key_exists($kategoriAktif, $tabs)) {
-            $kategoriAktif = $bolehSemua ? 'semua' : 'wali_santri';
+            $kategoriAktif = array_key_first($tabs);
         }
 
         $dasar = $this->queryTerlihat($user)
-            ->when($request->q, fn ($q, $s) => $q->where(function ($w) use ($s) {
-                $w->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%");
-            }))
-            ->when($request->jenjang, fn ($q, $j) => $q->where('jenjang', $j));
+            ->when($request->filled('q'), function ($q) use ($request) {
+                $cari = trim((string) $request->input('q'));
 
-        // Jumlah per tab (mengikuti pencarian/filter jenjang yang aktif).
+                $q->where(function ($w) use ($cari) {
+                    $w->where('name', 'like', "%{$cari}%")
+                        ->orWhere('email', 'like', "%{$cari}%");
+                });
+            })
+            ->when($punyaStatus && $request->filled('status'), fn ($q) => $q->where('status', $request->input('status')))
+            ->when($request->filled('jenjang'), fn ($q) => $q->where('jenjang', $request->input('jenjang')));
+
         $hitung = [];
         foreach ($tabs as $key => $tab) {
             $hitung[$key] = $key === 'semua'
@@ -117,48 +127,65 @@ class PenggunaController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        $statistik = [
+            'total' => (clone $this->queryTerlihat($user))->count(),
+            'aktif' => $punyaStatus
+                ? (clone $this->queryTerlihat($user))->where('status', 'active')->count()
+                : 0,
+            'pending' => $punyaStatus
+                ? (clone $this->queryTerlihat($user))->where('status', 'pending')->count()
+                : 0,
+        ];
+
         return view('dashboard.pengguna.index', [
             'penggunas' => $penggunas,
-            'roles' => self::ROLES,
+            'roles' => RoleSistem::daftar(),
+            'rolesBolehDibuat' => AkunPengguna::roleBolehDibuat($user),
             'jenjangList' => self::jenjangOptions(),
+            'santriList' => $this->santriOptions(),
             'tabs' => $tabs,
             'hitung' => $hitung,
             'kategoriAktif' => $kategoriAktif,
             'bolehSemua' => $bolehSemua,
+            'bisaReset' => $bolehSemua,
+            'statistik' => $statistik,
+            'punyaStatus' => $punyaStatus,
+            'filter' => $request->only(['q', 'status', 'jenjang']),
         ]);
     }
 
     public function create()
     {
-        $user = auth()->user();
-
-        return view('dashboard.pengguna.create', $this->dataForm($user));
+        return view('dashboard.pengguna.create', $this->dataForm(auth()->user()));
     }
 
     public function store(Request $request)
     {
-        $user = auth()->user();
         $data = $this->validasi($request);
 
-        // Peran non-Super Admin dipaksa menjadi wali santri.
-        if (! Akses::superAdmin($user)) {
-            $data['role'] = 'wali_santri';
-        }
-
+        $role = $data['role'];
+        $jenjang = $data['jenjang'] ?? null;
         $santriId = $data['santri_id'] ?? null;
-        unset($data['santri_id']);
+        $password = $data['password'] ?? null;
 
-        $data['password'] = Hash::make($data['password']);
-        $data['jenjang'] = $data['role'] === 'admin' ? $data['jenjang'] : null;
+        unset($data['santri_id'], $data['role'], $data['jenjang']);
+
+        // Akun yang dibuat pengelola langsung aktif. Bila kata sandi kosong,
+        // gunakan kata sandi default sistem (babul2026).
+        $data['password'] = $password ?: AkunPengguna::passwordDefault();
+        $data['status'] = 'active';
 
         $pengguna = User::create($data);
+        $pengguna->forceFill(['email_verified_at' => now()])->save();
+        $pengguna->setPeran($role, $jenjang);
 
         if ($santriId) {
             $this->tautkanSantri($pengguna, (int) $santriId);
         }
 
-        return redirect()->route('super.pengguna.index', $this->kategoriRedirect($pengguna->role))
-            ->with('success', 'Pengguna berhasil ditambahkan.');
+        return redirect()->route('super.pengguna.index', $this->kategoriRedirect($role))
+            ->with('success', 'Pengguna berhasil ditambahkan dengan peran '.RoleSistem::label($role).'.'
+                .' Kata sandi: '.($password ?: AkunPengguna::passwordDefault()).'.');
     }
 
     public function edit(User $pengguna)
@@ -178,39 +205,31 @@ class PenggunaController extends Controller
         $user = auth()->user();
         $data = $this->validasi($request, $pengguna);
 
-        // Non-Super Admin tidak boleh mengubah peran wali menjadi peran lain.
-        if (! Akses::superAdmin($user)) {
-            $data['role'] = 'wali_santri';
-        }
-
-        // Akun sendiri tidak boleh diturunkan perannya (mencegah lockout).
-        if ($pengguna->id === $user->id && $data['role'] !== 'super_admin') {
-            return back()->withErrors(['role' => 'Anda tidak bisa mengubah peran akun sendiri.'])->withInput();
-        }
-
-        // Jangan turunkan peran Super Admin terakhir.
-        if ($pengguna->role === 'super_admin' && $data['role'] !== 'super_admin'
-            && User::where('role', 'super_admin')->count() <= 1) {
-            return back()->withErrors(['role' => 'Tidak bisa mengubah peran Super Admin terakhir.'])->withInput();
-        }
-
+        $role = $data['role'];
+        $jenjang = $data['jenjang'] ?? null;
         $santriId = $data['santri_id'] ?? null;
-        unset($data['santri_id']);
 
-        if (! empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
+        unset($data['santri_id'], $data['role'], $data['jenjang']);
+
+        if (empty($data['password'])) {
             unset($data['password']);
         }
 
-        $data['jenjang'] = $data['role'] === 'admin' ? ($data['jenjang'] ?? null) : null;
-
-        // Jika peran berubah dari wali santri, lepaskan tautan santri.
-        if ($pengguna->role === 'wali_santri' && $data['role'] !== 'wali_santri') {
-            $pengguna->santri()->update(['user_id' => null]);
+        // Super Admin terakhir tidak boleh diturunkan perannya.
+        if (AkunPengguna::superAdminTerakhir($pengguna) && $role !== 'super-admin') {
+            return back()->withErrors([
+                'role' => 'Super Admin terakhir tidak boleh diturunkan perannya. Tambahkan Super Admin lain terlebih dahulu.',
+            ])->withInput();
         }
 
-        $pengguna->update($data);
+        // Jika peran berubah dari wali santri, lepaskan tautan santri/siswa.
+        if ($pengguna->peranSistem() === 'walisantri' && $role !== 'walisantri') {
+            $pengguna->santri()->update(['user_id' => null]);
+            $pengguna->students()->update(['user_id' => null]);
+        }
+
+        $pengguna->fill($data)->save();
+        $pengguna->setPeran($role, $jenjang);
 
         if ($santriId) {
             // Satu akun wali dipantau untuk satu santri: lepaskan tautan lama
@@ -220,8 +239,72 @@ class PenggunaController extends Controller
             $this->tautkanSantri($pengguna, (int) $santriId);
         }
 
-        return redirect()->route('super.pengguna.index', $this->kategoriRedirect($pengguna->role))
+        return redirect()->route('super.pengguna.index', $this->kategoriRedirect($role))
             ->with('success', 'Pengguna berhasil diperbarui.');
+    }
+
+    /** Reset kata sandi ke default `babul2026` (khusus Super Admin). */
+    public function resetPassword(User $pengguna)
+    {
+        $this->pastikanBolehKelola($pengguna);
+
+        abort_unless(Akses::superAdmin(auth()->user()), 403, 'Hanya Super Admin yang boleh mereset kata sandi.');
+
+        $password = AkunPengguna::passwordDefault();
+
+        $data = ['password' => $password];
+
+        if (Schema::hasColumn('users', 'password_generated_at')) {
+            $data['password_generated_at'] = now();
+        }
+
+        $pengguna->forceFill($data)->save();
+
+        $terkirim = null;
+
+        if ($pengguna->peranSistem() === 'walisantri') {
+            $terkirim = AkunPengguna::kirimPassword($pengguna, $password, false);
+        }
+
+        $pesan = 'Kata sandi berhasil direset ke '.$password.'.';
+
+        if ($terkirim === true) {
+            $pesan .= ' Kredensial baru telah dikirim ke '.$pengguna->email.'.';
+        } elseif ($terkirim === false) {
+            $pesan .= ' Namun email gagal dikirim; sampaikan kata sandi secara langsung kepada pengguna.';
+        }
+
+        return back()->with('success', $pesan);
+    }
+
+    /**
+     * Aktifkan akun yang masih pending.
+     *
+     * Sistem membuat kata sandi acak, menandai akun aktif, lalu mengirimkan
+     * kredensial ke email wali (bila perannya wali santri).
+     */
+    public function aktifkan(User $pengguna)
+    {
+        $this->pastikanBolehKelola($pengguna);
+
+        if ($pengguna->sudahAktif()) {
+            return back()->with('error', 'Akun '.$pengguna->name.' sudah berstatus Aktif.');
+        }
+
+        $kirimEmail = $pengguna->peranSistem() === 'walisantri';
+
+        $hasil = AkunPengguna::aktifkan($pengguna, null, $kirimEmail, false);
+
+        $pesan = 'Akun '.$pengguna->name.' berhasil diaktifkan.'
+            .' Kata sandi sementara: '.$hasil['password'].'.';
+
+        if ($kirimEmail && $hasil['email_terkirim']) {
+            $pesan .= ' Kredensial telah dikirim ke '.$pengguna->email.'.';
+        } elseif ($kirimEmail) {
+            $pesan .= ' Email gagal dikirim; sampaikan kata sandi secara langsung kepada pengguna.';
+        }
+
+        return back()->with('success', $pesan);
     }
 
     public function destroy(User $pengguna)
@@ -232,32 +315,63 @@ class PenggunaController extends Controller
             return back()->with('error', 'Anda tidak bisa menghapus akun Anda sendiri.');
         }
 
-        if ($pengguna->role === 'super_admin' && User::where('role', 'super_admin')->count() <= 1) {
-            return back()->with('error', 'Super Admin terakhir tidak bisa dihapus.');
+        if (AkunPengguna::superAdminTerakhir($pengguna)) {
+            return back()->with('error', 'Super Admin terakhir tidak bisa dihapus. Tambahkan Super Admin lain terlebih dahulu.');
         }
 
-        // Lepaskan tautan santri agar tidak menunjuk akun yang sudah dihapus.
+        // Lepas tautan santri/siswa agar tidak menunjuk akun yang sudah dihapus.
         $pengguna->santri()->update(['user_id' => null]);
+        $pengguna->students()->update(['user_id' => null]);
 
-        $role = $pengguna->role;
+        $kategori = $this->kategoriRedirect($pengguna->peranSistem());
         $pengguna->delete();
 
-        return redirect()->route('super.pengguna.index', $this->kategoriRedirect($role))
-            ->with('success', 'Pengguna berhasil dihapus.');
+        return redirect()->route('super.pengguna.index', $kategori)
+            ->with('success', 'Pengguna '.$pengguna->name.' berhasil dihapus.');
+    }
+
+    /**
+     * Tab kategori yang boleh dilihat pengguna aktif.
+     *
+     * @return array<string, array{label:string, roles:array<int,string>, ikon:string, warna:string, deskripsi:string}>
+     */
+    private function tabs(User $user): array
+    {
+        if (Akses::superAdmin($user)) {
+            return [
+                'semua' => [
+                    'label' => 'Semua Pengguna',
+                    'roles' => array_values(array_unique(array_merge(...array_column(self::KATEGORI, 'roles')))),
+                    'ikon' => 'fa-users',
+                    'warna' => 'slate',
+                    'deskripsi' => 'Seluruh akun yang dapat masuk ke sistem.',
+                ],
+            ] + self::KATEGORI;
+        }
+
+        $legacy = RoleSistem::legacyDari(array_keys(AkunPengguna::roleBolehDibuat($user)));
+
+        $tabs = [];
+
+        foreach (self::KATEGORI as $key => $tab) {
+            if (array_intersect($tab['roles'], $legacy)) {
+                $tabs[$key] = $tab;
+            }
+        }
+
+        return $tabs;
     }
 
     /**
      * Parameter tab kategori yang sesuai dengan peran akun yang baru diubah.
-     * Pengelola non-Super Admin selalu kembali ke tab wali santri.
+     * Pengelola non-Super Admin selalu kembali ke tab yang relevan.
      */
     private function kategoriRedirect(?string $role): array
     {
-        if (! Akses::superAdmin(auth()->user())) {
-            return ['kategori' => 'wali_santri'];
-        }
+        $lama = RoleSistem::legacy($role);
 
         foreach (self::KATEGORI as $key => $tab) {
-            if (in_array($role, $tab['roles'], true)) {
+            if (in_array($lama, $tab['roles'], true)) {
                 return ['kategori' => $key];
             }
         }
@@ -267,20 +381,17 @@ class PenggunaController extends Controller
 
     /**
      * Data untuk form create/edit.
-     * Non-Super Admin hanya mendapat pilihan peran Wali Santri.
+     * Pilihan peran mengikuti hak pengguna aktif (lihat AkunPengguna).
      */
     private function dataForm(User $user, ?User $pengguna = null): array
     {
         $bolehSemua = Akses::superAdmin($user);
         $sudahTertaut = $pengguna ? $pengguna->santri()->exists() : false;
 
-        $roles = $bolehSemua
-            ? self::ROLES
-            : ['wali_santri' => self::ROLES['wali_santri']];
-
         return [
-            'roles' => $roles,
+            'roles' => AkunPengguna::roleBolehDibuat($user),
             'jenjangList' => self::jenjangOptions(),
+            'jenjangTertaut' => Jenjang::normalisasi($pengguna?->jenjang),
             'santriList' => $this->santriOptions($pengguna),
             'santriTertaut' => $pengguna ? $pengguna->santri()->pluck('id')->all() : [],
             'wajibSantri' => ! $bolehSemua && ! $sudahTertaut,
@@ -294,7 +405,7 @@ class PenggunaController extends Controller
 
         $query = Santri::query()->orderBy('nama_lengkap');
 
-        if (Akses::normalisasi($user?->role) === 'admin') {
+        if (Akses::dibatasiJenjang($user)) {
             $nilai = Akses::nilaiJenjangDb($user, Santri::class, 'jenjang_pendidikan') ?: ['__tidak_ada__'];
             $query->whereIn('jenjang_pendidikan', $nilai);
         }
@@ -317,7 +428,12 @@ class PenggunaController extends Controller
             ->all();
     }
 
-    /** Batasi query daftar sesuai peran yang sedang login. */
+    /**
+     * Batasi query daftar sesuai peran yang sedang login.
+     *
+     * Admin Jenjang juga melihat akun wali pending yang emailnya terdaftar
+     * pada PPDB jenjangnya (belum tertaut ke santri sampai diverifikasi).
+     */
     private function queryTerlihat(User $user)
     {
         $query = User::query();
@@ -326,12 +442,30 @@ class PenggunaController extends Controller
             return $query;
         }
 
-        $query->where('role', 'wali_santri');
+        $query->whereIn('role', RoleSistem::legacyDari(array_keys(AkunPengguna::roleBolehDibuat($user))));
 
-        if (Akses::normalisasi($user->role) === 'admin') {
-            $nilai = Akses::nilaiJenjangDb($user, Santri::class, 'jenjang_pendidikan') ?: ['__tidak_ada__'];
+        if (Akses::dibatasiJenjang($user)) {
+            $nilai = Akses::nilaiJenjangDb($user, Santri::class, 'jenjang_pendidikan') ?: [];
+            $variasi = Ppdb::variasiJenjang($user->jenjangSlug());
 
-            $query->whereHas('santri', fn ($q) => $q->whereIn('jenjang_pendidikan', $nilai));
+            $query->where(function ($q) use ($nilai, $variasi) {
+                if ($nilai !== []) {
+                    $q->whereHas('santri', fn ($s) => $s->whereIn('jenjang_pendidikan', $nilai));
+                }
+
+                if ($variasi !== []) {
+                    $q->orWhereHas('students', fn ($s) => $s->whereIn('jenjang', $variasi));
+                }
+
+                if ($variasi !== []) {
+                    $q->orWhereIn('email', function ($sub) use ($variasi) {
+                        $sub->select('parent_email')
+                            ->from('pendaftaran_online')
+                            ->whereNotNull('parent_email')
+                            ->whereIn('jenjang_tujuan', $variasi);
+                    });
+                }
+            });
         }
 
         return $query;
@@ -346,21 +480,28 @@ class PenggunaController extends Controller
             return;
         }
 
+        $peranTarget = $target->peranSistem();
+
         abort_unless(
-            $target->role === 'wali_santri',
+            in_array($peranTarget, array_keys(AkunPengguna::roleBolehDibuat($user)), true),
             403,
-            'Anda hanya boleh mengelola akun wali santri.'
+            'Anda tidak berhak mengelola akun dengan peran ini.'
         );
 
-        if (Akses::normalisasi($user->role) === 'admin') {
-            $nilai = Akses::nilaiJenjangDb($user, Santri::class, 'jenjang_pendidikan') ?: ['__tidak_ada__'];
+        if (Akses::dibatasiJenjang($user)) {
+            $nilai = Akses::nilaiJenjangDb($user, Santri::class, 'jenjang_pendidikan') ?: [];
+            $variasi = Ppdb::variasiJenjang($user->jenjangSlug());
 
-            $cocok = $target->santri()->whereIn('jenjang_pendidikan', $nilai)->exists();
+            $cocok = ($nilai !== [] && $target->santri()->whereIn('jenjang_pendidikan', $nilai)->exists())
+                || ($variasi !== [] && $target->students()->whereIn('jenjang', $variasi)->exists())
+                || ($variasi !== [] && PendaftaranOnline::whereIn('jenjang_tujuan', $variasi)
+                    ->where('parent_email', $target->email)
+                    ->exists());
 
             abort_unless(
                 $cocok,
                 403,
-                'Akun wali ini bukan bagian dari jenjang yang Anda tangani.'
+                'Akun ini bukan bagian dari jenjang yang Anda tangani.'
             );
         }
     }
@@ -377,26 +518,35 @@ class PenggunaController extends Controller
     /** Validasi bersama untuk store & update. */
     private function validasi(Request $request, ?User $pengguna = null): array
     {
+        $user = auth()->user();
+        $bolehSemua = Akses::superAdmin($user);
+        $rolesBoleh = array_keys(AkunPengguna::roleBolehDibuat($user));
+
+        abort_if($rolesBoleh === [], 403, 'Anda tidak berhak menambah atau mengubah pengguna.');
+
+        // Normalisasi penulisan peran lama (mis. `admin`, `wali-santri`).
+        if ($request->filled('role')) {
+            $request->merge(['role' => RoleSistem::normalisasi($request->input('role'))]);
+        }
+
         $aturanEmail = ['required', 'email', 'max:255'];
 
         $aturanEmail[] = $pengguna
             ? Rule::unique('users', 'email')->ignore($pengguna->id)
             : Rule::unique('users', 'email');
 
-        $bolehSemua = Akses::superAdmin(auth()->user());
-        $rolesDiizinkan = $bolehSemua ? array_keys(self::ROLES) : ['wali_santri'];
-
         $aturan = [
             'name' => ['required', 'string', 'max:255'],
             'email' => $aturanEmail,
-            'role' => ['required', Rule::in($rolesDiizinkan)],
+            'role' => ['required', Rule::in($rolesBoleh)],
             'jenjang' => [
                 'nullable',
-                'required_if:role,admin',
+                'string',
+                Rule::requiredIf(fn () => $request->input('role') === 'admin-jenjang'),
                 Rule::in(array_keys(self::jenjangOptions())),
             ],
             'phone' => ['nullable', 'string', 'max:30'],
-            'password' => [$pengguna ? 'nullable' : 'required', 'string', 'min:8', 'confirmed'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'santri_id' => [
                 'nullable',
                 'integer',
@@ -413,7 +563,7 @@ class PenggunaController extends Controller
                     }
 
                     $user = auth()->user();
-                    if (Akses::normalisasi($user?->role) === 'admin'
+                    if (Akses::dibatasiJenjang($user)
                         && ! Akses::cocokJenjang($user, $santri->jenjang_pendidikan)) {
                         $fail('Santri ini berada di luar jenjang yang Anda tangani.');
                     }
@@ -421,20 +571,20 @@ class PenggunaController extends Controller
             ],
         ];
 
-        // Pengelola selain Super Admin wajib menautkan santri agar akun wali
-        // langsung terlihat pada daftar jenjangnya. Saat edit, akun yang sudah
-        // punya santri tidak perlu memilih ulang.
-        if (! $bolehSemua) {
-            $sudahTertaut = $pengguna && $pengguna->santri()->exists();
-
-            if (! $sudahTertaut) {
-                $aturan['santri_id'][] = 'required';
-            }
+        // Pengelola selain Super Admin wajib menautkan santri saat MEMBUAT
+        // akun wali agar akun langsung terlihat pada daftar jenjangnya.
+        if (! $bolehSemua
+            && ! $pengguna
+            && $request->input('role') === 'walisantri') {
+            $aturan['santri_id'][] = 'required';
         }
 
         return $request->validate($aturan, [
-            'jenjang.required_if' => 'Pilih jenjang untuk akun Admin Jenjang.',
+            'role.in' => 'Peran yang dipilih tidak dikenali atau di luar hak akses Anda.',
+            'jenjang.required' => 'Pilih jenjang yang ditangani akun Admin Jenjang.',
             'jenjang.in' => 'Jenjang yang dipilih tidak dikenali.',
+            'password.min' => 'Kata sandi minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
             'santri_id.required' => 'Pilih santri yang akan ditautkan ke akun wali.',
         ]);
     }

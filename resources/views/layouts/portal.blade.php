@@ -4,31 +4,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Wali Santri - Pondok Pesantren Babul Hasanah</title>
+    <title>{{ auth()->user()?->peranSistem() === 'alumni' ? 'Portal Alumni' : 'Portal Wali Santri' }} - Pondok Pesantren Babul Hasanah</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
+@php
+    $portalUser = auth()->user();
+    $portalAlumniAktif = $portalUser && $portalUser->peranSistem() === 'alumni';
+    $portalWaliAktif = $portalUser && $portalUser->peranSistem() === 'walisantri';
+    $portalAnakList = $portalWaliAktif ? \App\Support\PortalWali::anak($portalUser) : collect();
+    $portalAnakAktif = $portalAnakList->isNotEmpty() ? \App\Support\PortalWali::aktif(request(), $portalAnakList) : null;
+@endphp
 
 <body class="bg-slate-100 text-slate-900 font-sans antialiased">
 
     <div class="min-h-screen flex flex-col justify-between">
         <!-- Top Navbar Portal -->
         <header
-            class="bg-white border-b border-slate-200 py-4 px-6 sm:px-10 flex items-center justify-between shadow-sm z-10">
+            class="bg-white border-b border-slate-200 py-4 px-4 sm:px-10 flex flex-wrap items-center justify-between gap-3 shadow-sm z-10">
             <div class="flex items-center gap-3">
                 <div
                     class="w-10 h-10 rounded-xl bg-emerald-500 text-slate-900 flex items-center justify-center font-black">
-                    <i class="fa-solid fa-house-user"></i>
+                    <i class="fa-solid {{ $portalAlumniAktif ? 'fa-graduation-cap' : 'fa-house-user' }}"></i>
                 </div>
                 <div>
-                    <h1 class="font-black text-slate-900 text-sm sm:text-base">Portal Wali Santri</h1>
+                    <h1 class="font-black text-slate-900 text-sm sm:text-base">
+                        {{ $portalAlumniAktif ? 'Portal Alumni' : 'Portal Wali Santri' }}
+                    </h1>
                     <p class="text-[10px] text-emerald-600 font-semibold uppercase tracking-wider">Pondok Pesantren
                         Babul Hasanah</p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-4">
-                <span class="text-xs font-bold text-slate-700 hidden sm:inline">Halo, {{ Auth::user()->name }}</span>
+            <div class="flex flex-wrap items-center gap-3 sm:gap-4">
+                @include('portal._switcher')
+                <span class="text-xs font-bold text-slate-700 hidden md:inline">Halo, {{ Auth::user()->name }}</span>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit"

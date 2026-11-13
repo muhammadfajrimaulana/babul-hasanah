@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Support\PortalWali;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class PortalDashboardController extends Controller
 {
@@ -13,8 +15,19 @@ class PortalDashboardController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        $daftarAnak = $user->santri()->with(['pendaftaranOnline', 'absensi'])->get(); 
+        $anakList = PortalWali::anak($user);
+        $infoNilai = PortalWali::ringkasanNilaiTerbit($anakList);
 
-        return view('portal.dashboard', compact('user', 'daftarAnak'));
+        $adaNilaiBaru = $infoNilai->contains(function ($baris) {
+            return $baris->terakhir
+                && Carbon::parse($baris->terakhir)->gte(now()->subDays(14));
+        });
+
+        return view('portal.dashboard', compact(
+            'user',
+            'anakList',
+            'infoNilai',
+            'adaNilaiBaru'
+        ));
     }
 }

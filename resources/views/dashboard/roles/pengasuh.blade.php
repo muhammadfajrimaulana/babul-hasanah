@@ -6,7 +6,7 @@
     <div class="space-y-6">
 
         @include('dashboard.roles._hero', [
-            'badge' => 'Pengasuh / Pengurus',
+            'badge' => 'Pengasuh',
             'ikon' => 'fa-mosque',
             'judul' => 'Dashboard Pengasuh Pesantren',
             'deskripsi' => 'Pantau perkembangan pesantren secara menyeluruh: jumlah santri, pendaftar baru, alumni, prestasi, dan sebaran per jenjang. Halaman ini bersifat monitoring (hanya baca).',
@@ -146,7 +146,7 @@
         <div class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <p class="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
                 <i class="fa-solid fa-circle-info mr-1 text-emerald-600"></i>
-                <b>Batas akses Pengasuh / Pengurus:</b> hanya membaca data pendaftaran, santri, alumni, prestasi, dan jenjang.
+                <b>Batas akses Pengasuh:</b> hanya membaca data pendaftaran, santri, alumni, prestasi, dan jenjang.
                 Tombol tambah/ubah/hapus tidak tersedia; percobaan membuka aksi tersebut akan ditolak (403).
             </p>
         </div>

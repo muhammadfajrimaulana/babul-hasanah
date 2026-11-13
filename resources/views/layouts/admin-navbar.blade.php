@@ -53,7 +53,7 @@
                             <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ Auth::user()->name }}</h3>
                             <p class="text-[11px] text-slate-500 dark:text-slate-400">{{ Auth::user()->email }}</p>
                             <span class="mt-1 inline-block rounded-md bg-emerald-50 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400">
-                                {{ \App\Support\Akses::label(Auth::user()->role) }}
+                                {{ Auth::user()->labelPeran() }}
                             </span>
                         </div>
                     </div>
