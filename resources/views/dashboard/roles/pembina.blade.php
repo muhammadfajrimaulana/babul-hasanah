@@ -62,7 +62,7 @@
 
             <div class="space-y-3">
                 @foreach ($jenjangStats as $j)
-                    @php $persen = $maks > 0 ? max(2, round($j['santri'] / $maks * 100)) : 2; @endphp
+                    @php $persen = $j['santri'] > 0 ? max(2, round($j['santri'] / $maks * 100)) : 0; @endphp
                     <div>
                         <div class="mb-1 flex items-center justify-between gap-2">
                             <div class="flex items-center gap-2">

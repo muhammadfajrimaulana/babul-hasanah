@@ -534,6 +534,27 @@
             opacity: 0.5;
         }
 
+        /* Empty state di dalam kotak grafik (data masih kosong). */
+        .db-chart-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 16px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .db-chart-empty i {
+            font-size: 28px;
+            color: var(--line);
+            margin-bottom: 8px;
+            opacity: 0.75;
+        }
+
         /* ===================== KALENDER ===================== */
         .db-cal-panel {
             background: var(--surface);
@@ -2504,7 +2525,14 @@
                     </div>
                     <div class="db-panel-body" style="align-items: flex-start;">
                         <div class="db-chart-box db-chart-box-sm">
-                            <canvas id="chartJenjang"></canvas>
+                            @if (collect($jenjangStats)->sum('pendaftar') > 0)
+                                <canvas id="chartJenjang"></canvas>
+                            @else
+                                <div class="db-chart-empty">
+                                    <i class="fa-solid fa-chart-bar"></i>
+                                    <span>Belum ada data pendaftar.</span>
+                                </div>
+                            @endif
                         </div>
                         <p class="db-chart-caption">Jumlah pendaftar yang telah dikumpulkan per jenjang pendidikan.</p>
                     </div>
@@ -2525,7 +2553,14 @@
                         </div>
                         <div class="db-panel-body">
                             <div class="db-chart-box">
-                                <canvas id="chartSantri"></canvas>
+                                @if (count($santriPerJenjang))
+                                    <canvas id="chartSantri"></canvas>
+                                @else
+                                    <div class="db-chart-empty">
+                                        <i class="fa-solid fa-people-group"></i>
+                                        <span>Belum ada data santri.</span>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -2542,7 +2577,14 @@
                         </div>
                         <div class="db-panel-body">
                             <div class="db-chart-box">
-                                <canvas id="chartAlumni"></canvas>
+                                @if (count($alumniPerJenjang))
+                                    <canvas id="chartAlumni"></canvas>
+                                @else
+                                    <div class="db-chart-empty">
+                                        <i class="fa-solid fa-user-graduate"></i>
+                                        <span>Belum ada data alumni.</span>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -2576,7 +2618,14 @@
                             @endforeach
                         </div>
                         <div class="db-chart-box db-chart-box-lg">
-                            <canvas id="chartDataJenjang"></canvas>
+                            @if (collect($jenjangStats)->sum(fn ($j) => $j['santri'] + $j['pendaftar'] + $j['alumni']) > 0)
+                                <canvas id="chartDataJenjang"></canvas>
+                            @else
+                                <div class="db-chart-empty">
+                                    <i class="fa-solid fa-layer-group"></i>
+                                    <span>Belum ada santri, pendaftar, atau alumni pada jenjang mana pun.</span>
+                                </div>
+                            @endif
                         </div>
                         <p class="db-chart-caption">Klik salah satu jenjang di atas untuk melihat data lengkapnya.</p>
                     </div>

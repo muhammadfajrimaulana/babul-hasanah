@@ -15,10 +15,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Hanya data induk yang diperlukan aplikasi. Info harian sengaja tidak
+        // di-seed agar dashboard tetap kosong sampai admin mengisinya sendiri.
         $this->call([
             RoleAndUserSeeder::class,
             ProgramSeeder::class,
-            InfoHarianSeeder::class,
             StrukturOrganisasiSeeder::class,
             MataPelajaranSeeder::class,
         ]);
