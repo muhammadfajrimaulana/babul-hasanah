@@ -63,10 +63,12 @@ class SantriFormController extends Controller
             'Jenjang yang dipilih berada di luar wewenang Anda.'
         );
 
-        // Jika email wali diisi, cek apakah sudah dipakai akun lain
+        // Jika email wali diisi, cek apakah sudah dipakai akun lain.
+        // Akun wali yang pernah dihapus (soft delete) dipulihkan agar data anak
+        // lama tetap terhubung dan tidak membuat akun duplikat.
         $userLama = null;
         if (! empty($data['email_wali'])) {
-            $userLama = User::where('email', $data['email_wali'])->first();
+            $userLama = User::withTrashed()->where('email', $data['email_wali'])->first();
 
             if ($userLama && $userLama->peranSistem() !== 'walisantri') {
                 return back()->withInput()->withErrors([
@@ -81,8 +83,17 @@ class SantriFormController extends Controller
 
             if (! empty($data['email_wali'])) {
                 if ($userLama) {
-                    // Wali sudah punya akun (misalnya anak kedua): tautkan saja
+                    // Wali sudah punya akun (misalnya anak kedua): tautkan saja.
+                    // Bila akunnya pernah dihapus, pulihkan kembali.
                     $user = $userLama;
+
+                    if ($user->trashed()) {
+                        $user->restore();
+                    }
+
+                    if (strtolower((string) $user->status) !== 'active') {
+                        $user->forceFill(['status' => 'active'])->save();
+                    }
                 } else {
                     // Kata sandi acak unik per akun wali; ditampilkan sekali ke admin.
                     $rawPassword = Str::password(12, symbols: false);

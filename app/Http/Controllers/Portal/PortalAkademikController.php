@@ -105,6 +105,18 @@ class PortalAkademikController extends Controller
         $tahun = trim((string) $request->input('tahun_ajaran'));
         $semester = strtolower((string) $request->input('semester'));
 
+        // Tahun ajaran hanya boleh berformat 2026/2027 dan idealnya salah satu
+        // periode yang memang tersedia untuk anak ini.
+        if ($tahun !== '' && ! preg_match('/^\d{4}\/\d{4}$/', $tahun)) {
+            $tahun = '';
+        }
+
+        $daftarTahun = $opsi->pluck('tahun_ajaran')->filter()->unique()->values();
+
+        if ($tahun !== '' && $daftarTahun->isNotEmpty() && ! $daftarTahun->contains($tahun)) {
+            $tahun = '';
+        }
+
         $pertama = $opsi->first();
 
         if ($tahun === '') {

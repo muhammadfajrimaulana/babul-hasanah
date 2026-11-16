@@ -101,6 +101,38 @@
                         <p class="{{ $err }}">{{ $message }}</p>
                     @enderror
                 </div>
+
+                {{-- Tautan santri untuk akun wali santri --}}
+                <div x-show="data.role === 'walisantri'" x-cloak>
+                    <label class="{{ $lb }}">Santri / Anak Tertaut</label>
+
+                    @php($santriEditList = $santriEditList ?? [])
+
+                    @if (empty($santriEditList))
+                        <div
+                            class="rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/30 px-4 py-2.5 text-[11px] font-bold text-amber-700 dark:text-amber-300">
+                            <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                            Belum ada santri yang tersedia pada jenjang Anda.
+                        </div>
+                    @else
+                        <select name="santri_id" x-model="data.santri_id" class="{{ $in }}">
+                            <option value="">— Biarkan tautan saat ini —</option>
+                            @foreach ($santriEditList as $id => $info)
+                                <option value="{{ $id }}"
+                                    x-bind:disabled="data.santri_id !== '{{ $id }}' && {{ $info['user_id'] ? 'true' : 'false' }}">
+                                    {{ $info['label'] }}{{ $info['user_id'] ? ' — sudah tertaut' : '' }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="text-[10px] text-slate-400 mt-1">
+                            Pilih santri lain untuk memindahkan tautan. Biarkan kosong agar tautan tidak berubah.
+                        </p>
+                    @endif
+
+                    @error('santri_id')
+                        <p class="{{ $err }}">{{ $message }}</p>
+                    @enderror
+                </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

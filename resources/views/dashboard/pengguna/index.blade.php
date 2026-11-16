@@ -27,6 +27,7 @@
             'phone' => old('_form') === 'tambah' ? old('phone', '') : '',
             'status' => 'active',
             'aktif' => true,
+            'santri_id' => old('_form') === 'tambah' ? (string) old('santri_id', '') : '',
         ],
         'edit' => [
             'id' => old('_id'),
@@ -37,6 +38,7 @@
             'phone' => old('phone', ''),
             'status' => '',
             'aktif' => true,
+            'santri_id' => (string) old('santri_id', ''),
         ],
     ];
 @endphp
@@ -312,6 +314,7 @@
                                                 'phone' => $p->phone,
                                                 'status' => $p->statusAkun(),
                                                 'aktif' => $aktif,
+                                                'santri_id' => (string) ($p->santri->first()->id ?? ''),
                                             ]) }})"
                                             class="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-emerald-100 hover:text-emerald-700 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300 text-[10px] font-bold transition"
                                             title="Edit pengguna">
@@ -436,6 +439,7 @@
                     phone: '',
                     status: '',
                     aktif: true,
+                    santri_id: '',
                 },
                 hapus: {
                     id: null,
@@ -461,6 +465,7 @@
                         phone: '',
                         status: 'active',
                         aktif: true,
+                        santri_id: '',
                     };
                     this.modalTambah = true;
                 },

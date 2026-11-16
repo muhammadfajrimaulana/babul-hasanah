@@ -12,8 +12,9 @@ use App\Support\Jenjang;
 use App\Support\Ppdb;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
-use RuntimeException;
+use Throwable;
 
 /**
  * Modul PPDB: verifikasi kelulusan dan plotting santri ke kelas.
@@ -101,8 +102,13 @@ class PpdbController extends Controller
             }
 
             $hasil = Ppdb::terima($pendaftaran);
-        } catch (RuntimeException $e) {
-            return back()->with('error', $e->getMessage());
+        } catch (Throwable $e) {
+            Log::error('Gagal verifikasi PPDB: '.$e->getMessage(), [
+                'pendaftaran_id' => $pendaftaran->id,
+                'exception' => $e,
+            ]);
+
+            return back()->with('error', 'Verifikasi gagal: '.$e->getMessage());
         }
 
         $email = Ppdb::emailWali($pendaftaran);
@@ -211,7 +217,26 @@ class PpdbController extends Controller
         $kelas = SchoolClass::findOrFail($data['class_id']);
         $this->pastikanJenjang($kelas->jenjang);
 
-        $hasil = Ppdb::plotBanyak($data['student_ids'], $kelas);
+        $user = auth()->user();
+        $this->pastikanBolehMasuk($user);
+
+        // Batasi ID santri ke data yang memang terlihat oleh admin ini agar
+        // permintaan manual tidak bisa memplot santri jenjang lain.
+        $idsTerlihat = $this->queryStudent($user)
+            ->whereIn('id', $data['student_ids'])
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $idsDiminta = array_map('intval', $data['student_ids']);
+
+        abort_unless(
+            array_diff($idsDiminta, $idsTerlihat) === [],
+            403,
+            'Ada santri yang berada di luar jenjang yang Anda tangani.'
+        );
+
+        $hasil = Ppdb::plotBanyak($idsTerlihat, $kelas);
 
         $pesan = $hasil['berhasil'].' santri berhasil diplot ke kelas '.$kelas->label().'.';
 
@@ -291,6 +316,12 @@ class PpdbController extends Controller
     private function queryStudent(User $user): Builder
     {
         $query = Student::query();
+
+        // Admin tanpa jenjang tidak melihat data apa pun (fail-closed).
+        if (Akses::adminTanpaJenjang($user)) {
+            return $query->whereRaw('1 = 0');
+        }
+
         $slug = Akses::jenjangSlug($user);
 
         if ($slug) {

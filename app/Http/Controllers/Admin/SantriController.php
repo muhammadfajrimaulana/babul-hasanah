@@ -15,8 +15,11 @@ class SantriController extends Controller
         $user = auth()->user();
         $query = Santri::with(['user', 'pendaftaranOnline'])->latest();
 
-        // Admin Jenjang hanya melihat santri pada jenjangnya.
-        if (Akses::dibatasiJenjang($user)) {
+        // Admin Jenjang hanya melihat santri pada jenjangnya. Admin yang belum
+        // memiliki jenjang tidak melihat data apa pun (fail-closed).
+        if (Akses::adminTanpaJenjang($user)) {
+            $query->whereRaw('1 = 0');
+        } elseif (Akses::dibatasiJenjang($user)) {
             $query->whereIn('jenjang_pendidikan', Akses::nilaiJenjangDb($user, Santri::class, 'jenjang_pendidikan') ?: ['__tidak_ada__']);
         }
 

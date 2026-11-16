@@ -10,7 +10,6 @@ use App\Models\InfoHarian;
 use App\Models\Kepengurusan;
 use App\Models\PendaftaranOnline;
 use App\Models\PrestasiSantri;
-use App\Models\Program;
 use App\Models\Santri;
 use App\Models\User;
 use App\Support\Akses;
@@ -54,23 +53,10 @@ class DashboardController extends Controller
         $totalPengguna = $this->hitung(User::class);
         $isSuperAdmin = in_array(strtolower((string) (auth()->user()->role ?? '')), ['super_admin', 'superadmin', 'super admin', 'super'], true);
         $jmlPrestasi = $this->hitung(PrestasiSantri::class);
-        // ---- Ambil nama jenjang berdasarkan relasi program atau kolom user ----
-        $user = auth()->user()->load('program');
 
-        // Deteksi nama jenjang secara bertingkat agar tidak pernah meleset:
-        $namaJenjang = 'Pusat / Umum'; // Default
-
-        if ($user->program) {
-            // 1. Jika relasi program_id terhubung dengan benar
-            $namaJenjang = $user->program->nama_program;
-        } elseif (! empty($user->jenjang)) {
-            // 2. Jika kolom 'jenjang' diisi slug (misal: 'mahad-aly') atau nama langsung
-            $foundProgram = Program::where('slug', $user->jenjang)
-                ->orWhere('nama_program', 'LIKE', '%'.$user->jenjang.'%')
-                ->first();
-
-            $namaJenjang = $foundProgram ? $foundProgram->nama_program : ucwords(str_replace('-', ' ', $user->jenjang));
-        }
+        // Nama jenjang akun yang sedang login. Kelas Akses adalah satu-satunya
+        // sumber label jenjang; kolom lama `program_id` tidak dipakai lagi.
+        $namaJenjang = Akses::namaJenjang(auth()->user());
 
         $tahunAjaran = $now->month >= 7
             ? $now->year.'/'.($now->year + 1)

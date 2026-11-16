@@ -75,11 +75,6 @@ class User extends Authenticatable
         return $this->hasMany(Student::class, 'user_id');
     }
 
-    public function program()
-    {
-        return $this->belongsTo(Program::class, 'program_id');
-    }
-
     /**
      * Nama peran resmi (Spatie) milik pengguna.
      *

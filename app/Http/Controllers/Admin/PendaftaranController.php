@@ -12,7 +12,8 @@ use App\Support\Akses;
 use App\Support\Ppdb;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class PendaftaranController extends Controller
 {
@@ -21,8 +22,11 @@ class PendaftaranController extends Controller
         $user = auth()->user();
         $query = PendaftaranOnline::latest();
 
-        // Admin Jenjang hanya melihat pendaftar pada jenjangnya.
-        if (Akses::dibatasiJenjang($user)) {
+        // Admin Jenjang hanya melihat pendaftar pada jenjangnya. Admin tanpa
+        // jenjang tidak melihat data apa pun (fail-closed).
+        if (Akses::adminTanpaJenjang($user)) {
+            $query->whereRaw('1 = 0');
+        } elseif (Akses::dibatasiJenjang($user)) {
             $query->whereIn(
                 'jenjang_tujuan',
                 Akses::nilaiJenjangDb($user, PendaftaranOnline::class, 'jenjang_tujuan') ?: ['__tidak_ada__']
@@ -64,8 +68,13 @@ class PendaftaranController extends Controller
             }
 
             $hasil = Ppdb::terima($pendaftaran);
-        } catch (RuntimeException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+        } catch (Throwable $e) {
+            Log::error('Gagal memperbarui status PPDB: '.$e->getMessage(), [
+                'pendaftaran_id' => $pendaftaran->id,
+                'exception' => $e,
+            ]);
+
+            return redirect()->back()->with('error', 'Status gagal diperbarui: '.$e->getMessage());
         }
 
         // Normalisasi nomor WhatsApp (utamakan nomor orang tua)

@@ -8,6 +8,7 @@ use App\Models\Santri;
 use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -350,14 +351,7 @@ class Ppdb
         }
 
         return DB::transaction(function () use ($student, $kelas, $slugKelas) {
-            // Satu siswa berada pada satu kelas aktif. Bila kolom tahun ajaran
-            // tersedia, penempatan dicatat pada tahun ajaran berjalan.
-            $tahunId = self::tahunAjaranAktifId();
-            $pivot = $tahunId && Schema::hasColumn('class_student', 'academic_year_id')
-                ? [$kelas->id => ['academic_year_id' => $tahunId]]
-                : [$kelas->id];
-
-            $student->classes()->sync($pivot);
+            self::catatPenempatan($student, $kelas);
 
             $student->forceFill([
                 'class_id' => $kelas->id,
@@ -426,8 +420,64 @@ class Ppdb
         return $query->get();
     }
 
+    /**
+     * Catat penempatan kelas pada pivot `class_student` tanpa menghapus riwayat.
+     *
+     * `sync()` lama menghapus seluruh baris pivot milik siswa sehingga riwayat
+     * penempatan tahun-tahun sebelumnya ikut hilang. Di sini hanya penempatan
+     * pada tahun ajaran berjalan (atau baris tanpa tahun) yang diganti;
+     * penempatan tahun lain tetap tersimpan.
+     */
+    public static function catatPenempatan(Student $student, SchoolClass $kelas, ?int $tahunId = null): void
+    {
+        if (! Schema::hasTable('class_student')) {
+            return;
+        }
+
+        $punyaTahun = Schema::hasColumn('class_student', 'academic_year_id');
+        $tahunId = $punyaTahun ? ($tahunId ?? self::tahunAjaranAktifId()) : null;
+
+        $query = DB::table('class_student')->where('student_id', $student->id);
+
+        if ($punyaTahun) {
+            $query->where(function ($q) use ($tahunId) {
+                $q->whereNull('academic_year_id');
+
+                if ($tahunId !== null) {
+                    $q->orWhere('academic_year_id', $tahunId);
+                }
+            });
+        }
+
+        $query->delete();
+
+        $atribut = [
+            'class_id' => $kelas->id,
+            'student_id' => $student->id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        if ($punyaTahun) {
+            $atribut['academic_year_id'] = $tahunId;
+        }
+
+        try {
+            DB::table('class_student')->insert($atribut);
+        } catch (QueryException $e) {
+            // Basis data lama masih memakai indeks unik (class_id, student_id).
+            // Perbarui baris yang sudah ada agar tidak terjadi duplikasi.
+            DB::table('class_student')
+                ->where('class_id', $kelas->id)
+                ->where('student_id', $student->id)
+                ->update($punyaTahun
+                    ? ['academic_year_id' => $tahunId, 'updated_at' => now()]
+                    : ['updated_at' => now()]);
+        }
+    }
+
     /** Id tahun ajaran aktif untuk pivot `class_student` (null bila belum ada). */
-    private static function tahunAjaranAktifId(): ?int
+    public static function tahunAjaranAktifId(): ?int
     {
         try {
             if (! Schema::hasTable('academic_years')) {

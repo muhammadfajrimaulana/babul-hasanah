@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Absensi;
 use App\Models\Grade;
 use App\Models\NilaiSantri;
+use App\Models\PendaftaranOnline;
 use App\Models\Santri;
 use App\Models\Student;
 use App\Models\TagihanSantri;
@@ -81,6 +82,54 @@ class PortalWali
             ->concat($daftarLama)
             ->sortBy(fn (AnakPortal $anak) => mb_strtolower($anak->nama))
             ->values();
+    }
+
+    /**
+     * Riwayat PPDB milik akun wali.
+     *
+     * Sumber: email wali (`parent_email`, atau `email` lama), ditambah arsip
+     * pendaftaran yang tertaut langsung ke anak-anak akun ini. Semua status
+     * ditampilkan, termasuk pendaftaran yang belum diverifikasi, agar wali tahu
+     * perkembangan pendaftaran anaknya.
+     *
+     * @return Collection<int, PendaftaranOnline>
+     */
+    public static function pendaftaran(User $user): Collection
+    {
+        if (! Schema::hasTable('pendaftaran_online')) {
+            return collect();
+        }
+
+        $email = strtolower(trim((string) $user->email));
+
+        $idAnak = self::anak($user)
+            ->map(fn (AnakPortal $anak) => $anak->student?->pendaftaran_online_id
+                ?? $anak->santri?->pendaftaran_online_id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($email === '' && $idAnak === []) {
+            return collect();
+        }
+
+        return PendaftaranOnline::query()
+            ->where(function ($query) use ($email, $idAnak) {
+                if ($idAnak !== []) {
+                    $query->whereIn('id', $idAnak);
+                }
+
+                if ($email !== '') {
+                    $query->orWhereRaw('LOWER(parent_email) = ?', [$email])
+                        ->orWhere(function ($lama) use ($email) {
+                            $lama->whereNull('parent_email')
+                                ->whereRaw('LOWER(email) = ?', [$email]);
+                        });
+                }
+            })
+            ->latest()
+            ->get();
     }
 
     /**

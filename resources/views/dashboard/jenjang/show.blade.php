@@ -260,6 +260,57 @@
                 <div class="px-5 py-10 text-center text-xs text-slate-400">Belum ada alumni pada jenjang ini.</div>
             @endif
         </div>
+
+        {{-- ===================== DATA WALI SANTRI ===================== --}}
+        <div class="overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 px-5 py-4">
+                <div>
+                    <h3 class="text-sm font-black text-slate-900 dark:text-white">Data Wali Santri</h3>
+                    <p class="text-[11px] text-slate-400">Akun wali yang memiliki anak/pendaftaran di jenjang {{ $jenjang['kode'] }}.</p>
+                </div>
+                <a href="{{ route('admin.wali-santri.index') }}"
+                    class="text-[11px] font-bold text-emerald-600 hover:text-emerald-700">Kelola wali santri <i
+                        class="fa-solid fa-arrow-right text-[9px]"></i></a>
+            </div>
+
+            @if ($wali && $wali->count())
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-left text-xs">
+                        <thead>
+                            <tr
+                                class="border-b border-slate-100 bg-slate-50 text-[9px] uppercase tracking-wider text-slate-400 dark:border-slate-800 dark:bg-slate-800/50">
+                                <th class="px-4 py-2.5 font-extrabold sm:px-5">Nama</th>
+                                <th class="hidden px-4 py-2.5 font-extrabold sm:table-cell sm:px-5">Email</th>
+                                <th class="px-4 py-2.5 font-extrabold sm:px-5">Status</th>
+                                <th class="hidden px-4 py-2.5 text-center font-extrabold sm:table-cell sm:px-5">Anak</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-medium text-slate-700 dark:divide-slate-800 dark:text-slate-300">
+                            @foreach ($wali as $w)
+                                <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/30">
+                                    <td class="px-4 py-3 sm:px-5">
+                                        <a href="{{ route('admin.wali-santri.show', $w) }}"
+                                            class="font-bold text-slate-900 hover:text-emerald-600 dark:text-white">{{ $w->name }}</a>
+                                    </td>
+                                    <td class="hidden px-4 py-3 sm:table-cell sm:px-5">{{ $w->email }}</td>
+                                    <td class="px-4 py-3 sm:px-5">
+                                        <span @class([
+                                            'rounded-full px-2 py-0.5 text-[10px] font-bold',
+                                            'bg-emerald-50 text-emerald-700' => $w->sudahAktif(),
+                                            'bg-amber-50 text-amber-700' => ! $w->sudahAktif(),
+                                        ])>{{ $w->labelStatus() }}</span>
+                                    </td>
+                                    <td class="hidden px-4 py-3 text-center sm:table-cell sm:px-5">{{ $w->students_count + $w->santri_count }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div class="border-t border-slate-100 px-4 py-3 dark:border-slate-800 sm:px-5">{{ $wali->links() }}</div>
+            @else
+                <div class="px-5 py-10 text-center text-xs text-slate-400">Belum ada wali santri pada jenjang ini.</div>
+            @endif
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

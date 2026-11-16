@@ -473,7 +473,15 @@ class NilaiController extends Controller
             ?: $mapel?->jenjang;
 
         $kelas = trim((string) $request->input('kelas')) ?: null;
-        $tahun = trim((string) $request->input('tahun_ajaran')) ?: Akademik::tahunAjaranSekarang();
+        $tahun = trim((string) $request->input('tahun_ajaran'));
+
+        // Tolak nilai tahun ajaran yang tidak berformat 2026/2027 agar tidak
+        // menjadi filter liar atau memicu query yang tidak diinginkan.
+        if ($tahun !== '' && ! preg_match('/^\d{4}\/\d{4}$/', $tahun)) {
+            $tahun = '';
+        }
+
+        $tahun = $tahun ?: Akademik::tahunAjaranSekarang();
         $semester = strtolower((string) $request->input('semester')) ?: Akademik::semesterSekarang();
         $kategori = strtolower((string) $request->input('kategori')) ?: 'tugas';
 

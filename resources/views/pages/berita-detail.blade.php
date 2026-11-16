@@ -38,8 +38,9 @@
                 </div>
             </div>
 
-            @if ($berita->gambar)
-                <img src="{{ $berita->gambar_url }}" alt="{{ $berita->judul }}" class="bd-img">
+            @if ($berita->punyaGambarTersimpan())
+                <img src="{{ $berita->gambar_url }}" alt="{{ $berita->judul }}" class="bd-img"
+                    onerror="this.onerror=null;this.src='{{ asset('assets/img/berita-default.svg') }}'">
             @endif
 
             <div class="bd-body">{!! $berita->isi !!}</div>
@@ -51,7 +52,8 @@
                 <div class="bd-rel-grid">
                     @foreach ($terkait as $t)
                         <a href="{{ route('berita.show', $t) }}">
-                            <img src="{{ $t->gambar_url }}" alt="{{ $t->judul }}">
+                            <img src="{{ $t->gambar_url }}" alt="{{ $t->judul }}"
+                                onerror="this.onerror=null;this.src='{{ asset('assets/img/berita-default.svg') }}'">
                             <div>{{ $t->judul }}</div>
                         </a>
                     @endforeach

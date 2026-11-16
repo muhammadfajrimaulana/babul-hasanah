@@ -26,16 +26,31 @@ use RuntimeException;
  */
 class KenaikanKelas
 {
-    /** Santri yang masih menempati satu kelas. */
+    /** Santri yang masih menempati satu kelas pada tahun ajaran berjalan. */
     public static function siswaKelas(int $classId): Collection
     {
+        $tahunId = Ppdb::tahunAjaranAktifId();
+        $punyaTahun = Schema::hasTable('class_student')
+            && Schema::hasColumn('class_student', 'academic_year_id');
+
         return Student::query()
             ->with(['kelas', 'alumni'])
-            ->where(function ($query) use ($classId) {
+            ->where(function ($query) use ($classId, $tahunId, $punyaTahun) {
                 $query->where('class_id', $classId);
 
                 if (Schema::hasTable('class_student')) {
-                    $query->orWhereHas('classes', fn ($q) => $q->where('classes.id', $classId));
+                    $query->orWhereHas('classes', function ($q) use ($classId, $tahunId, $punyaTahun) {
+                        $q->where('classes.id', $classId);
+
+                        // Abaikan penempatan tahun ajaran lain agar santri yang
+                        // sudah naik kelas tidak muncul di kelas lamanya.
+                        if ($punyaTahun && $tahunId !== null) {
+                            $q->where(function ($w) use ($tahunId) {
+                                $w->whereNull('class_student.academic_year_id')
+                                    ->orWhere('class_student.academic_year_id', $tahunId);
+                            });
+                        }
+                    });
                 }
             })
             ->whereIn('status', ['aktif', 'calon'])
@@ -94,12 +109,9 @@ class KenaikanKelas
             }
 
             DB::transaction(function () use ($student, $tujuan, $tahun, $slugTujuan) {
-                // Catat penempatan baru beserta tahun ajarannya.
-                $pivot = Schema::hasColumn('class_student', 'academic_year_id')
-                    ? [$tujuan->id => ['academic_year_id' => $tahun->id]]
-                    : [$tujuan->id];
-
-                $student->classes()->sync($pivot);
+                // Catat penempatan baru beserta tahun ajarannya. Penempatan
+                // tahun-tahun sebelumnya tetap disimpan sebagai riwayat.
+                Ppdb::catatPenempatan($student, $tujuan, $tahun->id);
 
                 $student->forceFill([
                     'class_id' => $tujuan->id,
@@ -273,11 +285,18 @@ class KenaikanKelas
             return true;
         }
 
-        // Data lama: anak lain bisa hanya terdaftar di tabel `santri`.
+        // Data lama: anak lain bisa hanya terdaftar di tabel `santri`. Baris
+        // `santri` yang sudah punya pasangan di `students` tidak dihitung lagi
+        // karena sudah diperiksa pada blok di atas (menghindari hitung ganda).
         if (Schema::hasTable('santri') && Schema::hasColumn('santri', 'user_id')) {
+            $sudahTerhubung = Schema::hasTable('students') && Schema::hasColumn('students', 'santri_id')
+                ? Student::query()->whereNotNull('santri_id')->pluck('santri_id')
+                : collect();
+
             return Santri::query()
                 ->where('user_id', $user->id)
                 ->when($student->santri_id, fn ($query) => $query->whereKeyNot($student->santri_id))
+                ->when($sudahTerhubung->isNotEmpty(), fn ($query) => $query->whereNotIn('id', $sudahTerhubung))
                 ->exists();
         }
 

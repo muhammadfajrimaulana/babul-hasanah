@@ -11,8 +11,9 @@ use App\Support\KenaikanKelas;
 use App\Support\NilaiAkademik;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
-use RuntimeException;
+use Throwable;
 
 /**
  * Modul Kenaikan Kelas & Kelulusan Santri (skema `students`).
@@ -203,13 +204,18 @@ class KenaikanKelasController extends Controller
     {
         try {
             $hasil = KenaikanKelas::naikkan($ids, $asal, $tujuan, $tahun);
-        } catch (RuntimeException $e) {
+        } catch (Throwable $e) {
+            Log::error('Gagal memproses kenaikan kelas: '.$e->getMessage(), [
+                'class_id' => $asal->id,
+                'exception' => $e,
+            ]);
+
             return redirect()
                 ->route('admin.akademik.kenaikan-kelas.index', [
                     'class_id' => $asal->id,
                     'academic_year_id' => $tahun->id,
                 ])
-                ->with('error', $e->getMessage());
+                ->with('error', 'Kenaikan kelas gagal: '.$e->getMessage());
         }
 
         $pesan = $hasil['berhasil'].' santri dinaikkan dari '.$asal->name.' ke '.$tujuan->name
@@ -231,13 +237,17 @@ class KenaikanKelasController extends Controller
     {
         try {
             $hasil = KenaikanKelas::luluskan($ids, $tahun);
-        } catch (RuntimeException $e) {
+        } catch (Throwable $e) {
+            Log::error('Gagal memproses kelulusan santri: '.$e->getMessage(), [
+                'exception' => $e,
+            ]);
+
             return redirect()
                 ->route('admin.akademik.kenaikan-kelas.index', [
                     'class_id' => $asal->id,
                     'academic_year_id' => $tahun->id,
                 ])
-                ->with('error', $e->getMessage());
+                ->with('error', 'Proses kelulusan gagal: '.$e->getMessage());
         }
 
         $pesan = $hasil['berhasil'].' santri diluluskan pada tahun ajaran '.$tahun->nama.'.';

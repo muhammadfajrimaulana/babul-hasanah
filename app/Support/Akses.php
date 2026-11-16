@@ -83,9 +83,12 @@ class Akses
         'ppsw' => 'pps-wustha',
         'mts' => 'mts',
         'mas' => 'ma',
+        'ma' => 'ma',
         'pdfw' => 'pdf-wustha',
         'pdfu' => 'pdf-ulya',
-        'ma' => 'mahad-aly',
+        'mahadaly' => 'mahad-aly',
+        'mahad-aly' => 'mahad-aly',
+        'aly' => 'mahad-aly',
     ];
 
     /** Normalisasi nilai role dari database/input menjadi kunci resmi. */
@@ -278,10 +281,17 @@ class Akses
     /** Pastikan satu nilai jenjang milik user (dipakai untuk detail/edit). */
     public static function cocokJenjang(?User $user, ?string $nilai): bool
     {
+        // Admin yang belum memiliki jenjang tidak berhak atas data jenjang mana
+        // pun (fail-closed). Sebelumnya kondisi ini dianggap "global" sehingga
+        // admin tanpa jenjang bisa melihat & mengubah seluruh jenjang.
+        if (self::adminTanpaJenjang($user)) {
+            return false;
+        }
+
         $slug = self::jenjangSlug($user);
 
         if (! $slug) {
-            return true; // role global
+            return true; // role global (Super Admin / Pengasuh / Pembina)
         }
 
         return Jenjang::normalisasi($nilai) === $slug;

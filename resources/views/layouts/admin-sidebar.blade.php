@@ -187,6 +187,19 @@
                 </a>
             @endif
 
+            @if ($u?->bisa('santri.lihat'))
+                <!-- Data Wali Santri -->
+                <a href="{{ route('admin.wali-santri.index') }}" @click="sidebarOpen = false"
+                    class="flex items-center gap-3 px-4 py-3.5 rounded-xl {{ request()->routeIs('admin.wali-santri.*') ? 'bg-white text-emerald-900 shadow-lg shadow-emerald-950/40' : 'hover:bg-white/10 text-emerald-50/80 hover:text-white' }} font-semibold text-xs transition relative group">
+                    <i class="fa-solid fa-people-roof w-5 text-sm flex-shrink-0"></i>
+                    <span x-show="!sidebarMinimize" class="whitespace-nowrap">Data Wali Santri</span>
+                    <div x-show="sidebarMinimize"
+                        class="absolute left-full ml-3 px-2.5 py-1 bg-emerald-950 text-white text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 whitespace-nowrap">
+                        Data Wali Santri
+                    </div>
+                </a>
+            @endif
+
             @if ($u?->bisa('pengguna'))
                 @php $menuPengguna = $u?->isSuperAdmin() ? 'Pengguna' : 'Wali Santri'; @endphp
                 <!-- Pengguna / Wali Santri (label menyesuaikan peran) -->

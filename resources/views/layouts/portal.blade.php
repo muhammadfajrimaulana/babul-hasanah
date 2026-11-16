@@ -15,6 +15,14 @@
     $portalWaliAktif = $portalUser && $portalUser->peranSistem() === 'walisantri';
     $portalAnakList = $portalWaliAktif ? \App\Support\PortalWali::anak($portalUser) : collect();
     $portalAnakAktif = $portalAnakList->isNotEmpty() ? \App\Support\PortalWali::aktif(request(), $portalAnakList) : null;
+
+    $portalMenu = $portalWaliAktif ? [
+        ['route' => 'portal.dashboard', 'label' => 'Dashboard', 'ikon' => 'fa-gauge-high', 'aktif' => request()->routeIs('portal.dashboard')],
+        ['route' => 'wali.anak', 'label' => 'Data Anak', 'ikon' => 'fa-children', 'aktif' => request()->routeIs('wali.anak')],
+        ['route' => 'wali.nilai', 'label' => 'Nilai', 'ikon' => 'fa-chart-line', 'aktif' => request()->routeIs('wali.nilai', 'portal.nilai')],
+        ['route' => 'wali.pendaftaran', 'label' => 'Pendaftaran', 'ikon' => 'fa-file-lines', 'aktif' => request()->routeIs('wali.pendaftaran')],
+        ['route' => 'wali.profil', 'label' => 'Profil', 'ikon' => 'fa-user-gear', 'aktif' => request()->routeIs('wali.profil')],
+    ] : [];
 @endphp
 
 <body class="bg-slate-100 text-slate-900 font-sans antialiased">
@@ -49,6 +57,23 @@
                 </form>
             </div>
         </header>
+
+        @if ($portalWaliAktif)
+            <nav class="bg-white/80 backdrop-blur border-b border-slate-200 px-4 sm:px-10">
+                <div class="max-w-7xl mx-auto flex items-center gap-1 overflow-x-auto custom-scrollbar">
+                    @foreach ($portalMenu as $menu)
+                        <a href="{{ route($menu['route']) }}"
+                            class="inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-3 py-3 text-xs font-bold transition
+                                {{ $menu['aktif']
+                                    ? 'border-emerald-500 text-emerald-700'
+                                    : 'border-transparent text-slate-500 hover:text-emerald-700 hover:border-emerald-200' }}">
+                            <i class="fa-solid {{ $menu['ikon'] }}"></i>
+                            {{ $menu['label'] }}
+                        </a>
+                    @endforeach
+                </div>
+            </nav>
+        @endif
 
         <!-- Main Content (Tempat yield masuk) -->
         <main class="flex-1 max-w-7xl w-full mx-auto p-6 sm:p-8 lg:px-10">

@@ -27,7 +27,26 @@ class PortalAnakController extends Controller
 
         $tujuan = (string) $request->input('redirect');
 
-        if ($tujuan === '' || ! str_starts_with($tujuan, url('/'))) {
+        // Hanya izinkan redirect ke host aplikasi ini. Perbandingan host (bukan
+        // sekadar awalan string) mencegah open redirect seperti
+        // `https://domain-aplikasi.com.evil.test`.
+        if ($tujuan !== '') {
+            $bagian = parse_url($tujuan);
+            $hostTujuan = $bagian['host'] ?? null;
+            $hostAplikasi = parse_url(url('/'), PHP_URL_HOST);
+
+            $skemaSah = ! isset($bagian['scheme'])
+                || in_array(strtolower((string) $bagian['scheme']), ['http', 'https'], true);
+
+            $hostSah = $hostTujuan === null
+                || ($hostAplikasi && strcasecmp($hostTujuan, $hostAplikasi) === 0);
+
+            if (! $skemaSah || ! $hostSah) {
+                $tujuan = '';
+            }
+        }
+
+        if ($tujuan === '') {
             $tujuan = route('portal.dashboard');
         }
 

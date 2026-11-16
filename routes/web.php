@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\RoleDashboardController as AdminRoleDashboard;
 use App\Http\Controllers\Admin\SantriController as AdminDataSantriController;
 use App\Http\Controllers\Admin\SantriFormController as AdminSantriFormController;
 use App\Http\Controllers\Admin\StrukturOrganisasiController as AdminStrukturController;
+use App\Http\Controllers\Admin\WaliSantriDataController as AdminWaliSantriDataController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Portal\PortalAkademikController;
 use App\Http\Controllers\Portal\PortalAlumniController;
@@ -190,7 +191,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::patch('/pendaftaran/{id}', [AdminPendaftaranController::class, 'updateStatus'])->name('pendaftaran.verifikasi');
         Route::get('/pendaftaran/{id}/edit', [AdminPendaftaranController::class, 'edit'])->name('pendaftaran.edit');
         Route::put('/pendaftaran/{id}', [AdminPendaftaranController::class, 'update'])->name('pendaftaran.update');
-        Route::delete('/pendaftaran/{id}', [AdminDataSantriController::class, 'destroy'])->name('pendaftaran.destroy');
+        Route::delete('/pendaftaran/{id}', [AdminPendaftaranController::class, 'destroy'])->name('pendaftaran.destroy');
 
         // Modul PPDB: verifikasi kelulusan + plotting ke kelas.
         Route::prefix('ppdb')->name('ppdb.')->group(function () {
@@ -240,6 +241,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::get('/santri/{id}', [AdminDataSantriController::class, 'detail'])->name('santri.detail');
 
         Route::get('/data-alumni', [AdminAlumniController::class, 'index'])->name('alumni.index');
+        Route::get('/data-alumni/{alumni}', [AdminAlumniController::class, 'show'])->name('alumni.show');
+
+        // Data wali santri: akun, anak tertaut, dan status pendaftaran PPDB.
+        Route::get('/wali-santri', [AdminWaliSantriDataController::class, 'index'])->name('wali-santri.index');
+        Route::get('/wali-santri/{pengguna}', [AdminWaliSantriDataController::class, 'show'])->name('wali-santri.show');
 
         Route::get('/pengelolaan-prestasi', [PrestasiAdminController::class, 'index'])->name('prestasi.index');
 
@@ -345,6 +351,8 @@ Route::middleware(['auth', 'role:alumni'])
 Route::middleware(['auth', 'role:wali_santri'])->prefix('wali')->name('wali.')->group(function () {
     Route::get('dashboard', [\App\Http\Controllers\Admin\WaliSantriController::class, 'index'])->name('dashboard');
     Route::get('profil', [\App\Http\Controllers\Admin\WaliSantriController::class, 'profil'])->name('profil');
+    Route::put('profil', [\App\Http\Controllers\Admin\WaliSantriController::class, 'updateProfil'])->name('profil.update');
+    Route::put('profil/password', [\App\Http\Controllers\Admin\WaliSantriController::class, 'updatePassword'])->name('profil.password');
     Route::get('nilai', [\App\Http\Controllers\Admin\WaliSantriController::class, 'nilai'])->name('nilai');
     Route::get('anak', [\App\Http\Controllers\Admin\WaliSantriController::class, 'anak'])->name('anak');
     Route::get('pendaftaran', [\App\Http\Controllers\Admin\WaliSantriController::class, 'pendaftaran'])->name('pendaftaran');

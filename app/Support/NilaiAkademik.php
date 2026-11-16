@@ -85,15 +85,28 @@ class NilaiAkademik
         return self::mapelQuery($user)->get();
     }
 
-    /** Siswa yang duduk di satu kelas (kolom cache dan/atau pivot). */
+    /** Siswa yang duduk di satu kelas pada tahun ajaran berjalan. */
     public static function siswaKelas(int $classId): Builder
     {
+        $tahunId = Ppdb::tahunAjaranAktifId();
+        $punyaTahun = Schema::hasTable('class_student')
+            && Schema::hasColumn('class_student', 'academic_year_id');
+
         return Student::query()
-            ->where(function (Builder $query) use ($classId) {
+            ->where(function (Builder $query) use ($classId, $tahunId, $punyaTahun) {
                 $query->where('class_id', $classId);
 
                 if (Schema::hasTable('class_student')) {
-                    $query->orWhereHas('classes', fn (Builder $q) => $q->where('classes.id', $classId));
+                    $query->orWhereHas('classes', function (Builder $q) use ($classId, $tahunId, $punyaTahun) {
+                        $q->where('classes.id', $classId);
+
+                        if ($punyaTahun && $tahunId !== null) {
+                            $q->where(function (Builder $w) use ($tahunId) {
+                                $w->whereNull('class_student.academic_year_id')
+                                    ->orWhere('class_student.academic_year_id', $tahunId);
+                            });
+                        }
+                    });
                 }
             })
             ->orderBy('name');
@@ -247,9 +260,27 @@ class NilaiAkademik
                     $row = Grade::withTrashed()->firstOrNew($kunci);
 
                     if ($nilaiBaru === null) {
-                        if ($row->exists && $row->status === 'draft') {
-                            $row->delete();
+                        if (! $row->exists) {
+                            continue;
                         }
+
+                        if ($row->status === 'published') {
+                            // Nilai yang sudah terbit tidak boleh langsung dihapus;
+                            // tarik kembali menjadi draft agar tidak tampil di portal
+                            // sekaligus dapat diperbaiki lalu diterbitkan ulang.
+                            $row->fill(['nilai' => null, 'status' => 'draft', 'published_at' => null]);
+
+                            if ($academicYearId !== null) {
+                                $row->academic_year_id = $academicYearId;
+                            }
+
+                            $row->save();
+                            $dikembalikan++;
+
+                            continue;
+                        }
+
+                        $row->delete();
 
                         continue;
                     }

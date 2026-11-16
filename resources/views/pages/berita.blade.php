@@ -6,6 +6,7 @@
 
 @php
     $tanggal = now()->locale('id')->translatedFormat('l, d F Y');
+    $gambarDefault = asset('assets/img/berita-default.svg');
 @endphp
 
 <style>
@@ -228,12 +229,14 @@
         .nw-grid { grid-template-columns: 1fr; }
         .nw-side { position: static; }
         .nw-index { grid-template-columns: 1fr 1fr; }
+        /* Tidak ada kolom kosong saat sidebar turun ke bawah kartu. */
+        .nw-fill { display: none; }
     }
     @media (max-width: 720px) {
         .nw-hero { padding: 40px 0 46px; }
         .nw-hero::after { display: none; }
         .nw-body { padding: 32px 0 56px; }
-        .nw-main, .nw-feature, .nw-index { grid-template-columns: 1fr; }
+        .nw-main-cards, .nw-feature, .nw-index { grid-template-columns: 1fr; }
         .nw-feature .nw-img { min-height: 210px; }
         .nw-feature-body { padding: 22px; }
         .nw-feature .nw-h { font-size: 19px; }
@@ -308,7 +311,8 @@
                 {{-- Berita terbaru selalu tampil di kolom utama --}}
                 <a href="{{ route('berita.show', $headline) }}" class="nw-card nw-feature" data-kat="{{ $headline->kategori }}">
                     <div class="nw-img">
-                        <img src="{{ $headline->gambar_url }}" alt="{{ $headline->judul }}" loading="eager">
+                        <img src="{{ $headline->gambar_url }}" alt="{{ $headline->judul }}" loading="eager"
+                            onerror="this.onerror=null;this.src='{{ $gambarDefault }}'">
                         <span class="nw-badge {{ $headline->baru ? 'is-new' : '' }}">
                             @if ($headline->baru)<span class="dot"></span>@endif
                             {{ $headline->baru ? 'Terbaru' : 'Utama' }}
@@ -334,7 +338,8 @@
                 @foreach ($sub as $b)
                     <a href="{{ route('berita.show', $b) }}" class="nw-card nw-item" data-kat="{{ $b->kategori }}">
                         <div class="nw-img">
-                            <img src="{{ $b->gambar_url }}" alt="{{ $b->judul }}" loading="lazy">
+                            <img src="{{ $b->gambar_url }}" alt="{{ $b->judul }}" loading="lazy"
+                                onerror="this.onerror=null;this.src='{{ $gambarDefault }}'">
                             @if ($b->baru)
                                 <span class="nw-badge is-new"><span class="dot"></span>Baru</span>
                             @endif
@@ -404,7 +409,8 @@
                 @foreach ($indeks as $b)
                     <a href="{{ route('berita.show', $b) }}" class="nw-card" data-kat="{{ $b->kategori }}">
                         <div class="nw-img">
-                            <img src="{{ $b->gambar_url }}" alt="{{ $b->judul }}" loading="lazy">
+                            <img src="{{ $b->gambar_url }}" alt="{{ $b->judul }}" loading="lazy"
+                                onerror="this.onerror=null;this.src='{{ $gambarDefault }}'">
                             @if ($b->baru)
                                 <span class="nw-badge is-new"><span class="dot"></span>Baru</span>
                             @endif

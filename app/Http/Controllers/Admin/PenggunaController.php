@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\PendaftaranOnline;
 use App\Models\Santri;
 use App\Models\User;
-use App\Support\AkunPengguna;
 use App\Support\Akses;
+use App\Support\AkunPengguna;
 use App\Support\Jenjang;
 use App\Support\Ppdb;
 use App\Support\RoleSistem;
@@ -111,7 +111,8 @@ class PenggunaController extends Controller
                 });
             })
             ->when($punyaStatus && $request->filled('status'), fn ($q) => $q->where('status', $request->input('status')))
-            ->when($request->filled('jenjang'), fn ($q) => $q->where('jenjang', $request->input('jenjang')));
+            ->when($request->filled('jenjang'), fn ($q) => $q->where('jenjang', $request->input('jenjang')))
+            ->with(['santri' => fn ($q) => $q->select('id', 'user_id', 'nama_lengkap')]);
 
         $hitung = [];
         foreach ($tabs as $key => $tab) {
@@ -143,6 +144,10 @@ class PenggunaController extends Controller
             'rolesBolehDibuat' => AkunPengguna::roleBolehDibuat($user),
             'jenjangList' => self::jenjangOptions(),
             'santriList' => $this->santriOptions(),
+            // Daftar pilihan untuk modal edit dibatasi ke santri tanpa wali dan
+            // santri milik akun yang tampil di halaman ini, agar tidak memuat
+            // seluruh data santri pada satu select.
+            'santriEditList' => $this->santriOptions(null, true, $penggunas->pluck('id')->all()),
             'tabs' => $tabs,
             'hitung' => $hitung,
             'kategoriAktif' => $kategoriAktif,
@@ -398,34 +403,66 @@ class PenggunaController extends Controller
         ];
     }
 
-    /** Daftar santri yang boleh ditautkan ke akun wali. */
-    private function santriOptions(?User $pengguna = null): array
+    /**
+     * Daftar santri yang boleh ditautkan ke akun wali.
+     *
+     * @param  bool  $termasukTertaut  Sertakan santri yang sudah punya wali
+     *                                 (dipakai modal edit agar santri yang
+     *                                 sedang tertaut tetap tampil).
+     * @param  array<int, int|string>  $pemilikIds  Akun wali yang datanya ikut
+     *                                              ditampilkan saat $termasukTertaut aktif.
+     * @return array<int|string, mixed>
+     */
+    private function santriOptions(?User $pengguna = null, bool $termasukTertaut = false, array $pemilikIds = [])
     {
         $user = auth()->user();
 
         $query = Santri::query()->orderBy('nama_lengkap');
 
-        if (Akses::dibatasiJenjang($user)) {
+        if (Akses::adminTanpaJenjang($user)) {
+            $query->whereRaw('1 = 0');
+        } elseif (Akses::dibatasiJenjang($user)) {
             $nilai = Akses::nilaiJenjangDb($user, Santri::class, 'jenjang_pendidikan') ?: ['__tidak_ada__'];
             $query->whereIn('jenjang_pendidikan', $nilai);
         }
 
-        // Hanya santri tanpa wali, atau yang sudah tertaut ke akun ini.
-        $query->where(function ($q) use ($pengguna) {
-            $q->whereNull('user_id');
-            if ($pengguna) {
-                $q->orWhere('user_id', $pengguna->id);
-            }
-        });
+        if ($termasukTertaut) {
+            // Santri tanpa wali + santri milik akun wali pada halaman ini.
+            $query->where(function ($q) use ($pemilikIds) {
+                $q->whereNull('user_id');
 
-        return $query->get(['id', 'nama_lengkap', 'jenjang_pendidikan', 'kelas'])
-            ->mapWithKeys(function ($s) {
-                $jenjang = Jenjang::label($s->jenjang_pendidikan) ?: 'Tanpa jenjang';
-                $kelas = $s->kelas ?: 'tanpa kelas';
+                if ($pemilikIds !== []) {
+                    $q->orWhereIn('user_id', $pemilikIds);
+                }
+            });
+        } else {
+            // Hanya santri tanpa wali, atau yang sudah tertaut ke akun ini.
+            $query->where(function ($q) use ($pengguna) {
+                $q->whereNull('user_id');
+                if ($pengguna) {
+                    $q->orWhere('user_id', $pengguna->id);
+                }
+            });
+        }
 
-                return [$s->id => "{$s->nama_lengkap} — {$jenjang} — {$kelas}"];
-            })
-            ->all();
+        $santri = $query->get(['id', 'nama_lengkap', 'jenjang_pendidikan', 'kelas', 'user_id']);
+
+        $label = function ($s) {
+            $jenjang = Jenjang::label($s->jenjang_pendidikan) ?: 'Tanpa jenjang';
+            $kelas = $s->kelas ?: 'tanpa kelas';
+
+            return "{$s->nama_lengkap} — {$jenjang} — {$kelas}";
+        };
+
+        // Modal edit memakai bentuk detail agar opsi milik wali lain dapat
+        // dinonaktifkan tanpa menyembunyikan santri yang sedang tertaut.
+        if ($termasukTertaut) {
+            return $santri->mapWithKeys(fn ($s) => [
+                $s->id => ['label' => $label($s), 'user_id' => $s->user_id ? (int) $s->user_id : null],
+            ])->all();
+        }
+
+        return $santri->mapWithKeys(fn ($s) => [$s->id => $label($s)])->all();
     }
 
     /**
@@ -440,6 +477,11 @@ class PenggunaController extends Controller
 
         if (Akses::superAdmin($user)) {
             return $query;
+        }
+
+        // Admin yang belum memiliki jenjang tidak boleh melihat akun apa pun.
+        if (Akses::adminTanpaJenjang($user)) {
+            return $query->whereRaw('1 = 0');
         }
 
         $query->whereIn('role', RoleSistem::legacyDari(array_keys(AkunPengguna::roleBolehDibuat($user))));
