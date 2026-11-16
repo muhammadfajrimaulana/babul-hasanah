@@ -9,12 +9,6 @@
         <div>
             <h2 class="text-xl font-bold text-slate-900 dark:text-white">Prestasi Santri</h2>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Kelola capaian dan penghargaan yang tampil di website.</p>
-            @if (\App\Support\Akses::dibatasiJenjang(auth()->user()))
-                <p class="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-sky-50 px-2.5 py-1 text-[10px] font-bold text-sky-700 dark:bg-sky-950/40 dark:text-sky-300">
-                    <i class="fa-solid fa-filter"></i>
-                    Ditampilkan hanya prestasi santri jenjang {{ auth()->user()->namaJenjang() }}
-                </p>
-            @endif
         </div>
         @if (auth()->user()->bisa('prestasi.ubah'))
             <a href="{{ route('admin.prestasi.create') }}"

@@ -8,7 +8,6 @@
     $publishedAt = old('published_at', optional($berita?->published_at)->format('Y-m-d\TH:i'));
     $statusNow = old('status', $berita?->status ?? 'draft');
     $isPublished = ($berita?->status ?? 'draft') === 'published';
-    $gambarLamaAda = (bool) ($berita?->punyaGambarTersimpan() ?? false);
 
     // Unggah gambar isi berita ke server (opsional). Jika route belum dibuat, gambar disisipkan sebagai base64.
     $uploadUrl = \Illuminate\Support\Facades\Route::has('admin.berita.upload-gambar') ? route('admin.berita.upload-gambar') : null;
@@ -240,19 +239,16 @@
             </div>
 
             {{-- Gambar utama --}}
-            <div class="{{ $card }}" id="gambar-card">
-                <span class="{{ $label }}">Gambar Utama
-                    <span class="text-[10px] font-bold text-rose-500">* wajib publikasi</span>
-                </span>
-                <p class="{{ $hint }} mb-3">Unggah foto utama sebelum menekan Publikasikan (maks. 2 MB, JPG/PNG/WebP).</p>
+            <div class="{{ $card }}">
+                <span class="{{ $label }}">Gambar Utama <span class="text-[10px] text-slate-500">(maks. 2 MB)</span></span>
                 <div class="relative group">
                     <img id="preview-gambar" src="{{ $berita?->gambar_url ?? '' }}"
-                        class="{{ $gambarLamaAda ? '' : 'hidden' }} w-full h-32 object-cover rounded-xl mb-2 border border-slate-100 dark:border-slate-800">
+                        class="{{ $berita?->gambar ? '' : 'hidden' }} w-full h-32 object-cover rounded-xl mb-2 border border-slate-100 dark:border-slate-800">
                     <label class="block w-full h-32 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-emerald-500 dark:hover:border-emerald-700 transition"
                         onclick="document.getElementById('gambar-input').click()">
                         <i class="fa-solid fa-cloud-arrow-up text-emerald-500 dark:text-emerald-400 text-lg"></i>
                         <span class="text-[11px] font-medium text-slate-600 dark:text-slate-400">
-                            {{ $gambarLamaAda ? 'Ganti gambar' : 'Pilih gambar' }}
+                            {{ $berita?->gambar ? 'Ganti gambar' : 'Pilih gambar' }}
                         </span>
                         <span class="text-[10px] text-slate-400 dark:text-slate-500">JPG, PNG, WebP</span>
                     </label>
@@ -705,12 +701,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (wordCount() > MAX_WORDS) { e.preventDefault(); return alert('Isi berita melebihi batas ' + fmt(MAX_WORDS) + ' kata.'); }
         if (!$('kategori-input').value) { e.preventDefault(); return flag($('kategori-input'), 'Pilih kategori terlebih dahulu.'); }
         if (!$('penulis-input').value.trim()) { e.preventDefault(); return flag($('penulis-input'), 'Nama penulis belum diisi.'); }
-        if ($('status-input').value === 'published' && !$('gambar-input').files.length && !{{ $gambarLamaAda ? 'true' : 'false' }}) {
-            e.preventDefault();
-            $('gambar-card').scrollIntoView({ block: 'center', behavior: 'smooth' });
-            alert('Unggah foto utama terlebih dahulu sebelum mempublikasikan berita.');
-            return;
-        }
         isiInput.value = quill.root.innerHTML;
         dirty = false;
     });

@@ -16,10 +16,9 @@ class Akses
     public const ROLE_LABELS = [
         'super_admin' => 'Super Admin',
         'admin' => 'Admin Jenjang',
-        'pengasuh' => 'Pengasuh',
-        'pembina' => 'Pembina',
+        'pengasuh' => 'Pengasuh / Pengurus',
+        'pembina' => 'Pembina Asrama',
         'wali_santri' => 'Wali Santri',
-        'alumni' => 'Alumni',
     ];
 
     /** Halaman pertama (nama route) setelah login, per role. */
@@ -29,7 +28,6 @@ class Akses
         'pengasuh' => 'admin.dashboard.pengasuh',
         'pembina' => 'admin.dashboard.pembina',
         'wali_santri' => 'portal.dashboard',
-        'alumni' => 'alumni.dashboard',
     ];
 
     /**
@@ -83,12 +81,9 @@ class Akses
         'ppsw' => 'pps-wustha',
         'mts' => 'mts',
         'mas' => 'ma',
-        'ma' => 'ma',
         'pdfw' => 'pdf-wustha',
         'pdfu' => 'pdf-ulya',
-        'mahadaly' => 'mahad-aly',
-        'mahad-aly' => 'mahad-aly',
-        'aly' => 'mahad-aly',
+        'ma' => 'mahad-aly',
     ];
 
     /** Normalisasi nilai role dari database/input menjadi kunci resmi. */
@@ -96,12 +91,6 @@ class Akses
     {
         $nilai = strtolower(trim((string) $role));
         $nilai = str_replace([' ', '-'], '_', $nilai);
-
-        // Peran Spatie (mis. "admin-jenjang", "super-admin") dipetakan ke kunci lama.
-        $dariSistem = RoleSistem::legacy($nilai);
-        if ($dariSistem && array_key_exists($dariSistem, self::ROLE_LABELS)) {
-            return $dariSistem;
-        }
 
         $alias = [
             'superadmin' => 'super_admin',
@@ -130,26 +119,10 @@ class Akses
         return implode(',', self::MODUL[$modul] ?? []);
     }
 
-    /**
-     * Peran resmi dalam bentuk kunci lama.
-     *
-     * Utamakan kolom `users.role` (selalu disinkronkan), lalu jatuh ke peran
-     * Spatie agar akun yang diubah langsung lewat Spatie tetap dikenali.
-     */
-    private static function peran(?User $user): ?string
-    {
-        if (! $user) {
-            return null;
-        }
-
-        return self::normalisasi($user->role)
-            ?: RoleSistem::legacy($user->peranSistem());
-    }
-
     /** Apakah user boleh membuka modul tertentu. */
     public static function bisa(?User $user, string $modul): bool
     {
-        $role = self::peran($user);
+        $role = self::normalisasi($user?->role);
 
         if (! $role) {
             return false;
@@ -161,7 +134,7 @@ class Akses
     /** Nama route dashboard sesuai role. */
     public static function dashboardRoute(?User $user): string
     {
-        $role = self::peran($user);
+        $role = self::normalisasi($user?->role);
 
         return self::DASHBOARD_ROUTE[$role] ?? 'admin.dashboard';
     }
@@ -175,34 +148,27 @@ class Akses
     /** Route tujuan setelah login; null berarti role tidak valid. */
     public static function ruteSetelahLogin(?User $user): ?string
     {
-        return self::peran($user) ? self::dashboardRoute($user) : null;
+        return self::normalisasi($user?->role) ? self::dashboardRoute($user) : null;
     }
 
     /**
      * Slug jenjang yang menjadi tanggung jawab user.
      *
      * Urutan: kolom users.jenjang -> awalan email (mdta@, mts@, dst.).
-     * Hanya Admin Jenjang yang dibatasi per jenjang; role lain null (global).
+     * Hanya role `admin` yang dibatasi per jenjang; role lain null (global).
      */
     public static function jenjangSlug(?User $user): ?string
     {
-        if (! $user) {
+        if (self::normalisasi($user?->role) !== 'admin') {
             return null;
         }
 
-        $peran = self::normalisasi($user->role)
-            ?: RoleSistem::legacy($user->peranSistem());
-
-        if ($peran !== 'admin') {
-            return null;
-        }
-
-        $dariKolom = Jenjang::normalisasi($user->jenjang);
+        $dariKolom = Jenjang::normalisasi($user?->jenjang ?? null);
         if ($dariKolom) {
             return $dariKolom;
         }
 
-        $awalan = strtolower(strtok((string) $user->email, '@') ?: '');
+        $awalan = strtolower(strtok((string) $user?->email, '@') ?: '');
 
         return self::EMAIL_JENJANG[$awalan] ?? null;
     }
@@ -224,15 +190,7 @@ class Akses
     /** Apakah user adalah Super Admin (menerima variasi penulisan lama). */
     public static function superAdmin(?User $user): bool
     {
-        if (! $user) {
-            return false;
-        }
-
-        if (self::normalisasi($user->role) === 'super_admin') {
-            return true;
-        }
-
-        return method_exists($user, 'hasRole') && $user->hasRole('super-admin');
+        return self::normalisasi($user?->role) === 'super_admin';
     }
 
     /**
@@ -252,14 +210,8 @@ class Akses
      */
     public static function adminTanpaJenjang(?User $user): bool
     {
-        if (! $user) {
-            return false;
-        }
-
-        $peran = self::normalisasi($user->role)
-            ?: RoleSistem::legacy($user->peranSistem());
-
-        return $peran === 'admin' && self::jenjangSlug($user) === null;
+        return self::normalisasi($user?->role) === 'admin'
+            && self::jenjangSlug($user) === null;
     }
 
     /**
@@ -281,17 +233,10 @@ class Akses
     /** Pastikan satu nilai jenjang milik user (dipakai untuk detail/edit). */
     public static function cocokJenjang(?User $user, ?string $nilai): bool
     {
-        // Admin yang belum memiliki jenjang tidak berhak atas data jenjang mana
-        // pun (fail-closed). Sebelumnya kondisi ini dianggap "global" sehingga
-        // admin tanpa jenjang bisa melihat & mengubah seluruh jenjang.
-        if (self::adminTanpaJenjang($user)) {
-            return false;
-        }
-
         $slug = self::jenjangSlug($user);
 
         if (! $slug) {
-            return true; // role global (Super Admin / Pengasuh / Pembina)
+            return true; // role global
         }
 
         return Jenjang::normalisasi($nilai) === $slug;

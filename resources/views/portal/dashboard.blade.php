@@ -10,13 +10,13 @@
             </span>
             <h2 class="text-2xl sm:text-3xl font-black">Selamat Datang, {{ Auth::user()->name }}</h2>
             <p class="text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
-                Pantau perkembangan akademik, setoran tahfidz, rekap absensi, dan administrasi
-                putra/putri Anda secara real-time dari rumah.
+                Pantau perkembangan akademik, rekap absensi harian, dan informasi pendidikan putra/putri 
+                Anda secara real-time dari rumah.
             </p>
             <div class="flex flex-wrap items-center gap-2 pt-1">
                 <a href="{{ route('portal.nilai') }}"
                     class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-900 px-4 py-2.5 text-xs font-black transition">
-                    <i class="fa-solid fa-book-open"></i> Buka Rapor &amp; Transkrip
+                    <i class="fa-solid fa-book-open"></i> Lihat Nilai Santri
                 </a>
             </div>
         </div>
@@ -40,45 +40,46 @@
 
         <!-- DAFTAR ANAK / SANTRI YANG TERHUBUNG -->
         <div class="space-y-6">
-            @forelse($anakList as $anak)
+            @forelse($daftarAnak as $anak)
                 <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-6">
+                    
+                    <!-- Header Info Identitas Anak -->
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
                         <div>
                             <div class="flex items-center gap-2 mb-1">
                                 <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full uppercase">
-                                    {{ $anak->jenjang ?? 'Jenjang Umum' }}
+                                    {{ $anak->jenjang_pendidikan ?? 'Jenjang Umum' }}
                                 </span>
                                 <span class="text-xs text-slate-400 font-medium">
                                     Kelas: {{ $anak->kelas ?? '-' }}
                                 </span>
                             </div>
-                            <h3 class="text-xl font-black text-slate-900">{{ $anak->nama }}</h3>
-                            <p class="text-xs text-slate-500 font-mono mt-0.5">NISN / NIAT: {{ $anak->nis }}</p>
+                            <h3 class="text-xl font-black text-slate-900">{{ $anak->nama_lengkap }}</h3>
+                            <p class="text-xs text-slate-500 font-mono mt-0.5">NISN / NIAT: {{ $anak->nomor_induk }}</p>
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2">
-                            @php($ringkasNilai = $infoNilai->get($anak->key))
-                            @if ($ringkasNilai && $ringkasNilai->jumlah > 0)
+                            @php($ringkasNilai = $infoNilai->get($anak->id))
+                            @if ($ringkasNilai)
                                 <span class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-1.5 text-[11px] font-bold text-emerald-700">
                                     <i class="fa-solid fa-book-open"></i>
                                     {{ $ringkasNilai->jumlah }} nilai terbit
                                 </span>
                             @endif
-                            <a href="{{ route('portal.nilai', ['anak' => $anak->key]) }}"
+                            <a href="{{ route('portal.nilai', ['anak' => $anak->id]) }}"
                                 class="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 text-[11px] font-bold transition">
-                                <i class="fa-solid fa-eye"></i> Buka Portal
-                            </a>
-                            <a href="{{ route('portal.nilai', ['anak' => $anak->key, 'tab' => 'transkrip']) }}"
-                                class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 px-3 py-1.5 text-[11px] font-bold transition">
-                                <i class="fa-solid fa-chart-line"></i> Transkrip
+                                <i class="fa-solid fa-eye"></i> Lihat Nilai
                             </a>
                             <span class="inline-flex items-center px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700">
-                                Wali: {{ $anak->namaWali ?? Auth::user()->name }}
+                                Wali: {{ $anak->nama_wali ?? Auth::user()->name }}
                             </span>
                         </div>
                     </div>
 
+                    <!-- KARTU INFORMASI/STATISTIK ANAK -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                        <!-- Status Kehadiran -->
                         <div class="bg-slate-50/50 p-5 rounded-2xl border border-slate-200/60 space-y-2">
                             <div class="flex items-center justify-between">
                                 <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Status Kehadiran</span>
@@ -88,6 +89,7 @@
                             <p class="text-xs text-slate-500">Alamat: {{ $anak->alamat ?? 'Tidak dicantumkan' }}</p>
                         </div>
 
+                        <!-- Perkembangan Tahfidz / Akademik -->
                         <div class="bg-slate-50/50 p-5 rounded-2xl border border-slate-200/60 space-y-2">
                             <div class="flex items-center justify-between">
                                 <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Informasi Akademik</span>
@@ -95,10 +97,11 @@
                                     <i class="fa-solid fa-graduation-cap"></i>
                                 </span>
                             </div>
-                            <h4 class="text-base font-bold text-slate-900">{{ $anak->jenjang ?? 'Jenjang Umum' }} - {{ $anak->kelas ?? 'Kelas Belum Diatur' }}</h4>
+                            <h4 class="text-base font-bold text-slate-900">{{ $anak->jenjang_pendidikan }} - {{ $anak->kelas ?? 'Kelas Belum Diatur' }}</h4>
                             <p class="text-xs text-slate-500">Terdaftar resmi di sistem pesantren</p>
                         </div>
 
+                        <!-- Administrasi / Status -->
                         <div class="bg-slate-50/50 p-5 rounded-2xl border border-slate-200/60 space-y-2">
                             <div class="flex items-center justify-between">
                                 <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Status Data</span>
@@ -107,17 +110,19 @@
                             <h4 class="text-base font-bold text-slate-900">Data Sinkron</h4>
                             <p class="text-xs text-slate-500">Terhubung ke database pusat</p>
                         </div>
+
                     </div>
+
                 </div>
             @empty
+                <!-- Tampilan jika wali santri belum memiliki anak yang di-link ke akunnya -->
                 <div class="bg-amber-50 border border-amber-200 p-8 rounded-3xl text-center space-y-3">
                     <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto text-lg">
                         <i class="fa-solid fa-triangle-exclamation"></i>
                     </div>
                     <h3 class="text-lg font-bold text-amber-900">Belum Ada Data Anak Terhubung</h3>
                     <p class="text-xs sm:text-sm text-amber-700 max-w-md mx-auto leading-relaxed">
-                        Akun Anda belum dikaitkan dengan data santri manapun. Pastikan email akun ini sama
-                        dengan <span class="font-mono">parent_email</span> santri, atau hubungi Admin Pesantren.
+                        Akun Anda belum dikaitkan dengan data santri manapun. Silakan informasikan Nomor Induk atau Nama Santri Anda ke pihak Admin Pesantren.
                     </p>
                 </div>
             @endforelse

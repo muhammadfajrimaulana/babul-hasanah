@@ -4,50 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ auth()->user()?->peranSistem() === 'alumni' ? 'Portal Alumni' : 'Portal Wali Santri' }} - Pondok Pesantren Babul Hasanah</title>
+    <title>Portal Wali Santri - Pondok Pesantren Babul Hasanah</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
-@php
-    $portalUser = auth()->user();
-    $portalAlumniAktif = $portalUser && $portalUser->peranSistem() === 'alumni';
-    $portalWaliAktif = $portalUser && $portalUser->peranSistem() === 'walisantri';
-    $portalAnakList = $portalWaliAktif ? \App\Support\PortalWali::anak($portalUser) : collect();
-    $portalAnakAktif = $portalAnakList->isNotEmpty() ? \App\Support\PortalWali::aktif(request(), $portalAnakList) : null;
-
-    $portalMenu = $portalWaliAktif ? [
-        ['route' => 'portal.dashboard', 'label' => 'Dashboard', 'ikon' => 'fa-gauge-high', 'aktif' => request()->routeIs('portal.dashboard')],
-        ['route' => 'wali.anak', 'label' => 'Data Anak', 'ikon' => 'fa-children', 'aktif' => request()->routeIs('wali.anak')],
-        ['route' => 'wali.nilai', 'label' => 'Nilai', 'ikon' => 'fa-chart-line', 'aktif' => request()->routeIs('wali.nilai', 'portal.nilai')],
-        ['route' => 'wali.pendaftaran', 'label' => 'Pendaftaran', 'ikon' => 'fa-file-lines', 'aktif' => request()->routeIs('wali.pendaftaran')],
-        ['route' => 'wali.profil', 'label' => 'Profil', 'ikon' => 'fa-user-gear', 'aktif' => request()->routeIs('wali.profil')],
-    ] : [];
-@endphp
 
 <body class="bg-slate-100 text-slate-900 font-sans antialiased">
 
     <div class="min-h-screen flex flex-col justify-between">
         <!-- Top Navbar Portal -->
         <header
-            class="bg-white border-b border-slate-200 py-4 px-4 sm:px-10 flex flex-wrap items-center justify-between gap-3 shadow-sm z-10">
+            class="bg-white border-b border-slate-200 py-4 px-6 sm:px-10 flex items-center justify-between shadow-sm z-10">
             <div class="flex items-center gap-3">
                 <div
                     class="w-10 h-10 rounded-xl bg-emerald-500 text-slate-900 flex items-center justify-center font-black">
-                    <i class="fa-solid {{ $portalAlumniAktif ? 'fa-graduation-cap' : 'fa-house-user' }}"></i>
+                    <i class="fa-solid fa-house-user"></i>
                 </div>
                 <div>
-                    <h1 class="font-black text-slate-900 text-sm sm:text-base">
-                        {{ $portalAlumniAktif ? 'Portal Alumni' : 'Portal Wali Santri' }}
-                    </h1>
+                    <h1 class="font-black text-slate-900 text-sm sm:text-base">Portal Wali Santri</h1>
                     <p class="text-[10px] text-emerald-600 font-semibold uppercase tracking-wider">Pondok Pesantren
                         Babul Hasanah</p>
                 </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-3 sm:gap-4">
-                @include('portal._switcher')
-                <span class="text-xs font-bold text-slate-700 hidden md:inline">Halo, {{ Auth::user()->name }}</span>
+            <div class="flex items-center gap-4">
+                <span class="text-xs font-bold text-slate-700 hidden sm:inline">Halo, {{ Auth::user()->name }}</span>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit"
@@ -57,23 +38,6 @@
                 </form>
             </div>
         </header>
-
-        @if ($portalWaliAktif)
-            <nav class="bg-white/80 backdrop-blur border-b border-slate-200 px-4 sm:px-10">
-                <div class="max-w-7xl mx-auto flex items-center gap-1 overflow-x-auto custom-scrollbar">
-                    @foreach ($portalMenu as $menu)
-                        <a href="{{ route($menu['route']) }}"
-                            class="inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-3 py-3 text-xs font-bold transition
-                                {{ $menu['aktif']
-                                    ? 'border-emerald-500 text-emerald-700'
-                                    : 'border-transparent text-slate-500 hover:text-emerald-700 hover:border-emerald-200' }}">
-                            <i class="fa-solid {{ $menu['ikon'] }}"></i>
-                            {{ $menu['label'] }}
-                        </a>
-                    @endforeach
-                </div>
-            </nav>
-        @endif
 
         <!-- Main Content (Tempat yield masuk) -->
         <main class="flex-1 max-w-7xl w-full mx-auto p-6 sm:p-8 lg:px-10">

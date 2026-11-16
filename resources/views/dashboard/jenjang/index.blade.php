@@ -10,11 +10,7 @@
             <div>
                 <h2 class="text-xl font-black text-slate-900 dark:text-white">Jenjang Pendidikan</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    @if (\App\Support\Akses::dibatasiJenjang(auth()->user()))
-                        Data jenjang {{ auth()->user()->namaJenjang() }} beserta ringkasannya.
-                    @else
-                        Tujuh jenjang di Pondok Pesantren Babul Hasanah beserta ringkasan datanya.
-                    @endif
+                    Tujuh jenjang di Pondok Pesantren Babul Hasanah beserta ringkasan datanya.
                 </p>
             </div>
             <div class="flex items-center gap-2">
@@ -28,7 +24,7 @@
 
         {{-- ===================== KARTU JENJANG ===================== --}}
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            @forelse ($ringkasan as $j)
+            @foreach ($ringkasan as $j)
                 @php
                     $persen = $totalSantri > 0 ? round(($j['santri'] / $totalSantri) * 100) : 0;
                 @endphp
@@ -86,18 +82,7 @@
                         </div>
                     </div>
                 </a>
-            @empty
-                <div class="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center dark:border-amber-900/50 dark:bg-amber-950/30 sm:col-span-2 xl:col-span-3">
-                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-lg text-amber-600 dark:bg-amber-900/50 dark:text-amber-300">
-                        <i class="fa-solid fa-building-columns"></i>
-                    </div>
-                    <h3 class="mt-3 text-base font-black text-amber-900 dark:text-amber-200">Jenjang Belum Tersedia</h3>
-                    <p class="mx-auto mt-1 max-w-md text-xs leading-relaxed text-amber-700 dark:text-amber-300">
-                        Akun Anda belum memiliki jenjang yang ditangani. Hubungi Super Admin untuk
-                        mengatur jenjang pada akun ini.
-                    </p>
-                </div>
-            @endforelse
+            @endforeach
         </div>
 
         {{-- ===================== CHART PERBANDINGAN ===================== --}}
@@ -112,7 +97,7 @@
                         <p class="text-[11px] text-slate-400">Perbandingan jumlah santri, pendaftar, dan alumni.</p>
                     </div>
                 </div>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ count($ringkasan) }} Jenjang</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">7 Jenjang</span>
             </div>
             <div class="p-4 sm:p-5">
                 <div class="h-72 w-full sm:h-80">

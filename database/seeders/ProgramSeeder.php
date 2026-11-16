@@ -2,16 +2,16 @@
 
 namespace Database\Seeders;
 
-use App\Models\Program;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
+use App\Models\Program;
 
-/**
- * Daftar program/jenjang pendidikan resmi pesantren (data master).
- * Idempoten: aman dijalankan berulang karena memakai kunci slug.
- */
 class ProgramSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
         $programs = [
@@ -25,13 +25,11 @@ class ProgramSeeder extends Seeder
         ];
 
         foreach ($programs as $prog) {
-            Program::updateOrCreate(
-                ['slug' => Str::slug($prog)],
-                [
-                    'nama_program' => $prog,
-                    'status' => 'Aktif',
-                ]
-            );
+            Program::create([
+                'nama_program' => $prog,
+                'slug' => Str::slug($prog),
+                'status' => 'Aktif',
+            ]);
         }
     }
 }

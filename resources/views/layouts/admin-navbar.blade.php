@@ -31,18 +31,13 @@
         <!-- Dropdown Profil Pengguna -->
         <div x-data="{ profileOpen: false }" @click.away="profileOpen = false" class="relative">
             <button @click="profileOpen = !profileOpen"
-                class="flex items-center gap-1.5 group cursor-pointer"
-                :aria-expanded="profileOpen" aria-label="Menu profil">
+                class="w-10 h-10 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center transition transform hover:scale-105 shadow-sm cursor-pointer"
+                :class="{ 'ring-2 ring-emerald-400': profileOpen }">
                 @php
                     $avatarUrl = auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : asset('assets/img/logo/logo.png');
                 @endphp
-                <span
-                    class="block h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-slate-200 shadow-sm transition-transform duration-200 group-hover:scale-105 dark:border-slate-700"
-                    :class="{ 'ring-2 ring-emerald-400': profileOpen }">
-                    <img src="{{ $avatarUrl }}" alt="Profil" class="block h-full w-full object-cover"
-                        onerror="this.src='{{ asset('assets/img/logo/logo.png') }}'">
-                </span>
-                <i class="fa-solid fa-chevron-down text-[10px] text-slate-500 transition-transform duration-200 dark:text-slate-400"
+                <img src="{{ $avatarUrl }}" alt="Profil" class="w-full h-full object-cover" onerror="this.src='{{ asset('assets/img/logo/logo.png') }}'">
+                <i class="fa-solid fa-chevron-down ml-1 text-[10px] text-slate-500 dark:text-slate-400 transition-transform duration-200"
                    :class="profileOpen ? 'rotate-180' : ''"></i>
             </button>
 
@@ -53,12 +48,12 @@
                 <!-- Header Profil -->
                 <div class="p-4 border-b border-slate-100 dark:border-slate-800">
                     <div class="flex items-center gap-3">
-                        <img src="{{ $avatarUrl }}" alt="Profil" class="h-10 w-10 shrink-0 rounded-full object-cover" onerror="this.src='{{ asset('assets/img/logo/logo.png') }}'">
+                        <img src="{{ $avatarUrl }}" alt="Profil" class="w-10 h-10 rounded-full object-cover" onerror="this.src='{{ asset('assets/img/logo/logo.png') }}'">
                         <div>
                             <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ Auth::user()->name }}</h3>
                             <p class="text-[11px] text-slate-500 dark:text-slate-400">{{ Auth::user()->email }}</p>
                             <span class="mt-1 inline-block rounded-md bg-emerald-50 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400">
-                                {{ Auth::user()->labelPeran() }}
+                                {{ \App\Support\Akses::label(Auth::user()->role) }}
                             </span>
                         </div>
                     </div>
@@ -100,7 +95,7 @@
 </header>
 
 <!-- MODAL RESET PASSWORD -->
-<div x-show="resetPasswordModal" x-cloak
+<div x-data="{ resetPasswordModal: false }" x-show="resetPasswordModal" x-cloak
     class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" @click.away="resetPasswordModal = false"
     @keydown.escape.window="resetPasswordModal = false">
 

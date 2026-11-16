@@ -3,162 +3,183 @@
 namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
+use App\Models\NilaiSantri;
+use App\Models\Santri;
 use App\Support\Akademik;
-use App\Support\PortalWali;
-use Dompdf\Dompdf;
-use Dompdf\Options;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 
 class PortalAkademikController extends Controller
 {
     public function index(Request $request)
     {
         $user = $request->user();
-        $anakList = PortalWali::anak($user);
-        $anak = PortalWali::aktif($request, $anakList);
-        $opsi = $anak ? PortalWali::opsiPeriode($anak) : collect();
-        [$tahun, $semester] = $this->periode($request, $opsi);
+        $anakList = $user->santri()->orderBy('nama_lengkap')->get();
+        $anak = $this->pilihAnak($request, $anakList);
 
-        $tab = (string) $request->input('tab', 'rapor');
-        if (! in_array($tab, ['rapor', 'transkrip', 'tahfidz', 'absensi', 'keuangan'], true)) {
-            $tab = 'rapor';
+        if (! Akademik::siap()) {
+            return view('portal.akademik.index', [
+                'anakList' => $anakList,
+                'anak' => $anak,
+                'filter' => null,
+                'opsi' => collect(),
+                'data' => null,
+                'siap' => false,
+            ]);
         }
 
-        $rapor = $anak
-            ? PortalWali::rapor($anak, $tahun, $semester)
-            : $this->raporKosong();
+        $filter = $this->filter($request, $anak);
+        $data = $anak ? $this->data($anak, $filter) : null;
 
         return view('portal.akademik.index', [
             'anakList' => $anakList,
             'anak' => $anak,
-            'filter' => ['tahun' => $tahun, 'semester' => $semester],
-            'opsi' => $opsi,
-            'tabAktif' => $tab,
-            'rapor' => $rapor,
-            'transkrip' => $anak ? PortalWali::transkrip($anak) : collect(),
-            'tahfidz' => $anak ? PortalWali::tahfidz($anak, $tahun, $semester) : collect(),
-            'absensi' => $anak ? PortalWali::absensi($anak, $tahun, $semester) : $this->absensiKosong(),
-            'keuangan' => $anak ? PortalWali::keuangan($anak) : $this->keuanganKosong(),
+            'filter' => $filter,
+            'opsi' => $anak ? $this->opsi($anak) : collect(),
+            'data' => $data,
+            'siap' => true,
         ]);
     }
 
-    /** Unduh rapor resmi dalam bentuk PDF. */
-    public function pdf(Request $request)
-    {
-        return $this->buatPdf($request, false);
-    }
-
-    /** Tampilan cetak/PDF di tab baru (kompatibilitas route lama). */
     public function cetak(Request $request)
     {
-        return $this->buatPdf($request, true);
-    }
-
-    private function buatPdf(Request $request, bool $inline)
-    {
         $user = $request->user();
-        $anakList = PortalWali::anak($user);
-        $anak = PortalWali::aktif($request, $anakList);
+        $anakList = $user->santri()->orderBy('nama_lengkap')->get();
+        $anak = $this->pilihAnak($request, $anakList);
 
         abort_unless($anak, 404, 'Pilih anak terlebih dahulu.');
+        abort_unless(Akademik::siap(), 404, 'Modul nilai belum tersedia.');
 
-        $opsi = PortalWali::opsiPeriode($anak);
-        [$tahun, $semester] = $this->periode($request, $opsi);
-        $rapor = PortalWali::rapor($anak, $tahun, $semester);
+        $filter = $this->filter($request, $anak);
 
-        $html = view('portal.akademik.pdf', [
+        return view('portal.akademik.cetak', [
             'anak' => $anak,
-            'filter' => ['tahun' => $tahun, 'semester' => $semester],
-            'rapor' => $rapor,
-        ])->render();
-
-        $options = new Options;
-        $options->set('isRemoteEnabled', false);
-        $options->set('isHtml5ParserEnabled', true);
-        $options->set('defaultFont', 'serif');
-
-        $dompdf = new Dompdf($options);
-        $dompdf->loadHtml($html, 'UTF-8');
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
-
-        $nama = 'rapor-'.Str::slug($anak->nama).'-'.$tahun.'-'.$semester.'.pdf';
-
-        return response($dompdf->output(), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => ($inline ? 'inline' : 'attachment').'; filename="'.$nama.'"',
-            'Cache-Control' => 'private, max-age=0, must-revalidate',
+            'filter' => $filter,
+            'data' => $this->data($anak, $filter),
         ]);
+    }
+
+    /* ============================================================= Helper */
+
+    private function pilihAnak(Request $request, Collection $anakList): ?Santri
+    {
+        if ($anakList->isEmpty()) {
+            return null;
+        }
+
+        $id = (int) $request->input('anak');
+
+        if ($id === 0) {
+            return $anakList->first();
+        }
+
+        $anak = $anakList->firstWhere('id', $id);
+
+        // Jangan pernah mengandalkan dropdown saja: kepemilikan anak dicek
+        // di server pada setiap request.
+        abort_unless($anak, 403, 'Data anak ini bukan milik akun Anda.');
+
+        return $anak;
     }
 
     /**
-     * Tentukan periode. Bila tidak diminta, pakai nilai terbit terbaru;
-     * bila belum ada nilai, pakai semester berjalan.
-     *
-     * @param  Collection<int, array{tahun_ajaran:string,semester:string}>  $opsi
-     * @return array{0:string,1:string}
+     * @return array{tahun:string,semester:string}
      */
-    private function periode(Request $request, Collection $opsi): array
+    private function filter(Request $request, ?Santri $anak): array
     {
         $tahun = trim((string) $request->input('tahun_ajaran'));
         $semester = strtolower((string) $request->input('semester'));
 
-        // Tahun ajaran hanya boleh berformat 2026/2027 dan idealnya salah satu
-        // periode yang memang tersedia untuk anak ini.
-        if ($tahun !== '' && ! preg_match('/^\d{4}\/\d{4}$/', $tahun)) {
-            $tahun = '';
+        if ($anak && $tahun === '') {
+            $terakhir = NilaiSantri::query()
+                ->where('santri_id', $anak->id)
+                ->where('status', 'published')
+                ->orderByDesc('tahun_ajaran')
+                ->orderByDesc('semester')
+                ->first();
+
+            $tahun = $terakhir?->tahun_ajaran ?? Akademik::tahunAjaranSekarang();
         }
 
-        $daftarTahun = $opsi->pluck('tahun_ajaran')->filter()->unique()->values();
+        if ($anak && ! array_key_exists($semester, Akademik::SEMESTER)) {
+            $terakhir = NilaiSantri::query()
+                ->where('santri_id', $anak->id)
+                ->where('status', 'published')
+                ->where('tahun_ajaran', $tahun)
+                ->orderByDesc('semester')
+                ->first();
 
-        if ($tahun !== '' && $daftarTahun->isNotEmpty() && ! $daftarTahun->contains($tahun)) {
-            $tahun = '';
+            $semester = $terakhir?->semester ?? Akademik::semesterSekarang();
         }
 
-        $pertama = $opsi->first();
-
-        if ($tahun === '') {
-            $tahun = $pertama['tahun_ajaran'] ?? Akademik::tahunAjaranSekarang();
-        }
-
-        if (! array_key_exists($semester, Akademik::SEMESTER)) {
-            $semester = $pertama['semester'] ?? Akademik::semesterSekarang();
-        }
-
-        if (! array_key_exists($semester, Akademik::SEMESTER)) {
-            $semester = Akademik::semesterSekarang();
-        }
-
-        return [$tahun, $semester];
-    }
-
-    /** @return array<string, mixed> */
-    private function raporKosong(): array
-    {
         return [
-            'mapel' => collect(),
-            'rata' => null,
-            'predikat' => '-',
-            'jumlah' => 0,
-            'tuntas' => 0,
-            'catatan' => null,
-            'terakhir' => null,
-            'baru' => false,
-            'sumber' => 'kosong',
+            'tahun' => $tahun ?: Akademik::tahunAjaranSekarang(),
+            'semester' => array_key_exists($semester, Akademik::SEMESTER)
+                ? $semester
+                : Akademik::semesterSekarang(),
         ];
     }
 
-    /** @return array{rows:Collection,rekap:Collection,total:int} */
-    private function absensiKosong(): array
+    /** Pilihan tahun/semester yang benar-benar punya nilai terbit. */
+    private function opsi(Santri $anak): Collection
     {
-        return ['rows' => collect(), 'rekap' => collect(), 'total' => 0];
+        return NilaiSantri::query()
+            ->where('santri_id', $anak->id)
+            ->where('status', 'published')
+            ->select('tahun_ajaran', 'semester')
+            ->distinct()
+            ->orderByDesc('tahun_ajaran')
+            ->orderBy('semester')
+            ->get();
     }
 
-    /** @return array{rows:Collection,total:float,dibayar:float,sisa:float} */
-    private function keuanganKosong(): array
+    /**
+     * Susun nilai per mata pelajaran untuk satu anak.
+     *
+     * @return array<string, mixed>
+     */
+    private function data(Santri $anak, array $filter): array
     {
-        return ['rows' => collect(), 'total' => 0.0, 'dibayar' => 0.0, 'sisa' => 0.0];
+        $rows = NilaiSantri::query()
+            ->with('mataPelajaran')
+            ->where('santri_id', $anak->id)
+            ->where('status', 'published')
+            ->where('tahun_ajaran', $filter['tahun'])
+            ->where('semester', $filter['semester'])
+            ->get();
+
+        $mapel = $rows->groupBy('mata_pelajaran_id')->map(function ($grup) {
+            $ambil = fn (string $kategori) => $grup->firstWhere('kategori', $kategori)?->nilai;
+            $angka = $grup->pluck('nilai')->map(fn ($n) => (float) $n);
+            $akhir = round((float) $angka->avg(), 2);
+            $kkm = (float) ($grup->first()->mataPelajaran?->kkm ?? 70);
+
+            return [
+                'mapel' => $grup->first()->mataPelajaran,
+                'tugas' => $ambil('tugas'),
+                'uts' => $ambil('uts'),
+                'uas' => $ambil('uas'),
+                'hafalan' => $ambil('hafalan'),
+                'akhir' => $akhir,
+                'predikat' => Akademik::predikat($akhir),
+                'tuntas' => $akhir >= $kkm,
+                'catatan' => $grup->first(fn ($n) => filled($n->catatan))?->catatan,
+            ];
+        })->sortBy(fn ($r) => $r['mapel']?->nama)->values();
+
+        $rata = $mapel->avg('akhir');
+        $terakhir = $rows->max('published_at');
+        $catatan = $mapel->first(fn ($r) => filled($r['catatan']));
+
+        return [
+            'mapel' => $mapel,
+            'rata' => $rata,
+            'predikat' => Akademik::predikat($rata),
+            'jumlah' => $mapel->count(),
+            'tuntas' => $mapel->where('tuntas', true)->count(),
+            'catatan' => $catatan['catatan'] ?? null,
+            'terakhir' => $terakhir,
+            'baru' => $terakhir && $terakhir->gte(now()->subDays(14)),
+        ];
     }
 }

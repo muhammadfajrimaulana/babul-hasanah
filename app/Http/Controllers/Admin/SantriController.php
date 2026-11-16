@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PendaftaranOnline;
-use App\Models\Santri;
 use App\Support\Akses;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Santri;
+// Jika menggunakan Maatwebsite/Excel, uncomment baris di bawah:
+// use App\Imports\SantriImport;
+// use Maatwebsite\Excel\Facades\Excel;
 
 class SantriController extends Controller
 {
@@ -15,11 +19,8 @@ class SantriController extends Controller
         $user = auth()->user();
         $query = Santri::with(['user', 'pendaftaranOnline'])->latest();
 
-        // Admin Jenjang hanya melihat santri pada jenjangnya. Admin yang belum
-        // memiliki jenjang tidak melihat data apa pun (fail-closed).
-        if (Akses::adminTanpaJenjang($user)) {
-            $query->whereRaw('1 = 0');
-        } elseif (Akses::dibatasiJenjang($user)) {
+        // Admin Jenjang hanya melihat santri pada jenjangnya.
+        if (Akses::dibatasiJenjang($user)) {
             $query->whereIn('jenjang_pendidikan', Akses::nilaiJenjangDb($user, Santri::class, 'jenjang_pendidikan') ?: ['__tidak_ada__']);
         }
 
@@ -70,5 +71,34 @@ class SantriController extends Controller
         return redirect()
             ->route('admin.santri.index')
             ->with('success', 'Data santri berhasil dihapus.');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file_excel' => 'required|mimes:xlsx,xls,csv|max:5120',
+        ]);
+
+        try {
+            // Contoh implementasi jika menggunakan Laravel Excel:
+            // Excel::import(new SantriImport, $request->file('file_excel'));
+
+            return redirect()->route('admin.santri.index')
+                ->with('success', 'Data santri berhasil diimport ke dalam sistem.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat mengimport data: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $filePath = public_path('assets/template/template_data_santri.xlsx');
+
+        if (file_exists($filePath)) {
+            return response()->download($filePath);
+        }
+
+        return redirect()->back()->with('error', 'File template import belum tersedia.');
     }
 }

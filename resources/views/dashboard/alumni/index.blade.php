@@ -71,9 +71,7 @@
                                             </span>
                                         @endif
                                         <div>
-                                            <div class="font-black text-slate-900 dark:text-white">
-                                                <a href="{{ route('admin.alumni.show', $a) }}" class="hover:text-emerald-600 transition">{{ $a->nama }}</a>
-                                            </div>
+                                            <div class="font-black text-slate-900 dark:text-white">{{ $a->nama }}</div>
                                             <div class="text-[10px] text-slate-400">{{ $a->jenis_kelamin === 'L' ? 'Laki-laki' : ($a->jenis_kelamin === 'P' ? 'Perempuan' : '-') }}</div>
                                         </div>
                                     </div>
@@ -92,8 +90,6 @@
                                 </td>
                                 <td class="py-4 px-6 text-right">
                                     <div class="flex items-center justify-end gap-1">
-                                        <a href="{{ route('admin.alumni.show', $a) }}"
-                                            class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 rounded-lg text-[10px] font-bold transition">Detail</a>
                                         @if (auth()->user()->bisa('alumni.ubah'))
                                             <a href="{{ route('admin.alumni.edit', $a) }}"
                                                 class="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/50 text-amber-600 hover:bg-amber-100 rounded-lg text-[10px] font-bold transition">Edit</a>

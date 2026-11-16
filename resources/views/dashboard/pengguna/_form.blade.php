@@ -2,15 +2,12 @@
     $in  = 'w-full text-xs px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500';
     $lb  = 'block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5';
     $err = 'text-[11px] text-red-600 mt-1';
-    $v   = fn ($f) => old($f, $pengguna?->$f ?? '');
+    $v   = fn ($f) => old($f, $pengguna->$f ?? '');
     $edit = ! empty($pengguna);
 
     // Pengelola selain Super Admin hanya boleh membuat/mengubah akun wali santri.
-    $hanyaWali = count($roles) === 1 && array_key_exists('walisantri', $roles);
-    $roleAwal = old('role', $pengguna?->peranSistem() ?: ($hanyaWali ? 'walisantri' : ''));
-
-    $labelJenjang = \App\Http\Controllers\Admin\PenggunaController::jenjangOptions();
-    $jenjangAwal = old('jenjang', \App\Support\Jenjang::normalisasi($jenjangTertaut ?? null) ?: '');
+    $hanyaWali = count($roles) === 1 && array_key_exists('wali_santri', $roles);
+    $roleAwal = $v('role') ?: ($hanyaWali ? 'wali_santri' : '');
 
     $santriAwal = old('santri_id', $santriTertaut[0] ?? '');
     $sudahTertaut = ! empty($santriTertaut);
@@ -21,8 +18,7 @@
     <div class="px-4 py-3 rounded-xl bg-red-50 text-red-700 text-xs font-bold border border-red-100">Periksa kembali isian yang bertanda merah.</div>
 @endif
 
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4"
-     x-data='{ role: @json($roleAwal) }'>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4" x-data="{ role: '{{ $roleAwal }}' }">
     <div class="sm:col-span-2">
         <label class="{{ $lb }}">Nama lengkap *</label>
         <input type="text" name="name" value="{{ $v('name') }}" class="{{ $in }}" required>
@@ -46,7 +42,7 @@
 
         @if ($hanyaWali)
             {{-- Pengelola terbatas: peran dikunci ke Wali Santri. --}}
-            <input type="hidden" name="role" value="walisantri">
+            <input type="hidden" name="role" value="wali_santri">
             <div class="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
                 <i class="fa-solid fa-lock text-[10px] text-slate-400"></i>
                 Wali Santri
@@ -64,20 +60,20 @@
         @error('role') <p class="{{ $err }}">{{ $message }}</p> @enderror
     </div>
 
-    <div x-show="role === 'admin-jenjang'" x-cloak>
+    <div x-show="role === 'admin'" x-cloak>
         <label class="{{ $lb }}">Jenjang yang ditangani *</label>
-        <select name="jenjang" class="{{ $in }}" x-bind:required="role === 'admin-jenjang'">
+        <select name="jenjang" class="{{ $in }}">
             <option value="">- Pilih jenjang -</option>
-            @foreach ($labelJenjang as $slug => $label)
-                <option value="{{ $slug }}" @selected($jenjangAwal === $slug)>{{ $label }}</option>
+            @foreach (($jenjangList ?? []) as $slug => $nama)
+                <option value="{{ $slug }}" @selected($v('jenjang') === $slug)>{{ $nama }}</option>
             @endforeach
         </select>
+        <p class="text-[10px] text-slate-400 mt-1">Menentukan data yang tampil di dashboard Admin Jenjang.</p>
         @error('jenjang') <p class="{{ $err }}">{{ $message }}</p> @enderror
-        <p class="text-[10px] text-slate-400 mt-1">Data Admin Jenjang dibatasi ke jenjang yang dipilih.</p>
     </div>
 
     {{-- Tautan anak untuk akun wali santri --}}
-    <div class="sm:col-span-2" x-show="role === 'walisantri'" x-cloak>
+    <div class="sm:col-span-2" x-show="role === 'wali_santri'" x-cloak>
         <label class="{{ $lb }}">
             Santri / Anak Tertaut
             @if ($wajibSantri)
@@ -114,14 +110,14 @@
     </div>
 
     <div>
-        <label class="{{ $lb }}">Kata sandi {{ $edit ? '(kosongkan jika tidak diubah)' : '(kosongkan = babul2026)' }}</label>
-        <input type="password" name="password" class="{{ $in }}" autocomplete="new-password">
+        <label class="{{ $lb }}">Kata sandi {{ $edit ? '(kosongkan jika tidak diubah)' : '*' }}</label>
+        <input type="password" name="password" class="{{ $in }}" autocomplete="new-password" @required(!$edit)>
         @error('password') <p class="{{ $err }}">{{ $message }}</p> @enderror
     </div>
 
     <div>
         <label class="{{ $lb }}">Konfirmasi kata sandi</label>
-        <input type="password" name="password_confirmation" class="{{ $in }}" autocomplete="new-password">
+        <input type="password" name="password_confirmation" class="{{ $in }}" autocomplete="new-password" @required(!$edit)>
     </div>
 
     <div class="sm:col-span-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 px-4 py-3">
@@ -131,18 +127,17 @@
             <ul class="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5 list-disc pl-4">
                 <li><b>Wali Santri</b> — hanya masuk ke portal wali dan memantau data anaknya.</li>
                 <li>Data santri hanya bisa diubah oleh Super Admin atau Admin Jenjang.</li>
-                @if (\App\Support\Akses::dibatasiJenjang(auth()->user()))
+                @if (\App\Support\Akses::normalisasi(auth()->user()->role) === 'admin')
                     <li>Anda hanya dapat mengelola wali santri pada jenjang <b>{{ auth()->user()->namaJenjang() }}</b>.</li>
                 @endif
             </ul>
         @else
             <ul class="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5 list-disc pl-4">
                 <li><b>Super Admin</b> — akses penuh + kelola pengguna & konten institusional.</li>
-                <li><b>Admin Jenjang</b> — data operasional, dibatasi ke satu jenjang yang dipilih.</li>
-                <li><b>Pengasuh</b> — monitoring seluruh pesantren (hanya baca).</li>
-                <li><b>Pembina</b> — monitoring santri & kehadiran (hanya baca).</li>
+                <li><b>Admin Jenjang</b> — data operasional, dibatasi ke jenjang yang dipilih.</li>
+                <li><b>Pengasuh / Pengurus</b> — monitoring seluruh pesantren (hanya baca).</li>
+                <li><b>Pembina Asrama</b> — monitoring santri & kehadiran (hanya baca).</li>
                 <li><b>Wali Santri</b> — hanya portal wali, tidak bisa masuk panel admin.</li>
-                <li><b>Alumni</b> — hanya portal alumni.</li>
             </ul>
         @endif
     </div>

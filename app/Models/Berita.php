@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Berita extends Model
@@ -64,41 +63,10 @@ class Berita extends Model
             && $this->tanggal_terbit->gt(now()->subDays(3));
     }
 
-    /**
-     * URL foto utama yang benar-benar tersedia.
-     *
-     * Mengembalikan null bila kolom `gambar` kosong atau berkasnya sudah tidak
-     * ada di disk. Dipakai juga oleh validasi publikasi.
-     */
-    public function urlGambarTersimpan(): ?string
-    {
-        $gambar = trim((string) $this->gambar);
-
-        if ($gambar === '') {
-            return null;
-        }
-
-        if (Str::startsWith($gambar, ['http://', 'https://'])) {
-            return $gambar;
-        }
-
-        return Storage::disk('public')->exists($gambar)
-            ? asset('storage/' . $gambar)
-            : null;
-    }
-
-    /** Apakah berita sudah memiliki foto utama yang tersimpan. */
-    public function punyaGambarTersimpan(): bool
-    {
-        return $this->urlGambarTersimpan() !== null;
-    }
-
     public function getGambarUrlAttribute(): string
     {
-        $tersimpan = $this->urlGambarTersimpan();
-
-        if ($tersimpan !== null) {
-            return $tersimpan;
+        if ($this->gambar) {
+            return asset('storage/' . $this->gambar);
         }
 
         // Fallback: pakai gambar pertama yang disisipkan di dalam isi berita.
@@ -106,8 +74,7 @@ class Berita extends Model
             return $cocok[1];
         }
 
-        // Gambar default hijau bila tidak ada foto yang bisa ditampilkan.
-        return asset('assets/img/berita-default.svg');
+        return asset('assets/img/banner/banner.png');
     }
 
     public function getRingkasanOtomatisAttribute(): string

@@ -19,11 +19,8 @@ class AlumniController extends Controller
             }))
             ->when($request->angkatan, fn ($q, $a) => $q->where('tahun_lulus', $a));
 
-        // Admin Jenjang hanya melihat alumni pada jenjangnya. Admin tanpa
-        // jenjang tidak melihat data apa pun (fail-closed).
-        if (Akses::adminTanpaJenjang($user)) {
-            $query->whereRaw('1 = 0');
-        } elseif (Akses::dibatasiJenjang($user)) {
+        // Admin Jenjang hanya melihat alumni pada jenjangnya.
+        if (Akses::dibatasiJenjang($user)) {
             $query->whereIn(
                 'jenjang',
                 Akses::nilaiJenjangDb($user, Alumni::class, 'jenjang') ?: ['__tidak_ada__']
@@ -34,31 +31,9 @@ class AlumniController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        // Pilihan angkatan mengikuti jenjang yang boleh dilihat pengguna.
-        $angkatanQuery = Alumni::query()->select('tahun_lulus')->whereNotNull('tahun_lulus');
-
-        if (Akses::adminTanpaJenjang($user)) {
-            $angkatanQuery->whereRaw('1 = 0');
-        } elseif (Akses::dibatasiJenjang($user)) {
-            $angkatanQuery->whereIn(
-                'jenjang',
-                Akses::nilaiJenjangDb($user, Alumni::class, 'jenjang') ?: ['__tidak_ada__']
-            );
-        }
-
-        $daftarAngkatan = $angkatanQuery->distinct()->orderByDesc('tahun_lulus')->pluck('tahun_lulus');
+        $daftarAngkatan = Alumni::query()->select('tahun_lulus')->distinct()->orderByDesc('tahun_lulus')->pluck('tahun_lulus');
 
         return view('dashboard.alumni.index', compact('alumnis', 'daftarAngkatan'));
-    }
-
-    /** Detail satu alumni beserta data santri/akun tertaut. */
-    public function show(Alumni $alumni)
-    {
-        $this->pastikanJenjang($alumni->jenjang);
-
-        $alumni->loadMissing(['student', 'user']);
-
-        return view('dashboard.alumni.show', compact('alumni'));
     }
 
     public function create()
@@ -137,7 +112,7 @@ class AlumniController extends Controller
         return $request->validate([
             'nama'          => 'required|string|max:255',
             'jenis_kelamin' => 'nullable|in:L,P',
-            'tahun_lulus'   => 'required|integer|min:1980|max:' . (now()->year + 1),
+            'tahun_lulus'   => 'required|integer|min:1998|max:' . (now()->year + 1),
             'jenjang'       => 'nullable|string|max:50',
             'kegiatan'      => 'nullable|in:' . implode(',', Alumni::KEGIATAN),
             'instansi'      => 'nullable|string|max:255',

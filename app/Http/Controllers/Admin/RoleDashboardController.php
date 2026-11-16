@@ -11,7 +11,6 @@ use App\Models\PendaftaranOnline;
 use App\Models\PrestasiSantri;
 use App\Models\Santri;
 use App\Support\Akses;
-use App\Support\PrestasiJenjang;
 use App\Support\RekapJenjang;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
@@ -65,7 +64,7 @@ class RoleDashboardController extends Controller
             'totalPendaftar' => $this->hitung(PendaftaranOnline::class, $pendaftar),
             'pendaftarMenunggu' => $this->hitung(PendaftaranOnline::class, $pendaftarMenunggu),
             'totalAlumni' => $this->hitung(Alumni::class, $alumni),
-            'totalPrestasi' => $this->hitungQuery(fn () => PrestasiJenjang::query($user)),
+            'totalPrestasi' => $this->hitung(PrestasiSantri::class),
             'pendaftarTerbaru' => $this->terbaru(PendaftaranOnline::class, $pendaftar, 5),
             'santriTerbaru' => $this->terbaru(Santri::class, $santri, 5),
         ]);
@@ -122,20 +121,6 @@ class RoleDashboardController extends Controller
             }
 
             return (int) $query->count();
-        } catch (\Throwable $e) {
-            return 0;
-        }
-    }
-
-    /**
-     * Hitung hasil query builder yang sudah dibatasi (mis. per jenjang).
-     *
-     * @param  callable():object  $queryFactory
-     */
-    private function hitungQuery(callable $queryFactory): int
-    {
-        try {
-            return (int) $queryFactory()->count();
         } catch (\Throwable $e) {
             return 0;
         }

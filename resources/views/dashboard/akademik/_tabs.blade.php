@@ -1,7 +1,6 @@
 @php
     $tabNilai = request()->routeIs('admin.akademik.nilai.*');
     $tabTranskrip = request()->routeIs('admin.akademik.transkrip.*');
-    $tabKenaikan = request()->routeIs('admin.akademik.kenaikan-kelas.*');
     $tabMapel = request()->routeIs('admin.akademik.mapel.*');
     $tabClass = fn (bool $aktif) => 'inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition '
         . ($aktif
@@ -11,13 +10,10 @@
 
 <div class="flex flex-wrap items-center gap-2">
     <a href="{{ route('admin.akademik.nilai.index') }}" class="{{ $tabClass($tabNilai) }}">
-        <i class="fa-solid fa-pen-to-square"></i> Nilai Akademik
+        <i class="fa-solid fa-pen-to-square"></i> Nilai Santri
     </a>
     <a href="{{ route('admin.akademik.transkrip.index') }}" class="{{ $tabClass($tabTranskrip) }}">
         <i class="fa-solid fa-file-lines"></i> Transkrip Nilai
-    </a>
-    <a href="{{ route('admin.akademik.kenaikan-kelas.index') }}" class="{{ $tabClass($tabKenaikan) }}">
-        <i class="fa-solid fa-arrow-up-right-dots"></i> Kenaikan Kelas
     </a>
     @if (auth()->user()->bisa('akademik.mapel'))
         <a href="{{ route('admin.akademik.mapel.index') }}" class="{{ $tabClass($tabMapel) }}">

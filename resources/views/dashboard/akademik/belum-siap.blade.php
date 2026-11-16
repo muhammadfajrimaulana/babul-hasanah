@@ -10,10 +10,8 @@
         <div class="space-y-1">
             <h2 class="text-lg font-black text-slate-900 dark:text-white">Tabel akademik belum tersedia</h2>
             <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Halaman ini membutuhkan tabel akademik. Untuk skema baru: <code class="font-mono">classes</code>,
-                <code class="font-mono">subjects</code>, <code class="font-mono">students</code>, dan
-                <code class="font-mono">grades</code>. Untuk data lama: <code class="font-mono">mata_pelajaran</code>
-                dan <code class="font-mono">nilai_santri</code>. Migrasi sudah disiapkan di folder
+                Halaman ini membutuhkan tabel <code class="font-mono">mata_pelajaran</code> dan
+                <code class="font-mono">nilai_santri</code>. Migrasi sudah disiapkan di folder
                 <code class="font-mono">database/migrations</code>, tetapi belum dijalankan.
             </p>
         </div>

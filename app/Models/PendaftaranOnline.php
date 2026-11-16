@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Schema;
 
 class PendaftaranOnline extends Model
@@ -20,7 +19,6 @@ class PendaftaranOnline extends Model
         'no_hp_aktif',
         'alamat_domisili',
         'email',
-        'parent_email',
         'nama_ortu_wali',
         'no_hp_ortu',
         'asal_sekolah',
@@ -52,8 +50,8 @@ class PendaftaranOnline extends Model
     public static function pesanSkemaBelumSiap(array $kolomHilang): string
     {
         return 'Struktur database belum lengkap. Kolom yang belum ada: '
-            .implode(', ', $kolomHilang)
-            .'. Jalankan "php artisan migrate" lalu coba simpan kembali.';
+            . implode(', ', $kolomHilang)
+            . '. Jalankan "php artisan migrate" lalu coba simpan kembali.';
     }
 
     protected $fillable = [
@@ -82,7 +80,6 @@ class PendaftaranOnline extends Model
         'nama_ayah',
         'nama_ibu',
         'email',
-        'parent_email',
         'no_hp_ortu',
         'berkas_pasfoto',
         'berkas_kk',
@@ -91,22 +88,4 @@ class PendaftaranOnline extends Model
         'berkas_ktp_ortu',
         'status_pendaftaran',
     ];
-
-    /** Email wali yang dipakai untuk akun portal (kolom baru, fallback lama). */
-    public function emailWali(): string
-    {
-        return (string) ($this->parent_email ?: $this->email);
-    }
-
-    /** Siswa hasil verifikasi PPDB (skema Modul 1). */
-    public function students(): HasMany
-    {
-        return $this->hasMany(Student::class, 'pendaftaran_online_id');
-    }
-
-    /** Data santri lama hasil verifikasi (portal wali & modul lama). */
-    public function santri(): HasMany
-    {
-        return $this->hasMany(Santri::class, 'pendaftaran_online_id');
-    }
 }

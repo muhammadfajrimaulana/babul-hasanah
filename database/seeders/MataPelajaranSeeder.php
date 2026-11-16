@@ -3,12 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\MataPelajaran;
-use App\Models\Subject;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Schema;
 
 /**
- * Master mata pelajaran dasar per jenjang (data referensi kurikulum).
+ * Contoh mata pelajaran dasar per jenjang.
  *
  * Seeder ini idempoten: aman dijalankan berulang karena memakai kunci
  * (jenjang + kode). Jalankan hanya setelah migrasi akademik tersedia.
@@ -96,26 +94,6 @@ class MataPelajaranSeeder extends Seeder
                         'aktif' => true,
                     ]
                 );
-
-                if (Schema::hasTable('subjects')) {
-                    $subject = Subject::withTrashed()->firstOrNew([
-                        'jenjang' => $jenjang,
-                        'kode' => $item['kode'],
-                    ]);
-
-                    $subject->fill([
-                        'nama' => $item['nama'],
-                        'kelompok' => $item['kelompok'],
-                        'kkm' => $item['kkm'],
-                    ]);
-
-                    if ($subject->trashed()) {
-                        $subject->restore();
-                    }
-
-                    $subject->deleted_at = null;
-                    $subject->save();
-                }
             }
         }
     }

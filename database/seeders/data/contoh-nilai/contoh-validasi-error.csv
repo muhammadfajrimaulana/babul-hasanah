@@ -1,0 +1,6 @@
+nis,nama,kelas,kategori,nilai,catatan
+DEMO-NILAI-001,Ahmad Fauzan Demo,VII A,tugas,120,Nilai di luar rentang
+DEMO-NILAI-002,Muhammad Rizky Demo,VII A,tugas,sembilan puluh,Bukan angka
+DEMO-NILAI-003,Abdul Aziz Demo,VII A,tugas,85,Baris valid
+DEMO-NILAI-003,Abdul Aziz Demo,VII A,tugas,86,NIS duplikat dalam file
+NIS-TIDAK-DITEMUKAN,Santri Tidak Ada,VII A,tugas,80,NIS tidak terdaftar

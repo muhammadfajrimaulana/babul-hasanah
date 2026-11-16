@@ -4,12 +4,10 @@ namespace App\Http\Controllers\Admin\Akademik;
 
 use App\Http\Controllers\Controller;
 use App\Models\MataPelajaran;
-use App\Models\Subject;
 use App\Support\Akademik;
 use App\Support\Akses;
 use App\Support\Jenjang;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -61,8 +59,7 @@ class MataPelajaranController extends Controller
         abort_unless($request->user()->bisa('akademik.mapel'), 403);
 
         $data = $this->validasi($request);
-        $mapel = MataPelajaran::create($data);
-        $this->sinkronSubject($mapel);
+        MataPelajaran::create($data);
 
         return redirect()
             ->route('admin.akademik.mapel.index', ['jenjang' => $data['jenjang']])
@@ -86,10 +83,7 @@ class MataPelajaranController extends Controller
         abort_unless($request->user()->bisa('akademik.mapel'), 403);
         $this->pastikanAkses($mapel);
 
-        $jenjangLama = $mapel->jenjang;
-        $kodeLama = $mapel->kode;
         $mapel->update($this->validasi($request, $mapel));
-        $this->sinkronSubject($mapel, $jenjangLama, $kodeLama);
 
         return redirect()
             ->route('admin.akademik.mapel.index', ['jenjang' => $mapel->jenjang])
@@ -108,19 +102,7 @@ class MataPelajaranController extends Controller
         }
 
         $jenjang = $mapel->jenjang;
-        $kode = $mapel->kode;
         $mapel->delete();
-
-        if (Schema::hasTable('subjects')) {
-            $subject = Subject::query()
-                ->where('jenjang', $jenjang)
-                ->where('kode', $kode)
-                ->first();
-
-            if ($subject && ! $subject->grades()->exists()) {
-                $subject->delete();
-            }
-        }
 
         return redirect()
             ->route('admin.akademik.mapel.index', ['jenjang' => $jenjang])
@@ -193,48 +175,6 @@ class MataPelajaranController extends Controller
             403,
             'Mata pelajaran ini di luar jenjang yang Anda tangani.'
         );
-    }
-
-    /**
-     * Cerminkan mata pelajaran lama ke tabel `subjects` agar Manajemen Nilai
-     * Akademik (skema `grades`) memakai daftar mapel yang sama.
-     */
-    private function sinkronSubject(MataPelajaran $mapel, ?string $jenjangLama = null, ?string $kodeLama = null): void
-    {
-        if (! Schema::hasTable('subjects')) {
-            return;
-        }
-
-        if ($jenjangLama && $kodeLama
-            && ($jenjangLama !== $mapel->jenjang || $kodeLama !== $mapel->kode)) {
-            Subject::query()
-                ->where('jenjang', $jenjangLama)
-                ->where('kode', $kodeLama)
-                ->update([
-                    'jenjang' => $mapel->jenjang,
-                    'kode' => $mapel->kode,
-                ]);
-        }
-
-        $subject = Subject::withTrashed()
-            ->where('jenjang', $mapel->jenjang)
-            ->where('kode', $mapel->kode)
-            ->first() ?? new Subject;
-
-        $subject->fill([
-            'jenjang' => $mapel->jenjang,
-            'kode' => $mapel->kode,
-            'nama' => $mapel->nama,
-            'kelompok' => $mapel->kelompok,
-            'kkm' => $mapel->kkm,
-        ]);
-
-        if ($subject->trashed()) {
-            $subject->restore();
-        }
-
-        $subject->deleted_at = null;
-        $subject->save();
     }
 
     private function daftarJenjang($user): array

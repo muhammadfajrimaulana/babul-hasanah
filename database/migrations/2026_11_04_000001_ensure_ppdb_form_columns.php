@@ -40,7 +40,6 @@ return new class extends Migration
             'nama_ortu_wali'  => fn (Blueprint $table) => $table->string('nama_ortu_wali')->nullable(),
             'jenjang_tujuan'  => fn (Blueprint $table) => $table->string('jenjang_tujuan', 100)->nullable(),
             'email'           => fn (Blueprint $table) => $table->string('email')->nullable(),
-            'parent_email'    => fn (Blueprint $table) => $table->string('parent_email', 255)->nullable(),
             'nisn'            => fn (Blueprint $table) => $table->string('nisn', 20)->nullable(),
         ];
 
@@ -49,10 +48,6 @@ return new class extends Migration
                 Schema::table('pendaftaran_online', $buat);
             }
         }
-
-        // Kolom `parent_email` perlu indeks agar pencarian anak per email wali
-        // tetap cepat, termasuk bila kolomnya dibuat lebih awal oleh migrasi ini.
-        $this->pastikanIndexParentEmail();
 
         // 2. Kolom lama tidak lagi wajib diisi (form baru tidak mengirimnya).
         $longgarkan = [
@@ -68,26 +63,6 @@ return new class extends Migration
                 });
             }
         }
-    }
-
-    /** Pastikan `parent_email` memiliki indeks biasa (bukan unik). */
-    private function pastikanIndexParentEmail(): void
-    {
-        if (! Schema::hasColumn('pendaftaran_online', 'parent_email')) {
-            return;
-        }
-
-        foreach (Schema::getIndexes('pendaftaran_online') as $index) {
-            $kolom = array_map('strtolower', $index['columns'] ?? []);
-
-            if ($kolom === ['parent_email']) {
-                return;
-            }
-        }
-
-        Schema::table('pendaftaran_online', function (Blueprint $table) {
-            $table->index('parent_email');
-        });
     }
 
     private function pastikanKolomSantri(): void
