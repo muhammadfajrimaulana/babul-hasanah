@@ -112,10 +112,8 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout')->middleware('auth');
-<<<<<<< HEAD
-Route::get('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout')->middleware('auth');
-=======
->>>>>>> 0b92c49de206a1843977a1430384e3de67525b3c
+
+// Route::get('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout')->middleware('auth');
 
 // ==========================================
 // 3. ROUTES PENGGUNA (Super Admin + pengelola wali)
