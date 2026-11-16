@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Support\Akses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
 class AuthenticatedSessionController extends Controller
@@ -41,14 +42,16 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        // 4. Cek status akun (opsional: jika tabel users memiliki kolom status)
-        if (isset($user->is_active) && !$user->is_active) {
+        // 4. Cek status akun. Akun wali santri yang mendaftar mandiri berstatus
+        //    `pending` sampai Admin Jenjang memverifikasi pendaftarannya.
+        if (Schema::hasColumn('users', 'status') && ! $user->sudahAktif()) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
             return redirect()->route('login')->withErrors([
-                'email' => 'Akun Anda sedang dinonaktifkan. Silakan hubungi Sekretariat Pesantren.',
+                'email' => 'Akun Anda masih berstatus PENDING. Tunggu verifikasi Admin Jenjang; '
+                    .'kata sandi akan dikirim otomatis ke email Anda setelah pendaftaran disetujui.',
             ]);
         }
 

@@ -817,7 +817,7 @@
                         </p>
 
                         <div class="sambutan-sign">
-                            <strong>[ Nama Pimpinan ]</strong>
+                            <strong>KH. MARDIN HSB ASSHIDDIQY, M.MPd</strong>
                             <span>Pimpinan Pondok Pesantren Babul Hasanah</span>
                         </div>
                     </div>

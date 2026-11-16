@@ -7,6 +7,7 @@ use App\Models\Berita;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class BeritaController extends Controller
 {
@@ -97,6 +98,17 @@ class BeritaController extends Controller
         ]);
 
         $data['slug'] = $data['slug'] ?: Str::slug($data['judul']);
+
+        // Berita yang dipublikasikan wajib memiliki foto utama yang benar-benar
+        // tersimpan. Draft tetap boleh disimpan tanpa foto.
+        $punyaGambarBaru = $request->hasFile('gambar');
+        $punyaGambarLama = $berita?->punyaGambarTersimpan() ?? false;
+
+        if ($data['status'] === 'published' && ! $punyaGambarBaru && ! $punyaGambarLama) {
+            throw ValidationException::withMessages([
+                'gambar' => 'Unggah foto utama terlebih dahulu sebelum mempublikasikan berita.',
+            ]);
+        }
 
         if ($request->hasFile('gambar')) {
             $data['gambar'] = $request->file('gambar')->store('berita', 'public');

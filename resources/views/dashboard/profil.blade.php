@@ -173,7 +173,7 @@
                 </form>
                 <h2 class="pf-name">{{ $user->name }}</h2>
                 <span class="pf-email">{{ $user->email }}</span>
-                <span class="pf-role">{{ \App\Support\Akses::label($user->role) }}</span>
+                <span class="pf-role">{{ $user->labelPeran() }}</span>
             </div>
         </div>
 
@@ -197,7 +197,7 @@
                         </div>
                         <div class="pf-field full">
                             <label class="pf-label">Peran Akun</label>
-                            <input type="text" class="pf-input" value="{{ \App\Support\Akses::label($user->role) }}" disabled>
+                            <input type="text" class="pf-input" value="{{ $user->labelPeran() }}" disabled>
                             <span class="pf-hint">Peran hanya dapat diubah oleh Super Admin melalui menu Pengguna.</span>
                         </div>
                     </div>

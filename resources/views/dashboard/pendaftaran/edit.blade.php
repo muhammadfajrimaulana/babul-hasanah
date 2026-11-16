@@ -126,14 +126,14 @@
                 </div>
 
                 <div class="sm:col-span-2">
-                    <label class="{{ $labelCls }}" for="email">Email Orang Tua / Wali <span class="text-rose-500">*</span></label>
-                    <input id="email" type="email" name="email" required maxlength="255" autocomplete="email"
-                        value="{{ old('email', $pendaftaran->email) }}" class="{{ $inputCls }}"
+                    <label class="{{ $labelCls }}" for="parent_email">Email Orang Tua / Wali <span class="text-rose-500">*</span></label>
+                    <input id="parent_email" type="email" name="parent_email" required maxlength="255" autocomplete="email"
+                        value="{{ old('parent_email', $pendaftaran->parent_email ?: $pendaftaran->email) }}" class="{{ $inputCls }}"
                         placeholder="email.orangtua@gmail.com">
                     <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                         Email milik orang tua/wali yang dipakai untuk <b>login Portal Wali Santri</b>. Santri tidak perlu email sendiri.
                     </p>
-                    @error('email') <p class="text-[11px] text-rose-600 mt-1">{{ $message }}</p> @enderror
+                    @error('parent_email') <p class="text-[11px] text-rose-600 mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="sm:col-span-2 pt-2 border-t border-slate-100 dark:border-slate-800">
@@ -164,6 +164,7 @@
                     <label class="{{ $labelCls }}" for="nisn">NISN</label>
                     <input id="nisn" type="text" name="nisn" maxlength="20" inputmode="numeric"
                         value="{{ old('nisn', $pendaftaran->nisn) }}" class="{{ $inputCls }}">
+                    @error('nisn') <p class="text-[11px] text-rose-600 mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
 

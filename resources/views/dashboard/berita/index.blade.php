@@ -45,7 +45,8 @@
                                 <td class="py-4 px-6">
                                     <div class="flex items-center gap-3">
                                         <img src="{{ $berita->gambar_url }}" alt=""
-                                            class="w-14 h-10 object-cover rounded-lg border border-slate-100 dark:border-slate-700">
+                                            class="w-14 h-10 object-cover rounded-lg border border-slate-100 dark:border-slate-700"
+                                            onerror="this.onerror=null;this.src='{{ asset('assets/img/berita-default.svg') }}'">
                                         <div>
                                             <div class="font-black text-slate-900 dark:text-white">{{ $berita->judul }}</div>
                                             <div class="text-[10px] text-slate-400 font-mono">{{ $berita->slug }}</div>

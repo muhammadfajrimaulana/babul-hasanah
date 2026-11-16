@@ -1,11 +1,11 @@
 @extends('layouts.admin')
 
 @php
-    $bolehSemua = \App\Support\Akses::superAdmin(auth()->user());
-    $kembali = route('super.pengguna.index', $bolehSemua ? [] : ['kategori' => 'wali_santri']);
+    $multiPeran = count($roles ?? []) > 1;
+    $kembali = route('super.pengguna.index', $multiPeran ? [] : ['kategori' => 'wali_santri']);
 @endphp
 
-@section('title', ($bolehSemua ? 'Edit Pengguna' : 'Edit Wali Santri').' - Pondok Pesantren Babul Hasanah')
+@section('title', ($multiPeran ? 'Edit Pengguna' : 'Edit Wali Santri').' - Pondok Pesantren Babul Hasanah')
 
 @section('content')
     <div class="max-w-2xl space-y-6">
@@ -14,10 +14,10 @@
                 <a href="{{ $kembali }}"
                     class="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-400 hover:text-emerald-600 transition mb-1">
                     <i class="fa-solid fa-arrow-left"></i>
-                    {{ $bolehSemua ? 'Kembali ke daftar pengguna' : 'Kembali ke daftar wali santri' }}
+                    {{ $multiPeran ? 'Kembali ke daftar pengguna' : 'Kembali ke daftar wali santri' }}
                 </a>
                 <h2 class="text-xl font-black text-slate-900 dark:text-white">
-                    {{ $bolehSemua ? 'Edit Pengguna' : 'Edit Wali Santri' }}
+                    {{ $multiPeran ? 'Edit Pengguna' : 'Edit Wali Santri' }}
                 </h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400">
                     Perbarui data akun <span class="font-bold text-slate-700 dark:text-slate-200">{{ $pengguna->name }}</span>.
@@ -35,7 +35,7 @@
                     <p class="text-[11px] text-slate-400 truncate">{{ $pengguna->email }}</p>
                 </div>
                 <span class="ml-auto shrink-0 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300">
-                    {{ $roles[$pengguna->role] ?? $pengguna->role }}
+                    {{ $pengguna->labelPeran() }}
                 </span>
             </div>
 

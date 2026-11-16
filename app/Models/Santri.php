@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Absensi;
 
 class Santri extends Model
 {
@@ -40,5 +39,11 @@ class Santri extends Model
     public function absensi()
     {
         return $this->hasMany(Absensi::class, 'santri_id');
+    }
+
+    /** Nilai akademik santri (semua kategori & semester). */
+    public function nilai()
+    {
+        return $this->hasMany(NilaiSantri::class, 'santri_id');
     }
 }
