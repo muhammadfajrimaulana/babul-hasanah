@@ -39,6 +39,28 @@
             </div>
         </header>
 
+        <!-- Menu Navigasi Portal -->
+        <nav class="bg-white border-b border-slate-200 px-6 sm:px-10">
+            <div class="max-w-7xl mx-auto flex items-center gap-1.5 overflow-x-auto py-2">
+                @php
+                    $navClass = fn (bool $aktif) => 'inline-flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-[11px] font-bold transition '
+                        .($aktif
+                            ? 'bg-emerald-700 text-white shadow-sm'
+                            : 'text-slate-600 hover:bg-slate-100 hover:text-emerald-700');
+                @endphp
+
+                <a href="{{ route('portal.dashboard') }}" class="{{ $navClass(request()->routeIs('portal.dashboard')) }}">
+                    <i class="fa-solid fa-house"></i> Beranda
+                </a>
+                <a href="{{ route('portal.nilai') }}" class="{{ $navClass(request()->routeIs('portal.nilai*')) }}">
+                    <i class="fa-solid fa-book-open"></i> Nilai Santri
+                </a>
+                <a href="{{ route('portal.prestasi') }}" class="{{ $navClass(request()->routeIs('portal.prestasi*')) }}">
+                    <i class="fa-solid fa-trophy"></i> Prestasi
+                </a>
+            </div>
+        </nav>
+
         <!-- Main Content (Tempat yield masuk) -->
         <main class="flex-1 max-w-7xl w-full mx-auto p-6 sm:p-8 lg:px-10">
             @yield('content')

@@ -23,11 +23,16 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validasi input form
-        $credentials = $request->validate([
+        // 1. Validasi input form (persetujuan syarat & ketentuan wajib dicentang)
+        $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
+            'agree' => ['accepted'],
+        ], [
+            'agree.accepted' => 'Centang persetujuan Syarat & Ketentuan terlebih dahulu sebelum masuk ke Dashboard.',
         ]);
+
+        $credentials = $request->only('email', 'password');
 
         // 2. Cek percobaan autentikasi
         if (!Auth::attempt($credentials, $request->boolean('remember'))) {

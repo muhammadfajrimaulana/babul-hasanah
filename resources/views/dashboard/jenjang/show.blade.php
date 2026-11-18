@@ -125,6 +125,18 @@
             </div>
         </div>
 
+        {{-- ===================== AKADEMIK: NILAI & PRESTASI ===================== --}}
+        @php
+            $inputCls = 'w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500';
+            $labelCls = 'block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5';
+            $cardCls = 'rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-4';
+        @endphp
+
+        <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            @include('dashboard.roles._form-nilai-jenjang')
+            @include('dashboard.roles._form-prestasi-jenjang')
+        </div>
+
         {{-- ===================== DATA SANTRI ===================== --}}
         <div class="overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 px-5 py-4">
@@ -241,6 +253,7 @@
                                 <th class="px-4 py-2.5 font-extrabold sm:px-5">Nama</th>
                                 <th class="px-4 py-2.5 font-extrabold sm:px-5">Tahun Lulus</th>
                                 <th class="hidden px-4 py-2.5 font-extrabold sm:table-cell sm:px-5">Kegiatan</th>
+                                <th class="px-4 py-2.5 text-center font-extrabold sm:px-5">Status</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 font-medium text-slate-700 dark:divide-slate-800 dark:text-slate-300">
@@ -250,6 +263,9 @@
                                     </td>
                                     <td class="px-4 py-3 sm:px-5">{{ $a->tahun_lulus ?: '-' }}</td>
                                     <td class="hidden px-4 py-3 sm:table-cell sm:px-5">{{ $a->kegiatan ?: '-' }}</td>
+                                    <td class="px-4 py-3 text-center sm:px-5">
+                                        @include('dashboard.alumni._status', ['alumni' => $a])
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

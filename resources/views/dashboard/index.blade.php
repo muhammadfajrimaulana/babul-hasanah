@@ -2953,6 +2953,28 @@
 
         </div>
 
+        {{-- Panel Dashboard Jenjang: Super Admin bisa kelola seluruh jenjang --}}
+        @isset($jenjangPanel)
+            <div class="mt-6 space-y-3" id="panel-jenjang">
+                <div>
+                    <h2 class="text-sm font-black text-slate-900 dark:text-white">Dashboard Jenjang</h2>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                        Statistik, input nilai/prestasi, dan Data Alumni. Pilih jenjang untuk mengelola satu jenjang,
+                        atau biarkan kosong untuk melihat gabungan seluruh jenjang.
+                    </p>
+                </div>
+                @include('dashboard.roles._panel-jenjang', ['panel' => $jenjangPanel])
+            </div>
+        @endisset
+
+        {{-- Komponen akses cepat per jenjang (Super Admin) --}}
+        <div class="mt-6">
+            @include('dashboard.roles._jenjang-akses', [
+                'judul' => 'Akses Cepat per Jenjang',
+                'deskripsi' => 'Input nilai & prestasi serta kelola data santri dan alumni pada tiap jenjang.',
+            ])
+        </div>
+
         {{-- ===================== TOAST ===================== --}}
         <div id="db-toast">
             <i class="fa-solid fa-check-circle"></i>

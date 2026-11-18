@@ -79,6 +79,12 @@
             </div>
         </div>
 
+        {{-- Komponen akses cepat per jenjang --}}
+        @include('dashboard.roles._jenjang-akses', [
+            'judul' => 'Akses Cepat per Jenjang',
+            'deskripsi' => 'Lihat nilai, prestasi, data santri, dan alumni pada tiap jenjang (hanya baca).',
+        ])
+
         <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
             {{-- Santri terbaru --}}
             <div class="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 xl:col-span-2">

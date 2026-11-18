@@ -396,7 +396,7 @@ class PenggunaController extends Controller
                 Rule::in(array_keys(self::jenjangOptions())),
             ],
             'phone' => ['nullable', 'string', 'max:30'],
-            'password' => [$pengguna ? 'nullable' : 'required', 'string', 'min:8', 'confirmed'],
+            'password' => [$pengguna ? 'nullable' : 'required', 'string', 'min:6', 'confirmed'],
             'santri_id' => [
                 'nullable',
                 'integer',

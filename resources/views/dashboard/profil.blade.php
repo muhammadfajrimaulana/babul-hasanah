@@ -217,7 +217,7 @@
                         <div class="pf-field full">
                             <label class="pf-label">Password Baru</label>
                             <input type="password" name="password" class="pf-input" placeholder="••••••••" required>
-                            <span class="pf-hint">Minimal 8 karakter.</span>
+                            <span class="pf-hint">Minimal 6 karakter.</span>
                         </div>
                         <div class="pf-field full">
                             <label class="pf-label">Konfirmasi Password Baru</label>

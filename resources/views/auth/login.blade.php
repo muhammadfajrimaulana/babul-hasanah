@@ -96,8 +96,14 @@
     .lg-field { margin-bottom: 16px; }
     .lg-label { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
     .lg-label label { font-size: 12px; font-weight: 600; color: var(--green); }
-    .lg-label a { font-size: 12px; font-weight: 500; color: var(--emerald-d); transition: color .2s ease; }
-    .lg-label a:hover { color: var(--green); }
+
+    .lg-forgot { display: flex; justify-content: flex-end; margin: -4px 0 16px; }
+    .lg-forgot a {
+        display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;
+        color: var(--emerald-d); padding: 3px 2px; transition: color .2s ease;
+    }
+    .lg-forgot a i { font-size: 10.5px; }
+    .lg-forgot a:hover { color: var(--green); text-decoration: underline; text-underline-offset: 3px; }
 
     .lg-input { position: relative; }
     .lg-input > i.lead {
@@ -122,9 +128,36 @@
     .lg-eye:hover { background: var(--cream); color: var(--green); }
     .lg-error { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: #d92d33; margin-top: 7px; }
 
-    .lg-remember { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 12.5px; color: var(--muted); margin: 4px 0 20px; user-select: none; }
-    .lg-remember input { width: 17px; height: 17px; accent-color: var(--emerald-d); cursor: pointer; margin: 0; }
-    .lg-remember:hover { color: var(--ink); }
+    /* ---------- Persetujuan syarat & ketentuan ---------- */
+    .lg-agree {
+        display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 12.5px; color: var(--muted);
+        line-height: 1.65; margin: 4px 0 20px; user-select: none; border-radius: 12px; transition: color .2s ease;
+    }
+    .lg-agree input { width: 17px; height: 17px; accent-color: var(--emerald-d); cursor: pointer; margin: 2px 0 0; flex: none; }
+    .lg-agree a { font-weight: 600; color: var(--emerald-d); }
+    .lg-agree a:hover { color: var(--green); }
+    .lg-agree:hover { color: var(--ink); }
+    .lg-agree.invalid { color: #b42318; }
+    .lg-agree.invalid input { outline: 2px solid #e5484d; outline-offset: 2px; }
+    .lg-agree.shake { animation: lgshake .32s ease; }
+    @keyframes lgshake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-5px); }
+        50% { transform: translateX(5px); }
+        80% { transform: translateX(-3px); }
+    }
+
+    .lg-note {
+        display: none; align-items: flex-start; gap: 8px; font-size: 12px; font-weight: 500; line-height: 1.6;
+        background: #fdf1f1; border: 1px solid #f6c6c7; color: #b42318; padding: 10px 12px; border-radius: 12px;
+        margin: -8px 0 18px; animation: lgpop .25s ease;
+    }
+    .lg-note.show { display: flex; }
+    .lg-note i { margin-top: 3px; }
+    @keyframes lgpop {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
     .lg-btn {
         width: 100%; height: 52px; border: 0; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600; color: #fff;
@@ -239,12 +272,7 @@
 
                 {{-- Kata sandi --}}
                 <div class="lg-field">
-                    <div class="lg-label">
-                        <label for="password">Kata Sandi</label>
-                        @if (Route::has('password.request'))
-                            <a href="{{ route('password.request') }}">Lupa sandi?</a>
-                        @endif
-                    </div>
+                    <div class="lg-label"><label for="password">Kata Sandi</label></div>
                     <div class="lg-input has-eye">
                         <i class="fa-solid fa-lock lead"></i>
                         <input id="password" name="password" type="password" autocomplete="current-password" required
@@ -258,10 +286,26 @@
                     @enderror
                 </div>
 
-                <label class="lg-remember">
-                    <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                    <span>Ingat saya di perangkat ini</span>
+                {{-- Lupa kata sandi --}}
+                @if (Route::has('password.request'))
+                    <div class="lg-forgot">
+                        <a href="{{ route('password.request') }}"><i class="fa-solid fa-key"></i> Lupa kata sandi?</a>
+                    </div>
+                @endif
+
+                {{-- Persetujuan wajib sebelum masuk --}}
+                <label class="lg-agree {{ $errors->has('agree') ? 'invalid' : '' }}" id="agreeLabel">
+                    <input type="checkbox" name="agree" id="agree" value="1" {{ old('agree') ? 'checked' : '' }}>
+                    <span>
+                        Saya menyetujui <a href="#" onclick="return false;">Syarat &amp; Ketentuan</a> serta
+                        <a href="#" onclick="return false;">Kebijakan Privasi</a> Pondok Pesantren Babul Hasanah.
+                    </span>
                 </label>
+
+                <p class="lg-note {{ $errors->has('agree') ? 'show' : '' }}" id="agreeNote" role="alert" aria-live="polite">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span id="agreeNoteText">{{ $errors->first('agree') ?: 'Centang persetujuan terlebih dahulu sebelum masuk ke Dashboard.' }}</span>
+                </p>
 
                 <button type="submit" class="lg-btn" id="loginBtn">
                     <span class="lg-spin"></span>
@@ -302,12 +346,44 @@
         icon.classList.toggle('fa-eye-slash', tampil);
     }
 
+    // Persetujuan syarat & ketentuan: wajib dicentang sebelum login diproses
+    const agreeBox = document.getElementById('agree');
+    const agreeLabel = document.getElementById('agreeLabel');
+    const agreeNote = document.getElementById('agreeNote');
+
+    function showAgreeWarning() {
+        agreeLabel.classList.add('invalid');
+        agreeNote.classList.add('show');
+        agreeLabel.classList.remove('shake');
+        void agreeLabel.offsetWidth; // paksa animasi bisa diulang
+        agreeLabel.classList.add('shake');
+    }
+
+    function hideAgreeWarning() {
+        agreeLabel.classList.remove('invalid', 'shake');
+        agreeNote.classList.remove('show');
+    }
+
+    agreeBox.addEventListener('change', function () {
+        if (agreeBox.checked) {
+            hideAgreeWarning();
+        }
+    });
+
     // Tombol berubah jadi "memproses" saat form dikirim, mencegah klik ganda
-    document.getElementById('loginForm').addEventListener('submit', function () {
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+        if (!agreeBox.checked) {
+            e.preventDefault();
+            showAgreeWarning();
+            agreeBox.focus();
+            return;
+        }
+
         const btn = document.getElementById('loginBtn');
         btn.classList.add('loading');
         document.getElementById('loginText').textContent = 'Memproses...';
     });
+
 </script>
 
 @endsection

@@ -98,6 +98,12 @@
             </div>
         </div>
 
+        {{-- Komponen akses cepat per jenjang --}}
+        @include('dashboard.roles._jenjang-akses', [
+            'judul' => 'Akses Cepat per Jenjang',
+            'deskripsi' => 'Lihat nilai, prestasi, data santri, dan alumni pada tiap jenjang (hanya baca).',
+        ])
+
         {{-- Pendaftar terbaru --}}
         <div class="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">

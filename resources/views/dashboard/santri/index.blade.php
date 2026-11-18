@@ -8,7 +8,7 @@
             <div>
                 <h2 class="text-xl font-black text-slate-900 dark:text-white">Manajemen Data Santri</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Kelola informasi data santri aktif Pondok Pesantren
-                    Babul Hasanah dari semua jenjang.</p>
+                    Babul Hasanah{{ ($bisaFilterJenjang ?? false) ? ' dari semua jenjang' : '' }}. Santri yang ditandai lulus otomatis masuk ke Data Alumni.</p>
             </div>
             <div class="flex items-center gap-2">
                 @if (auth()->user()->bisa('santri.ubah'))
@@ -29,6 +29,52 @@
                 @endif
             </div>
         </div>
+
+        <!-- FILTER JENJANG -->
+        @if ($bisaFilterJenjang ?? false)
+            <form method="GET" action="{{ route('admin.santri.index') }}"
+                class="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex items-start gap-3">
+                    <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </span>
+                    <div>
+                        <p class="text-[11px] font-black uppercase tracking-wider text-slate-400">Pilih Jenjang</p>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                            Menampilkan santri satu jenjang, atau seluruh jenjang bila tidak dipilih.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <select name="jenjang"
+                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 sm:w-64">
+                        <option value="">Semua jenjang</option>
+                        @foreach ($daftarJenjang as $j)
+                            <option value="{{ $j['slug'] }}" @selected(($filterJenjang ?? '') === $j['slug'])>
+                                {{ $j['kode'] }} — {{ $j['nama'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <div class="flex items-center gap-2">
+                        <button type="submit"
+                            class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-emerald-700">
+                            <i class="fa-solid fa-filter"></i> Terapkan
+                        </button>
+                        @if (filled($filterJenjang ?? null))
+                            <a href="{{ route('admin.santri.index') }}"
+                                class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2.5 text-[11px] font-bold text-slate-500 transition hover:text-slate-700 dark:border-slate-700 dark:text-slate-400">
+                                Reset
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            </form>
+        @elseif (filled($namaJenjangAdmin ?? null))
+            <div class="flex items-center gap-2 rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-3 text-[11px] font-bold text-emerald-800 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
+                <i class="fa-solid fa-layer-group"></i>
+                Data dibatasi pada jenjang {{ $namaJenjangAdmin }}.
+            </div>
+        @endif
 
         <!-- PESAN SUKSES / ERROR -->
         @if (session('success'))
@@ -137,6 +183,7 @@
                             <th class="py-3 px-4 font-extrabold">NISN</th>
                             <th class="py-3 px-4 font-extrabold">Pilihan Jenjang</th>
                             <th class="py-3 px-4 font-extrabold text-center">Status</th>
+                            <th class="py-3 px-4 font-extrabold text-center">Kelulusan</th>
                             <th class="py-3 px-4 font-extrabold text-right">Aksi</th>
                         </tr>
                     </thead>
@@ -216,6 +263,26 @@
                                     @endif
                                 </td>
 
+                                {{-- Status Kelulusan --}}
+                                <td class="py-4 px-4 text-center">
+                                    @if (! $kelulusanSiap)
+                                        <span class="text-slate-400">-</span>
+                                    @elseif ($santri->sudah_lulus)
+                                        <span class="inline-flex items-center gap-1 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                                            <i class="fa-solid fa-graduation-cap text-[9px]"></i>
+                                            Lulus{{ $santri->tahun_lulus ? ' '.$santri->tahun_lulus : '' }}
+                                        </span>
+                                        @if ($tautanSiap && $santri->alumni)
+                                            <div class="mt-1">
+                                                <a href="{{ route('admin.alumni.index', ['q' => $santri->nomor_induk]) }}"
+                                                    class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline">Data alumni</a>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <span class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Aktif</span>
+                                    @endif
+                                </td>
+
                                 {{-- Aksi --}}
                                 <td class="py-4 px-4 text-right space-x-1 whitespace-nowrap">
                                     <a href="{{ route('admin.santri.detail', $santri->id) }}"
@@ -223,6 +290,16 @@
                                     @if (auth()->user()->bisa('santri.ubah'))
                                         <a href="{{ route('admin.santri.edit', $santri->id) }}"
                                             class="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/50 text-amber-600 hover:bg-amber-100 rounded-lg text-[10px] font-bold transition">Edit</a>
+                                        @if ($kelulusanSiap && ! $santri->sudah_lulus)
+                                            <form action="{{ route('admin.santri.luluskan', $santri->id) }}" method="POST"
+                                                class="inline-block"
+                                                onsubmit="var tahun = prompt('Tahun lulus {{ $santri->nama_lengkap }}:', '{{ now()->year }}'); if (tahun === null || tahun === '') { return false; } this.tahun_lulus.value = tahun; return confirm('Tandai santri ini LULUS dan buat data alumni?');">
+                                                @csrf
+                                                <input type="hidden" name="tahun_lulus" value="{{ now()->year }}">
+                                                <button type="submit"
+                                                    class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-[10px] font-bold transition">Luluskan</button>
+                                            </form>
+                                        @endif
                                         <form action="{{ route('admin.santri.destroy', $santri->id) }}" method="POST"
                                             class="inline-block"
                                             onsubmit="return confirm('Hapus data santri ini? Status pendaftaran terkait akan kembali menjadi Pending.');">
@@ -236,7 +313,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="15" class="py-8 text-center text-slate-400 text-xs">Belum ada data santri
+                                <td colspan="16" class="py-8 text-center text-slate-400 text-xs">Belum ada data santri
                                     yang tersimpan di database.</td>
                             </tr>
                         @endforelse

@@ -142,8 +142,8 @@
                                 <input id="email" type="email" name="email" value="{{ old('email') }}" required maxlength="255"
                                     class="{{ $inputCls }}" placeholder="email.orangtua@gmail.com" autocomplete="email">
                                 <p class="text-xs text-slate-500 mt-1">
-                                    Email milik orang tua/wali. Dipakai untuk <b>login Portal Wali Santri</b> setelah pendaftaran diverifikasi.
-                                    Santri tidak perlu memiliki email sendiri.
+                                    Email milik orang tua/wali. Setelah pendaftaran dikirim, <b>username dan kata sandi
+                                    Portal Wali Santri</b> akan dikirim ke email ini. Santri tidak perlu memiliki email sendiri.
                                 </p>
                                 @error('email') <p class="{{ $errorCls }}">{{ $message }}</p> @enderror
                             </div>

@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
+use App\Models\DokumenNilai;
 use App\Models\NilaiSantri;
 use App\Models\Santri;
 use App\Support\Akademik;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class PortalAkademikController extends Controller
 {
@@ -24,6 +26,7 @@ class PortalAkademikController extends Controller
                 'filter' => null,
                 'opsi' => collect(),
                 'data' => null,
+                'dokumen' => collect(),
                 'siap' => false,
             ]);
         }
@@ -37,6 +40,7 @@ class PortalAkademikController extends Controller
             'filter' => $filter,
             'opsi' => $anak ? $this->opsi($anak) : collect(),
             'data' => $data,
+            'dokumen' => $anak ? $this->dokumen($anak, $filter) : collect(),
             'siap' => true,
         ]);
     }
@@ -91,23 +95,13 @@ class PortalAkademikController extends Controller
         $semester = strtolower((string) $request->input('semester'));
 
         if ($anak && $tahun === '') {
-            $terakhir = NilaiSantri::query()
-                ->where('santri_id', $anak->id)
-                ->where('status', 'published')
-                ->orderByDesc('tahun_ajaran')
-                ->orderByDesc('semester')
-                ->first();
+            $terakhir = $this->periodeTerakhir($anak->id);
 
             $tahun = $terakhir?->tahun_ajaran ?? Akademik::tahunAjaranSekarang();
         }
 
         if ($anak && ! array_key_exists($semester, Akademik::SEMESTER)) {
-            $terakhir = NilaiSantri::query()
-                ->where('santri_id', $anak->id)
-                ->where('status', 'published')
-                ->where('tahun_ajaran', $tahun)
-                ->orderByDesc('semester')
-                ->first();
+            $terakhir = $this->periodeTerakhir($anak->id, $tahun);
 
             $semester = $terakhir?->semester ?? Akademik::semesterSekarang();
         }
@@ -120,17 +114,125 @@ class PortalAkademikController extends Controller
         ];
     }
 
-    /** Pilihan tahun/semester yang benar-benar punya nilai terbit. */
+    /** Pilihan tahun/semester yang benar-benar punya nilai atau rapor terbit. */
     private function opsi(Santri $anak): Collection
     {
-        return NilaiSantri::query()
+        $nilai = NilaiSantri::query()
             ->where('santri_id', $anak->id)
             ->where('status', 'published')
             ->select('tahun_ajaran', 'semester')
             ->distinct()
-            ->orderByDesc('tahun_ajaran')
-            ->orderBy('semester')
             ->get();
+
+        $dokumen = $this->dokumenSiap()
+            ? DokumenNilai::query()
+                ->where('santri_id', $anak->id)
+                ->where('status', 'published')
+                ->select('tahun_ajaran', 'semester')
+                ->distinct()
+                ->get()
+            : collect();
+
+        return $nilai
+            ->concat($dokumen)
+            ->unique(fn ($baris) => $baris->tahun_ajaran.'|'.$baris->semester)
+            ->sortByDesc(fn ($baris) => $baris->tahun_ajaran.'|'.$baris->semester)
+            ->values();
+    }
+
+    /**
+     * Periode terbaru yang punya nilai atau rapor PDF terbit.
+     * Dipakai agar halaman tetap membuka periode yang benar meskipun
+     * santri hanya punya rapor PDF tanpa nilai angka.
+     */
+    private function periodeTerakhir(int $santriId, ?string $tahun = null): ?object
+    {
+        $nilai = NilaiSantri::query()
+            ->where('santri_id', $santriId)
+            ->where('status', 'published')
+            ->when($tahun, fn ($q) => $q->where('tahun_ajaran', $tahun))
+            ->orderByDesc('tahun_ajaran')
+            ->orderByDesc('semester')
+            ->first();
+
+        $dokumen = $this->dokumenSiap()
+            ? DokumenNilai::query()
+                ->where('santri_id', $santriId)
+                ->where('status', 'published')
+                ->when($tahun, fn ($q) => $q->where('tahun_ajaran', $tahun))
+                ->orderByDesc('tahun_ajaran')
+                ->orderByDesc('semester')
+                ->first()
+            : null;
+
+        if ($nilai && $dokumen) {
+            $kunciNilai = $nilai->tahun_ajaran.'|'.$nilai->semester;
+            $kunciDokumen = $dokumen->tahun_ajaran.'|'.$dokumen->semester;
+
+            return $kunciDokumen > $kunciNilai ? $dokumen : $nilai;
+        }
+
+        return $dokumen ?? $nilai;
+    }
+
+    /** Rapor PDF terbit untuk satu anak pada periode terpilih. */
+    private function dokumen(Santri $anak, array $filter): Collection
+    {
+        if (! $this->dokumenSiap()) {
+            return collect();
+        }
+
+        return DokumenNilai::query()
+            ->with('pengunggah')
+            ->where('santri_id', $anak->id)
+            ->where('status', 'published')
+            ->where('tahun_ajaran', $filter['tahun'])
+            ->where('semester', $filter['semester'])
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    private function dokumenSiap(): bool
+    {
+        return Akademik::siap() && DokumenNilai::siap();
+    }
+
+    /** Pastikan dokumen benar-benar milik anak dari akun wali ini. */
+    private function pastikanMilik(Request $request, DokumenNilai $dokumen): void
+    {
+        $milik = $request->user()
+            ->santri()
+            ->whereKey($dokumen->santri_id)
+            ->exists();
+
+        abort_unless($milik, 403, 'Dokumen ini bukan milik akun Anda.');
+        abort_unless(
+            filled($dokumen->file_path) && Storage::disk('public')->exists($dokumen->file_path),
+            404,
+            'Berkas PDF tidak ditemukan.'
+        );
+    }
+
+    /** Tampilkan PDF langsung di browser (untuk pratinjau/iframe). */
+    public function dokumenLihat(Request $request, DokumenNilai $dokumen)
+    {
+        $this->pastikanMilik($request, $dokumen);
+
+        return response()->file(
+            Storage::disk('public')->path($dokumen->file_path),
+            ['Content-Type' => 'application/pdf']
+        );
+    }
+
+    /** Unduh PDF rapor ke perangkat wali. */
+    public function dokumenUnduh(Request $request, DokumenNilai $dokumen)
+    {
+        $this->pastikanMilik($request, $dokumen);
+
+        return Storage::disk('public')->download(
+            $dokumen->file_path,
+            $dokumen->file_name ?: 'rapor-'.$dokumen->tahun_ajaran.'.pdf'
+        );
     }
 
     /**

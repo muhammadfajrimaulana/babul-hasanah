@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Storage;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         // Halaman ini khusus Super Admin. Role lain diarahkan ke dashboard-nya
         // sendiri agar tidak pernah melihat data/layout yang salah.
@@ -127,6 +127,11 @@ class DashboardController extends Controller
         // ---- Agenda terdekat ----
         $agenda = $this->agendaTerdekat();
 
+        // ---- Panel Dashboard Jenjang (Super Admin bisa kelola semua jenjang) ----
+        // Data ini sama dengan halaman Dashboard Jenjang: statistik, form input
+        // nilai/prestasi, tabel alumni, dan santri untuk jenjang terpilih.
+        $jenjangPanel = app(RoleDashboardController::class)->dataJenjang($request);
+
         $data = [
             'totalSantri' => $totalSantri,
             'santriPutra' => 0,
@@ -150,6 +155,7 @@ class DashboardController extends Controller
             'santriPerJenjang' => $santriPerJenjang,
             'alumniPerJenjang' => $alumniPerJenjang,
             'jenjangStats' => $jenjangStats,
+            'jenjangPanel' => $jenjangPanel,
             'infoHarian' => $infoHarian,
             'kalenderEvents' => $kalenderEvents,
             'userAvatar' => auth()->user()->avatar ?? null,
@@ -196,7 +202,7 @@ class DashboardController extends Controller
         $user = auth()->user();
 
         $request->validate([
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
         $user->password = Hash::make($request->password);

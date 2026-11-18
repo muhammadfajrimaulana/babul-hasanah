@@ -48,9 +48,9 @@ class Akses
         'prestasi.lihat' => ['super_admin', 'admin', 'pengasuh', 'pembina'],
         'jenjang.lihat' => ['super_admin', 'admin', 'pengasuh', 'pembina'],
 
-        // Modul akademik: Super Admin, Admin Jenjang (jenjangnya), dan
-        // Pengasuh (monitoring semua jenjang, hanya baca).
-        'akademik.lihat' => ['super_admin', 'admin', 'pengasuh'],
+        // Modul akademik: Super Admin, Admin Jenjang (jenjangnya), serta
+        // Pengasuh & Pembina (monitoring semua jenjang, hanya baca).
+        'akademik.lihat' => ['super_admin', 'admin', 'pengasuh', 'pembina'],
 
         // Tulis (operasional) — hanya Super Admin & Admin Jenjang.
         'pendaftaran.ubah' => ['super_admin', 'admin'],

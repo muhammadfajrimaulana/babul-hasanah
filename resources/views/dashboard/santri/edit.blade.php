@@ -16,6 +16,11 @@
     if (\App\Support\Akses::dibatasiJenjang(auth()->user())) {
         $jenjangList = [$santri->jenjang_pendidikan ?: \App\Support\Akses::namaJenjang(auth()->user())];
     }
+
+    // Admin Jenjang: jenjang terkunci, tidak perlu memilih.
+    $infoJenjang = \App\Support\Akses::jenjangInfo(auth()->user());
+    $batasiJenjang = $infoJenjang !== null;
+    $jenjangTerkunci = $santri->jenjang_pendidikan ?: ($infoJenjang['nama'] ?? null);
 @endphp
 
 <div class="max-w-3xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-6">
@@ -73,19 +78,28 @@
             </div>
 
             <div class="sm:col-span-2">
-                <label class="{{ $labelCls }}" for="jenjang_pendidikan">Jenjang Pendidikan</label>
-                <select id="jenjang_pendidikan" name="jenjang_pendidikan" required class="{{ $inputCls }}">
-                    @foreach ($jenjangList as $jenjang)
-                        <option value="{{ $jenjang }}"
-                            {{ old('jenjang_pendidikan', $santri->jenjang_pendidikan) === $jenjang ? 'selected' : '' }}>
-                            {{ $jenjang }}
-                        </option>
-                    @endforeach
-                    {{-- Pertahankan nilai lama jika tidak ada dalam daftar --}}
-                    @if ($santri->jenjang_pendidikan && ! in_array($santri->jenjang_pendidikan, $jenjangList))
-                        <option value="{{ $santri->jenjang_pendidikan }}" selected>{{ $santri->jenjang_pendidikan }}</option>
-                    @endif
-                </select>
+                @if ($batasiJenjang)
+                    <label class="{{ $labelCls }}">Jenjang Pendidikan</label>
+                    <input type="hidden" name="jenjang_pendidikan" value="{{ $jenjangTerkunci }}">
+                    <div class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 px-4 py-3 text-xs font-bold">
+                        <i class="fa-solid fa-lock mr-1.5 text-[10px]"></i>{{ $jenjangTerkunci }}
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1">Jenjang otomatis mengikuti akun Admin Jenjang Anda.</p>
+                @else
+                    <label class="{{ $labelCls }}" for="jenjang_pendidikan">Jenjang Pendidikan</label>
+                    <select id="jenjang_pendidikan" name="jenjang_pendidikan" required class="{{ $inputCls }}">
+                        @foreach ($jenjangList as $jenjang)
+                            <option value="{{ $jenjang }}"
+                                {{ old('jenjang_pendidikan', $santri->jenjang_pendidikan) === $jenjang ? 'selected' : '' }}>
+                                {{ $jenjang }}
+                            </option>
+                        @endforeach
+                        {{-- Pertahankan nilai lama jika tidak ada dalam daftar --}}
+                        @if ($santri->jenjang_pendidikan && ! in_array($santri->jenjang_pendidikan, $jenjangList))
+                            <option value="{{ $santri->jenjang_pendidikan }}" selected>{{ $santri->jenjang_pendidikan }}</option>
+                        @endif
+                    </select>
+                @endif
             </div>
 
             <div class="sm:col-span-2">

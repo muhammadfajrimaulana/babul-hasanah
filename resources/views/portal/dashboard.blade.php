@@ -1,5 +1,7 @@
 @extends('layouts.portal')
 
+@use('App\Support\Akademik')
+
 @section('content')
     <div class="space-y-6">
 
@@ -18,6 +20,10 @@
                     class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-900 px-4 py-2.5 text-xs font-black transition">
                     <i class="fa-solid fa-book-open"></i> Lihat Nilai Santri
                 </a>
+                <a href="{{ route('portal.prestasi') }}"
+                    class="inline-flex items-center gap-2 rounded-xl border border-white/25 hover:bg-white/10 text-white px-4 py-2.5 text-xs font-black transition">
+                    <i class="fa-solid fa-trophy"></i> Lihat Prestasi
+                </a>
             </div>
         </div>
 
@@ -35,6 +41,29 @@
                     </p>
                 </div>
                 <i class="fa-solid fa-chevron-right text-emerald-500 text-xs mt-3 ml-auto shrink-0"></i>
+            </a>
+        @endif
+
+        <!-- NOTIFIKASI PRESTASI BARU -->
+        @if (! empty($adaPrestasiBaru) && $adaPrestasiBaru)
+            @php($prestasiPertama = $prestasiTerbaru->first())
+            <a href="{{ route('portal.prestasi') }}"
+                class="flex items-start gap-3 rounded-3xl border border-amber-200 bg-amber-50 p-5 hover:border-amber-400 transition">
+                <span class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-sm shrink-0">
+                    <i class="fa-solid fa-trophy"></i>
+                </span>
+                <div class="min-w-0">
+                    <p class="text-xs font-black text-amber-900">Prestasi baru ananda</p>
+                    <p class="text-[11px] text-amber-700 leading-relaxed">
+                        @if ($prestasiPertama)
+                            <b>{{ $prestasiPertama->judul }}</b> &mdash; {{ $prestasiPertama->label }}
+                            ({{ $prestasiPertama->nama }}). Klik untuk melihat seluruh prestasi ananda.
+                        @else
+                            Ada prestasi baru yang tercatat untuk ananda.
+                        @endif
+                    </p>
+                </div>
+                <i class="fa-solid fa-chevron-right text-amber-500 text-xs mt-3 ml-auto shrink-0"></i>
             </a>
         @endif
 
@@ -111,6 +140,54 @@
                             <p class="text-xs text-slate-500">Terhubung ke database pusat</p>
                         </div>
 
+                    </div>
+
+                    <!-- RINGKASAN NILAI TERBARU DARI ADMIN JENJANG -->
+                    @php($terbaru = $nilaiTerbaru->get($anak->id) ?? collect())
+                    <div class="space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <div>
+                                <h4 class="text-sm font-black text-slate-900">Nilai Terbaru</h4>
+                                <p class="text-[11px] text-slate-500">
+                                    Nilai yang diinput dan diterbitkan oleh Admin Jenjang.
+                                </p>
+                            </div>
+                            <a href="{{ route('portal.nilai', ['anak' => $anak->id]) }}"
+                                class="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 px-3.5 py-2 text-[11px] font-bold text-white transition">
+                                <i class="fa-solid fa-book-open"></i> Lihat Semua Nilai
+                            </a>
+                        </div>
+
+                        @if ($terbaru->isEmpty())
+                            <div class="rounded-2xl border border-dashed border-slate-200 px-4 py-6 text-center text-[11px] text-slate-400">
+                                <i class="fa-solid fa-clock mr-1"></i>
+                                Belum ada nilai yang diterbitkan untuk ananda. Silakan cek kembali nanti.
+                            </div>
+                        @else
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                @foreach ($terbaru as $n)
+                                    <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 space-y-1">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <span class="text-[9px] font-black uppercase tracking-wider text-slate-400">
+                                                {{ Akademik::labelKategori($n->kategori) }}
+                                            </span>
+                                            <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-black text-emerald-700">
+                                                {{ Akademik::predikat($n->nilai) }}
+                                            </span>
+                                        </div>
+                                        <p class="truncate text-[11px] font-bold text-slate-700">
+                                            {{ $n->mataPelajaran?->nama ?? '-' }}
+                                        </p>
+                                        <p class="text-2xl font-black text-emerald-700">
+                                            {{ Akademik::formatNilai($n->nilai) }}
+                                        </p>
+                                        <p class="text-[10px] text-slate-400">
+                                            {{ $n->tahun_ajaran }} · Semester {{ Akademik::labelSemester($n->semester) }}
+                                        </p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
 
                 </div>

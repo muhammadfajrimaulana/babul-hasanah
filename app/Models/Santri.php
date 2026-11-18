@@ -12,6 +12,10 @@ class Santri extends Model
     // Menyesuaikan dengan nama tabel di database migrasi kita
     protected $table = 'santri';
 
+    public const STATUS_AKTIF = 'aktif';
+
+    public const STATUS_LULUS = 'lulus';
+
     protected $fillable = [
         'user_id',
         'pendaftaran_online_id',
@@ -19,6 +23,8 @@ class Santri extends Model
         'nama_lengkap',
         'jenjang_pendidikan',
         'kelas',
+        'status_kelulusan',
+        'tahun_lulus',
         'alamat',
         'nama_wali',
     ];
@@ -45,5 +51,17 @@ class Santri extends Model
     public function nilai()
     {
         return $this->hasMany(NilaiSantri::class, 'santri_id');
+    }
+
+    /** Data alumni yang dibuat saat santri ditandai lulus. */
+    public function alumni()
+    {
+        return $this->hasOne(Alumni::class, 'santri_id');
+    }
+
+    /** Apakah santri sudah dinyatakan lulus. */
+    public function getSudahLulusAttribute(): bool
+    {
+        return ($this->status_kelulusan ?? self::STATUS_AKTIF) === self::STATUS_LULUS;
     }
 }

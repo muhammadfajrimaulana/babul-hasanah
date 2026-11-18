@@ -76,6 +76,104 @@
             </div>
         </div>
 
+        <!-- STATUS KELULUSAN & TAUTAN DATA ALUMNI -->
+        <div class="{{ $cardCls }}">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">Kelulusan &amp; Data Alumni</h2>
+                        <p class="text-[11px] text-slate-400">Santri yang ditandai lulus otomatis masuk ke halaman Data Alumni.</p>
+                    </div>
+                </div>
+                @if ($kelulusanSiap && $santri->sudah_lulus)
+                    <span class="inline-flex items-center gap-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 px-3 py-2 text-[11px] font-black text-indigo-700 dark:text-indigo-300">
+                        <i class="fa-solid fa-circle-check"></i>
+                        Lulus{{ $santri->tahun_lulus ? ' '.$santri->tahun_lulus : '' }}
+                    </span>
+                @endif
+            </div>
+
+            @if (! $kelulusanSiap)
+                <div class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+                    <p class="font-black"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Kolom kelulusan belum tersedia.</p>
+                    <p class="mt-1">Jalankan <b>php artisan migrate</b> agar fitur kelulusan &amp; tautan alumni aktif.</p>
+                </div>
+            @elseif ($santri->sudah_lulus)
+                <dl class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div class="{{ $boxCls }}">
+                        <dt class="{{ $labelCls }}">Status</dt>
+                        <dd class="font-bold text-indigo-700 dark:text-indigo-300">Lulus</dd>
+                    </div>
+                    <div class="{{ $boxCls }}">
+                        <dt class="{{ $labelCls }}">Tahun Lulus</dt>
+                        <dd class="font-bold text-slate-900 dark:text-white">{{ $santri->tahun_lulus ?? '-' }}</dd>
+                    </div>
+                    <div class="{{ $boxCls }} sm:col-span-2">
+                        <dt class="{{ $labelCls }}">Data Alumni</dt>
+                        <dd class="font-medium text-slate-900 dark:text-white">
+                            @if (! $tautanSiap)
+                                Jalankan migrasi agar data alumni dapat ditautkan.
+                            @elseif ($alumniTertaut)
+                                <span class="text-emerald-700 dark:text-emerald-400 font-bold">
+                                    <i class="fa-solid fa-link mr-1"></i> Tertaut ke Data Alumni
+                                </span>
+                                <a href="{{ route('admin.alumni.index', ['q' => $santri->nomor_induk]) }}"
+                                    class="ml-2 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline">Lihat</a>
+                                @if (auth()->user()->bisa('alumni.ubah'))
+                                    <a href="{{ route('admin.alumni.edit', $alumniTertaut) }}"
+                                        class="ml-1 text-[11px] font-bold text-amber-600 hover:underline">Lengkapi</a>
+                                @endif
+                            @else
+                                <span class="text-amber-700 dark:text-amber-400 font-bold">
+                                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> Belum ada data alumni tertaut
+                                </span>
+                                <span class="text-slate-400">— buka Data Alumni lalu klik “Tarik Santri Lulus”.</span>
+                            @endif
+                        </dd>
+                    </div>
+                </dl>
+
+                @if (auth()->user()->bisa('santri.ubah'))
+                    <form action="{{ route('admin.santri.batalkan-kelulusan', $santri->id) }}" method="POST"
+                        class="mt-5"
+                        onsubmit="return confirm('Batalkan status lulus {{ $santri->nama_lengkap }}? Data alumni yang dibuat otomatis akan ikut dihapus.');">
+                        @csrf
+                        <button type="submit"
+                            class="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-[11px] font-bold text-rose-700 hover:bg-rose-100 transition dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300">
+                            <i class="fa-solid fa-rotate-left"></i> Batalkan Kelulusan
+                        </button>
+                    </form>
+                @endif
+            @elseif (auth()->user()->bisa('santri.ubah'))
+                <form action="{{ route('admin.santri.luluskan', $santri->id) }}" method="POST"
+                    class="mt-5 flex flex-col sm:flex-row sm:items-end gap-3"
+                    onsubmit="return confirm('Tandai {{ $santri->nama_lengkap }} sebagai LULUS dan buat data alumni?');">
+                    @csrf
+                    <div class="sm:w-44">
+                        <label for="tahun_lulus" class="{{ $labelCls }}">Tahun Lulus</label>
+                        <input id="tahun_lulus" type="number" name="tahun_lulus" min="1998" max="{{ now()->year + 1 }}"
+                            value="{{ old('tahun_lulus', now()->year) }}"
+                            class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                    </div>
+                    <button type="submit"
+                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-[11px] font-black text-white shadow-sm transition hover:bg-indigo-700">
+                        <i class="fa-solid fa-graduation-cap"></i> Tandai Lulus &amp; Masukkan ke Alumni
+                    </button>
+                </form>
+                <p class="mt-2 text-[10px] text-slate-400">
+                    Data alumni dibuat dari nama, jenjang, dan kontak santri. Kegiatan setelah lulus bisa dilengkapi di halaman Data Alumni.
+                </p>
+            @else
+                <p class="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-[11px] text-slate-500 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
+                    <i class="fa-solid fa-eye mr-1"></i>
+                    Status kelulusan saat ini aktif. Hanya Super Admin dan Admin Jenjang yang dapat menandai kelulusan.
+                </p>
+            @endif
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- DATA SANTRI -->
             <div class="{{ $cardCls }}">

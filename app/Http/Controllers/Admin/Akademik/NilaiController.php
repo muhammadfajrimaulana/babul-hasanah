@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Akademik;
 
 use App\Http\Controllers\Controller;
+use App\Models\DokumenNilai;
 use App\Models\MataPelajaran;
 use App\Models\NilaiSantri;
 use App\Support\Akademik;
@@ -55,8 +56,41 @@ class NilaiController extends Controller
             ];
         }
 
+        // Data panel input cepat & riwayat terbaru. Dahulu berada di halaman
+        // dashboard-jenjang/input-nilai; kini digabung agar hanya ada satu
+        // halaman pengelolaan nilai.
+        $jenjangAktif = $filter['jenjang'];
+
+        $santriList = $jenjangAktif
+            ? Akademik::santriQuery($user, $jenjangAktif)->orderBy('nama_lengkap')->get()
+            : collect();
+
+        $mapelList = $jenjangAktif
+            ? Akademik::mapelQuery($user, $jenjangAktif)->where('aktif', true)->orderBy('nama')->get()
+            : collect();
+
+        $nilaiTerbaru = NilaiSantri::query()
+            ->with(['santri', 'mataPelajaran'])
+            ->when($jenjangAktif, fn ($q) => $q->where('jenjang', $jenjangAktif))
+            ->latest()
+            ->take(8)
+            ->get();
+
+        $dokumenTerbaru = DokumenNilai::siap()
+            ? DokumenNilai::query()
+                ->with('santri')
+                ->when($jenjangAktif, fn ($q) => $q->where('jenjang', $jenjangAktif))
+                ->latest()
+                ->take(8)
+                ->get()
+            : collect();
+
         return view('dashboard.akademik.nilai.index', [
             'filter' => $filter,
+            'santriList' => $santriList,
+            'mapelList' => $mapelList,
+            'nilaiTerbaru' => $nilaiTerbaru,
+            'dokumenTerbaru' => $dokumenTerbaru,
             'santris' => $santris,
             'nilai' => $nilai,
             'ringkasan' => $ringkasan,
@@ -64,6 +98,7 @@ class NilaiController extends Controller
             'daftarMapel' => $this->daftarMapel($user, $filter['jenjang']),
             'daftarJenjang' => $this->daftarJenjang($user),
             'tahunPilihan' => Akademik::tahunAjaranPilihan(),
+            'dokumenSiap' => DokumenNilai::siap(),
         ]);
     }
 
@@ -158,238 +193,6 @@ class NilaiController extends Controller
             ->with('success', $pesan);
     }
 
-    /* ==================================================== Unggah file CSV */
-
-    public function upload(Request $request)
-    {
-        if (! Akademik::siap()) {
-            return view('dashboard.akademik.belum-siap');
-        }
-
-        $user = $request->user();
-        $filter = $this->filter($request);
-
-        return view('dashboard.akademik.nilai.upload', [
-            'filter' => $filter,
-            'daftarKelas' => Akademik::daftarKelas($user, $filter['jenjang']),
-            'daftarMapel' => $this->daftarMapel($user, $filter['jenjang']),
-            'daftarJenjang' => $this->daftarJenjang($user),
-            'tahunPilihan' => Akademik::tahunAjaranPilihan(),
-            'preview' => null,
-            'errorBaris' => [],
-        ]);
-    }
-
-    public function preview(Request $request)
-    {
-        abort_unless($request->user()->bisa('akademik.ubah'), 403);
-
-        $konteks = $this->konteks($request);
-
-        $request->validate([
-            'file_nilai' => ['required', 'file', 'mimes:csv,txt', 'max:5120'],
-        ], [
-            'file_nilai.required' => 'Pilih file CSV yang akan diunggah.',
-            'file_nilai.mimes' => 'Format file harus CSV. Simpan Excel sebagai CSV UTF-8 terlebih dahulu.',
-            'file_nilai.max' => 'Ukuran file maksimal 5 MB.',
-        ]);
-
-        $user = $request->user();
-        $santris = Akademik::santriQuery($user, $konteks['jenjang'])
-            ->where('kelas', $konteks['kelas'])
-            ->get()
-            ->keyBy(fn ($s) => strtoupper(trim((string) $s->nomor_induk)));
-
-        $existing = NilaiSantri::query()
-            ->whereIn('santri_id', $santris->pluck('id'))
-            ->konteks($konteks['mapel']->id, $konteks['tahun'], $konteks['semester'], $konteks['kategori'])
-            ->get()
-            ->keyBy('santri_id');
-
-        $baris = [];
-        $errors = [];
-        $terlihat = [];
-
-        foreach ($this->bacaCsv($request->file('file_nilai')) as $row) {
-            $nomorBaris = $row['_line'] ?? null;
-            $nis = strtoupper(trim((string) ($row['nis'] ?? $row['nomor_induk'] ?? '')));
-            $nilaiMentah = trim((string) ($row['nilai'] ?? ''));
-            $catatan = trim((string) ($row['catatan'] ?? '')) ?: null;
-
-            if ($nis === '' && $nilaiMentah === '') {
-                continue;
-            }
-
-            if ($nis === '') {
-                $errors[] = 'Baris '.$nomorBaris.': NIS/Nomor Induk kosong.';
-
-                continue;
-            }
-
-            if (isset($terlihat[$nis])) {
-                $errors[] = 'Baris '.$nomorBaris.': NIS '.$nis.' muncul lebih dari sekali.';
-
-                continue;
-            }
-            $terlihat[$nis] = true;
-
-            $santri = $santris->get($nis);
-
-            if (! $santri) {
-                $errors[] = 'Baris '.$nomorBaris.': NIS '.$nis.' tidak ditemukan di kelas '.$konteks['kelas'].'.';
-
-                continue;
-            }
-
-            $nilai = str_replace(',', '.', $nilaiMentah);
-            if ($nilai === '' || ! is_numeric($nilai)) {
-                $errors[] = 'Baris '.$nomorBaris.': nilai "'.$nilaiMentah.'" bukan angka.';
-
-                continue;
-            }
-
-            $nilai = round((float) $nilai, 2);
-            if ($nilai < 0 || $nilai > 100) {
-                $errors[] = 'Baris '.$nomorBaris.': nilai harus antara 0 sampai 100.';
-
-                continue;
-            }
-
-            $lama = $existing->get($santri->id);
-
-            $baris[] = [
-                'santri_id' => $santri->id,
-                'nis' => $santri->nomor_induk,
-                'nama' => $santri->nama_lengkap,
-                'nilai' => $nilai,
-                'catatan' => $catatan,
-                'aksi' => $lama ? 'Perbarui' : 'Baru',
-                'status' => $lama?->status,
-            ];
-        }
-
-        if ($baris === [] && $errors === []) {
-            $errors[] = 'File tidak berisi baris nilai yang bisa diproses.';
-        }
-
-        $preview = [
-            'konteks' => $konteks,
-            'baris' => $baris,
-            'file' => $request->file('file_nilai')->getClientOriginalName(),
-        ];
-
-        if ($errors === [] && $baris !== []) {
-            $request->session()->put($this->sessionKey($user->id), $preview);
-        }
-
-        return view('dashboard.akademik.nilai.upload', [
-            'filter' => $this->filterFromKonteks($konteks),
-            'daftarKelas' => Akademik::daftarKelas($user, $konteks['jenjang']),
-            'daftarMapel' => $this->daftarMapel($user, $konteks['jenjang']),
-            'daftarJenjang' => $this->daftarJenjang($user),
-            'tahunPilihan' => Akademik::tahunAjaranPilihan(),
-            'preview' => $preview,
-            'errorBaris' => $errors,
-        ]);
-    }
-
-    public function import(Request $request)
-    {
-        abort_unless($request->user()->bisa('akademik.ubah'), 403);
-
-        $user = $request->user();
-
-        abort_if(
-            Akses::adminTanpaJenjang($user),
-            403,
-            'Akun admin ini belum memiliki jenjang. Hubungi Super Admin.'
-        );
-
-        $terbitkan = $request->input('aksi') === 'terbit';
-        abort_unless(! $terbitkan || $user->bisa('akademik.terbit'), 403);
-
-        $preview = $request->session()->pull($this->sessionKey($user->id));
-
-        if (! $preview || empty($preview['baris'])) {
-            return redirect()
-                ->route('admin.akademik.nilai.index')
-                ->with('error', 'Data pratinjau sudah kedaluwarsa. Silakan unggah ulang file.');
-        }
-
-        $konteks = $preview['konteks'];
-
-        // Pastikan konteks lama masih valid dan masih dalam jenjang user.
-        abort_unless(Akses::cocokJenjang($user, $konteks['jenjang']), 403);
-
-        $mapel = MataPelajaran::find($konteks['mapel']->id);
-        abort_unless($mapel && $mapel->jenjang === $konteks['jenjang'], 403);
-
-        $idSantri = Akademik::santriQuery($user, $konteks['jenjang'])
-            ->where('kelas', $konteks['kelas'])
-            ->pluck('id')
-            ->all();
-
-        $disimpan = 0;
-
-        DB::transaction(function () use ($preview, $konteks, $idSantri, $user, &$disimpan) {
-            foreach ($preview['baris'] as $baris) {
-                if (! in_array($baris['santri_id'], $idSantri, true)) {
-                    continue;
-                }
-
-                $row = NilaiSantri::firstOrNew([
-                    'santri_id' => $baris['santri_id'],
-                    'mata_pelajaran_id' => $konteks['mapel']->id,
-                    'tahun_ajaran' => $konteks['tahun'],
-                    'semester' => $konteks['semester'],
-                    'kategori' => $konteks['kategori'],
-                ]);
-
-                $baru = ! $row->exists;
-
-                $row->fill([
-                    'jenjang' => $konteks['jenjang'],
-                    'kelas' => $konteks['kelas'],
-                    'nilai' => $baris['nilai'],
-                    'catatan' => $baris['catatan'],
-                    'status' => 'draft',
-                    'published_at' => null,
-                    'diperbarui_oleh' => $user->id,
-                ]);
-
-                if ($baru) {
-                    $row->created_by = $user->id;
-                }
-
-                $row->save();
-                $disimpan++;
-            }
-        });
-
-        if ($terbitkan) {
-            $diterbitkan = NilaiSantri::query()
-                ->whereIn('santri_id', $idSantri)
-                ->where('jenjang', $konteks['jenjang'])
-                ->where('kelas', $konteks['kelas'])
-                ->konteks($konteks['mapel']->id, $konteks['tahun'], $konteks['semester'], $konteks['kategori'])
-                ->where('status', 'draft')
-                ->update([
-                    'status' => 'published',
-                    'published_at' => now(),
-                    'diterbitkan_oleh' => $user->id,
-                    'updated_at' => now(),
-                ]);
-
-            return redirect()
-                ->route('admin.akademik.nilai.index', $this->queryKonteks($konteks))
-                ->with('success', $disimpan.' nilai diunggah dan '.$diterbitkan.' nilai diterbitkan ke portal wali santri.');
-        }
-
-        return redirect()
-            ->route('admin.akademik.nilai.index', $this->queryKonteks($konteks))
-            ->with('success', $disimpan.' nilai berhasil diunggah sebagai draft. Periksa lalu terbitkan.');
-    }
-
     /* ========================================================= Publikasi */
 
     public function terbitkan(Request $request)
@@ -422,42 +225,6 @@ class NilaiController extends Controller
         return redirect()
             ->route('admin.akademik.nilai.index', $this->queryKonteks($konteks))
             ->with($jumlah > 0 ? 'success' : 'info', $pesan);
-    }
-
-    /* ======================================================== Template CSV */
-
-    public function template(Request $request)
-    {
-        abort_unless($request->user()->bisa('akademik.ubah'), 403);
-
-        $konteks = $this->konteks($request);
-        $santris = Akademik::santriQuery($request->user(), $konteks['jenjang'])
-            ->where('kelas', $konteks['kelas'])
-            ->orderBy('nama_lengkap')
-            ->get();
-
-        $namaFile = 'template-nilai-'
-            .strtolower(preg_replace('/[^A-Za-z0-9]+/', '-', $konteks['mapel']->kode ?: $konteks['mapel']->nama))
-            .'-kelas-'.preg_replace('/[^A-Za-z0-9]+/', '-', $konteks['kelas'])
-            .'-'.str_replace('/', '-', $konteks['tahun'])
-            .'-'.$konteks['semester'].'.csv';
-
-        return response()->streamDownload(function () use ($santris, $konteks) {
-            $out = fopen('php://output', 'w');
-            fwrite($out, "\xEF\xBB\xBF"); // BOM agar Excel membaca UTF-8 dengan benar.
-            fputcsv($out, ['nis', 'nama', 'kelas', 'kategori', 'nilai', 'catatan']);
-            foreach ($santris as $santri) {
-                fputcsv($out, [
-                    $santri->nomor_induk,
-                    $santri->nama_lengkap,
-                    $santri->kelas,
-                    $konteks['kategori'],
-                    '',
-                    '',
-                ]);
-            }
-            fclose($out);
-        }, $namaFile, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
     /* ============================================================= Helper */
@@ -510,20 +277,6 @@ class NilaiController extends Controller
             'kategori' => $kategori,
             'mismatch' => $mismatch,
             'lengkap' => $jenjang && $kelas && $mapel && ! $mismatch,
-        ];
-    }
-
-    private function filterFromKonteks(array $konteks): array
-    {
-        return [
-            'jenjang' => $konteks['jenjang'],
-            'kelas' => $konteks['kelas'],
-            'mapel' => $konteks['mapel'],
-            'tahun' => $konteks['tahun'],
-            'semester' => $konteks['semester'],
-            'kategori' => $konteks['kategori'],
-            'mismatch' => false,
-            'lengkap' => true,
         ];
     }
 
@@ -642,61 +395,5 @@ class NilaiController extends Controller
             'terbit' => 0,
             'rata' => null,
         ];
-    }
-
-    /**
-     * Baca CSV menjadi array asosiatif berdasarkan header.
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    private function bacaCsv($file): array
-    {
-        $handle = fopen($file->getRealPath(), 'r');
-
-        if (! $handle) {
-            return [];
-        }
-
-        $barisPertama = (string) fgets($handle);
-        $delimiter = substr_count($barisPertama, ';') > substr_count($barisPertama, ',') ? ';' : ',';
-        rewind($handle);
-
-        $header = null;
-        $baris = [];
-        $nomor = 0;
-
-        while (($data = fgetcsv($handle, 0, $delimiter)) !== false) {
-            $nomor++;
-
-            if ($nomor === 1) {
-                $data[0] = preg_replace('/^\xEF\xBB\xBF/', '', (string) ($data[0] ?? ''));
-                $header = array_map(
-                    fn ($h) => strtolower(preg_replace('/[^a-z0-9]+/i', '_', trim((string) $h))),
-                    $data
-                );
-
-                continue;
-            }
-
-            if (count(array_filter($data, fn ($v) => trim((string) $v) !== '')) === 0) {
-                continue;
-            }
-
-            $row = ['_line' => $nomor];
-            foreach ($header as $i => $key) {
-                $row[$key] = $data[$i] ?? '';
-            }
-
-            $baris[] = $row;
-        }
-
-        fclose($handle);
-
-        return $baris;
-    }
-
-    private function sessionKey(int $userId): string
-    {
-        return 'akademik.import.'.$userId;
     }
 }

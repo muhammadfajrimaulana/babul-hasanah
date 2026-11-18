@@ -163,8 +163,13 @@ class Akademik
             ->pluck('kelas');
     }
 
-    /** Query mata pelajaran sesuai jenjang user. */
-    public static function mapelQuery(?User $user): Builder
+    /**
+     * Query mata pelajaran sesuai jenjang user.
+     *
+     * Admin Jenjang selalu dibatasi ke jenjangnya sendiri; Super Admin/Pengasuh
+     * dapat mempersempit lewat parameter $jenjang (dashboard per jenjang).
+     */
+    public static function mapelQuery(?User $user, ?string $jenjang = null): Builder
     {
         $query = MataPelajaran::query();
 
@@ -172,7 +177,11 @@ class Akademik
             return $query->whereRaw('1 = 0');
         }
 
-        $slug = $user ? Akses::jenjangSlug($user) : null;
+        if ($user && Akses::dibatasiJenjang($user)) {
+            $slug = Akses::jenjangSlug($user);
+        } else {
+            $slug = Jenjang::normalisasi($jenjang);
+        }
 
         if ($slug) {
             $query->where('jenjang', $slug);

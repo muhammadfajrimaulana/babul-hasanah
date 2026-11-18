@@ -28,10 +28,16 @@
                         Lihat nilai yang sudah diterbitkan pengajar, lengkap dengan rata-rata, predikat, dan catatan per mata pelajaran.
                     </p>
                 </div>
-                <a href="{{ route('portal.dashboard') }}"
-                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2.5 text-xs font-bold text-white transition shrink-0">
-                    <i class="fa-solid fa-house"></i> Dashboard
-                </a>
+                <div class="flex flex-wrap items-center gap-2 shrink-0">
+                    <a href="{{ route('portal.prestasi') }}"
+                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 border border-amber-300/30 px-4 py-2.5 text-xs font-bold text-amber-100 transition">
+                        <i class="fa-solid fa-trophy"></i> Prestasi
+                    </a>
+                    <a href="{{ route('portal.dashboard') }}"
+                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2.5 text-xs font-bold text-white transition">
+                        <i class="fa-solid fa-house"></i> Dashboard
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -134,26 +140,84 @@
                     </div>
                 </div>
 
-                {{-- NOTIFIKASI NILAI BARU --}}
-                @if ($data && $data['baru'])
+                {{-- NOTIFIKASI NILAI / RAPOR BARU --}}
+                @php
+                    $adaDokumenBaru = $dokumen->contains(
+                        fn ($d) => $d->created_at && $d->created_at->gte(now()->subDays(14))
+                    );
+                @endphp
+                @if (($data && $data['baru']) || $adaDokumenBaru)
                     <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-xs font-bold text-emerald-800 flex items-start gap-2.5">
                         <i class="fa-solid fa-bell mt-0.5"></i>
                         <span>
-                            Nilai baru telah diterbitkan untuk ananda {{ $anak->nama_lengkap }}.
-                            Silakan periksa rincian di bawah atau unduh rapor PDF.
+                            Nilai atau rapor baru telah diterbitkan untuk ananda {{ $anak->nama_lengkap }}.
+                            Silakan periksa rincian di bawah atau buka rapor PDF.
                         </span>
                     </div>
                 @endif
 
+                {{-- RAPOR PDF YANG DIUNGGAH PENGELOLA --}}
+                @if ($dokumen->isNotEmpty())
+                    @foreach ($dokumen as $dok)
+                        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div class="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div class="min-w-0">
+                                    <p class="text-[10px] font-black uppercase tracking-wider text-rose-600">
+                                        <i class="fa-solid fa-file-pdf mr-1"></i> Rapor PDF
+                                    </p>
+                                    <h3 class="text-sm font-black text-slate-900 truncate">{{ $dok->judul }}</h3>
+                                    <p class="text-[11px] text-slate-500">
+                                        {{ $dok->tahun_ajaran }} · Semester {{ Akademik::labelSemester($dok->semester) }}
+                                        · {{ $dok->ukuranManusia() }}
+                                    </p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                    <a href="{{ route('portal.nilai.dokumen', $dok) }}" target="_blank" rel="noopener"
+                                        class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3.5 py-2 text-[11px] font-bold text-slate-600 transition hover:border-emerald-400 hover:text-emerald-700">
+                                        <i class="fa-solid fa-up-right-from-square"></i> Buka
+                                    </a>
+                                    <a href="{{ route('portal.nilai.dokumen.unduh', $dok) }}"
+                                        class="inline-flex items-center gap-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 px-3.5 py-2 text-[11px] font-bold text-white transition">
+                                        <i class="fa-solid fa-download"></i> Unduh PDF
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="p-4 sm:p-5 space-y-2">
+                                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                                    <iframe src="{{ route('portal.nilai.dokumen', $dok) }}#toolbar=1&navpanes=0&view=FitH"
+                                        title="Rapor PDF {{ $dok->judul }}"
+                                        class="h-[420px] w-full sm:h-[600px]"></iframe>
+                                </div>
+                                <p class="text-[10px] text-slate-400">
+                                    <i class="fa-solid fa-circle-info mr-1"></i>
+                                    Jika pratinjau tidak muncul di perangkat Anda, gunakan tombol
+                                    <b>Buka</b> atau <b>Unduh PDF</b>.
+                                    Diunggah {{ $dok->created_at?->translatedFormat('d F Y H:i') }} WIB
+                                    @if ($dok->pengunggah) · oleh {{ $dok->pengunggah->name }} @endif
+                                </p>
+                            </div>
+                        </div>
+                    @endforeach
+                @endif
+
                 @if (! $data || $data['mapel']->isEmpty())
-                    <div class="bg-white p-10 rounded-3xl border border-slate-200 shadow-sm text-center space-y-2">
-                        <i class="fa-solid fa-folder-open text-3xl text-slate-300"></i>
-                        <h3 class="text-sm font-black text-slate-900">Belum ada nilai terbit</h3>
-                        <p class="text-xs text-slate-500 max-w-md mx-auto">
-                            Pengajar belum menerbitkan nilai untuk tahun ajaran dan semester ini.
-                            Silakan pilih periode lain atau cek kembali nanti.
-                        </p>
-                    </div>
+                    @if ($dokumen->isEmpty())
+                        <div class="bg-white p-10 rounded-3xl border border-slate-200 shadow-sm text-center space-y-2">
+                            <i class="fa-solid fa-folder-open text-3xl text-slate-300"></i>
+                            <h3 class="text-sm font-black text-slate-900">Belum ada nilai terbit</h3>
+                            <p class="text-xs text-slate-500 max-w-md mx-auto">
+                                Pengajar belum menerbitkan nilai untuk tahun ajaran dan semester ini.
+                                Silakan pilih periode lain atau cek kembali nanti.
+                            </p>
+                        </div>
+                    @else
+                        <div class="rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-xs text-slate-500">
+                            <i class="fa-solid fa-circle-info mr-1 text-slate-400"></i>
+                            Rincian nilai angka belum diterbitkan untuk periode ini. Rapor PDF di atas tetap
+                            dapat dibuka dan diunduh.
+                        </div>
+                    @endif
                 @else
                     {{-- KARTU RINGKASAN --}}
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -198,7 +262,7 @@
                             </div>
                             <a href="{{ route('portal.nilai.cetak', array_filter($queryCetak)) }}" target="_blank"
                                 class="inline-flex items-center gap-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 text-[11px] font-bold transition">
-                                <i class="fa-solid fa-file-pdf"></i> Unduh Rapor PDF
+                                <i class="fa-solid fa-print"></i> Cetak Rapor
                             </a>
                         </div>
 

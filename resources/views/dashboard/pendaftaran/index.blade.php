@@ -72,6 +72,8 @@
                 @forelse($pendaftar as $item)
                     @php
                         $statusMobile = strtolower($item->status_pendaftaran ?? 'pending');
+                        $santriTertaut = $item->santri_tertaut ?? null;
+                        $alumniTertaut = $item->alumni_tertaut ?? null;
                         $keyword = $item->nama_lengkap . ' ' . $item->no_pendaftaran . ' ' . $item->nisn . ' ' . $item->asal_sekolah . ' ' . $item->email . ' ' . $item->nama_ortu_wali;
                     @endphp
                     <div class="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 space-y-3.5 shadow-sm searchable-item"
@@ -87,6 +89,19 @@
                         </div>
 
                         <h3 class="text-sm font-black text-slate-900 dark:text-white">{{ $item->nama_lengkap }}</h3>
+
+                        @if ($santriTertaut)
+                            <div class="flex flex-wrap items-center gap-1.5 -mt-1.5">
+                                <span
+                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 text-[10px] font-bold">
+                                    <i class="fa-solid fa-box-archive"></i> Arsip PPDB
+                                </span>
+                                <span
+                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold">
+                                    {{ $alumniTertaut ? 'Alumni ' . $alumniTertaut->tahun_lulus : 'Santri aktif' }}
+                                </span>
+                            </div>
+                        @endif
 
                         <dl class="grid grid-cols-1 gap-2 text-[11px]">
                             <div><dt class="font-bold text-slate-500 dark:text-slate-400">Tempat Tanggal Lahir</dt><dd class="text-slate-800 dark:text-slate-200">{{ $item->tempat_tanggal_lahir ?? '-' }}</dd></div>
@@ -132,15 +147,22 @@
                                     class="bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
                                     <i class="fa-solid fa-pen"></i> Edit
                                 </a>
-                                <form action="{{ route('admin.pendaftaran.destroy', $item->id) }}" method="POST"
-                                    onsubmit="return confirm('Hapus data pendaftaran ini secara permanen? Data santri hasil verifikasi juga akan dihapus.');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                        class="w-full bg-slate-50 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-slate-200 dark:border-slate-700 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
-                                        <i class="fa-solid fa-trash"></i> Hapus
-                                    </button>
-                                </form>
+                                @if ($santriTertaut)
+                                    <div class="w-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-not-allowed"
+                                        title="Data sudah menjadi arsip PPDB dan tidak bisa dihapus.">
+                                        <i class="fa-solid fa-lock"></i> Arsip
+                                    </div>
+                                @else
+                                    <form action="{{ route('admin.pendaftaran.destroy', $item->id) }}" method="POST"
+                                        onsubmit="return confirm('Hapus data pendaftaran ini secara permanen?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                            class="w-full bg-slate-50 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-slate-200 dark:border-slate-700 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                            <i class="fa-solid fa-trash"></i> Hapus
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         @else
                             <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-center text-[11px] font-bold text-slate-500 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
@@ -181,12 +203,23 @@
                         @forelse($pendaftar as $item)
                             @php
                                 $statusDesktop = strtolower($item->status_pendaftaran ?? 'pending');
+                                $santriTertaut = $item->santri_tertaut ?? null;
+                                $alumniTertaut = $item->alumni_tertaut ?? null;
                                 $keyword = $item->nama_lengkap . ' ' . $item->no_pendaftaran . ' ' . $item->nisn . ' ' . $item->asal_sekolah . ' ' . $item->email . ' ' . $item->nama_ortu_wali;
                             @endphp
                             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition searchable-item"
                                 data-keyword="{{ strtolower($keyword) }}">
                                 <td class="py-3.5 px-3.5 font-mono font-bold text-emerald-700 dark:text-emerald-400">{{ $item->no_pendaftaran }}</td>
-                                <td class="py-3.5 px-3.5 font-bold text-slate-900 dark:text-white">{{ $item->nama_lengkap }}</td>
+                                <td class="py-3.5 px-3.5 font-bold text-slate-900 dark:text-white">
+                                    {{ $item->nama_lengkap }}
+                                    @if ($santriTertaut)
+                                        <span
+                                            class="ml-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 text-[9px] font-bold uppercase tracking-wide"
+                                            title="Arsip PPDB: {{ $alumniTertaut ? 'sudah menjadi alumni ' . $alumniTertaut->tahun_lulus : 'sudah menjadi santri aktif' }}">
+                                            <i class="fa-solid fa-box-archive"></i> Arsip
+                                        </span>
+                                    @endif
+                                </td>
                                 <td class="py-3.5 px-3.5">{{ $item->tempat_tanggal_lahir ?? '-' }}</td>
                                 <td class="py-3.5 px-3.5 font-mono">{{ $item->no_hp_aktif ?? '-' }}</td>
                                 <td class="py-3.5 px-3.5 max-w-xs whitespace-normal">{{ $item->alamat_domisili ?? '-' }}</td>
@@ -231,16 +264,24 @@
                                                 Edit
                                             </a>
 
-                                            <form action="{{ route('admin.pendaftaran.destroy', $item->id) }}" method="POST"
-                                                class="inline-flex"
-                                                onsubmit="return confirm('Hapus data pendaftaran ini secara permanen? Data santri hasil verifikasi juga akan dihapus.');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                    class="bg-slate-100 dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 px-2.5 py-1 rounded text-[11px] font-bold transition">
-                                                    Hapus
-                                                </button>
-                                            </form>
+                                            @if ($santriTertaut)
+                                                <span
+                                                    class="inline-flex items-center gap-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2.5 py-1 rounded text-[11px] font-bold cursor-not-allowed"
+                                                    title="Data sudah menjadi arsip PPDB dan tidak bisa dihapus.">
+                                                    <i class="fa-solid fa-lock"></i> Arsip
+                                                </span>
+                                            @else
+                                                <form action="{{ route('admin.pendaftaran.destroy', $item->id) }}" method="POST"
+                                                    class="inline-flex"
+                                                    onsubmit="return confirm('Hapus data pendaftaran ini secara permanen?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                        class="bg-slate-100 dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 px-2.5 py-1 rounded text-[11px] font-bold transition">
+                                                        Hapus
+                                                    </button>
+                                                </form>
+                                            @endif
                                         @else
                                             <span class="text-slate-400 dark:text-slate-500 text-[11px] italic">
                                                 <i class="fa-solid fa-eye mr-1"></i> Hanya baca

@@ -74,7 +74,17 @@
 </head>
 
 <body class="bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased"
-    x-data="{ sidebarOpen: false, sidebarMinimize: false, logoutModalOpen: false, resetPasswordModal: false }">
+    x-data="{ sidebarOpen: false, sidebarMinimize: localStorage.getItem('adminSidebarMinimize') === 'true', logoutModalOpen: false, resetPasswordModal: false }"
+    x-init="
+        if (window.innerWidth < 768) sidebarMinimize = false;
+        $watch('sidebarMinimize', value => {
+            if (window.innerWidth >= 768) localStorage.setItem('adminSidebarMinimize', value);
+        });
+        window.addEventListener('resize', () => {
+            if (window.innerWidth < 768 && sidebarMinimize) sidebarMinimize = false;
+        });
+    "
+    :class="{ 'overflow-hidden': sidebarOpen }">
 
     <div class="flex h-screen overflow-hidden">
 

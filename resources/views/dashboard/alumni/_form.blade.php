@@ -17,6 +17,12 @@
     </div>
 
     <div>
+        <label class="{{ $lb }}">NISN</label>
+        <input type="text" name="nisn" value="{{ $v('nisn') }}" class="{{ $in }}" placeholder="Nomor Induk Siswa Nasional">
+        @error('nisn') <p class="{{ $err }}">{{ $message }}</p> @enderror
+    </div>
+
+    <div>
         <label class="{{ $lb }}">Jenis kelamin</label>
         <select name="jenis_kelamin" class="{{ $in }}">
             <option value="">-</option>
@@ -24,6 +30,12 @@
             <option value="P" @selected($v('jenis_kelamin') === 'P')>Perempuan</option>
         </select>
         @error('jenis_kelamin') <p class="{{ $err }}">{{ $message }}</p> @enderror
+    </div>
+
+    <div>
+        <label class="{{ $lb }}">Tahun masuk</label>
+        <input type="number" name="tahun_masuk" value="{{ $v('tahun_masuk') }}" min="1998" max="{{ now()->year + 1 }}" class="{{ $in }}" placeholder="{{ now()->year - 6 }}">
+        @error('tahun_masuk') <p class="{{ $err }}">{{ $message }}</p> @enderror
     </div>
 
     <div>
@@ -36,14 +48,14 @@
         <label class="{{ $lb }}">Jenjang terakhir</label>
         <select name="jenjang" class="{{ $in }}">
             <option value="">-</option>
-            @foreach (\App\Models\Alumni::JENJANG as $j)
+            @foreach ($jenjangList ?? \App\Models\Alumni::JENJANG as $j)
                 <option value="{{ $j }}" @selected($v('jenjang') === $j)>{{ $j }}</option>
             @endforeach
         </select>
         @error('jenjang') <p class="{{ $err }}">{{ $message }}</p> @enderror
     </div>
 
-    <div>
+    <div class="sm:col-span-2">
         <label class="{{ $lb }}">Kegiatan sekarang</label>
         <select name="kegiatan" class="{{ $in }}">
             <option value="">-</option>

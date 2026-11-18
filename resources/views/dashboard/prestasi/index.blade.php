@@ -22,6 +22,52 @@
         @endif
     </div>
 
+    {{-- FILTER JENJANG --}}
+    @if ($bisaFilterJenjang ?? false)
+        <form method="GET" action="{{ route('admin.prestasi.index') }}"
+            class="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-start gap-3">
+                <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
+                    <i class="fa-solid fa-layer-group"></i>
+                </span>
+                <div>
+                    <p class="text-[11px] font-black uppercase tracking-wider text-slate-400">Pilih Jenjang</p>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                        Menampilkan prestasi satu jenjang, atau seluruh jenjang bila tidak dipilih.
+                    </p>
+                </div>
+            </div>
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <select name="jenjang"
+                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 sm:w-64">
+                    <option value="">Semua jenjang</option>
+                    @foreach ($daftarJenjang as $j)
+                        <option value="{{ $j['slug'] }}" @selected(($filterJenjang ?? '') === $j['slug'])>
+                            {{ $j['kode'] }} — {{ $j['nama'] }}
+                        </option>
+                    @endforeach
+                </select>
+                <div class="flex items-center gap-2">
+                    <button type="submit"
+                        class="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-amber-600">
+                        <i class="fa-solid fa-filter"></i> Terapkan
+                    </button>
+                    @if (filled($filterJenjang ?? null))
+                        <a href="{{ route('admin.prestasi.index') }}"
+                            class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2.5 text-[11px] font-bold text-slate-500 transition hover:text-slate-700 dark:border-slate-700 dark:text-slate-400">
+                            Reset
+                        </a>
+                    @endif
+                </div>
+            </div>
+        </form>
+    @elseif (filled($namaJenjangAdmin ?? null))
+        <div class="flex items-center gap-2 rounded-2xl border border-amber-100 bg-amber-50/70 px-4 py-3 text-[11px] font-bold text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
+            <i class="fa-solid fa-layer-group"></i>
+            Data dibatasi pada jenjang {{ $namaJenjangAdmin }}.
+        </div>
+    @endif
+
     @if (session('success'))
         <div class="px-4 py-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
             {{ session('success') }}

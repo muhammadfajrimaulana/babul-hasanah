@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Public\PendaftaranOnlineController as PublicPendaftaranController;
+use App\Models\Alumni;
 use App\Models\PendaftaranOnline;
 use App\Models\Santri;
 use App\Models\User;
 use App\Support\Akses;
+use App\Support\Kelulusan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -29,6 +31,28 @@ class PendaftaranController extends Controller
         }
 
         $pendaftar = $query->get();
+
+        // Tandai arsip: pendaftar yang sudah menjadi santri/alumni tetap
+        // ditampilkan dan tidak boleh dihapus agar riwayat PPDB utuh.
+        $santriArsip = Santri::query()
+            ->whereIn('pendaftaran_online_id', $pendaftar->pluck('id'))
+            ->get()
+            ->keyBy('pendaftaran_online_id');
+
+        $alumniArsip = collect();
+        if (Kelulusan::siapTautan() && $santriArsip->isNotEmpty()) {
+            $alumniArsip = Alumni::query()
+                ->whereIn('santri_id', $santriArsip->pluck('id'))
+                ->get()
+                ->keyBy('santri_id');
+        }
+
+        foreach ($pendaftar as $item) {
+            $item->santri_tertaut = $santriArsip->get($item->id);
+            $item->alumni_tertaut = $item->santri_tertaut
+                ? $alumniArsip->get($item->santri_tertaut->id)
+                : null;
+        }
 
         return view('dashboard.pendaftaran.index', compact('pendaftar'));
     }
@@ -99,17 +123,17 @@ class PendaftaranController extends Controller
                 // $rawPassword = 'babul' . rand(1000, 9999);
 
                 $user = User::create([
-                    'name'     => $namaWali,
-                    'email'    => $pendaftaran->email,
+                    'name' => $namaWali,
+                    'email' => $pendaftaran->email,
                     'password' => Hash::make($rawPassword),
-                    'role'     => 'wali_santri',
-                    'phone'    => $pendaftaran->no_hp_ortu,
+                    'role' => 'wali_santri',
+                    'phone' => $pendaftaran->no_hp_ortu,
                 ]);
             }
 
             // Nomor induk: ulangi sampai benar-benar unik
             do {
-                $nomorInduk = 'SANTRI-' . date('Y') . '-' . strtoupper(Str::random(4));
+                $nomorInduk = 'SANTRI-'.date('Y').'-'.strtoupper(Str::random(4));
             } while (Santri::where('nomor_induk', $nomorInduk)->exists());
 
             // Alamat lengkap: utamakan kolom domisili baru, lalu fallback ke
@@ -124,14 +148,14 @@ class PendaftaranController extends Controller
             ])->filter()->implode(', ');
 
             Santri::create([
-                'user_id'               => $user->id,
+                'user_id' => $user->id,
                 'pendaftaran_online_id' => $pendaftaran->id,
-                'nomor_induk'           => $nomorInduk,
-                'nama_lengkap'          => $pendaftaran->nama_lengkap,
-                'jenjang_pendidikan'    => $pendaftaran->jenjang_tujuan,
-                'kelas'                 => '1',
-                'alamat'                => $alamat ?: 'Asal sekolah: ' . $pendaftaran->asal_sekolah,
-                'nama_wali'             => $namaWali,
+                'nomor_induk' => $nomorInduk,
+                'nama_lengkap' => $pendaftaran->nama_lengkap,
+                'jenjang_pendidikan' => $pendaftaran->jenjang_tujuan,
+                'kelas' => '1',
+                'alamat' => $alamat ?: 'Asal sekolah: '.$pendaftaran->asal_sekolah,
+                'nama_wali' => $namaWali,
             ]);
 
             return ['rawPassword' => $rawPassword];
@@ -140,7 +164,7 @@ class PendaftaranController extends Controller
         // Normalisasi nomor WhatsApp (utamakan nomor orang tua)
         $phone = preg_replace('/\D/', '', $pendaftaran->no_hp_ortu ?: ($pendaftaran->no_hp_aktif ?? ''));
         if (str_starts_with($phone, '0')) {
-            $phone = '62' . substr($phone, 1);
+            $phone = '62'.substr($phone, 1);
         }
 
         $loginUrl = route('login');
@@ -152,13 +176,13 @@ class PendaftaranController extends Controller
         // Pesan yang akan otomatis terisi di WhatsApp
         $pesanWa = "Alhamdulillah, Pendaftaran santri atas nama *{$pendaftaran->nama_lengkap}* telah *DITERIMA* di Pesantren Babul Hasanah.\n\nSilakan login ke Portal Wali Santri:\n{$infoLogin}\n\nSilakan login melalui link berikut:\n{$loginUrl}";
 
-        $waLink = "https://wa.me/{$phone}?text=" . urlencode($pesanWa);
+        $waLink = "https://wa.me/{$phone}?text=".urlencode($pesanWa);
 
         return redirect()->back()->with([
-            'success'     => $hasil['rawPassword']
+            'success' => $hasil['rawPassword']
                 ? 'Status berhasil diubah menjadi Diterima! Akun telah dibuat.'
                 : 'Status berhasil diubah menjadi Diterima! Santri ditautkan ke akun wali yang sudah ada.',
-            'wa_link'     => $waLink,
+            'wa_link' => $waLink,
             'nama_santri' => $pendaftaran->nama_lengkap,
         ]);
     }
@@ -182,34 +206,34 @@ class PendaftaranController extends Controller
         $this->pastikanJenjang($pendaftaran);
 
         $validated = $request->validate([
-            'nama_lengkap'         => ['required', 'string', 'max:255'],
+            'nama_lengkap' => ['required', 'string', 'max:255'],
             'tempat_tanggal_lahir' => ['required', 'string', 'max:255'],
-            'no_hp_aktif'          => ['required', 'string', 'max:30'],
-            'alamat_domisili'      => ['required', 'string', 'max:1000'],
-            'email'                => ['required', 'email', 'max:255', 'unique:pendaftaran_online,email,' . $pendaftaran->id],
-            'nama_ortu_wali'       => ['required', 'string', 'max:255'],
-            'no_hp_ortu'           => ['required', 'string', 'max:30'],
-            'asal_sekolah'         => ['required', 'string', 'max:255'],
-            'alamat_sekolah'       => ['required', 'string', 'max:1000'],
-            'tahun_lulus'          => ['required', 'digits:4'],
-            'nisn'                 => ['nullable', 'string', 'max:20'],
-            'jenjang_tujuan'       => ['required', 'in:' . implode(',', PublicPendaftaranController::JENJANG)],
+            'no_hp_aktif' => ['required', 'string', 'max:30'],
+            'alamat_domisili' => ['required', 'string', 'max:1000'],
+            'email' => ['required', 'email', 'max:255', 'unique:pendaftaran_online,email,'.$pendaftaran->id],
+            'nama_ortu_wali' => ['required', 'string', 'max:255'],
+            'no_hp_ortu' => ['required', 'string', 'max:30'],
+            'asal_sekolah' => ['required', 'string', 'max:255'],
+            'alamat_sekolah' => ['required', 'string', 'max:1000'],
+            'tahun_lulus' => ['required', 'digits:4'],
+            'nisn' => ['nullable', 'string', 'max:20'],
+            'jenjang_tujuan' => ['required', 'in:'.implode(',', PublicPendaftaranController::JENJANG)],
         ], [
-            'nama_lengkap.required'         => 'Nama lengkap wajib diisi.',
+            'nama_lengkap.required' => 'Nama lengkap wajib diisi.',
             'tempat_tanggal_lahir.required' => 'Tempat tanggal lahir wajib diisi.',
-            'no_hp_aktif.required'          => 'Nomor handphone aktif wajib diisi.',
-            'alamat_domisili.required'      => 'Alamat tinggal (domisili) wajib diisi.',
-            'email.required'                => 'Email orang tua/wali wajib diisi.',
-            'email.email'                   => 'Format email orang tua/wali tidak valid.',
-            'email.unique'                  => 'Email orang tua/wali ini sudah dipakai pendaftar lain.',
-            'nama_ortu_wali.required'       => 'Nama orang tua/wali wajib diisi.',
-            'no_hp_ortu.required'           => 'Nomor handphone orang tua wajib diisi.',
-            'asal_sekolah.required'         => 'Sekolah asal wajib diisi.',
-            'alamat_sekolah.required'       => 'Alamat sekolah asal wajib diisi.',
-            'tahun_lulus.required'          => 'Tahun lulus wajib diisi.',
-            'tahun_lulus.digits'            => 'Tahun lulus harus 4 angka, contoh: 2026.',
-            'jenjang_tujuan.required'       => 'Pilihan jenjang wajib dipilih.',
-            'jenjang_tujuan.in'             => 'Pilihan jenjang tidak valid.',
+            'no_hp_aktif.required' => 'Nomor handphone aktif wajib diisi.',
+            'alamat_domisili.required' => 'Alamat tinggal (domisili) wajib diisi.',
+            'email.required' => 'Email orang tua/wali wajib diisi.',
+            'email.email' => 'Format email orang tua/wali tidak valid.',
+            'email.unique' => 'Email orang tua/wali ini sudah dipakai pendaftar lain.',
+            'nama_ortu_wali.required' => 'Nama orang tua/wali wajib diisi.',
+            'no_hp_ortu.required' => 'Nomor handphone orang tua wajib diisi.',
+            'asal_sekolah.required' => 'Sekolah asal wajib diisi.',
+            'alamat_sekolah.required' => 'Alamat sekolah asal wajib diisi.',
+            'tahun_lulus.required' => 'Tahun lulus wajib diisi.',
+            'tahun_lulus.digits' => 'Tahun lulus harus 4 angka, contoh: 2026.',
+            'jenjang_tujuan.required' => 'Pilihan jenjang wajib dipilih.',
+            'jenjang_tujuan.in' => 'Pilihan jenjang tidak valid.',
         ]);
 
         // Pastikan struktur tabel sudah mendukung 12 field PPDB.
@@ -235,24 +259,24 @@ class PendaftaranController extends Controller
 
         DB::transaction(function () use ($validated, $pendaftaran, $santri, $userTertaut, $namaWali) {
             $pendaftaran->update([
-                'nama_lengkap'         => $validated['nama_lengkap'],
+                'nama_lengkap' => $validated['nama_lengkap'],
                 'tempat_tanggal_lahir' => $validated['tempat_tanggal_lahir'],
-                'no_hp_aktif'          => $validated['no_hp_aktif'],
-                'alamat_domisili'      => $validated['alamat_domisili'],
-                'email'                => $validated['email'],
-                'nama_ortu_wali'       => $validated['nama_ortu_wali'],
-                'no_hp_ortu'           => $validated['no_hp_ortu'],
-                'asal_sekolah'         => $validated['asal_sekolah'],
-                'alamat_sekolah'       => $validated['alamat_sekolah'],
-                'tahun_lulus'          => $validated['tahun_lulus'],
-                'nisn'                 => $validated['nisn'] ?? null,
-                'jenjang_tujuan'       => $validated['jenjang_tujuan'],
+                'no_hp_aktif' => $validated['no_hp_aktif'],
+                'alamat_domisili' => $validated['alamat_domisili'],
+                'email' => $validated['email'],
+                'nama_ortu_wali' => $validated['nama_ortu_wali'],
+                'no_hp_ortu' => $validated['no_hp_ortu'],
+                'asal_sekolah' => $validated['asal_sekolah'],
+                'alamat_sekolah' => $validated['alamat_sekolah'],
+                'tahun_lulus' => $validated['tahun_lulus'],
+                'nisn' => $validated['nisn'] ?? null,
+                'jenjang_tujuan' => $validated['jenjang_tujuan'],
             ]);
 
             // Sinkronkan akun portal wali agar login tetap memakai data terbaru.
             if ($userTertaut) {
                 $userTertaut->update([
-                    'name'  => $namaWali,
+                    'name' => $namaWali,
                     'email' => $validated['email'],
                     'phone' => $validated['no_hp_ortu'],
                 ]);
@@ -261,10 +285,10 @@ class PendaftaranController extends Controller
             // Sinkronkan data santri yang sudah diverifikasi.
             if ($santri) {
                 $santri->update([
-                    'nama_lengkap'       => $validated['nama_lengkap'],
+                    'nama_lengkap' => $validated['nama_lengkap'],
                     'jenjang_pendidikan' => $validated['jenjang_tujuan'],
-                    'nama_wali'          => $namaWali,
-                    'alamat'             => $validated['alamat_domisili'],
+                    'nama_wali' => $namaWali,
+                    'alamat' => $validated['alamat_domisili'],
                 ]);
             }
         });
@@ -274,19 +298,29 @@ class PendaftaranController extends Controller
             ->with('success', 'Data pendaftaran berhasil diperbarui.');
     }
 
-    /** Hapus data pendaftaran beserta data santri hasil verifikasinya. */
+    /**
+     * Hapus data pendaftaran yang belum pernah diverifikasi.
+     *
+     * Pendaftar yang sudah menjadi santri (termasuk yang kini berstatus
+     * alumni) dipertahankan sebagai arsip PPDB sehingga tidak bisa dihapus.
+     */
     public function destroy($id)
     {
         $pendaftaran = PendaftaranOnline::findOrFail($id);
         $this->pastikanJenjang($pendaftaran);
 
-        DB::transaction(function () use ($pendaftaran) {
-            // Santri yang lahir dari pendaftaran ini ikut dihapus agar tidak
-            // menyisakan data yatim; akun portal wali tetap dipertahankan.
-            Santri::where('pendaftaran_online_id', $pendaftaran->id)->delete();
+        $santri = Santri::where('pendaftaran_online_id', $pendaftaran->id)->first();
 
-            $pendaftaran->delete();
-        });
+        if ($santri) {
+            return back()->with(
+                'error',
+                'Data pendaftaran '.$pendaftaran->no_pendaftaran.' sudah tertaut Data Santri ('
+                .$santri->nama_lengkap.') sehingga disimpan sebagai arsip PPDB dan tidak bisa dihapus. '
+                .'Hapus data santri terlebih dahulu bila memang data ini keliru.'
+            );
+        }
+
+        $pendaftaran->delete();
 
         return redirect()
             ->route('admin.pendaftaran.index')

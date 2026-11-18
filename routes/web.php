@@ -19,8 +19,11 @@ use App\Http\Controllers\Admin\SantriController as AdminDataSantriController;
 use App\Http\Controllers\Admin\SantriFormController as AdminSantriFormController;
 use App\Http\Controllers\Admin\StrukturOrganisasiController as AdminStrukturController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Portal\PortalAkademikController;
 use App\Http\Controllers\Portal\PortalDashboardController as PortalDashboard;
+use App\Http\Controllers\Portal\PortalPrestasiController;
 use App\Http\Controllers\Public\AlumniController as PublicAlumniController;
 use App\Http\Controllers\Public\BeritaController as PublicBeritaController;
 use App\Http\Controllers\Public\GaleriController as PublicGaleriController;
@@ -93,6 +96,18 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     // Batasi 6 percobaan per menit per IP untuk mencegah brute force.
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->middleware('throttle:6,1');
+
+    // Lupa kata sandi: tautan reset dikirim ke email akun yang terdaftar.
+    // Token hanya disimpan sebagai hash dan berlaku 30 menit (single-use).
+    Route::get('/lupa-kata-sandi', [ForgotPasswordController::class, 'create'])->name('password.request');
+    Route::post('/lupa-kata-sandi', [ForgotPasswordController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('password.email');
+
+    Route::get('/reset-kata-sandi/{token}', [ResetPasswordController::class, 'create'])->name('password.reset');
+    Route::post('/reset-kata-sandi', [ResetPasswordController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('password.store');
 });
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout')->middleware('auth');
@@ -128,7 +143,35 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         ->middleware('role:super_admin')->name('dashboard');
 
     Route::get('/dashboard-jenjang', [AdminRoleDashboard::class, 'adminJenjang'])
-        ->middleware('role:admin')->name('dashboard.jenjang');
+        ->middleware('role:admin,super_admin,pengasuh,pembina')->name('dashboard.jenjang');
+
+    // Halaman input nilai sudah digabung ke Akademik → Nilai Santri.
+    // Route lama tetap ada sebagai pengalihan agar tautan lama tidak rusak.
+    Route::get('/dashboard-jenjang/input-nilai', [AdminRoleDashboard::class, 'formNilai'])
+        ->middleware('role:admin,super_admin,pengasuh,pembina')->name('dashboard.jenjang.nilai.form');
+
+    Route::get('/dashboard-jenjang/input-prestasi', [AdminRoleDashboard::class, 'formPrestasi'])
+        ->middleware('role:admin,super_admin,pengasuh,pembina')->name('dashboard.jenjang.prestasi.form');
+
+    // Input cepat nilai & prestasi dari dashboard jenjang (Super Admin & Admin).
+    Route::post('/dashboard-jenjang/nilai', [AdminRoleDashboard::class, 'simpanNilai'])
+        ->middleware('role:admin,super_admin')->name('dashboard.jenjang.nilai');
+
+    Route::post('/dashboard-jenjang/prestasi', [AdminRoleDashboard::class, 'simpanPrestasi'])
+        ->middleware('role:admin,super_admin')->name('dashboard.jenjang.prestasi');
+
+    // Unggah & kelola rapor PDF nilai santri.
+    Route::post('/dashboard-jenjang/nilai/pdf', [AdminRoleDashboard::class, 'simpanDokumenNilai'])
+        ->middleware('role:admin,super_admin')->name('dashboard.jenjang.nilai.pdf');
+
+    Route::post('/dashboard-jenjang/nilai/pdf/massal', [AdminRoleDashboard::class, 'pdfMassal'])
+        ->middleware('role:admin,super_admin')->name('dashboard.jenjang.nilai.pdf.massal');
+
+    Route::get('/dashboard-jenjang/nilai/pdf/{dokumen}/unduh', [AdminRoleDashboard::class, 'unduhDokumenNilai'])
+        ->middleware('role:admin,super_admin,pengasuh,pembina')->name('dashboard.jenjang.nilai.pdf.unduh');
+
+    Route::delete('/dashboard-jenjang/nilai/pdf/{dokumen}', [AdminRoleDashboard::class, 'hapusDokumenNilai'])
+        ->middleware('role:admin,super_admin')->name('dashboard.jenjang.nilai.pdf.hapus');
 
     Route::get('/dashboard-pengasuh', [AdminRoleDashboard::class, 'pengasuh'])
         ->middleware('role:pengasuh')->name('dashboard.pengasuh');
@@ -156,6 +199,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::put('/santri/{id}', [AdminSantriFormController::class, 'update'])->name('santri.update');
         Route::delete('/santri/{id}', [AdminDataSantriController::class, 'destroy'])->name('santri.destroy');
 
+        // Kelulusan santri: otomatis membuat/menghapus data alumni terkait.
+        Route::post('/santri/{id}/luluskan', [AdminDataSantriController::class, 'luluskan'])->name('santri.luluskan');
+        Route::post('/santri/{id}/batalkan-kelulusan', [AdminDataSantriController::class, 'batalkanKelulusan'])->name('santri.batalkan-kelulusan');
+
         // Pendaftaran (verifikasi & ubah)
         Route::patch('/pendaftaran/{id}', [AdminPendaftaranController::class, 'updateStatus'])->name('pendaftaran.verifikasi');
         Route::get('/pendaftaran/{id}/edit', [AdminPendaftaranController::class, 'edit'])->name('pendaftaran.edit');
@@ -163,11 +210,16 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::delete('/pendaftaran/{id}', [AdminPendaftaranController::class, 'destroy'])->name('pendaftaran.destroy');
 
         // Alumni (CRUD, tanpa index yang sudah ada di grup baca)
+        Route::post('/data-alumni/tarik-santri-lulus', [AdminAlumniController::class, 'tarikSantriLulus'])->name('alumni.tarik-santri-lulus');
         Route::get('/data-alumni/create', [AdminAlumniController::class, 'create'])->name('alumni.create');
         Route::post('/data-alumni', [AdminAlumniController::class, 'store'])->name('alumni.store');
         Route::get('/data-alumni/{alumni}/edit', [AdminAlumniController::class, 'edit'])->name('alumni.edit');
         Route::put('/data-alumni/{alumni}', [AdminAlumniController::class, 'update'])->name('alumni.update');
         Route::delete('/data-alumni/{alumni}', [AdminAlumniController::class, 'destroy'])->name('alumni.destroy');
+
+        // Unggah & hapus berkas nilai/transkrip alumni.
+        Route::post('/data-alumni/{alumni}/nilai', [AdminAlumniController::class, 'uploadNilai'])->name('alumni.nilai.upload');
+        Route::delete('/data-alumni/{alumni}/nilai', [AdminAlumniController::class, 'hapusNilai'])->name('alumni.nilai.hapus');
 
         // Prestasi (CRUD, tanpa index)
         Route::get('/pengelolaan-prestasi/tambah', [PrestasiAdminController::class, 'create'])->name('prestasi.create');
@@ -201,6 +253,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::get('/santri/{id}', [AdminDataSantriController::class, 'detail'])->name('santri.detail');
 
         Route::get('/data-alumni', [AdminAlumniController::class, 'index'])->name('alumni.index');
+        Route::get('/data-alumni/{alumni}/nilai', [AdminAlumniController::class, 'unduhNilai'])->name('alumni.nilai.unduh');
+        Route::get('/data-alumni/{alumni}', [AdminAlumniController::class, 'show'])->name('alumni.show');
 
         Route::get('/pengelolaan-prestasi', [PrestasiAdminController::class, 'index'])->name('prestasi.index');
 
@@ -240,7 +294,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::prefix('akademik')->name('akademik.')->group(function () {
         Route::middleware('role:'.Akses::roles('akademik.lihat'))->group(function () {
             Route::get('/nilai', [AdminNilaiController::class, 'index'])->name('nilai.index');
-            Route::get('/nilai/upload', [AdminNilaiController::class, 'upload'])->name('nilai.upload');
             Route::get('/transkrip', [AdminTranskripController::class, 'index'])->name('transkrip.index');
             Route::get('/transkrip/{santri}/cetak', [AdminTranskripController::class, 'cetak'])->name('transkrip.cetak');
             Route::get('/transkrip/{santri}', [AdminTranskripController::class, 'show'])->name('transkrip.show');
@@ -249,9 +302,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         // Tulis: hanya Super Admin & Admin Jenjang.
         Route::middleware('role:'.Akses::roles('akademik.ubah'))->group(function () {
             Route::post('/nilai', [AdminNilaiController::class, 'store'])->name('nilai.store');
-            Route::post('/nilai/upload', [AdminNilaiController::class, 'preview'])->name('nilai.preview');
-            Route::post('/nilai/import', [AdminNilaiController::class, 'import'])->name('nilai.import');
-            Route::get('/nilai/template', [AdminNilaiController::class, 'template'])->name('nilai.template');
         });
 
         Route::post('/nilai/terbitkan', [AdminNilaiController::class, 'terbitkan'])
@@ -274,4 +324,9 @@ Route::middleware(['auth', 'role:wali_santri'])->prefix('portal')->name('portal.
     Route::get('/dashboard', [PortalDashboard::class, 'index'])->name('dashboard');
     Route::get('/nilai', [PortalAkademikController::class, 'index'])->name('nilai');
     Route::get('/nilai/cetak', [PortalAkademikController::class, 'cetak'])->name('nilai.cetak');
+
+    // Rapor PDF: pratinjau (inline) dan unduh, hanya untuk wali pemilik data.
+    Route::get('/nilai/dokumen/{dokumen}', [PortalAkademikController::class, 'dokumenLihat'])->name('nilai.dokumen');
+    Route::get('/nilai/dokumen/{dokumen}/unduh', [PortalAkademikController::class, 'dokumenUnduh'])->name('nilai.dokumen.unduh');
+    Route::get('/prestasi', [PortalPrestasiController::class, 'index'])->name('prestasi');
 });
