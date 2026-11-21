@@ -3,15 +3,20 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\KredensialMail;
 use App\Models\Alumni;
 use App\Models\PendaftaranOnline;
 use App\Models\Santri;
+use App\Support\Akademik;
 use App\Support\Akses;
+use App\Support\AlumniAkun;
+use App\Support\CatatanAktivitas;
 use App\Support\Jenjang;
 use App\Support\Kelulusan;
 use App\Support\RekapJenjang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 // Jika menggunakan Maatwebsite/Excel, uncomment baris di bawah:
 // use App\Imports\SantriImport;
@@ -55,7 +60,18 @@ class SantriController extends Controller
 
     public function detail($id)
     {
-        $santri = Santri::with(['user', 'pendaftaranOnline'])->findOrFail($id);
+        $santri = Santri::with([
+            'user',
+            'pendaftaranOnline',
+            'waliUsers',
+            'kelasModel.waliKelas',
+            'hafalan' => fn ($q) => $q->latest('tanggal')->limit(10),
+            'pelanggaran' => fn ($q) => $q->latest('tanggal')->limit(10),
+            'izin' => fn ($q) => $q->latest()->limit(10),
+            'dokumen',
+            'riwayatKelas' => fn ($q) => $q->latest(),
+            'pengajuanPerubahan' => fn ($q) => $q->latest()->limit(10),
+        ])->findOrFail($id);
 
         abort_unless(
             Akses::cocokJenjang(auth()->user(), $santri->jenjang_pendidikan),
@@ -116,8 +132,44 @@ class SantriController extends Controller
 
         $alumni = Kelulusan::luluskan($santri, $data['tahun_lulus'] ?? null);
 
+        $passwordSementara = null;
+        $emailTerkirim = false;
+
+        if ($alumni) {
+            $hasil = AlumniAkun::pastikan($alumni);
+            $passwordSementara = $hasil['password'];
+
+            if ($passwordSementara) {
+                try {
+                    Mail::to($hasil['user']->email, $hasil['user']->name)->send(new KredensialMail(
+                        nama: $hasil['user']->name,
+                        email: $hasil['user']->email,
+                        passwordSementara: $passwordSementara,
+                        peran: 'Alumni',
+                        judul: 'Akun Portal Alumni & Unduh Ijazah',
+                        catatan: 'Ijazah dan dokumen kelulusan Anda dapat diunduh setelah login pertama.',
+                    ));
+                    $emailTerkirim = true;
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            }
+
+            CatatanAktivitas::catat('luluskan_santri', $santri, [
+                'alumni_id' => $alumni->id,
+                'akun_alumni' => $hasil['user']->email,
+                'email_terkirim' => $emailTerkirim,
+            ]);
+        }
+
         $pesan = $santri->nama_lengkap.' ditandai LULUS'
             .($alumni ? ' dan otomatis masuk ke Data Alumni angkatan '.$alumni->tahun_lulus.'.' : '.');
+
+        if ($alumni && $passwordSementara) {
+            $pesan .= $emailTerkirim
+                ? ' Akun alumni dibuat dan kredensial telah dikirim ke email alumni.'
+                : ' Akun alumni dibuat, tetapi email kredensial gagal dikirim. Gunakan reset password alumni.';
+        }
 
         if (! $alumni) {
             $pesan .= ' Jalankan php artisan migrate agar data alumni ikut terhubung.';
@@ -126,9 +178,11 @@ class SantriController extends Controller
         return back()->with('success', $pesan);
     }
 
-    /** Batalkan status lulus santri beserta data alumni yang dibuat otomatis. */
+    /** Batalkan status lulus santri (khusus Superadmin). */
     public function batalkanKelulusan($id)
     {
+        abort_unless(Akses::superAdmin(auth()->user()), 403);
+
         $santri = Santri::findOrFail($id);
 
         abort_unless(
@@ -146,6 +200,8 @@ class SantriController extends Controller
 
         Kelulusan::batalkan($santri);
 
+        CatatanAktivitas::catat('batalkan_kelulusan', $santri, [], 'Dibatalkan oleh Superadmin');
+
         return back()->with(
             'success',
             'Status kelulusan '.$santri->nama_lengkap.' dibatalkan. Data alumni terkait ikut dihapus.'
@@ -161,6 +217,10 @@ class SantriController extends Controller
      */
     public function destroy($id)
     {
+        // Penghapusan permanen hanya untuk Superadmin. Admin Jenjang harus
+        // memakai arsip agar riwayat santri, nilai, dan akun wali tetap utuh.
+        abort_unless(Akses::superAdmin(auth()->user()), 403, 'Admin Jenjang tidak boleh menghapus permanen. Gunakan fitur Arsipkan.');
+
         $santri = Santri::with('pendaftaranOnline')->findOrFail($id);
 
         abort_unless(

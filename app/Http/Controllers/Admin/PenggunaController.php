@@ -49,12 +49,19 @@ class PenggunaController extends Controller
             'warna' => 'emerald',
             'deskripsi' => 'Mengelola data operasional pada jenjang masing-masing.',
         ],
-        'pengasuh' => [
-            'label' => 'Pengurus & Pembina',
-            'roles' => ['pengasuh', 'pembina'],
+        'pengurus' => [
+            'label' => 'Pengurus',
+            'roles' => ['pengurus'],
             'ikon' => 'fa-mosque',
             'warna' => 'amber',
-            'deskripsi' => 'Monitoring pesantren; hanya boleh mengelola akun wali santri.',
+            'deskripsi' => 'Manajemen & operasional; hanya membaca data santri.',
+        ],
+        'pembina' => [
+            'label' => 'Pembina',
+            'roles' => ['pembina'],
+            'ikon' => 'fa-hands-praying',
+            'warna' => 'violet',
+            'deskripsi' => 'Pembinaan harian: hafalan, presensi, pelanggaran, dan izin.',
         ],
         'wali_santri' => [
             'label' => 'Wali Santri',
@@ -62,6 +69,13 @@ class PenggunaController extends Controller
             'ikon' => 'fa-people-roof',
             'warna' => 'sky',
             'deskripsi' => 'Hanya memantau data anak yang dikirim oleh Admin Jenjang.',
+        ],
+        'alumni' => [
+            'label' => 'Alumni',
+            'roles' => ['alumni'],
+            'ikon' => 'fa-user-graduate',
+            'warna' => 'indigo',
+            'deskripsi' => 'Hanya melihat data diri, riwayat, dan mengunduh dokumen.',
         ],
     ];
 
@@ -112,7 +126,7 @@ class PenggunaController extends Controller
 
         $penggunas = (clone $dasar)
             ->when($kategoriAktif !== 'semua', fn ($q) => $q->whereIn('role', $tabs[$kategoriAktif]['roles']))
-            ->withCount('santri')
+            ->withCount('anak as santri_count')
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -145,16 +159,16 @@ class PenggunaController extends Controller
             $data['role'] = 'wali_santri';
         }
 
-        $santriId = $data['santri_id'] ?? null;
-        unset($data['santri_id']);
+        $santriIds = array_values(array_filter((array) ($data['santri_ids'] ?? [])));
+        unset($data['santri_ids']);
 
         $data['password'] = Hash::make($data['password']);
         $data['jenjang'] = $data['role'] === 'admin' ? $data['jenjang'] : null;
 
         $pengguna = User::create($data);
 
-        if ($santriId) {
-            $this->tautkanSantri($pengguna, (int) $santriId);
+        if ($santriIds) {
+            $this->tautkanSantri($pengguna, $santriIds);
         }
 
         return redirect()->route('super.pengguna.index', $this->kategoriRedirect($pengguna->role))
@@ -194,8 +208,10 @@ class PenggunaController extends Controller
             return back()->withErrors(['role' => 'Tidak bisa mengubah peran Super Admin terakhir.'])->withInput();
         }
 
-        $santriId = $data['santri_id'] ?? null;
-        unset($data['santri_id']);
+        $santriIds = array_key_exists('santri_ids', $data)
+            ? array_values(array_filter((array) $data['santri_ids']))
+            : null;
+        unset($data['santri_ids']);
 
         if (! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
@@ -205,19 +221,21 @@ class PenggunaController extends Controller
 
         $data['jenjang'] = $data['role'] === 'admin' ? ($data['jenjang'] ?? null) : null;
 
-        // Jika peran berubah dari wali santri, lepaskan tautan santri.
+        // Jika peran berubah dari wali santri, lepaskan semua tautan santri.
         if ($pengguna->role === 'wali_santri' && $data['role'] !== 'wali_santri') {
-            $pengguna->santri()->update(['user_id' => null]);
+            foreach ($pengguna->anak as $anak) {
+                if ($anak->user_id === $pengguna->id) {
+                    $anak->update(['user_id' => null]);
+                }
+            }
+            $pengguna->anak()->detach();
         }
 
         $pengguna->update($data);
 
-        if ($santriId) {
-            // Satu akun wali dipantau untuk satu santri: lepaskan tautan lama
-            // yang berbeda sebelum menautkan pilihan baru.
-            $pengguna->santri()->where('id', '!=', (int) $santriId)->update(['user_id' => null]);
-
-            $this->tautkanSantri($pengguna, (int) $santriId);
+        // Sinkronkan tautan banyak anak (ayah/ibu bisa punya akun berbeda).
+        if ($santriIds !== null) {
+            $this->sinkronTautan($pengguna, $santriIds);
         }
 
         return redirect()->route('super.pengguna.index', $this->kategoriRedirect($pengguna->role))
@@ -236,8 +254,13 @@ class PenggunaController extends Controller
             return back()->with('error', 'Super Admin terakhir tidak bisa dihapus.');
         }
 
-        // Lepaskan tautan santri agar tidak menunjuk akun yang sudah dihapus.
-        $pengguna->santri()->update(['user_id' => null]);
+        // Lepaskan semua tautan santri agar tidak menunjuk akun yang dihapus.
+        foreach ($pengguna->anak as $anak) {
+            if ($anak->user_id === $pengguna->id) {
+                $anak->update(['user_id' => null]);
+            }
+        }
+        $pengguna->anak()->detach();
 
         $role = $pengguna->role;
         $pengguna->delete();
@@ -272,7 +295,7 @@ class PenggunaController extends Controller
     private function dataForm(User $user, ?User $pengguna = null): array
     {
         $bolehSemua = Akses::superAdmin($user);
-        $sudahTertaut = $pengguna ? $pengguna->santri()->exists() : false;
+        $sudahTertaut = $pengguna ? $pengguna->anak()->exists() : false;
 
         $roles = $bolehSemua
             ? self::ROLES
@@ -282,7 +305,7 @@ class PenggunaController extends Controller
             'roles' => $roles,
             'jenjangList' => self::jenjangOptions(),
             'santriList' => $this->santriOptions($pengguna),
-            'santriTertaut' => $pengguna ? $pengguna->santri()->pluck('id')->all() : [],
+            'santriTertaut' => $pengguna ? $pengguna->anak()->pluck('santri.id')->all() : [],
             'wajibSantri' => ! $bolehSemua && ! $sudahTertaut,
         ];
     }
@@ -299,14 +322,8 @@ class PenggunaController extends Controller
             $query->whereIn('jenjang_pendidikan', $nilai);
         }
 
-        // Hanya santri tanpa wali, atau yang sudah tertaut ke akun ini.
-        $query->where(function ($q) use ($pengguna) {
-            $q->whereNull('user_id');
-            if ($pengguna) {
-                $q->orWhere('user_id', $pengguna->id);
-            }
-        });
-
+        // Tampilkan semua santri pada jenjang yang berwenang. Satu santri boleh
+        // memiliki akun ayah dan ibu yang berbeda (pivot santri_wali).
         return $query->get(['id', 'nama_lengkap', 'jenjang_pendidikan', 'kelas'])
             ->mapWithKeys(function ($s) {
                 $jenjang = Jenjang::label($s->jenjang_pendidikan) ?: 'Tanpa jenjang';
@@ -331,7 +348,7 @@ class PenggunaController extends Controller
         if (Akses::normalisasi($user->role) === 'admin') {
             $nilai = Akses::nilaiJenjangDb($user, Santri::class, 'jenjang_pendidikan') ?: ['__tidak_ada__'];
 
-            $query->whereHas('santri', fn ($q) => $q->whereIn('jenjang_pendidikan', $nilai));
+            $query->whereHas('anak', fn ($q) => $q->whereIn('jenjang_pendidikan', $nilai));
         }
 
         return $query;
@@ -355,7 +372,7 @@ class PenggunaController extends Controller
         if (Akses::normalisasi($user->role) === 'admin') {
             $nilai = Akses::nilaiJenjangDb($user, Santri::class, 'jenjang_pendidikan') ?: ['__tidak_ada__'];
 
-            $cocok = $target->santri()->whereIn('jenjang_pendidikan', $nilai)->exists();
+            $cocok = $target->anak()->whereIn('jenjang_pendidikan', $nilai)->exists();
 
             abort_unless(
                 $cocok,
@@ -365,13 +382,45 @@ class PenggunaController extends Controller
         }
     }
 
-    /** Tautkan satu santri ke akun wali. */
-    private function tautkanSantri(User $pengguna, int $santriId): void
+    /** Tautkan satu atau beberapa santri ke akun wali (pivot + user_id utama). */
+    private function tautkanSantri(User $pengguna, array $santriIds): void
     {
-        $santri = Santri::findOrFail($santriId);
+        foreach ($santriIds as $santriId) {
+            $santri = Santri::find($santriId);
 
-        $santri->user_id = $pengguna->id;
-        $santri->save();
+            if (! $santri) {
+                continue;
+            }
+
+            if (blank($santri->user_id)) {
+                $santri->update(['user_id' => $pengguna->id]);
+            }
+
+            $pengguna->anak()->syncWithoutDetaching([
+                $santri->id => ['hubungan' => 'wali', 'utama' => blank($santri->user_id) || $santri->user_id === $pengguna->id],
+            ]);
+        }
+    }
+
+    /** Samakan daftar anak dengan pilihan form tanpa memutus anak lain. */
+    private function sinkronTautan(User $pengguna, array $santriIds): void
+    {
+        $lama = $pengguna->anak()->pluck('santri.id')->all();
+        $baru = array_map('intval', $santriIds);
+
+        $dilepas = array_diff($lama, $baru);
+
+        foreach ($dilepas as $santriId) {
+            $santri = Santri::find($santriId);
+
+            if ($santri && $santri->user_id === $pengguna->id) {
+                $santri->update(['user_id' => null]);
+            }
+
+            $pengguna->anak()->detach($santriId);
+        }
+
+        $this->tautkanSantri($pengguna, $baru);
     }
 
     /** Validasi bersama untuk store & update. */
@@ -396,20 +445,16 @@ class PenggunaController extends Controller
                 Rule::in(array_keys(self::jenjangOptions())),
             ],
             'phone' => ['nullable', 'string', 'max:30'],
-            'password' => [$pengguna ? 'nullable' : 'required', 'string', 'min:6', 'confirmed'],
-            'santri_id' => [
-                'nullable',
+            'password' => [$pengguna ? 'nullable' : 'required', 'string', 'min:8', 'confirmed'],
+            'santri_ids' => ['nullable', 'array'],
+            'santri_ids.*' => [
                 'integer',
                 Rule::exists('santri', 'id'),
-                function ($attribute, $value, $fail) use ($pengguna) {
+                function ($attribute, $value, $fail) {
                     $santri = Santri::find($value);
 
                     if (! $santri) {
                         return;
-                    }
-
-                    if ($santri->user_id && $santri->user_id !== $pengguna?->id) {
-                        $fail('Santri ini sudah tertaut ke akun wali lain.');
                     }
 
                     $user = auth()->user();
@@ -421,21 +466,18 @@ class PenggunaController extends Controller
             ],
         ];
 
-        // Pengelola selain Super Admin wajib menautkan santri agar akun wali
-        // langsung terlihat pada daftar jenjangnya. Saat edit, akun yang sudah
-        // punya santri tidak perlu memilih ulang.
         if (! $bolehSemua) {
-            $sudahTertaut = $pengguna && $pengguna->santri()->exists();
+            $sudahTertaut = $pengguna && $pengguna->anak()->exists();
 
             if (! $sudahTertaut) {
-                $aturan['santri_id'][] = 'required';
+                $aturan['santri_ids'][] = 'required';
             }
         }
 
         return $request->validate($aturan, [
             'jenjang.required_if' => 'Pilih jenjang untuk akun Admin Jenjang.',
             'jenjang.in' => 'Jenjang yang dipilih tidak dikenali.',
-            'santri_id.required' => 'Pilih santri yang akan ditautkan ke akun wali.',
+            'santri_ids.required' => 'Pilih minimal satu santri yang akan ditautkan ke akun wali.',
         ]);
     }
 }

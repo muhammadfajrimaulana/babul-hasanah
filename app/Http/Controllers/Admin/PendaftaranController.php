@@ -4,15 +4,20 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Public\PendaftaranOnlineController as PublicPendaftaranController;
+use App\Mail\KredensialMail;
 use App\Models\Alumni;
 use App\Models\PendaftaranOnline;
+use App\Models\RiwayatKelas;
 use App\Models\Santri;
 use App\Models\User;
 use App\Support\Akses;
+use App\Support\CatatanAktivitas;
+use App\Support\Jenjang;
 use App\Support\Kelulusan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class PendaftaranController extends Controller
@@ -79,24 +84,24 @@ class PendaftaranController extends Controller
         $pendaftaran = PendaftaranOnline::findOrFail($id);
         $this->pastikanJenjang($pendaftaran);
 
-        // CEK 1: Jika sudah pernah diterima sebelumnya, tolak proses duplikasi
         if ($pendaftaran->status_pendaftaran === 'diterima') {
             return redirect()->back()->with('error', 'Pendaftar ini sudah diterima sebelumnya dan akunnya sudah dibuat!');
         }
 
-        // Jika DITOLAK: cukup ubah status, tidak perlu membuat akun
         if ($request->status_pendaftaran === 'ditolak') {
             $pendaftaran->update(['status_pendaftaran' => 'ditolak']);
+
+            CatatanAktivitas::catat('tolak_ppdb', $pendaftaran, [
+                'no_pendaftaran' => $pendaftaran->no_pendaftaran,
+            ]);
 
             return redirect()->back()->with('success', 'Status pendaftaran berhasil diperbarui.');
         }
 
-        // CEK 2: Email orang tua/wali wajib ada untuk membuat akun portal (hanya saat diterima)
         if (empty($pendaftaran->email)) {
             return redirect()->back()->with('error', 'Gagal membuat akun: Email orang tua/wali pendaftar masih kosong!');
         }
 
-        // CEK 3: Email yang sudah dipakai akun non-wali tidak boleh dipakai ulang
         $userLama = User::where('email', $pendaftaran->email)->first();
 
         if ($userLama && $userLama->role !== 'wali_santri') {
@@ -106,21 +111,18 @@ class PendaftaranController extends Controller
             );
         }
 
-        // Semua proses ditulis dalam transaction agar tidak setengah jadi
         $hasil = DB::transaction(function () use ($pendaftaran, $userLama) {
             $pendaftaran->update(['status_pendaftaran' => 'diterima']);
 
             $namaWali = $pendaftaran->nama_ortu_wali
                 ?: ($pendaftaran->nama_ayah ?: ($pendaftaran->nama_ibu ?: $pendaftaran->nama_lengkap));
 
-            // Wali yang sudah punya akun (misalnya mendaftarkan anak kedua)
-            // memakai akun lama, tanpa membuat atau mengganti password.
+            // Wali yang sudah punya akun (anak kedua) memakai akun lama.
             if ($userLama) {
                 $user = $userLama;
                 $rawPassword = null;
             } else {
-                $rawPassword = 'babul2026';
-                // $rawPassword = 'babul' . rand(1000, 9999);
+                $rawPassword = Str::password(12, symbols: false);
 
                 $user = User::create([
                     'name' => $namaWali,
@@ -128,16 +130,16 @@ class PendaftaranController extends Controller
                     'password' => Hash::make($rawPassword),
                     'role' => 'wali_santri',
                     'phone' => $pendaftaran->no_hp_ortu,
+                    'is_active' => true,
+                    'must_change_password' => true,
+                    'temp_password_expires_at' => now()->addDay(),
                 ]);
             }
 
-            // Nomor induk: ulangi sampai benar-benar unik
             do {
                 $nomorInduk = 'SANTRI-'.date('Y').'-'.strtoupper(Str::random(4));
             } while (Santri::where('nomor_induk', $nomorInduk)->exists());
 
-            // Alamat lengkap: utamakan kolom domisili baru, lalu fallback ke
-            // kolom alamat lama bila data pendaftar masih menggunakan form lama.
             $alamat = $pendaftaran->alamat_domisili ?: collect([
                 $pendaftaran->alamat_jalan,
                 $pendaftaran->alamat_rt_rw,
@@ -147,41 +149,90 @@ class PendaftaranController extends Controller
                 $pendaftaran->alamat_provinsi,
             ])->filter()->implode(', ');
 
-            Santri::create([
+            $santri = Santri::create([
                 'user_id' => $user->id,
                 'pendaftaran_online_id' => $pendaftaran->id,
                 'nomor_induk' => $nomorInduk,
                 'nama_lengkap' => $pendaftaran->nama_lengkap,
-                'jenjang_pendidikan' => $pendaftaran->jenjang_tujuan,
+                'jenjang_pendidikan' => Jenjang::label($pendaftaran->jenjang_tujuan),
                 'kelas' => '1',
+                'kamar' => null,
+                'status_kelulusan' => Santri::STATUS_AKTIF,
                 'alamat' => $alamat ?: 'Asal sekolah: '.$pendaftaran->asal_sekolah,
                 'nama_wali' => $namaWali,
             ]);
 
-            return ['rawPassword' => $rawPassword];
+            // Dukung ayah & ibu dengan akun berbeda lewat pivot.
+            $user->anak()->syncWithoutDetaching([
+                $santri->id => ['hubungan' => 'wali', 'utama' => true],
+            ]);
+
+            RiwayatKelas::create([
+                'santri_id' => $santri->id,
+                'jenjang' => $santri->jenjang_pendidikan,
+                'kelas' => $santri->kelas,
+                'kamar' => $santri->kamar,
+                'tahun_ajaran' => now()->month >= 7
+                    ? now()->year.'/'.(now()->year + 1)
+                    : (now()->year - 1).'/'.now()->year,
+                'semester' => '1',
+                'status' => 'naik',
+                'keterangan' => 'Data awal dari PPDB',
+                'diproses_oleh' => auth()->id(),
+            ]);
+
+            return ['user' => $user, 'santri' => $santri, 'rawPassword' => $rawPassword];
         });
 
-        // Normalisasi nomor WhatsApp (utamakan nomor orang tua)
+        $emailTerkirim = false;
+
+        if ($hasil['rawPassword']) {
+            try {
+                Mail::to($pendaftaran->email, $hasil['user']->name)->send(new KredensialMail(
+                    nama: $hasil['user']->name,
+                    email: $pendaftaran->email,
+                    passwordSementara: $hasil['rawPassword'],
+                    peran: 'Wali Santri',
+                    judul: 'Akun Portal Wali Santri',
+                    catatan: 'Akun ini terhubung dengan santri '.$pendaftaran->nama_lengkap.'.',
+                ));
+                $emailTerkirim = true;
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        CatatanAktivitas::catat('terima_ppdb', $pendaftaran, [
+            'santri_id' => $hasil['santri']->id,
+            'akun_baru' => (bool) $hasil['rawPassword'],
+            'email_terkirim' => $emailTerkirim,
+        ]);
+
         $phone = preg_replace('/\D/', '', $pendaftaran->no_hp_ortu ?: ($pendaftaran->no_hp_aktif ?? ''));
         if (str_starts_with($phone, '0')) {
             $phone = '62'.substr($phone, 1);
         }
 
         $loginUrl = route('login');
-
-        $infoLogin = $hasil['rawPassword']
-            ? "Email: {$pendaftaran->email}\nPassword: {$hasil['rawPassword']}"
-            : "Email: {$pendaftaran->email}\nPassword: sama seperti akun portal Anda sebelumnya";
-
-        // Pesan yang akan otomatis terisi di WhatsApp
-        $pesanWa = "Alhamdulillah, Pendaftaran santri atas nama *{$pendaftaran->nama_lengkap}* telah *DITERIMA* di Pesantren Babul Hasanah.\n\nSilakan login ke Portal Wali Santri:\n{$infoLogin}\n\nSilakan login melalui link berikut:\n{$loginUrl}";
+        $pesanWa = "Alhamdulillah, Pendaftaran santri atas nama *{$pendaftaran->nama_lengkap}* telah *DITERIMA* di Pesantren Babul Hasanah.\n\n"
+            ."Akun Portal Wali Santri: {$pendaftaran->email}\n"
+            .($hasil['rawPassword']
+                ? "Password sementara telah dikirim ke email wali dan wajib diganti saat login pertama (berlaku 24 jam).\n\n"
+                : "Silakan gunakan password akun portal yang sudah ada.\n\n")
+            ."Login melalui: {$loginUrl}";
 
         $waLink = "https://wa.me/{$phone}?text=".urlencode($pesanWa);
 
+        $success = $hasil['rawPassword']
+            ? 'Status berhasil diubah menjadi Diterima! Data santri & akun wali dibuat.'
+            : 'Status berhasil diubah menjadi Diterima! Santri ditautkan ke akun wali yang sudah ada.';
+
+        if ($hasil['rawPassword'] && ! $emailTerkirim) {
+            $success .= ' Namun email kredensial gagal dikirim. Gunakan tombol Reset Password Wali di detail santri.';
+        }
+
         return redirect()->back()->with([
-            'success' => $hasil['rawPassword']
-                ? 'Status berhasil diubah menjadi Diterima! Akun telah dibuat.'
-                : 'Status berhasil diubah menjadi Diterima! Santri ditautkan ke akun wali yang sudah ada.',
+            'success' => $success,
             'wa_link' => $waLink,
             'nama_santri' => $pendaftaran->nama_lengkap,
         ]);

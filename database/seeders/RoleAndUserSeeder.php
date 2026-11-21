@@ -10,12 +10,13 @@ use Illuminate\Support\Facades\Hash;
  * Akun inti pesantren (bukan data dummy).
  *
  * Hanya tiga akun resmi yang dibuat:
- * - Super Admin : akses penuh
- * - Pengurus    : monitoring seluruh pesantren (role `pengasuh`)
- * - Pembina     : monitoring asrama & kehadiran
+ * - Super Admin : akses penuh (role `super_admin`)
+ * - Pengurus    : manajemen & operasional pesantren (role `pengurus`)
+ * - Pembina     : pembinaan harian asrama (role `pembina`)
  *
- * Akun admin per jenjang dan akun wali santri dibuat manual lewat menu
- * Pengguna agar tidak ada kredensial contoh di database produksi.
+ * Akun Admin Jenjang, Wali Santri, dan Alumni dibuat melalui alur aplikasi
+ * (menu Pengguna / penerimaan PPDB / kelulusan) agar jenjang dan relasi anak
+ * selalu valid serta tidak ada kredensial contoh di database produksi.
  * Password awal hanya dipakai saat akun pertama kali dibuat, sehingga
  * menjalankan seeder ulang tidak mereset password yang sudah diganti.
  */
@@ -33,7 +34,7 @@ class RoleAndUserSeeder extends Seeder
             [
                 'email' => 'pengurus@babulhasanah.sch.id',
                 'name' => 'Pengurus Pesantren',
-                'role' => 'pengasuh',
+                'role' => 'pengurus',
                 'jenjang' => null,
             ],
             [

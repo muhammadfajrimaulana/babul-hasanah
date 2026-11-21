@@ -9,7 +9,7 @@
     $hanyaWali = count($roles) === 1 && array_key_exists('wali_santri', $roles);
     $roleAwal = $v('role') ?: ($hanyaWali ? 'wali_santri' : '');
 
-    $santriAwal = old('santri_id', $santriTertaut[0] ?? '');
+    $santriAwal = array_map('strval', (array) old('santri_ids', $santriTertaut ?? []));
     $sudahTertaut = ! empty($santriTertaut);
     $wajibSantri = ($wajibSantri ?? false) && ! $sudahTertaut;
 @endphp
@@ -92,21 +92,24 @@
                 Belum ada santri yang tersedia untuk ditautkan. Tambahkan data santri terlebih dahulu.
             </div>
         @else
-            <select name="santri_id" class="{{ $in }}" @required($wajibSantri)>
-                <option value="">- Pilih santri -</option>
+            <div class="max-h-56 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-800">
                 @foreach ($santriList as $id => $label)
-                    <option value="{{ $id }}" @selected((string) $santriAwal === (string) $id)>{{ $label }}</option>
+                    <label class="flex items-start gap-2.5 px-4 py-2.5 text-[11px] font-semibold text-slate-600 dark:text-slate-300 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60">
+                        <input type="checkbox" name="santri_ids[]" value="{{ $id }}"
+                            class="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                            @checked(in_array((string) $id, $santriAwal, true))>
+                        <span>{{ $label }}</span>
+                    </label>
                 @endforeach
-            </select>
+            </div>
             <p class="text-[10px] text-slate-400 mt-1">
-                Akun wali akan memantau data santri yang dipilih di portal wali.
-                @if ($sudahTertaut)
-                    Kosongkan bila tidak ingin mengubah tautan saat ini.
-                @endif
+                Satu akun wali boleh terhubung ke beberapa anak (mis. kakak & adik di jenjang berbeda).
+                Satu santri juga boleh memiliki akun ayah dan ibu yang terpisah.
             </p>
         @endif
 
-        @error('santri_id') <p class="{{ $err }}">{{ $message }}</p> @enderror
+        @error('santri_ids') <p class="{{ $err }}">{{ $message }}</p> @enderror
+        @error('santri_ids.*') <p class="{{ $err }}">{{ $message }}</p> @enderror
     </div>
 
     <div>
@@ -133,11 +136,13 @@
             </ul>
         @else
             <ul class="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5 list-disc pl-4">
-                <li><b>Super Admin</b> — akses penuh + kelola pengguna & konten institusional.</li>
+                <li><b>Superadmin</b> — akses penuh + kelola pengguna, master data, dan log aktivitas.</li>
+                <li><b>Pengurus</b> — manajemen & operasional; hanya membaca data santri.</li>
+                <li><b>Pembina</b> — hafalan, presensi kegiatan, pelanggaran, dan izin.</li>
                 <li><b>Admin Jenjang</b> — data operasional, dibatasi ke jenjang yang dipilih.</li>
-                <li><b>Pengasuh / Pengurus</b> — monitoring seluruh pesantren (hanya baca).</li>
-                <li><b>Pembina Asrama</b> — monitoring santri & kehadiran (hanya baca).</li>
                 <li><b>Wali Santri</b> — hanya portal wali, tidak bisa masuk panel admin.</li>
+                <li><b>Alumni</b> — hanya melihat data diri & mengunduh dokumen.</li>
+                <li>Guru & Wali Kelas <b>tidak memiliki akun login</b>; keduanya data jabatan/tenaga pendidik.</li>
             </ul>
         @endif
     </div>

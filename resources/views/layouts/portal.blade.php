@@ -58,11 +58,33 @@
                 <a href="{{ route('portal.prestasi') }}" class="{{ $navClass(request()->routeIs('portal.prestasi*')) }}">
                     <i class="fa-solid fa-trophy"></i> Prestasi
                 </a>
+                <a href="{{ route('portal.pengumuman.index') }}" class="{{ $navClass(request()->routeIs('portal.pengumuman*')) }}">
+                    <i class="fa-solid fa-bullhorn"></i> Pengumuman
+                </a>
+                <a href="{{ route('portal.izin.index') }}" class="{{ $navClass(request()->routeIs('portal.izin*')) }}">
+                    <i class="fa-solid fa-plane-departure"></i> Izin Pulang
+                </a>
+                <a href="{{ route('portal.pengajuan.index') }}" class="{{ $navClass(request()->routeIs('portal.pengajuan*')) }}">
+                    <i class="fa-solid fa-pen-to-square"></i> Ajukan Perubahan
+                </a>
+                <a href="{{ route('portal.dokumen.index') }}" class="{{ $navClass(request()->routeIs('portal.dokumen*')) }}">
+                    <i class="fa-solid fa-folder-open"></i> Dokumen
+                </a>
             </div>
         </nav>
 
         <!-- Main Content (Tempat yield masuk) -->
         <main class="flex-1 max-w-7xl w-full mx-auto p-6 sm:p-8 lg:px-10">
+            @if (session('success'))
+                <div class="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-bold text-emerald-700">
+                    <i class="fa-solid fa-circle-check mr-1"></i> {{ session('success') }}
+                </div>
+            @endif
+            @if (session('error'))
+                <div class="mb-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-bold text-rose-700">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i> {{ session('error') }}
+                </div>
+            @endif
             @yield('content')
         </main>
 

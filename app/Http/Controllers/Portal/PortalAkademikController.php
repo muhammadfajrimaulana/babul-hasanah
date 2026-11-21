@@ -16,7 +16,7 @@ class PortalAkademikController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $anakList = $user->santri()->orderBy('nama_lengkap')->get();
+        $anakList = $user->anakQuery()->orderBy('nama_lengkap')->get();
         $anak = $this->pilihAnak($request, $anakList);
 
         if (! Akademik::siap()) {
@@ -48,7 +48,7 @@ class PortalAkademikController extends Controller
     public function cetak(Request $request)
     {
         $user = $request->user();
-        $anakList = $user->santri()->orderBy('nama_lengkap')->get();
+        $anakList = $user->anakQuery()->orderBy('nama_lengkap')->get();
         $anak = $this->pilihAnak($request, $anakList);
 
         abort_unless($anak, 404, 'Pilih anak terlebih dahulu.');
@@ -201,7 +201,7 @@ class PortalAkademikController extends Controller
     private function pastikanMilik(Request $request, DokumenNilai $dokumen): void
     {
         $milik = $request->user()
-            ->santri()
+            ->anakQuery()
             ->whereKey($dokumen->santri_id)
             ->exists();
 

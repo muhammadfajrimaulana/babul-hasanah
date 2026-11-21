@@ -8,10 +8,14 @@ use App\Models\Absensi;
 use App\Models\Alumni;
 use App\Models\Berita;
 use App\Models\DokumenNilai;
+use App\Models\Hafalan;
+use App\Models\Izin;
 use App\Models\Kepengurusan;
 use App\Models\MataPelajaran;
 use App\Models\NilaiSantri;
+use App\Models\Pelanggaran;
 use App\Models\PendaftaranOnline;
+use App\Models\Pengumuman;
 use App\Models\PrestasiSantri;
 use App\Models\Santri;
 use App\Support\Akademik;
@@ -713,8 +717,8 @@ class RoleDashboardController extends Controller
         return back()->with('success', 'Rapor PDF "'.$nama.'" berhasil dihapus.');
     }
 
-    /** Dashboard Pengasuh: ringkasan seluruh pesantren (hanya baca). */
-    public function pengasuh()
+    /** Dashboard Pengurus: ringkasan seluruh pesantren (hanya baca). */
+    public function pengurus()
     {
         $menunggu = function ($q) {
             $q->where(function ($w) {
@@ -723,7 +727,9 @@ class RoleDashboardController extends Controller
             });
         };
 
-        return view('dashboard.roles.pengasuh', [
+        Izin::tandaiTerlambat();
+
+        return view('dashboard.roles.pengurus', [
             'totalSantri' => $this->hitung(Santri::class),
             'totalPendaftar' => $this->hitung(PendaftaranOnline::class),
             'pendaftarMenunggu' => $this->hitung(PendaftaranOnline::class, $menunggu),
@@ -731,22 +737,35 @@ class RoleDashboardController extends Controller
             'totalPrestasi' => $this->hitung(PrestasiSantri::class),
             'totalAsatidz' => $this->hitung(Kepengurusan::class),
             'totalBerita' => $this->hitung(Berita::class, fn ($q) => $q->published()),
+            'jumlahPengumuman' => $this->hitung(Pengumuman::class),
             'jenjangStats' => RekapJenjang::ringkasan(),
             'pendaftarTerbaru' => $this->terbaru(PendaftaranOnline::class, null, 6),
         ]);
     }
 
-    /** Dashboard Pembina: fokus santri & kehadiran asrama (hanya baca). */
+    /** Alias lama untuk kompatibilitas. */
+    public function pengasuh()
+    {
+        return $this->pengurus();
+    }
+
+    /** Dashboard Pembina: fokus pembinaan harian. */
     public function pembina()
     {
+        Izin::tandaiTerlambat();
+
         return view('dashboard.roles.pembina', [
             'totalSantri' => $this->hitung(Santri::class),
             'totalPrestasi' => $this->hitung(PrestasiSantri::class),
             'totalAlumni' => $this->hitung(Alumni::class),
             'absensiHariIni' => $this->hitung(Absensi::class, fn ($q) => $q->whereDate('tanggal', now()->toDateString())),
+            'hafalanHariIni' => $this->hitung(Hafalan::class, fn ($q) => $q->whereDate('tanggal', now()->toDateString())),
+            'pelanggaranBulanIni' => $this->hitung(Pelanggaran::class, fn ($q) => $q->whereMonth('tanggal', now()->month)->whereYear('tanggal', now()->year)),
+            'izinMenunggu' => $this->hitung(Izin::class, fn ($q) => $q->where('status', Izin::MENUNGGU)),
+            'izinTerlambat' => $this->hitung(Izin::class, fn ($q) => $q->where('status', Izin::TERLAMBAT)),
             'jenjangStats' => RekapJenjang::ringkasan(),
             'santriTerbaru' => $this->terbaru(Santri::class, null, 6),
-            'prestasiTerbaru' => $this->terbaru(PrestasiSantri::class, null, 4),
+            'izinTerbaru' => $this->terbaru(Izin::class, fn ($q) => $q->with('santri'), 6),
         ]);
     }
 

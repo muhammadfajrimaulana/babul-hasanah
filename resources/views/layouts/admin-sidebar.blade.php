@@ -7,7 +7,7 @@
 
     $dashboardAktif =
         request()->routeIs('admin.dashboard') ||
-        request()->routeIs('admin.dashboard.pengasuh') ||
+        request()->routeIs('admin.dashboard.pengurus') ||
         request()->routeIs('admin.dashboard.pembina') ||
         (request()->routeIs('admin.dashboard.jenjang') && !$isGlobal);
 
@@ -29,6 +29,11 @@
         $u?->bisa('info') ||
         $u?->bisa('struktur');
     $grupSistem = $u?->bisa('konten') || $u?->bisa('pengguna');
+    $grupLayanan =
+        $u?->bisa('pembinaan.lihat') ||
+        $u?->bisa('izin.lihat') ||
+        $u?->bisa('pengumuman.lihat') ||
+        $u?->bisa('kelas.lihat');
 @endphp
 
 <style>
@@ -398,6 +403,76 @@
             @endif
         @endif
 
+        {{-- ============ PEMBINAAN & LAYANAN ============ --}}
+        @if ($grupLayanan)
+            <div class="mb-1 mt-4" x-show="!sidebarMinimize">
+                <p class="sb-label">Pembinaan &amp; Layanan</p>
+            </div>
+            <div class="mb-2" x-show="sidebarMinimize">
+                <div class="sb-hr"></div>
+            </div>
+
+            @if ($u?->bisa('pembinaan.lihat'))
+                <a href="{{ route('admin.pembinaan.index') }}" @click="sidebarOpen = false"
+                    class="{{ $itemClass(request()->routeIs('admin.pembinaan.*')) }}"
+                    @if (request()->routeIs('admin.pembinaan.*')) aria-current="page" @endif title="Pembinaan">
+                    <i class="fa-solid fa-book-quran"></i>
+                    <span x-show="!sidebarMinimize" class="truncate whitespace-nowrap">Pembinaan</span>
+                    <span class="sb-dot" x-show="!sidebarMinimize" aria-hidden="true"></span>
+                </a>
+            @endif
+
+            @if ($u?->bisa('izin.lihat'))
+                <a href="{{ route('admin.izin.index') }}" @click="sidebarOpen = false"
+                    class="{{ $itemClass(request()->routeIs('admin.izin.*')) }}"
+                    @if (request()->routeIs('admin.izin.*')) aria-current="page" @endif title="Izin Pulang">
+                    <i class="fa-solid fa-plane-departure"></i>
+                    <span x-show="!sidebarMinimize" class="truncate whitespace-nowrap">Izin Pulang</span>
+                    <span class="sb-dot" x-show="!sidebarMinimize" aria-hidden="true"></span>
+                </a>
+            @endif
+
+            @if ($u?->bisa('pengumuman.lihat'))
+                <a href="{{ route('admin.pengumuman.index') }}" @click="sidebarOpen = false"
+                    class="{{ $itemClass(request()->routeIs('admin.pengumuman.*')) }}"
+                    @if (request()->routeIs('admin.pengumuman.*')) aria-current="page" @endif title="Pengumuman">
+                    <i class="fa-solid fa-bullhorn"></i>
+                    <span x-show="!sidebarMinimize" class="truncate whitespace-nowrap">Pengumuman</span>
+                    <span class="sb-dot" x-show="!sidebarMinimize" aria-hidden="true"></span>
+                </a>
+            @endif
+
+            @if ($u?->bisa('kelas.lihat'))
+                <a href="{{ route('admin.kelas.index') }}" @click="sidebarOpen = false"
+                    class="{{ $itemClass(request()->routeIs('admin.kelas.*') || request()->routeIs('admin.guru.*')) }}"
+                    @if (request()->routeIs('admin.kelas.*') || request()->routeIs('admin.guru.*')) aria-current="page" @endif title="Kelas & Guru">
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                    <span x-show="!sidebarMinimize" class="truncate whitespace-nowrap">Kelas &amp; Guru</span>
+                    <span class="sb-dot" x-show="!sidebarMinimize" aria-hidden="true"></span>
+                </a>
+            @endif
+
+            @if ($u?->bisa('santri.lihat'))
+                <a href="{{ route('admin.pengajuan.index') }}" @click="sidebarOpen = false"
+                    class="{{ $itemClass(request()->routeIs('admin.pengajuan.*')) }}"
+                    @if (request()->routeIs('admin.pengajuan.*')) aria-current="page" @endif title="Pengajuan Perubahan">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span x-show="!sidebarMinimize" class="truncate whitespace-nowrap">Pengajuan Perubahan</span>
+                    <span class="sb-dot" x-show="!sidebarMinimize" aria-hidden="true"></span>
+                </a>
+            @endif
+
+            @if ($u?->bisa('alumni.lihat'))
+                <a href="{{ route('admin.legalisir.index') }}" @click="sidebarOpen = false"
+                    class="{{ $itemClass(request()->routeIs('admin.legalisir.*')) }}"
+                    @if (request()->routeIs('admin.legalisir.*')) aria-current="page" @endif title="Legalisir">
+                    <i class="fa-solid fa-stamp"></i>
+                    <span x-show="!sidebarMinimize" class="truncate whitespace-nowrap">Legalisir</span>
+                    <span class="sb-dot" x-show="!sidebarMinimize" aria-hidden="true"></span>
+                </a>
+            @endif
+        @endif
+
         {{-- ============ KONTEN & INFORMASI ============ --}}
         @if ($grupKonten)
             <div class="mb-1 mt-4" x-show="!sidebarMinimize">
@@ -518,14 +593,23 @@
                 </a>
             @endif
 
+            @if ($u?->bisa('log'))
+                <a href="{{ route('admin.log.index') }}" @click="sidebarOpen = false"
+                    class="{{ $itemClass(request()->routeIs('admin.log.*')) }}"
+                    @if (request()->routeIs('admin.log.*')) aria-current="page" @endif title="Log Aktivitas">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span x-show="!sidebarMinimize" class="truncate whitespace-nowrap">Log Aktivitas</span>
+                    <span class="sb-dot" x-show="!sidebarMinimize" aria-hidden="true"></span>
+                </a>
+            @endif
+
             @if ($u?->bisa('pengguna'))
-                @php $menuPengguna = $u?->isSuperAdmin() ? 'Pengguna' : 'Wali Santri'; @endphp
-                <a href="{{ route('super.pengguna.index', $u?->isSuperAdmin() ? [] : ['kategori' => 'wali_santri']) }}"
+                <a href="{{ route('super.pengguna.index') }}"
                     @click="sidebarOpen = false" class="{{ $itemClass(request()->routeIs('super.pengguna.*')) }}"
                     @if (request()->routeIs('super.pengguna.*')) aria-current="page" @endif
-                    title="{{ $menuPengguna }}">
-                    <i class="fa-solid {{ $u?->isSuperAdmin() ? 'fa-users-gear' : 'fa-people-roof' }}"></i>
-                    <span x-show="!sidebarMinimize" class="truncate whitespace-nowrap">{{ $menuPengguna }}</span>
+                    title="Pengguna">
+                    <i class="fa-solid fa-users-gear"></i>
+                    <span x-show="!sidebarMinimize" class="truncate whitespace-nowrap">Pengguna</span>
                     <span class="sb-dot" x-show="!sidebarMinimize" aria-hidden="true"></span>
                 </a>
             @endif

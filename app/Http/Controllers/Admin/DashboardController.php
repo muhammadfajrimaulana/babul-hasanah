@@ -165,6 +165,22 @@ class DashboardController extends Controller
         return view('dashboard.index', $data);
     }
 
+    /** Halaman pengaturan sistem (khusus Superadmin). */
+    public function settings()
+    {
+        return view('dashboard.settings', [
+            'user' => auth()->user(),
+            'infoSistem' => [
+                'Aplikasi' => config('app.name'),
+                'Lingkungan' => app()->environment(),
+                'Versi Laravel' => app()->version(),
+                'Versi PHP' => PHP_VERSION,
+                'Zona Waktu' => config('app.timezone'),
+                'URL Aplikasi' => config('app.url'),
+            ],
+        ]);
+    }
+
     /** Halaman pengaturan profil pengguna yang login. */
     public function profil()
     {

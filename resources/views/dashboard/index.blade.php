@@ -2401,9 +2401,9 @@
                         <span
                             class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 uppercase tracking-wider">Super
                             Administrator</span>
-                    @elseif(auth()->user()->role === 'pengasuh')
+                    @elseif(auth()->user()->role === 'pengurus')
                         <span
-                            class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase tracking-wider">Pengasuh
+                            class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase tracking-wider">Pengurus
                             Pesantren</span>
                     @elseif(auth()->user()->role === 'pembina')
                         <span
@@ -2422,8 +2422,8 @@
                 <p class="db-sub">
                     @if (auth()->user()->role === 'super_admin')
                         Selamat datang kembali di Panel Utama Super Admin Pondok Pesantren Babul Hasanah.
-                    @elseif(auth()->user()->role === 'pengasuh')
-                        Selamat datang kembali, Buya/Kiyai/Ustadz. Berikut rekapitulasi pengawasan menyeluruh aktivitas
+                    @elseif(auth()->user()->role === 'pengurus')
+                        Selamat datang kembali. Berikut rekapitulasi pengawasan menyeluruh aktivitas
                         pondok hari ini.
                     @elseif(auth()->user()->role === 'pembina')
                         Selamat datang di Panel Manajemen Pembina Asrama. Pantau data

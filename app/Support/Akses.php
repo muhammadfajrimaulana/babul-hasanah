@@ -5,29 +5,34 @@ namespace App\Support;
 use App\Models\User;
 
 /**
- * Pusat kebijakan akses (role, menu, dan halaman awal) untuk panel admin.
+ * Pusat kebijakan akses (role, menu, jenjang, dan halaman awal).
  *
- * Semua keputusan "role ini boleh apa" sebaiknya diambil dari kelas ini agar
- * route, sidebar, dan controller tidak pernah berbeda pendapat.
+ * Enam role final:
+ * - super_admin : pengelola tertinggi (pengguna, master data, log)
+ * - pengurus    : manajemen & operasional, hanya baca data santri
+ * - pembina     : pembinaan harian (hafalan, presensi, pelanggaran, izin)
+ * - admin       : Admin Jenjang, terikat tepat satu jenjang
+ * - wali_santri : hanya data anaknya sendiri
+ * - alumni      : hanya data dirinya sendiri
  */
 class Akses
 {
-    /** Label tampilan setiap nilai kolom users.role. */
     public const ROLE_LABELS = [
-        'super_admin' => 'Super Admin',
+        'super_admin' => 'Superadmin',
+        'pengurus' => 'Pengurus',
+        'pembina' => 'Pembina',
         'admin' => 'Admin Jenjang',
-        'pengasuh' => 'Pengasuh / Pengurus',
-        'pembina' => 'Pembina Asrama',
         'wali_santri' => 'Wali Santri',
+        'alumni' => 'Alumni',
     ];
 
-    /** Halaman pertama (nama route) setelah login, per role. */
     public const DASHBOARD_ROUTE = [
         'super_admin' => 'admin.dashboard',
-        'admin' => 'admin.dashboard.jenjang',
-        'pengasuh' => 'admin.dashboard.pengasuh',
+        'pengurus' => 'admin.dashboard.pengurus',
         'pembina' => 'admin.dashboard.pembina',
+        'admin' => 'admin.dashboard.jenjang',
         'wali_santri' => 'portal.dashboard',
+        'alumni' => 'alumni.dashboard',
     ];
 
     /**
@@ -38,52 +43,49 @@ class Akses
      * - tampilan: Akses::bisa($user, 'nama.modul')
      */
     public const MODUL = [
-        'dashboard' => ['super_admin', 'admin', 'pengasuh', 'pembina'],
-        'profil' => ['super_admin', 'admin', 'pengasuh', 'pembina'],
+        'dashboard' => ['super_admin', 'admin', 'pengurus', 'pembina'],
+        'profil' => ['super_admin', 'admin', 'pengurus', 'pembina'],
 
-        // Baca (monitoring) — boleh untuk semua peran panel.
-        'pendaftaran.lihat' => ['super_admin', 'admin', 'pengasuh', 'pembina'],
-        'santri.lihat' => ['super_admin', 'admin', 'pengasuh', 'pembina'],
-        'alumni.lihat' => ['super_admin', 'admin', 'pengasuh', 'pembina'],
-        'prestasi.lihat' => ['super_admin', 'admin', 'pengasuh', 'pembina'],
-        'jenjang.lihat' => ['super_admin', 'admin', 'pengasuh', 'pembina'],
+        // Baca (monitoring).
+        'pendaftaran.lihat' => ['super_admin', 'admin', 'pengurus'],
+        'santri.lihat' => ['super_admin', 'admin', 'pengurus', 'pembina'],
+        'alumni.lihat' => ['super_admin', 'admin', 'pengurus'],
+        'prestasi.lihat' => ['super_admin', 'admin', 'pengurus', 'pembina'],
+        'jenjang.lihat' => ['super_admin', 'admin', 'pengurus', 'pembina'],
+        'akademik.lihat' => ['super_admin', 'admin', 'pengurus', 'pembina'],
+        'pembinaan.lihat' => ['super_admin', 'admin', 'pengurus', 'pembina'],
+        'izin.lihat' => ['super_admin', 'admin', 'pengurus', 'pembina'],
+        'pengumuman.lihat' => ['super_admin', 'admin', 'pengurus', 'pembina'],
+        'kelas.lihat' => ['super_admin', 'admin', 'pengurus', 'pembina'],
 
-        // Modul akademik: Super Admin, Admin Jenjang (jenjangnya), serta
-        // Pengasuh & Pembina (monitoring semua jenjang, hanya baca).
-        'akademik.lihat' => ['super_admin', 'admin', 'pengasuh', 'pembina'],
-
-        // Tulis (operasional) — hanya Super Admin & Admin Jenjang.
+        // Tulis (operasional).
         'pendaftaran.ubah' => ['super_admin', 'admin'],
         'santri.ubah' => ['super_admin', 'admin'],
+        'santri.arsip' => ['super_admin', 'admin'],
         'alumni.ubah' => ['super_admin', 'admin'],
         'prestasi.ubah' => ['super_admin', 'admin'],
         'akademik.ubah' => ['super_admin', 'admin'],
         'akademik.terbit' => ['super_admin', 'admin'],
         'akademik.mapel' => ['super_admin', 'admin'],
+        'pembinaan.ubah' => ['super_admin', 'admin', 'pembina'],
+        'izin.verifikasi' => ['super_admin', 'admin', 'pembina'],
+        'pengumuman.ubah' => ['super_admin', 'admin', 'pengurus'],
+        'kelas.ubah' => ['super_admin', 'admin'],
+        'guru.ubah' => ['super_admin', 'admin'],
+
+        // Konten website.
         'berita' => ['super_admin', 'admin'],
         'galeri' => ['super_admin', 'admin'],
 
-        // Pengelolaan institusional — hanya Super Admin.
+        // Institusional.
         'konten' => ['super_admin'],
         'struktur' => ['super_admin'],
         'info' => ['super_admin'],
 
-        // Halaman Pengguna: Super Admin mengelola semua akun. Admin Jenjang,
-        // Pengasuh, dan Pembina hanya boleh mengelola akun WALI SANTRI
-        // (Admin Jenjang dibatasi ke jenjangnya — dijaga di controller).
-        'pengguna' => ['super_admin', 'admin', 'pengasuh', 'pembina'],
+        // Pengguna & sistem.
+        'pengguna' => ['super_admin'],
         'sistem' => ['super_admin'],
-    ];
-
-    /** Pemetaan awalan email admin jenjang -> slug jenjang resmi. */
-    public const EMAIL_JENJANG = [
-        'mdta' => 'mdta',
-        'ppsw' => 'pps-wustha',
-        'mts' => 'mts',
-        'mas' => 'ma',
-        'pdfw' => 'pdf-wustha',
-        'pdfu' => 'pdf-ulya',
-        'ma' => 'mahad-aly',
+        'log' => ['super_admin'],
     ];
 
     /** Normalisasi nilai role dari database/input menjadi kunci resmi. */
@@ -95,9 +97,14 @@ class Akses
         $alias = [
             'superadmin' => 'super_admin',
             'super' => 'super_admin',
+            'pengasuh' => 'pengurus',
+            'pengurus_besar' => 'pengurus',
             'wali' => 'wali_santri',
             'walisantri' => 'wali_santri',
-            'pengurus' => 'pengasuh',
+            'orangtua' => 'wali_santri',
+            'admin_jenjang' => 'admin',
+            'adminjenjang' => 'admin',
+            'alumnus' => 'alumni',
         ];
 
         $nilai = $alias[$nilai] ?? $nilai;
@@ -136,7 +143,7 @@ class Akses
     {
         $role = self::normalisasi($user?->role);
 
-        return self::DASHBOARD_ROUTE[$role] ?? 'admin.dashboard';
+        return self::DASHBOARD_ROUTE[$role] ?? 'login';
     }
 
     /** URL dashboard sesuai role. */
@@ -151,11 +158,24 @@ class Akses
         return self::normalisasi($user?->role) ? self::dashboardRoute($user) : null;
     }
 
+    /** Role yang memakai panel admin. */
+    public static function rolePanel(?string $role): bool
+    {
+        return in_array(self::normalisasi($role), ['super_admin', 'pengurus', 'pembina', 'admin'], true);
+    }
+
+    /** Role yang memakai portal (wali/alumni). */
+    public static function rolePortal(?string $role): bool
+    {
+        return in_array(self::normalisasi($role), ['wali_santri', 'alumni'], true);
+    }
+
     /**
      * Slug jenjang yang menjadi tanggung jawab user.
      *
-     * Urutan: kolom users.jenjang -> awalan email (mdta@, mts@, dst.).
-     * Hanya role `admin` yang dibatasi per jenjang; role lain null (global).
+     * Hanya role `admin` yang dibatasi per jenjang. Sumber satu-satunya adalah
+     * kolom users.jenjang; fallback email sengaja dihapus agar perubahan email
+     * tidak bisa mengubah cakupan data.
      */
     public static function jenjangSlug(?User $user): ?string
     {
@@ -163,14 +183,7 @@ class Akses
             return null;
         }
 
-        $dariKolom = Jenjang::normalisasi($user?->jenjang ?? null);
-        if ($dariKolom) {
-            return $dariKolom;
-        }
-
-        $awalan = strtolower(strtok((string) $user?->email, '@') ?: '');
-
-        return self::EMAIL_JENJANG[$awalan] ?? null;
+        return Jenjang::normalisasi($user?->jenjang ?? null);
     }
 
     /** Data jenjang lengkap (slug, kode, nama, warna, ikon) milik user. */
@@ -184,6 +197,10 @@ class Akses
     /** Nama jenjang untuk header; "Pusat / Umum" bila tidak dibatasi. */
     public static function namaJenjang(?User $user): string
     {
+        if (self::normalisasi($user?->role) === 'admin' && self::jenjangSlug($user) === null) {
+            return 'Jenjang Belum Diatur';
+        }
+
         return self::jenjangInfo($user)['nama'] ?? 'Pusat / Umum';
     }
 
@@ -195,18 +212,18 @@ class Akses
 
     /**
      * Apakah data user dibatasi ke satu jenjang.
-     * Hanya role admin yang dibatasi; role lain melihat seluruh data.
+     *
+     * Admin selalu dianggap dibatasi, termasuk saat jenjangnya belum diatur.
+     * Kondisi belum diatur harus fail-closed, bukan menjadi akses global.
      */
     public static function dibatasiJenjang(?User $user): bool
     {
-        return self::jenjangSlug($user) !== null;
+        return self::normalisasi($user?->role) === 'admin';
     }
 
     /**
-     * Admin yang belum memiliki jenjang (kolom kosong & email tidak dikenali).
-     *
-     * Kondisi ini harus diperlakukan sebagai "tidak berhak atas jenjang mana
-     * pun" (fail-closed), bukan sebagai admin global.
+     * Admin yang belum memiliki jenjang (kolom kosong / tidak dikenali).
+     * Diperlakukan sebagai "tidak berhak atas jenjang mana pun".
      */
     public static function adminTanpaJenjang(?User $user): bool
     {
@@ -230,15 +247,29 @@ class Akses
         return RekapJenjang::nilaiDb($model, $kolom, $slug);
     }
 
-    /** Pastikan satu nilai jenjang milik user (dipakai untuk detail/edit). */
+    /**
+     * Pastikan satu nilai jenjang milik user.
+     *
+     * Fail-closed: admin tanpa jenjang tidak cocok dengan data apa pun.
+     */
     public static function cocokJenjang(?User $user, ?string $nilai): bool
     {
-        $slug = self::jenjangSlug($user);
-
-        if (! $slug) {
+        if (self::normalisasi($user?->role) !== 'admin') {
             return true; // role global
         }
 
+        $slug = self::jenjangSlug($user);
+
+        if (! $slug) {
+            return false;
+        }
+
         return Jenjang::normalisasi($nilai) === $slug;
+    }
+
+    /** Apakah user boleh melihat seluruh jenjang. */
+    public static function semuaJenjang(?User $user): bool
+    {
+        return in_array(self::normalisasi($user?->role), ['super_admin', 'pengurus', 'pembina'], true);
     }
 }

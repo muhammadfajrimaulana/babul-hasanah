@@ -13,7 +13,7 @@ class PortalPrestasiController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $anakList = $user->santri()->orderBy('nama_lengkap')->get();
+        $anakList = $user->anakQuery()->orderBy('nama_lengkap')->get();
 
         $prestasi = collect();
         $siap = $anakList->isNotEmpty() && $this->siap();

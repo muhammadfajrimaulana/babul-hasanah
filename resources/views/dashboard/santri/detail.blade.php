@@ -59,15 +59,17 @@
                         class="bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
                         <i class="fa-solid fa-pen"></i> Edit
                     </a>
-                    <form action="{{ route('admin.santri.destroy', $santri->id) }}" method="POST"
-                        onsubmit="return confirm('Hapus data santri ini? Status pendaftaran terkait akan kembali menjadi Pending.');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit"
-                            class="bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
-                            <i class="fa-solid fa-trash"></i> Hapus
-                        </button>
-                    </form>
+                    @if (\App\Support\Akses::superAdmin(auth()->user()))
+                        <form action="{{ route('admin.santri.destroy', $santri->id) }}" method="POST"
+                            onsubmit="return confirm('Hapus permanen data santri ini? Tindakan ini hanya untuk Superadmin.');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                class="bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                                <i class="fa-solid fa-trash"></i> Hapus
+                            </button>
+                        </form>
+                    @endif
                 @endif
                 <a href="{{ route('admin.santri.index') }}"
                     class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
@@ -339,6 +341,226 @@
                 Santri ini tidak memiliki arsip pendaftaran online.
             </div>
         @endif
+
+        @if (auth()->user()->bisa('santri.ubah'))
+            {{-- AKSI SANTRI --}}
+            <div class="{{ $cardCls }}">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-screwdriver-wrench"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">Aksi Data Santri</h2>
+                        <p class="text-[11px] text-slate-400">Reset akun wali, pindah jenjang, naik kelas, dan arsip. Data tidak dihapus permanen kecuali oleh Superadmin.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    {{-- Reset password wali --}}
+                    <div class="rounded-2xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                        <h3 class="text-xs font-black text-slate-800 dark:text-slate-100"><i class="fa-solid fa-key mr-1 text-emerald-600"></i> Reset Password Wali</h3>
+                        <p class="mt-1 text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
+                            Password sementara baru berlaku 24 jam dan dikirim ke email wali. Admin tidak bisa melihat password.
+                        </p>
+                        @if ($santri->user)
+                            <form action="{{ route('admin.santri.reset-wali', $santri->id) }}" method="POST" class="mt-3"
+                                onsubmit="return confirm('Reset password akun wali {{ $santri->user->email }}?');">
+                                @csrf
+                                <button type="submit" class="rounded-xl bg-emerald-600 px-4 py-2 text-[11px] font-black text-white hover:bg-emerald-700">
+                                    <i class="fa-solid fa-rotate mr-1"></i> Reset &amp; Kirim Email
+                                </button>
+                            </form>
+                        @else
+                            <p class="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-[10px] font-bold text-amber-700">Belum ada akun wali tertaut.</p>
+                        @endif
+                    </div>
+
+                    {{-- Pindah jenjang --}}
+                    <div class="rounded-2xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                        <h3 class="text-xs font-black text-slate-800 dark:text-slate-100"><i class="fa-solid fa-right-left mr-1 text-sky-600"></i> Pindah Jenjang</h3>
+                        <p class="mt-1 text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
+                            Data, riwayat, dan akun wali tetap sama. Hanya jenjang/kelas yang dilanjutkan.
+                        </p>
+                        <form action="{{ route('admin.santri.pindah-jenjang', $santri->id) }}" method="POST" class="mt-3 space-y-2">
+                            @csrf
+                            <select name="jenjang" required class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                                <option value="">— Jenjang tujuan —</option>
+                                @foreach (\App\Support\Jenjang::semua() as $j)
+                                    @if (\App\Support\Jenjang::normalisasi($santri->jenjang_pendidikan) !== $j['slug'])
+                                        <option value="{{ $j['slug'] }}">{{ $j['kode'] }} — {{ $j['nama'] }}</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                            <input type="text" name="kelas" required maxlength="50" placeholder="Kelas tujuan (mis. 10A)"
+                                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                            <input type="text" name="alasan" required maxlength="500" placeholder="Alasan pindah jenjang"
+                                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                            <button type="submit" class="rounded-xl bg-sky-600 px-4 py-2 text-[11px] font-black text-white hover:bg-sky-700"
+                                onclick="return confirm('Pindahkan santri ke jenjang tujuan?')">
+                                <i class="fa-solid fa-arrow-right mr-1"></i> Proses Pindah
+                            </button>
+                        </form>
+                    </div>
+
+                    {{-- Naik kelas --}}
+                    <div class="rounded-2xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                        <h3 class="text-xs font-black text-slate-800 dark:text-slate-100"><i class="fa-solid fa-arrow-up-right-dots mr-1 text-indigo-600"></i> Naik / Tinggal Kelas</h3>
+                        <p class="mt-1 text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
+                            Proses massal per kelas. Nilai lama tetap terkunci. Rollback hanya oleh Superadmin dengan alasan.
+                        </p>
+                        <a href="{{ route('admin.santri.naik-kelas') }}"
+                            class="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-[11px] font-black text-white hover:bg-indigo-700">
+                            <i class="fa-solid fa-arrow-up-right-dots"></i> Buka Proses Naik Kelas
+                        </a>
+                    </div>
+
+                    {{-- Arsip --}}
+                    <div class="rounded-2xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                        <h3 class="text-xs font-black text-slate-800 dark:text-slate-100"><i class="fa-solid fa-box-archive mr-1 text-rose-600"></i> Arsipkan (Keluar / Berhenti)</h3>
+                        <p class="mt-1 text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
+                            Data tidak dihapus. Akun wali tetap aktif untuk melihat riwayat anak.
+                        </p>
+                        @if ($santri->sudah_lulus)
+                            <p class="mt-3 rounded-lg bg-indigo-50 px-3 py-2 text-[10px] font-bold text-indigo-700">Santri sudah lulus — tidak perlu diarsipkan.</p>
+                        @else
+                            <form action="{{ route('admin.santri.arsipkan', $santri->id) }}" method="POST" class="mt-3 space-y-2"
+                                onsubmit="return confirm('Arsipkan data santri ini?');">
+                                @csrf
+                                <select name="status" required class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                                    <option value="keluar">Keluar / Berhenti</option>
+                                    <option value="arsip">Diarsipkan</option>
+                                </select>
+                                <input type="text" name="alasan" required maxlength="500" placeholder="Alasan keluar/berhenti"
+                                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                                <button type="submit" class="rounded-xl bg-rose-600 px-4 py-2 text-[11px] font-black text-white hover:bg-rose-700">
+                                    <i class="fa-solid fa-box-archive mr-1"></i> Arsipkan
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            {{-- RIWAYAT KELAS --}}
+            <div class="{{ $cardCls }}">
+                <div class="flex items-center gap-3 mb-5 pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">Riwayat Kelas &amp; Jenjang</h2>
+                        <p class="text-[11px] text-slate-400">Setiap kenaikan/pindah/keluar tercatat dan tidak terhapus.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    @forelse ($santri->riwayatKelas as $r)
+                        <div class="flex flex-col gap-2 rounded-xl border border-slate-100 bg-slate-50/60 px-3.5 py-2.5 dark:border-slate-800 dark:bg-slate-800/40 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p class="text-[11px] font-bold text-slate-800 dark:text-slate-100">
+                                    {{ \App\Support\Jenjang::label($r->jenjang) }} · {{ $r->kelas ?: '-' }}
+                                    @if ($r->kamar) · Kamar {{ $r->kamar }} @endif
+                                </p>
+                                <p class="text-[10px] text-slate-400">{{ $r->tahun_ajaran }} · Semester {{ $r->semester }}{{ $r->keterangan ? ' · '.$r->keterangan : '' }}</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="rounded-full bg-slate-200 px-2 py-0.5 text-[9px] font-black text-slate-600 dark:bg-slate-700 dark:text-slate-300">{{ $r->labelStatus() }}</span>
+                                @if (\App\Support\Akses::superAdmin(auth()->user()) && $r->status !== 'dibatalkan')
+                                    <form action="{{ route('admin.riwayat.rollback', $r) }}" method="POST"
+                                        class="flex items-center gap-1"
+                                        onsubmit="return confirm('Rollback kenaikan ini? Wajib alasan dan akan tercatat di log.');">
+                                        @csrf
+                                        <input type="text" name="alasan" required maxlength="500" placeholder="Alasan rollback"
+                                            class="w-40 rounded-lg border border-rose-200 px-2 py-1 text-[10px] dark:border-rose-900/50 dark:bg-slate-900 dark:text-white">
+                                        <button type="submit" class="rounded-lg bg-rose-600 px-2 py-1 text-[10px] font-black text-white hover:bg-rose-700">Rollback</button>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+                    @empty
+                        <p class="py-6 text-center text-[11px] text-slate-400">Belum ada riwayat kelas.</p>
+                    @endforelse
+                </div>
+            </div>
+        @endif
+
+        {{-- DOKUMEN KELULUSAN --}}
+        <div class="{{ $cardCls }}">
+            <div class="flex items-center gap-3 mb-5 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div class="w-10 h-10 rounded-2xl bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <div>
+                    <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">Dokumen Kelulusan</h2>
+                    <p class="text-[11px] text-slate-400">Ijazah, SKL, transkrip, dan sertifikat diunggah Admin Jenjang; alumni hanya mengunduh.</p>
+                </div>
+            </div>
+
+            @if (auth()->user()->bisa('alumni.ubah'))
+                <form action="{{ route('admin.santri.dokumen.store', $santri->id) }}" method="POST" enctype="multipart/form-data"
+                    class="mb-5 grid grid-cols-1 gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40 sm:grid-cols-3">
+                    @csrf
+                    <div>
+                        <label class="mb-1 block text-[10px] font-bold text-slate-500">Jenis Dokumen</label>
+                        <select name="jenis" required class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                            @foreach (\App\Models\DokumenSantri::JENIS as $kunci => $label)
+                                <option value="{{ $kunci }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="mb-1 block text-[10px] font-bold text-slate-500">Berkas (PDF/JPG/PNG, maks 10 MB)</label>
+                        <div class="flex gap-2">
+                            <input type="file" name="file" required accept=".pdf,.jpg,.jpeg,.png"
+                                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-[11px] dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                            <button type="submit" class="shrink-0 rounded-xl bg-sky-600 px-4 py-2 text-[11px] font-black text-white hover:bg-sky-700">
+                                <i class="fa-solid fa-upload mr-1"></i> Unggah
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            @endif
+
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                @php $dokumenTersedia = $santri->dokumen->keyBy('jenis'); @endphp
+                @foreach (\App\Models\DokumenSantri::JENIS as $kunci => $label)
+                    @php $d = $dokumenTersedia->get($kunci); @endphp
+                    <div class="rounded-2xl border {{ $d ? 'border-emerald-200 bg-emerald-50/50' : 'border-dashed border-slate-200 bg-slate-50/50' }} p-3.5">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <p class="text-[11px] font-black text-slate-800 dark:text-slate-100">{{ $label }}</p>
+                                @if ($d)
+                                    <p class="mt-0.5 truncate text-[10px] text-slate-500">{{ $d->file_name ?: 'Berkas' }}</p>
+                                    <p class="text-[10px] text-slate-400">{{ $d->ukuranManusia() }}</p>
+                                @else
+                                    <p class="mt-0.5 text-[10px] text-slate-400">Belum diunggah.</p>
+                                @endif
+                            </div>
+                            @if ($d)
+                                <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-black text-emerald-700">Ada</span>
+                            @endif
+                        </div>
+                        @if ($d)
+                            <div class="mt-2 flex items-center gap-2">
+                                <a href="{{ asset('storage/'.$d->file_path) }}" target="_blank" rel="noopener"
+                                    class="inline-flex items-center gap-1 rounded-lg bg-emerald-700 px-2.5 py-1.5 text-[10px] font-bold text-white hover:bg-emerald-800">
+                                    <i class="fa-solid fa-eye"></i> Lihat
+                                </a>
+                                @if (auth()->user()->bisa('alumni.ubah'))
+                                    <form action="{{ route('admin.santri.dokumen.hapus', $d) }}" method="POST" onsubmit="return confirm('Hapus dokumen ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="inline-flex items-center gap-1 rounded-lg bg-rose-50 px-2.5 py-1.5 text-[10px] font-bold text-rose-700 hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-300">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
 
     </div>
 @endsection

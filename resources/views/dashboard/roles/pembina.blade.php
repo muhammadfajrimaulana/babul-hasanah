@@ -6,12 +6,37 @@
     <div class="space-y-6">
 
         @include('dashboard.roles._hero', [
-            'badge' => 'Pembina Asrama',
+            'badge' => 'Pembina',
             'ikon' => 'fa-house-chimney-user',
-            'judul' => 'Dashboard Pembina Asrama',
-            'deskripsi' => 'Pantau kondisi santri dan kehadiran harian. Halaman ini bersifat monitoring (hanya baca) agar pembina dapat fokus mendampingi santri tanpa mengubah data induk.',
+            'judul' => 'Dashboard Pembinaan',
+            'deskripsi' => 'Catat hafalan, presensi kegiatan, pelanggaran, dan verifikasi izin pulang. Pembina tidak mengubah data induk santri maupun nilai akademik.',
             'gradien' => 'from-cyan-800 via-emerald-900 to-emerald-950',
         ])
+
+        @if ($izinTerlambat > 0 || $izinMenunggu > 0)
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                @if ($izinTerlambat > 0)
+                    <a href="{{ route('admin.izin.index', ['status' => 'terlambat']) }}"
+                        class="flex items-center gap-3 rounded-2xl border border-red-300 bg-red-50 p-4 transition hover:border-red-400">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-red-600 text-white"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                        <div>
+                            <p class="text-xs font-black text-red-700">{{ $izinTerlambat }} santri TERLAMBAT kembali</p>
+                            <p class="text-[10px] text-red-600">Segera periksa dan hubungi wali.</p>
+                        </div>
+                    </a>
+                @endif
+                @if ($izinMenunggu > 0)
+                    <a href="{{ route('admin.izin.index', ['status' => 'menunggu']) }}"
+                        class="flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 transition hover:border-amber-400">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500 text-white"><i class="fa-solid fa-hourglass-half"></i></span>
+                        <div>
+                            <p class="text-xs font-black text-amber-700">{{ $izinMenunggu }} izin menunggu verifikasi</p>
+                            <p class="text-[10px] text-amber-600">Buka antrean izin pulang.</p>
+                        </div>
+                    </a>
+                @endif
+            </div>
+        @endif
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             @include('dashboard.roles._stat', [
@@ -22,27 +47,28 @@
                 'href' => route('admin.santri.index'),
             ])
             @include('dashboard.roles._stat', [
-                'label' => 'Kehadiran Hari Ini',
+                'label' => 'Presensi Hari Ini',
                 'nilai' => number_format($absensiHariIni, 0, ',', '.'),
-                'sub' => 'Baris absensi tercatat',
+                'sub' => 'Baris presensi tercatat',
                 'ikon' => 'fa-clipboard-check',
                 'ikonBg' => 'bg-cyan-50 text-cyan-600 dark:bg-cyan-950/50 dark:text-cyan-400',
+                'href' => route('admin.pembinaan.index'),
             ])
             @include('dashboard.roles._stat', [
-                'label' => 'Prestasi Santri',
-                'nilai' => number_format($totalPrestasi, 0, ',', '.'),
-                'sub' => 'Seluruh jenjang',
-                'ikon' => 'fa-trophy',
-                'ikonBg' => 'bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400',
-                'href' => route('admin.prestasi.index'),
+                'label' => 'Setoran Hafalan Hari Ini',
+                'nilai' => number_format($hafalanHariIni, 0, ',', '.'),
+                'sub' => 'Setoran / ziyadah / murojaah',
+                'ikon' => 'fa-book-quran',
+                'ikonBg' => 'bg-teal-50 text-teal-600 dark:bg-teal-950/50 dark:text-teal-400',
+                'href' => route('admin.pembinaan.index'),
             ])
             @include('dashboard.roles._stat', [
-                'label' => 'Alumni',
-                'nilai' => number_format($totalAlumni, 0, ',', '.'),
-                'sub' => 'Lulusan tercatat',
-                'ikon' => 'fa-user-graduate',
-                'ikonBg' => 'bg-violet-50 text-violet-600 dark:bg-violet-950/50 dark:text-violet-400',
-                'href' => route('admin.alumni.index'),
+                'label' => 'Pelanggaran Bulan Ini',
+                'nilai' => number_format($pelanggaranBulanIni, 0, ',', '.'),
+                'sub' => 'Catatan pembinaan',
+                'ikon' => 'fa-triangle-exclamation',
+                'ikonBg' => 'bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400',
+                'href' => route('admin.pembinaan.index'),
             ])
         </div>
 
@@ -121,20 +147,26 @@
                 </div>
             </div>
 
-            {{-- Prestasi terbaru --}}
+            {{-- Izin terbaru --}}
             <div class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <div class="mb-3 flex items-center justify-between gap-2">
-                    <h2 class="text-sm font-black text-slate-900 dark:text-white">Prestasi Terbaru</h2>
-                    <a href="{{ route('admin.prestasi.index') }}" class="text-[10px] font-bold text-emerald-600 hover:underline">Semua</a>
+                    <h2 class="text-sm font-black text-slate-900 dark:text-white">Izin Terbaru</h2>
+                    <a href="{{ route('admin.izin.index') }}" class="text-[10px] font-bold text-emerald-600 hover:underline">Semua</a>
                 </div>
                 <div class="space-y-2">
-                    @forelse ($prestasiTerbaru as $pr)
-                        <div class="rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2.5 dark:border-slate-800 dark:bg-slate-800/40">
-                            <p class="text-[11px] font-bold text-slate-800 dark:text-slate-100">{{ $pr->judul ?? '-' }}</p>
-                            <p class="text-[10px] text-slate-400">{{ $pr->nama ?? '-' }} · {{ $pr->tingkat ?? $pr->kategori ?? '-' }}</p>
-                        </div>
+                    @forelse ($izinTerbaru as $iz)
+                        <a href="{{ route('admin.izin.index') }}" class="block rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2.5 transition hover:border-emerald-200 dark:border-slate-800 dark:bg-slate-800/40">
+                            <div class="flex items-center justify-between gap-2">
+                                <p class="text-[11px] font-bold text-slate-800 dark:text-slate-100">{{ $iz->santri?->nama_lengkap ?? 'Santri' }}</p>
+                                <span class="rounded-lg border px-2 py-0.5 text-[9px] font-black uppercase {{ $iz->kelasStatus() }}">{{ $iz->labelStatus() }}</span>
+                            </div>
+                            <p class="mt-0.5 text-[10px] text-slate-400">
+                                {{ $iz->tanggal_pulang?->translatedFormat('d M') }} – {{ $iz->tanggal_kembali?->translatedFormat('d M Y') }}
+                                · {{ $iz->penjemput }}
+                            </p>
+                        </a>
                     @empty
-                        <p class="py-6 text-center text-[11px] text-slate-400">Belum ada prestasi tercatat.</p>
+                        <p class="py-6 text-center text-[11px] text-slate-400">Belum ada pengajuan izin.</p>
                     @endforelse
                 </div>
             </div>
@@ -143,8 +175,8 @@
         <div class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <p class="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
                 <i class="fa-solid fa-circle-info mr-1 text-emerald-600"></i>
-                <b>Batas akses Pembina Asrama:</b> hanya membaca data santri, pendaftaran, alumni, prestasi, dan jenjang.
-                Pembina tidak dapat menambah, mengubah, atau menghapus data.
+                <b>Batas akses Pembina:</b> menginput hafalan, presensi kegiatan, pelanggaran, dan memverifikasi izin.
+                Pembina tidak dapat mengubah data induk santri, nilai akademik, atau mengelola pengguna.
             </p>
         </div>
     </div>

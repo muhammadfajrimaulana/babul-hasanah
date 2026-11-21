@@ -10,7 +10,7 @@ class Alumni extends Model
     protected $table = 'alumni';
 
     protected $fillable = [
-        'santri_id', 'nama', 'nisn', 'jenis_kelamin', 'tahun_masuk', 'tahun_lulus', 'jenjang',
+        'santri_id', 'user_id', 'nama', 'nisn', 'jenis_kelamin', 'tahun_masuk', 'tahun_lulus', 'nomor_ijazah', 'jenjang',
         'kegiatan', 'instansi', 'no_hp', 'email', 'alamat', 'testimoni', 'foto',
         'nilai_path', 'nilai_nama', 'nilai_diunggah_pada',
     ];
@@ -23,6 +23,35 @@ class Alumni extends Model
     public function santri()
     {
         return $this->belongsTo(Santri::class, 'santri_id');
+    }
+
+    /** Akun login alumni. */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function tracer()
+    {
+        return $this->hasOne(TracerStudy::class, 'alumni_id');
+    }
+
+    public function legalisir()
+    {
+        return $this->hasMany(Legalisir::class, 'alumni_id');
+    }
+
+    /** Dokumen final diambil dari data santri asal. */
+    public function dokumen()
+    {
+        return $this->hasManyThrough(
+            DokumenSantri::class,
+            Santri::class,
+            'id',
+            'santri_id',
+            'santri_id',
+            'id'
+        );
     }
 
     public function getFotoUrlAttribute(): ?string

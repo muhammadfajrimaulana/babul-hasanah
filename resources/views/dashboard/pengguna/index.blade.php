@@ -142,8 +142,9 @@
                                 $badge = match ($p->role) {
                                     'super_admin' => 'bg-red-50 dark:bg-red-950/50 text-red-600',
                                     'admin'       => 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400',
-                                    'pengasuh'    => 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400',
+                                    'pengurus'    => 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400',
                                     'pembina'     => 'bg-cyan-50 dark:bg-cyan-950/50 text-cyan-700 dark:text-cyan-400',
+                                    'alumni'      => 'bg-violet-50 dark:bg-violet-950/50 text-violet-700 dark:text-violet-400',
                                     default       => 'bg-sky-50 dark:bg-sky-950/50 text-sky-600',
                                 };
                             @endphp

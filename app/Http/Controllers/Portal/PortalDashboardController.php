@@ -19,7 +19,7 @@ class PortalDashboardController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        $daftarAnak = $user->santri()->with(['pendaftaranOnline', 'absensi'])->get();
+        $daftarAnak = $user->anakQuery()->with(['pendaftaranOnline', 'absensi'])->get();
 
         // Ringkasan nilai terbit per anak untuk indikator notifikasi di beranda.
         $infoNilai = collect();
