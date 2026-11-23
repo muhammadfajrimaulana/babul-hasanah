@@ -102,7 +102,12 @@
                 @forelse ($data['mapel'] as $row)
                     <tr>
                         <td class="center">{{ $loop->iteration }}</td>
-                        <td>{{ $row['mapel']?->nama ?? 'Mata pelajaran terhapus' }}</td>
+                        <td>
+                            {{ $row['mapel']?->nama ?? 'Mata pelajaran terhapus' }}
+                            @if ($row['mapel']?->guru)
+                                <br><small style="color:#64748b;">Guru: {{ $row['mapel']->guru->nama }}</small>
+                            @endif
+                        </td>
                         <td class="center">{{ Akademik::formatNilai($row['tugas']) }}</td>
                         <td class="center">{{ Akademik::formatNilai($row['uts']) }}</td>
                         <td class="center">{{ Akademik::formatNilai($row['uas']) }}</td>

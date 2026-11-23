@@ -127,8 +127,12 @@
                                 </p>
                             </div>
 
-                            @if ($bolehUbah)
-                                <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('admin.kelas.rekap', $k) }}"
+                                    class="rounded-xl bg-sky-50 px-3 py-2 text-[11px] font-bold text-sky-700 hover:bg-sky-100 dark:bg-sky-500/10 dark:text-sky-300">
+                                    <i class="fa-solid fa-clipboard-list"></i> Rekap
+                                </a>
+                                @if ($bolehUbah)
                                     <button type="button" @click="edit = !edit" class="rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-bold text-amber-700 hover:bg-amber-100 dark:bg-amber-500/10 dark:text-amber-300">
                                         <i class="fa-solid fa-pen"></i> Edit
                                     </button>
@@ -137,8 +141,8 @@
                                         @method('DELETE')
                                         <button class="rounded-xl bg-rose-50 px-3 py-2 text-[11px] font-bold text-rose-700 hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-300"><i class="fa-solid fa-trash"></i></button>
                                     </form>
-                                </div>
-                            @endif
+                                @endif
+                            </div>
                         </div>
 
                         @if ($bolehUbah)

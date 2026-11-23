@@ -179,6 +179,7 @@
                 <div class="{{ $box }}"><dt class="{{ $label }}">No. HP</dt><dd class="mt-0.5 text-xs font-bold text-slate-800">{{ $alumni->no_hp ?: '-' }}</dd></div>
                 <div class="{{ $box }}"><dt class="{{ $label }}">Email</dt><dd class="mt-0.5 break-all text-xs font-bold text-slate-800">{{ $alumni->email ?: Auth::user()->email }}</dd></div>
                 <div class="{{ $box }}"><dt class="{{ $label }}">Kegiatan</dt><dd class="mt-0.5 text-xs font-bold text-slate-800">{{ $alumni->kegiatan ?: '-' }}</dd></div>
+                <div class="{{ $box }}"><dt class="{{ $label }}">Pekerjaan</dt><dd class="mt-0.5 text-xs font-bold text-slate-800">{{ $alumni->pekerjaan ?: '-' }}</dd></div>
                 <div class="{{ $box }}"><dt class="{{ $label }}">Instansi</dt><dd class="mt-0.5 text-xs font-bold text-slate-800">{{ $alumni->instansi ?: '-' }}</dd></div>
                 <div class="{{ $box }} lg:col-span-2"><dt class="{{ $label }}">Alamat Sekarang</dt><dd class="mt-0.5 text-xs font-medium text-slate-700">{{ $alumni->alamat ?: '-' }}</dd></div>
                 <div class="{{ $box }} lg:col-span-2"><dt class="{{ $label }}">Tracer Study</dt><dd class="mt-0.5 text-xs font-bold text-slate-800">{{ $alumni->tracer?->kegiatan ?? 'Belum diisi' }}{{ $alumni->tracer?->instansi ? ' · '.$alumni->tracer->instansi : '' }}</dd></div>

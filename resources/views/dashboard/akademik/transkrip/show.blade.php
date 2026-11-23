@@ -121,6 +121,9 @@
                                     <p class="text-xs font-bold text-slate-800 dark:text-slate-100">{{ $row['mapel']?->nama ?? 'Mata pelajaran terhapus' }}</p>
                                     <p class="text-[10px] text-slate-400">
                                         {{ $row['mapel']?->kode ?? '—' }}
+                                        @if ($row['mapel']?->guru)
+                                            · Guru: {{ $row['mapel']->guru->nama }}
+                                        @endif
                                         @if ($row['ada_draft'])
                                             <span class="ml-1 inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-500/20 px-2 py-0.5 text-[9px] font-black text-amber-700 dark:text-amber-300">
                                                 <i class="fa-solid fa-clock"></i> ada draft

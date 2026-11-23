@@ -11,7 +11,7 @@ class Alumni extends Model
 
     protected $fillable = [
         'santri_id', 'user_id', 'nama', 'nisn', 'jenis_kelamin', 'tahun_masuk', 'tahun_lulus', 'nomor_ijazah', 'jenjang',
-        'kegiatan', 'instansi', 'no_hp', 'email', 'alamat', 'testimoni', 'foto',
+        'kegiatan', 'instansi', 'pekerjaan', 'no_hp', 'email', 'alamat', 'testimoni', 'foto',
         'nilai_path', 'nilai_nama', 'nilai_diunggah_pada',
     ];
 

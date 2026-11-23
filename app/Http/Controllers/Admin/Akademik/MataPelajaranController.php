@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Akademik;
 
 use App\Http\Controllers\Controller;
+use App\Models\Guru;
 use App\Models\MataPelajaran;
 use App\Support\Akademik;
 use App\Support\Akses;
@@ -24,6 +25,7 @@ class MataPelajaranController extends Controller
             ?: Jenjang::normalisasi($request->query('jenjang'));
 
         $mapel = Akademik::mapelQuery($user)
+            ->with('guru')
             ->when($jenjang, fn ($q) => $q->where('jenjang', $jenjang))
             ->orderBy('jenjang')
             ->orderBy('nama')
@@ -33,6 +35,7 @@ class MataPelajaranController extends Controller
             'mapel' => $mapel,
             'jenjang' => $jenjang,
             'daftarJenjang' => $this->daftarJenjang($user),
+            'gurus' => $this->daftarGuru(),
             'bisaUbah' => $user->bisa('akademik.mapel') && ! Akses::adminTanpaJenjang($user),
         ]);
     }
@@ -51,6 +54,7 @@ class MataPelajaranController extends Controller
             'jenjang' => Akses::jenjangSlug($request->user())
                 ?: Jenjang::normalisasi($request->query('jenjang')),
             'daftarJenjang' => $this->daftarJenjang($request->user()),
+            'gurus' => $this->daftarGuru(),
         ]);
     }
 
@@ -75,6 +79,7 @@ class MataPelajaranController extends Controller
             'item' => $mapel,
             'jenjang' => $mapel->jenjang,
             'daftarJenjang' => $this->daftarJenjang($request->user()),
+            'gurus' => $this->daftarGuru(),
         ]);
     }
 
@@ -137,11 +142,13 @@ class MataPelajaranController extends Controller
                     ->ignore($mapel?->id),
             ],
             'nama' => ['required', 'string', 'max:150'],
+            'guru_id' => ['nullable', 'integer', Rule::exists('guru', 'id')],
             'kelompok' => ['nullable', 'string', 'max:50'],
             'kkm' => ['required', 'integer', 'min:0', 'max:100'],
             'aktif' => ['nullable', 'boolean'],
         ], [
             'kode.unique' => 'Kode mata pelajaran sudah dipakai pada jenjang ini.',
+            'guru_id.exists' => 'Guru yang dipilih tidak terdaftar.',
             'kkm.min' => 'KKM minimal 0.',
             'kkm.max' => 'KKM maksimal 100.',
         ]);
@@ -156,6 +163,7 @@ class MataPelajaranController extends Controller
             'jenjang' => $jenjang,
             'kode' => strtoupper(trim($data['kode'])),
             'nama' => trim($data['nama']),
+            'guru_id' => $data['guru_id'] ?? null,
             'kelompok' => trim((string) ($data['kelompok'] ?? '')) ?: null,
             'kkm' => (int) $data['kkm'],
             'aktif' => $request->boolean('aktif'),
@@ -175,6 +183,15 @@ class MataPelajaranController extends Controller
             403,
             'Mata pelajaran ini di luar jenjang yang Anda tangani.'
         );
+    }
+
+    /** Guru pengampu yang bisa dipilih (tanpa akun login). */
+    private function daftarGuru()
+    {
+        return Guru::query()
+            ->where('aktif', true)
+            ->orderBy('nama')
+            ->get();
     }
 
     private function daftarJenjang($user): array

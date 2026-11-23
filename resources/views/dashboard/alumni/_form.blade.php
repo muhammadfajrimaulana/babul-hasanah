@@ -72,6 +72,12 @@
         @error('instansi') <p class="{{ $err }}">{{ $message }}</p> @enderror
     </div>
 
+    <div class="sm:col-span-2">
+        <label class="{{ $lb }}">Pekerjaan / jabatan</label>
+        <input type="text" name="pekerjaan" value="{{ $v('pekerjaan') }}" class="{{ $in }}" placeholder="Contoh: Guru, Mahasiswa, Wirausaha">
+        @error('pekerjaan') <p class="{{ $err }}">{{ $message }}</p> @enderror
+    </div>
+
     <div>
         <label class="{{ $lb }}">No. HP / WhatsApp</label>
         <input type="text" name="no_hp" value="{{ $v('no_hp') }}" class="{{ $in }}">

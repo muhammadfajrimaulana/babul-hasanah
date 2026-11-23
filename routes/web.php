@@ -19,14 +19,15 @@ use App\Http\Controllers\Admin\LogAktivitasController;
 use App\Http\Controllers\Admin\PembinaanController;
 use App\Http\Controllers\Admin\PendaftaranController as AdminPendaftaranController;
 use App\Http\Controllers\Admin\PengajuanPerubahanController as AdminPengajuanController;
-use App\Http\Controllers\Admin\PengumumanController as AdminPengumumanController;
 use App\Http\Controllers\Admin\PenggunaController as AdminPenggunaController;
+use App\Http\Controllers\Admin\PengumumanController as AdminPengumumanController;
 use App\Http\Controllers\Admin\PrestasiAdminController;
 use App\Http\Controllers\Admin\RoleDashboardController as AdminRoleDashboard;
 use App\Http\Controllers\Admin\SantriAksiController;
 use App\Http\Controllers\Admin\SantriController as AdminDataSantriController;
 use App\Http\Controllers\Admin\SantriFormController as AdminSantriFormController;
 use App\Http\Controllers\Admin\StrukturOrganisasiController as AdminStrukturController;
+use App\Http\Controllers\Alumni\AlumniPortalController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GantiPasswordController;
@@ -39,7 +40,6 @@ use App\Http\Controllers\Portal\PortalPengajuanController;
 use App\Http\Controllers\Portal\PortalPengumumanController;
 use App\Http\Controllers\Portal\PortalPrestasiController;
 use App\Http\Controllers\Portal\PortalSantriController;
-use App\Http\Controllers\Alumni\AlumniPortalController;
 use App\Http\Controllers\Public\AlumniController as PublicAlumniController;
 use App\Http\Controllers\Public\BeritaController as PublicBeritaController;
 use App\Http\Controllers\Public\GaleriController as PublicGaleriController;
@@ -67,6 +67,7 @@ Route::prefix('profil')->name('profil.')->group(function () {
     Route::get('/visi-misi', fn () => view('pages.visi-misi'))->name('visi-misi');
     Route::get('/struktur-organisasi', [StrukturOrganisasiController::class, 'index'])->name('struktur-organisasi');
     Route::get('/pembelajaran', fn () => view('pages.pembelajaran'))->name('pembelajaran');
+    Route::get('/fasilitas', fn () => view('pages.fasilitas'))->name('profil.fasilitas');
 });
 
 // ######## JENJANG ########### //
@@ -345,6 +346,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     Route::middleware('role:'.Akses::roles('kelas.lihat'))->group(function () {
         Route::get('/kelas', [AdminKelasController::class, 'index'])->name('kelas.index');
+        Route::get('/kelas/{kelas}/rekap', [AdminKelasController::class, 'rekap'])->name('kelas.rekap');
     });
 
     Route::middleware('role:'.Akses::roles('kelas.ubah'))->group(function () {
@@ -449,6 +451,9 @@ Route::middleware(['auth', 'role:alumni'])->prefix('alumni')->name('alumni.')->g
 
     Route::get('/profil', [AlumniPortalController::class, 'profil'])->name('profil');
     Route::put('/profil', [AlumniPortalController::class, 'updateProfil'])->name('profil.update');
+
+    // History nilai terkunci (hanya baca).
+    Route::get('/nilai', [AlumniPortalController::class, 'nilai'])->name('nilai');
 
     Route::get('/dokumen', [AlumniPortalController::class, 'dokumen'])->name('dokumen');
     Route::get('/dokumen/{dokumen}/unduh', [AlumniPortalController::class, 'unduhDokumen'])->name('dokumen.unduh');

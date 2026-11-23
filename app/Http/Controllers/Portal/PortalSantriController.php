@@ -25,7 +25,7 @@ class PortalSantriController extends Controller
             'hafalan' => fn ($q) => $q->latest('tanggal'),
             'pelanggaran' => fn ($q) => $q->latest('tanggal'),
             'izin' => fn ($q) => $q->latest(),
-            'nilai' => fn ($q) => $q->with('mataPelajaran')->latest(),
+            'nilai' => fn ($q) => $q->with('mataPelajaran.guru')->latest(),
             'absensi' => fn ($q) => $q->latest('tanggal')->limit(50),
             'dokumen',
             'riwayatKelas' => fn ($q) => $q->latest(),

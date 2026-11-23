@@ -16,4 +16,10 @@ class Guru extends Model
     {
         return $this->hasMany(Kelas::class, 'wali_kelas_id');
     }
+
+    /** Mata pelajaran yang diampu guru ini. */
+    public function mataPelajaran()
+    {
+        return $this->hasMany(MataPelajaran::class, 'guru_id');
+    }
 }

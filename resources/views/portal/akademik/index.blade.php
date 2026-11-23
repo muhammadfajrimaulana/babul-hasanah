@@ -285,7 +285,12 @@
                                         <tr class="hover:bg-slate-50/70">
                                             <td class="px-4 py-3">
                                                 <p class="text-xs font-bold text-slate-800">{{ $row['mapel']?->nama ?? 'Mata pelajaran terhapus' }}</p>
-                                                <p class="text-[10px] text-slate-400">KKM {{ $row['mapel']?->kkm ?? 70 }}</p>
+                                                <p class="text-[10px] text-slate-400">
+                                                    KKM {{ $row['mapel']?->kkm ?? 70 }}
+                                                    @if ($row['mapel']?->guru)
+                                                        · Guru: {{ $row['mapel']->guru->nama }}
+                                                    @endif
+                                                </p>
                                             </td>
                                             <td class="px-4 py-3 text-center text-xs font-semibold text-slate-700">{{ Akademik::formatNilai($row['tugas']) }}</td>
                                             <td class="px-4 py-3 text-center text-xs font-semibold text-slate-700">{{ Akademik::formatNilai($row['uts']) }}</td>

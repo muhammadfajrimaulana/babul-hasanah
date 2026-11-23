@@ -38,14 +38,24 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2">
-                    <a href="{{ route('portal.pengajuan.index') }}"
-                        class="inline-flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2 text-[11px] font-bold text-amber-700 transition hover:bg-amber-100">
-                        <i class="fa-solid fa-pen-to-square"></i> Ajukan Perubahan Data
-                    </a>
-                    <a href="{{ route('portal.izin.index') }}"
-                        class="inline-flex items-center gap-1.5 rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-2 text-[11px] font-bold text-sky-700 transition hover:bg-sky-100">
-                        <i class="fa-solid fa-plane-departure"></i> Ajukan Izin Pulang
-                    </a>
+                    @if ($santri->non_aktif)
+                        <span class="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2 text-[11px] font-black text-indigo-700">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Mode Riwayat
+                        </span>
+                        <a href="{{ route('portal.dokumen.index') }}"
+                            class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-[11px] font-bold text-emerald-700 transition hover:bg-emerald-100">
+                            <i class="fa-solid fa-folder-open"></i> Dokumen Kelulusan
+                        </a>
+                    @else
+                        <a href="{{ route('portal.pengajuan.index') }}"
+                            class="inline-flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2 text-[11px] font-bold text-amber-700 transition hover:bg-amber-100">
+                            <i class="fa-solid fa-pen-to-square"></i> Ajukan Perubahan Data
+                        </a>
+                        <a href="{{ route('portal.izin.index') }}"
+                            class="inline-flex items-center gap-1.5 rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-2 text-[11px] font-bold text-sky-700 transition hover:bg-sky-100">
+                            <i class="fa-solid fa-plane-departure"></i> Ajukan Izin Pulang
+                        </a>
+                    @endif
                     <a href="{{ route('portal.dashboard') }}"
                         class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-[11px] font-bold text-slate-600 hover:bg-slate-50">
                         <i class="fa-solid fa-arrow-left"></i> Kembali
@@ -67,10 +77,18 @@
                 </div>
             @endif
 
-            <p class="mt-4 rounded-xl bg-slate-50 px-3 py-2 text-[10px] leading-relaxed text-slate-500">
-                <i class="fa-solid fa-lock mr-1 text-slate-400"></i>
-                Halaman ini hanya-baca. Perubahan data harus diajukan ke Admin Jenjang melalui tombol di atas.
-            </p>
+            @if ($santri->non_aktif)
+                <p class="mt-4 rounded-xl border border-indigo-100 bg-indigo-50 px-3 py-2 text-[10px] leading-relaxed text-indigo-700">
+                    <i class="fa-solid fa-clock-rotate-left mr-1"></i>
+                    Status anak Anda saat ini <b>{{ $santri->labelStatus() }}</b>. Seluruh data di halaman ini menjadi
+                    <b>history</b> dan hanya dapat dibaca/diunduh. Akun wali tetap aktif untuk mengakses riwayat anak.
+                </p>
+            @else
+                <p class="mt-4 rounded-xl bg-slate-50 px-3 py-2 text-[10px] leading-relaxed text-slate-500">
+                    <i class="fa-solid fa-lock mr-1 text-slate-400"></i>
+                    Halaman ini hanya-baca. Perubahan data harus diajukan ke Admin Jenjang melalui tombol di atas.
+                </p>
+            @endif
         </div>
 
         {{-- TAB --}}
@@ -154,7 +172,12 @@
                         <tbody class="divide-y divide-slate-100">
                             @forelse ($santri->nilai as $n)
                                 <tr>
-                                    <td class="px-3 py-2.5 font-bold text-slate-700">{{ $n->mataPelajaran?->nama ?? '-' }}</td>
+                                    <td class="px-3 py-2.5">
+                                        <p class="font-bold text-slate-700">{{ $n->mataPelajaran?->nama ?? '-' }}</p>
+                                        @if ($n->mataPelajaran?->guru)
+                                            <p class="text-[10px] text-slate-400">Guru: {{ $n->mataPelajaran->guru->nama }}</p>
+                                        @endif
+                                    </td>
                                     <td class="px-3 py-2.5 text-slate-500">{{ $n->tahun_ajaran ?: '-' }} · Semester {{ $n->semester ?: '-' }}</td>
                                     <td class="px-3 py-2.5 font-black text-emerald-700">{{ $n->nilai !== null ? rtrim(rtrim(number_format((float) $n->nilai, 2, ',', '.'), '0'), ',') : '-' }}</td>
                                     <td class="px-3 py-2.5 text-slate-500">{{ $n->predikat ?: '-' }}</td>

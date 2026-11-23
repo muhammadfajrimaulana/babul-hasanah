@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Izin;
 use App\Models\Santri;
 use App\Support\Akademik;
-use App\Support\Akses;
 use App\Support\CatatanAktivitas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -99,8 +98,11 @@ class IzinController extends Controller
     {
         $this->pastikanBoleh($izin);
 
-        if ($izin->status === Izin::MENUNGGU) {
-            return back()->with('error', 'Izin belum disetujui, belum bisa ditandai kembali.');
+        if (! in_array($izin->status, [Izin::DISETUJUI, Izin::TERLAMBAT], true)) {
+            return back()->with(
+                'error',
+                'Hanya izin berstatus Disetujui atau Terlambat yang dapat ditandai sudah kembali.'
+            );
         }
 
         $izin->update([

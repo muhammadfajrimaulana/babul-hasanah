@@ -401,7 +401,7 @@ class AlumniController extends Controller
     /** Buang kolom opsional yang belum ada sebelum migrasi dijalankan. */
     private function bersihkanKolom(array $data): array
     {
-        foreach (['nisn', 'tahun_masuk'] as $kolom) {
+        foreach (['nisn', 'tahun_masuk', 'pekerjaan'] as $kolom) {
             if (! Alumni::siapKolom($kolom)) {
                 unset($data[$kolom]);
             }
@@ -421,6 +421,7 @@ class AlumniController extends Controller
             'jenjang' => 'nullable|string|max:50',
             'kegiatan' => 'nullable|in:'.implode(',', Alumni::KEGIATAN),
             'instansi' => 'nullable|string|max:255',
+            'pekerjaan' => 'nullable|string|max:150',
             'no_hp' => 'nullable|string|max:30',
             'email' => 'nullable|email|max:255',
             'alamat' => 'nullable|string|max:1000',

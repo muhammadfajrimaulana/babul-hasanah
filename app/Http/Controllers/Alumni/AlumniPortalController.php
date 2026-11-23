@@ -6,12 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\Alumni;
 use App\Models\DokumenSantri;
-use App\Models\Hafalan;
 use App\Models\Legalisir;
 use App\Models\NilaiSantri;
-use App\Models\Pengumuman;
 use App\Models\Pelanggaran;
+use App\Models\Pengumuman;
 use App\Models\TracerStudy;
+use App\Support\Akademik;
 use App\Support\CatatanAktivitas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -39,7 +39,7 @@ class AlumniPortalController extends Controller
                 'hafalan' => fn ($q) => $q->latest('tanggal'),
                 'pelanggaran' => fn ($q) => $q->latest('tanggal'),
                 'riwayatKelas' => fn ($q) => $q->latest(),
-                'nilai' => fn ($q) => $q->with('mataPelajaran')->latest(),
+                'nilai' => fn ($q) => $q->with('mataPelajaran.guru')->latest(),
             ]);
         }
 
@@ -49,7 +49,7 @@ class AlumniPortalController extends Controller
 
         if ($santri) {
             $nilaiAkhir = NilaiSantri::query()
-                ->with('mataPelajaran')
+                ->with('mataPelajaran.guru')
                 ->where('santri_id', $santri->id)
                 ->where('status', 'published')
                 ->get()
@@ -97,6 +97,69 @@ class AlumniPortalController extends Controller
         ]);
     }
 
+    /**
+     * History nilai alumni — hanya baca dan terkunci.
+     *
+     * Nilai dikelompokkan per tahun ajaran/semester agar alumni dapat
+     * melihat seluruh riwayat akademiknya, bukan hanya ringkasan dashboard.
+     */
+    public function nilai(Request $request)
+    {
+        $alumni = $this->alumni($request);
+        $santri = $alumni->santri;
+
+        abort_unless($santri, 404, 'Data santri asal alumni tidak ditemukan.');
+
+        $nilai = NilaiSantri::query()
+            ->with('mataPelajaran.guru')
+            ->where('santri_id', $santri->id)
+            ->where('status', 'published')
+            ->orderByDesc('tahun_ajaran')
+            ->orderByDesc('semester')
+            ->get();
+
+        $periode = $nilai
+            ->groupBy(fn (NilaiSantri $n) => $n->tahun_ajaran.'|'.$n->semester)
+            ->map(function ($baris, string $kunci) {
+                [$tahun, $semester] = array_pad(explode('|', $kunci), 2, '');
+
+                $mapel = $baris
+                    ->groupBy('mata_pelajaran_id')
+                    ->map(function ($grup) {
+                        $ambil = fn (string $kategori) => $grup->firstWhere('kategori', $kategori)?->nilai;
+                        $akhir = round((float) $grup->avg('nilai'), 2);
+
+                        return [
+                            'mapel' => $grup->first()->mataPelajaran,
+                            'tugas' => $ambil('tugas'),
+                            'uts' => $ambil('uts'),
+                            'uas' => $ambil('uas'),
+                            'hafalan' => $ambil('hafalan'),
+                            'akhir' => $akhir,
+                            'predikat' => Akademik::predikat($akhir),
+                        ];
+                    })
+                    ->sortBy(fn ($r) => $r['mapel']?->nama)
+                    ->values();
+
+                return [
+                    'tahun' => $tahun,
+                    'semester' => $semester,
+                    'mapel' => $mapel,
+                    'rata' => round((float) $baris->avg('nilai'), 2),
+                ];
+            })
+            ->values();
+
+        return view('alumni.nilai', [
+            'alumni' => $alumni,
+            'santri' => $santri,
+            'periode' => $periode,
+            'totalNilai' => $nilai->count(),
+            'rataKeseluruhan' => round((float) $nilai->avg('nilai'), 2),
+        ]);
+    }
+
     public function profil(Request $request)
     {
         $alumni = $this->alumni($request);
@@ -118,6 +181,7 @@ class AlumniPortalController extends Controller
             'alamat' => ['nullable', 'string', 'max:1000'],
             'kegiatan' => ['nullable', Rule::in(Alumni::KEGIATAN)],
             'instansi' => ['nullable', 'string', 'max:255'],
+            'pekerjaan' => ['nullable', 'string', 'max:150'],
         ], [
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email ini sudah dipakai akun lain.',

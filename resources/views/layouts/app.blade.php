@@ -380,6 +380,7 @@
                             <a href="{{ url('/profil/struktur-organisasi') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-sitemap"></i></span>Struktur Organisasi</a>
                             <a href="{{ url('/profil/pembelajaran') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-graduation-cap"></i></span>Pembelajaran</a>
                             <a href="{{ route('alumni.index') }}" class="dd-item {{ request()->is('alumni*') ? 'active' : '' }}"><span class="ic"><i class="fa-solid fa-user-graduate"></i></span>Alumni</a>
+                            <a href="{{ url('/profil/fasilitas') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-box"></i></span>Fasilitas</a>
                         </div>
                     </div>
 

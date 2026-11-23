@@ -131,7 +131,7 @@
                         <option value="">Pilih mapel</option>
                         @foreach ($daftarMapel as $mapel)
                             <option value="{{ $mapel->id }}" @selected($filter['mapel']?->id === $mapel->id)>
-                                {{ $mapel->kode }} — {{ $mapel->nama }}
+                                {{ $mapel->kode }} — {{ $mapel->nama }}{{ $mapel->guru ? ' · '.$mapel->guru->nama : '' }}
                             </option>
                         @endforeach
                     </select>
@@ -247,7 +247,7 @@
                                         <option value="" disabled @selected(old('mata_pelajaran_id') === null)>Pilih mata pelajaran</option>
                                         @foreach ($mapelList as $mapel)
                                             <option value="{{ $mapel->id }}" @selected((string) old('mata_pelajaran_id') === (string) $mapel->id)">
-                                                {{ $mapel->kode ? $mapel->kode.' — ' : '' }}{{ $mapel->nama }}
+                                                {{ $mapel->kode ? $mapel->kode.' — ' : '' }}{{ $mapel->nama }}{{ $mapel->guru ? ' · '.$mapel->guru->nama : '' }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -424,6 +424,11 @@
                                 </h3>
                                 <p class="text-[11px] text-slate-500 dark:text-slate-400">
                                     {{ Akademik::labelKategori($filter['kategori']) }} · {{ $filter['tahun'] }} · Semester {{ Akademik::labelSemester($filter['semester']) }}
+                                </p>
+                                <p class="mt-0.5 inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
+                                    <i class="fa-solid fa-chalkboard-user text-[10px]"></i>
+                                    Guru Pengampu:
+                                    {{ $filter['mapel']->guru?->nama ?? 'Belum ditentukan' }}
                                 </p>
                             </div>
                             @if ($bisaUbah && $dokumenSiap && $filter['jenjang'])
@@ -662,6 +667,9 @@
                                     </p>
                                     <p class="truncate text-[10px] text-slate-400">
                                         {{ $n->mataPelajaran?->nama ?? '-' }} · {{ Akademik::labelKategori($n->kategori) }}
+                                        @if ($n->mataPelajaran?->guru)
+                                            · {{ $n->mataPelajaran->guru->nama }}
+                                        @endif
                                     </p>
                                 </div>
                                 <span class="shrink-0 rounded-xl bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">

@@ -243,7 +243,7 @@ class PortalAkademikController extends Controller
     private function data(Santri $anak, array $filter): array
     {
         $rows = NilaiSantri::query()
-            ->with('mataPelajaran')
+            ->with('mataPelajaran.guru')
             ->where('santri_id', $anak->id)
             ->where('status', 'published')
             ->where('tahun_ajaran', $filter['tahun'])

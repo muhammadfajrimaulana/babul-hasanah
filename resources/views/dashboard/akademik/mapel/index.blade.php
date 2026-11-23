@@ -96,6 +96,7 @@
                             <th class="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Jenjang</th>
                             <th class="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Kode</th>
                             <th class="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Nama Mata Pelajaran</th>
+                            <th class="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Guru Pengampu</th>
                             <th class="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Kelompok</th>
                             <th class="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400 text-center">KKM</th>
                             <th class="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400 text-center">Status</th>
@@ -115,6 +116,16 @@
                                 </td>
                                 <td class="px-4 py-3 text-[11px] font-mono font-bold text-slate-600 dark:text-slate-300">{{ $item->kode }}</td>
                                 <td class="px-4 py-3 text-xs font-bold text-slate-800 dark:text-slate-100">{{ $item->nama }}</td>
+                                <td class="px-4 py-3 text-xs text-slate-600 dark:text-slate-300">
+                                    @if ($item->guru)
+                                        <span class="inline-flex items-center gap-1.5">
+                                            <i class="fa-solid fa-chalkboard-user text-[10px] text-emerald-600"></i>
+                                            {{ $item->guru->nama }}
+                                        </span>
+                                    @else
+                                        <span class="text-[10px] font-bold uppercase text-slate-400">Belum ditentukan</span>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">{{ $item->kelompok ?: '—' }}</td>
                                 <td class="px-4 py-3 text-center text-xs font-black text-slate-900 dark:text-white">{{ $item->kkm }}</td>
                                 <td class="px-4 py-3 text-center">
@@ -150,7 +161,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ $bisaUbah ? 8 : 7 }}" class="px-4 py-12 text-center">
+                                <td colspan="{{ $bisaUbah ? 9 : 8 }}" class="px-4 py-12 text-center">
                                     <i class="fa-solid fa-book text-2xl text-slate-300"></i>
                                     <p class="mt-2 text-xs font-bold text-slate-500 dark:text-slate-400">Belum ada mata pelajaran pada jenjang ini.</p>
                                     @if ($bisaUbah)

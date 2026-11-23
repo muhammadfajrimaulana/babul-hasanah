@@ -10,13 +10,9 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // Hanya data induk yang diperlukan aplikasi. Info harian sengaja tidak
-        // di-seed agar dashboard tetap kosong sampai admin mengisinya sendiri.
+        // 1. Data intasional & master (tidak ada perubahan)
         $this->call([
             RoleAndUserSeeder::class,
             ProgramSeeder::class,
@@ -24,7 +20,9 @@ class DatabaseSeeder extends Seeder
             MataPelajaranSeeder::class,
         ]);
 
-        Konten::insert([
+        // 2. PERBAIKAN KONTEN (Ini yang mengatasi error Duplicate entry)
+        // Mengganti Konten::insert() dengan loop cek existence agar aman berulang kali
+        $daftarKonten = [
             ['key' => 'profil_hero_title', 'value' => 'Profil & Visi Misi Pondok Pesantren', 'type' => 'text'],
             ['key' => 'profil_hero_desc', 'value' => 'Mengenal lebih dekat sejarah, landasan hukum, struktur kepengurusan, serta cita-cita luhur Pondok Pesantren Babul Hasanah.', 'type' => 'textarea'],
             ['key' => 'sejarah_judul', 'value' => 'Menyalakan Lentera Ilmu di Tanah Padang Lawas', 'type' => 'text'],
@@ -33,6 +31,17 @@ class DatabaseSeeder extends Seeder
             ['key' => 'sejarah_foto', 'value' => null, 'type' => 'image'],
             ['key' => 'visi', 'value' => 'Terwujudnya lembaga pendidikan Islam yang unggul...', 'type' => 'textarea'],
             ['key' => 'misi', 'value' => '1. Menyelenggarakan pendidikan Islam terpadu...\n2. Menanamkan kecintaan terhadap Al-Qur\'an...', 'type' => 'textarea'],
-        ]);
+        ];
+
+        foreach ($daftarKonten as $konten) {
+            // CEK DULU: apakah key sudah ada di database?
+            $sudahAda = Konten::where('key', $konten['key'])->exists();
+
+            if (! $sudahAda) {
+                // BELUM ADA → baru buat record
+                Konten::create($konten);
+            }
+            // Jika sudah ada: lewati, tidak terjadi error duplicate key
+        }
     }
 }

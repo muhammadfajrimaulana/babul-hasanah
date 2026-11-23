@@ -66,11 +66,11 @@ class NilaiController extends Controller
             : collect();
 
         $mapelList = $jenjangAktif
-            ? Akademik::mapelQuery($user, $jenjangAktif)->where('aktif', true)->orderBy('nama')->get()
+            ? Akademik::mapelQuery($user, $jenjangAktif)->with('guru')->where('aktif', true)->orderBy('nama')->get()
             : collect();
 
         $nilaiTerbaru = NilaiSantri::query()
-            ->with(['santri', 'mataPelajaran'])
+            ->with(['santri', 'mataPelajaran.guru'])
             ->when($jenjangAktif, fn ($q) => $q->where('jenjang', $jenjangAktif))
             ->latest()
             ->take(8)
@@ -233,7 +233,7 @@ class NilaiController extends Controller
     {
         $user = $request->user();
         $mapelId = (int) $request->input('mata_pelajaran_id');
-        $mapel = $mapelId ? MataPelajaran::find($mapelId) : null;
+        $mapel = $mapelId ? MataPelajaran::with('guru')->find($mapelId) : null;
 
         $jenjang = Akses::jenjangSlug($user)
             ?: Jenjang::normalisasi($request->input('jenjang'))
@@ -363,6 +363,7 @@ class NilaiController extends Controller
     private function daftarMapel($user, ?string $jenjang)
     {
         return Akademik::mapelQuery($user)
+            ->with('guru')
             ->where('aktif', true)
             ->when($jenjang, fn ($q) => $q->where('jenjang', $jenjang))
             ->orderBy('nama')

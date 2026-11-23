@@ -143,7 +143,7 @@ class TranskripController extends Controller
     private function barisNilai(Santri $santri, array $filter, bool $hanyaTerbit): array
     {
         $query = NilaiSantri::query()
-            ->with('mataPelajaran')
+            ->with('mataPelajaran.guru')
             ->where('santri_id', $santri->id)
             ->where('tahun_ajaran', $filter['tahun'])
             ->where('semester', $filter['semester']);

@@ -51,6 +51,9 @@
                 <a href="{{ route('alumni.profil') }}" class="{{ $navClass(request()->routeIs('alumni.profil*')) }}">
                     <i class="fa-solid fa-id-card"></i> Profil
                 </a>
+                <a href="{{ route('alumni.nilai') }}" class="{{ $navClass(request()->routeIs('alumni.nilai*')) }}">
+                    <i class="fa-solid fa-book-open"></i> Nilai &amp; Riwayat
+                </a>
                 <a href="{{ route('alumni.dokumen') }}" class="{{ $navClass(request()->routeIs('alumni.dokumen*')) }}">
                     <i class="fa-solid fa-folder-open"></i> Dokumen
                 </a>

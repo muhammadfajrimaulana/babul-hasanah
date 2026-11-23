@@ -54,6 +54,11 @@
                             <input type="text" name="instansi" value="{{ old('instansi', $alumni->instansi) }}" maxlength="255" class="{{ $in }}">
                             @error('instansi') <p class="mt-1 text-[11px] text-rose-600">{{ $message }}</p> @enderror
                         </div>
+                        <div>
+                            <label class="{{ $lb }}">Pekerjaan / Jabatan</label>
+                            <input type="text" name="pekerjaan" value="{{ old('pekerjaan', $alumni->pekerjaan) }}" maxlength="150" class="{{ $in }}" placeholder="Contoh: Guru / Mahasiswa / Wirausaha">
+                            @error('pekerjaan') <p class="mt-1 text-[11px] text-rose-600">{{ $message }}</p> @enderror
+                        </div>
                     </div>
                     <div>
                         <label class="{{ $lb }}">Alamat Sekarang</label>

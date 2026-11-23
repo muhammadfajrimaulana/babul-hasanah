@@ -63,6 +63,9 @@ class Konten extends Model
         'visi_page_motto' => '“Berilmu, Beramal,',
         'visi_page_motto_accent' => 'Berakhlak Mulia”',
 
+        // Halaman Fasilitas
+        'fasilitas_photos' => '["storage/default-fasilitas-1.jpg","storage/default-fasilitas-2.jpg","storage/default-fasilitas-3.jpg"]',
+
         // Halaman Pembelajaran
         'pembelajaran_hero_eyebrow' => 'Pondok Pesantren Babul Hasanah',
         'pembelajaran_hero_title' => 'Belajar bertahap,',

@@ -3,9 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Absensi;
 use App\Models\Guru;
+use App\Models\Hafalan;
 use App\Models\Kelas;
-use App\Models\Santri;
+use App\Models\MataPelajaran;
+use App\Models\NilaiSantri;
+use App\Models\Pelanggaran;
+use App\Support\Akademik;
 use App\Support\Akses;
 use App\Support\CatatanAktivitas;
 use App\Support\Jenjang;
@@ -45,6 +50,77 @@ class KelasController extends Controller
             'tahunAjaran' => now()->month >= 7
                 ? now()->year.'/'.(now()->year + 1)
                 : (now()->year - 1).'/'.now()->year,
+        ]);
+    }
+
+    /**
+     * Rekap kelas untuk Wali Kelas.
+     *
+     * Wali Kelas tidak memiliki akun login. Admin Jenjang mencetak rekap ini,
+     * memberikannya ke Wali Kelas untuk diperiksa/direkap, lalu Admin Jenjang
+     * yang menginput perubahan ke sistem (tercatat di Log Aktivitas).
+     */
+    public function rekap(Request $request, Kelas $kelas)
+    {
+        $this->pastikanJenjang($kelas);
+
+        $tahun = trim((string) $request->input('tahun_ajaran')) ?: Akademik::tahunAjaranSekarang();
+        $semester = strtolower((string) $request->input('semester')) ?: Akademik::semesterSekarang();
+
+        if (! array_key_exists($semester, Akademik::SEMESTER)) {
+            $semester = Akademik::semesterSekarang();
+        }
+
+        $santris = $kelas->santri()->orderBy('nama_lengkap')->get();
+        $idSantri = $santris->pluck('id');
+
+        $mapel = MataPelajaran::query()
+            ->with('guru')
+            ->where('jenjang', $kelas->jenjang)
+            ->where('aktif', true)
+            ->orderBy('nama')
+            ->get();
+
+        $nilai = NilaiSantri::query()
+            ->whereIn('santri_id', $idSantri)
+            ->where('tahun_ajaran', $tahun)
+            ->where('semester', $semester)
+            ->where('status', 'published')
+            ->get()
+            ->groupBy(fn (NilaiSantri $n) => $n->santri_id.'|'.$n->mata_pelajaran_id)
+            ->map(fn ($grup) => round((float) $grup->avg('nilai'), 2));
+
+        $hafalan = Hafalan::query()
+            ->whereIn('santri_id', $idSantri)
+            ->selectRaw('santri_id, COUNT(*) as jumlah')
+            ->groupBy('santri_id')
+            ->pluck('jumlah', 'santri_id');
+
+        $pelanggaran = Pelanggaran::query()
+            ->whereIn('santri_id', $idSantri)
+            ->selectRaw('santri_id, COUNT(*) as jumlah, COALESCE(SUM(poin), 0) as poin')
+            ->groupBy('santri_id')
+            ->get()
+            ->keyBy('santri_id');
+
+        $presensi = Absensi::query()
+            ->whereIn('santri_id', $idSantri)
+            ->where('status_kehadiran', 'hadir')
+            ->selectRaw('santri_id, COUNT(*) as jumlah')
+            ->groupBy('santri_id')
+            ->pluck('jumlah', 'santri_id');
+
+        return view('dashboard.kelas.rekap', [
+            'kelas' => $kelas,
+            'santris' => $santris,
+            'mapel' => $mapel,
+            'nilai' => $nilai,
+            'hafalan' => $hafalan,
+            'pelanggaran' => $pelanggaran,
+            'presensi' => $presensi,
+            'tahun' => $tahun,
+            'semester' => $semester,
+            'tahunPilihan' => Akademik::tahunAjaranPilihan(),
         ]);
     }
 

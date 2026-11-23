@@ -16,6 +16,7 @@ class MataPelajaran extends Model
         'jenjang',
         'kode',
         'nama',
+        'guru_id',
         'kelompok',
         'kkm',
         'aktif',
@@ -25,6 +26,12 @@ class MataPelajaran extends Model
         'kkm' => 'integer',
         'aktif' => 'boolean',
     ];
+
+    /** Guru pengampu (tanpa akun login) yang namanya tampil di halaman nilai. */
+    public function guru()
+    {
+        return $this->belongsTo(Guru::class, 'guru_id');
+    }
 
     /** Nilai santri yang memakai mata pelajaran ini. */
     public function nilai()

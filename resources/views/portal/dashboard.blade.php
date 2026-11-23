@@ -75,12 +75,16 @@
                     <!-- Header Info Identitas Anak -->
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
                         <div>
-                            <div class="flex items-center gap-2 mb-1">
+                            <div class="flex flex-wrap items-center gap-2 mb-1">
                                 <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full uppercase">
                                     {{ $anak->jenjang_pendidikan ?? 'Jenjang Umum' }}
                                 </span>
                                 <span class="text-xs text-slate-400 font-medium">
                                     Kelas: {{ $anak->kelas ?? '-' }}
+                                </span>
+                                <span class="rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider
+                                    {{ $anak->sudah_lulus ? 'bg-indigo-100 text-indigo-700' : ($anak->non_aktif ? 'bg-slate-200 text-slate-600' : 'bg-emerald-100 text-emerald-700') }}">
+                                    {{ $anak->labelStatus() }}
                                 </span>
                             </div>
                             <h3 class="text-xl font-black text-slate-900">{{ $anak->nama_lengkap }}</h3>
@@ -99,6 +103,11 @@
                                 class="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 text-[11px] font-bold transition">
                                 <i class="fa-solid fa-eye"></i> Lihat Nilai
                             </a>
+                            <a href="{{ route('portal.anak.show', $anak) }}"
+                                class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[11px] font-bold text-emerald-700 transition hover:bg-emerald-100">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                                {{ $anak->non_aktif ? 'Riwayat Anak' : 'Detail Anak' }}
+                            </a>
                             <span class="inline-flex items-center px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700">
                                 Wali: {{ $anak->nama_wali ?? Auth::user()->name }}
                             </span>
@@ -114,7 +123,9 @@
                                 <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Status Kehadiran</span>
                                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                             </div>
-                            <h4 class="text-base font-bold text-slate-900">Aktif di Pesantren</h4>
+                            <h4 class="text-base font-bold text-slate-900">
+                                {{ $anak->sudah_lulus ? 'Telah Lulus (Alumni)' : ($anak->non_aktif ? $anak->labelStatus() : 'Aktif di Pesantren') }}
+                            </h4>
                             <p class="text-xs text-slate-500">Alamat: {{ $anak->alamat ?? 'Tidak dicantumkan' }}</p>
                         </div>
 

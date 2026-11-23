@@ -1127,6 +1127,37 @@
             </section>
         @endif
 
+        {{-- FASILITAS PESANTREN --}}
+        <section class="py-20 bg-slate-50">
+            <div class="container">
+                <div class="eyebrow light">Fasilitas</div>
+                <h2 class="text-2xl font-black text-slate-900 mb-6">Fasilitas Pesantren</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md transition">
+                        <div class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center mb-3">
+                            <i class="fa-solid fa-building-column"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">Gedung Pembelajaran</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed">Gedung berkaca dua lantai dilengkapi kursi majelis, papan tulis putih, dan sistem audiovisual.</p>
+                    </div>
+                    <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md transition">
+                        <div class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center mb-3">
+                            <i class="fa-solid fa-user-group"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">Asrama Santri</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed">Asrama terpisah untuk santri putra dan putri dengan fasilitas tidur dan area studi.</p>
+                    </div>
+                    <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md transition">
+                        <div class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center mb-3">
+                            <i class="fa-solid fa-mosque"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">Masjid</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed">Masjid utama dengan kubah indah untuk shalat jamaah lima waktu dan hari raya.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         {{-- PENERIMAAN SANTRI BARU --}}
         <section class="psb" id="psb">
             <div class="container">
@@ -1184,8 +1215,8 @@
                     <div class="map-card">
                         <div class="eyebrow">Lokasi Kami</div>
                         <h3>Pondok Pesantren Babul Hasanah</h3>
-                        <p>Kabupaten Padang Lawas, Sumatera Utara</p>
-                        <a href="https://www.google.com/maps/search/?api=1&query=Padang+Lawas,+Sumatera+Utara" target="_blank" rel="noopener" class="btn btn-primary">Buka di Google Maps <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                        <p>Desa Manggis, Kecamatan Batang Lubu Sutam</p>
+                        <a href="<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63829.14841326984!2d99.89939928887301!3d0.9039505394392833!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x302b75242b5bb17b%3A0x1d2fda5ca1b8d418!2sManggis%2C%20Kec.%20Batang%20Lubu%20Sutam%2C%20Kabupaten%20Padang%20Lawas%2C%20Sumatera%20Utara!5e0!3m2!1sid!2sid!4v1795352249347!5m2!1sid!2sid" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe> <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                     </div>
                 </div>
             </div>
