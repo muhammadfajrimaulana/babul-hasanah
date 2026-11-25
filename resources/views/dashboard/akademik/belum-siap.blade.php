@@ -3,7 +3,7 @@
 @section('title', 'Modul Akademik Belum Siap')
 
 @section('content')
-    <div class="max-w-2xl mx-auto bg-white dark:bg-slate-900 rounded-3xl border border-amber-200 dark:border-amber-500/30 shadow-sm p-8 space-y-4">
+    <div class="max-w-2xl mx-auto bg-white dark:bg-slate-900 rounded-3xl border border-amber-200 dark:border-amber-500/30 shadow-sm p-6 sm:p-8 space-y-4">
         <div class="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300 flex items-center justify-center text-xl">
             <i class="fa-solid fa-database"></i>
         </div>

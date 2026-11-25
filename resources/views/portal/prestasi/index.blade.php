@@ -37,7 +37,7 @@
                 </p>
             </div>
         @elseif ($prestasi->isEmpty())
-            <div class="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center space-y-3">
+            <div class="rounded-3xl border border-dashed border-slate-300 bg-white p-6 sm:p-10 text-center space-y-3">
                 <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto text-lg">
                     <i class="fa-solid fa-trophy"></i>
                 </div>

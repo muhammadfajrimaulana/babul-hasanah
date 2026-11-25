@@ -10,7 +10,7 @@
                 <p class="text-xs text-slate-500 dark:text-slate-400">Kelola informasi data santri aktif Pondok Pesantren
                     Babul Hasanah{{ ($bisaFilterJenjang ?? false) ? ' dari semua jenjang' : '' }}. Santri yang ditandai lulus otomatis masuk ke Data Alumni.</p>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
                 @if (auth()->user()->bisa('santri.ubah'))
                     <!-- Tombol Trigger Modal Import -->
                     <button @click="importModalOpen = true"
@@ -272,7 +272,7 @@
                                             <i class="fa-solid fa-graduation-cap text-[9px]"></i>
                                             Lulus{{ $santri->tahun_lulus ? ' '.$santri->tahun_lulus : '' }}
                                         </span>
-                                        @if ($tautanSiap && $santri->alumni)
+                                        @if ($tautanSiap && $santri->alumni && auth()->user()->bisa('alumni.lihat'))
                                             <div class="mt-1">
                                                 <a href="{{ route('admin.alumni.index', ['q' => $santri->nomor_induk]) }}"
                                                     class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline">Data alumni</a>

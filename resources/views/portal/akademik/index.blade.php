@@ -42,13 +42,13 @@
         </div>
 
         @if (! $siap)
-            <div class="bg-white p-8 rounded-3xl border border-amber-200 shadow-sm text-center space-y-2">
+            <div class="bg-white p-6 sm:p-8 rounded-3xl border border-amber-200 shadow-sm text-center space-y-2">
                 <i class="fa-solid fa-hourglass-half text-2xl text-amber-500"></i>
                 <h3 class="text-sm font-black text-slate-900">Modul nilai belum tersedia</h3>
                 <p class="text-xs text-slate-500">Pengelola pesantren belum mengaktifkan modul nilai. Silakan coba lagi nanti.</p>
             </div>
         @elseif ($anakList->isEmpty())
-            <div class="bg-amber-50 border border-amber-200 p-8 rounded-3xl text-center space-y-3">
+            <div class="bg-amber-50 border border-amber-200 p-6 sm:p-8 rounded-3xl text-center space-y-3">
                 <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto text-lg">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                 </div>
@@ -103,7 +103,7 @@
 
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <p class="text-[10px] text-slate-400">Hanya nilai berstatus terbit yang ditampilkan di portal.</p>
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
                         <button type="submit"
                             class="rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2.5 text-xs font-bold transition inline-flex items-center gap-2">
                             <i class="fa-solid fa-filter"></i> Tampilkan Nilai
@@ -119,7 +119,7 @@
             </form>
 
             @if (! $anak)
-                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm text-center">
+                <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm text-center">
                     <p class="text-xs font-bold text-slate-500">Pilih anak terlebih dahulu.</p>
                 </div>
             @else
@@ -203,7 +203,7 @@
 
                 @if (! $data || $data['mapel']->isEmpty())
                     @if ($dokumen->isEmpty())
-                        <div class="bg-white p-10 rounded-3xl border border-slate-200 shadow-sm text-center space-y-2">
+                        <div class="bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm text-center space-y-2">
                             <i class="fa-solid fa-folder-open text-3xl text-slate-300"></i>
                             <h3 class="text-sm font-black text-slate-900">Belum ada nilai terbit</h3>
                             <p class="text-xs text-slate-500 max-w-md mx-auto">

@@ -2,6 +2,8 @@
     $pengguna = auth()->user();
     $bolehNilai = $pengguna->bisa('akademik.ubah');
     $bolehPrestasi = $pengguna->bisa('prestasi.ubah');
+    $bolehFormJenjang = in_array(\App\Support\Akses::normalisasi($pengguna->role), ['super_admin', 'admin', 'pengurus'], true);
+    $bolehAlumni = $pengguna->bisa('alumni.lihat');
     $statistik = $jenjangStats ?? \App\Support\RekapJenjang::ringkasan();
     $judul = $judul ?? 'Akses Cepat per Jenjang';
     $deskripsi = $deskripsi ?? 'Input nilai & prestasi serta lihat data santri dan alumni pada tiap jenjang.';
@@ -45,24 +47,28 @@
                 </p>
 
                 <div class="mt-3 grid grid-cols-2 gap-1.5">
-                    <a href="{{ route('admin.dashboard.jenjang.nilai.form', ['jenjang' => $j['slug']]) }}"
-                        class="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-2 text-[10px] font-black text-emerald-800 transition hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200">
-                        <i class="fa-solid {{ $bolehNilai ? 'fa-pen-to-square' : 'fa-book-open-reader' }}"></i>
-                        {{ $bolehNilai ? 'Input Nilai' : 'Nilai' }}
-                    </a>
-                    <a href="{{ route('admin.dashboard.jenjang.prestasi.form', ['jenjang' => $j['slug']]) }}"
-                        class="flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2 py-2 text-[10px] font-black text-amber-800 transition hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
-                        <i class="fa-solid {{ $bolehPrestasi ? 'fa-trophy' : 'fa-medal' }}"></i>
-                        {{ $bolehPrestasi ? 'Input Prestasi' : 'Prestasi' }}
-                    </a>
+                    @if ($bolehFormJenjang)
+                        <a href="{{ route('admin.dashboard.jenjang.nilai.form', ['jenjang' => $j['slug']]) }}"
+                            class="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-2 text-[10px] font-black text-emerald-800 transition hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200">
+                            <i class="fa-solid {{ $bolehNilai ? 'fa-pen-to-square' : 'fa-book-open-reader' }}"></i>
+                            {{ $bolehNilai ? 'Input Nilai' : 'Nilai' }}
+                        </a>
+                        <a href="{{ route('admin.dashboard.jenjang.prestasi.form', ['jenjang' => $j['slug']]) }}"
+                            class="flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2 py-2 text-[10px] font-black text-amber-800 transition hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+                            <i class="fa-solid {{ $bolehPrestasi ? 'fa-trophy' : 'fa-medal' }}"></i>
+                            {{ $bolehPrestasi ? 'Input Prestasi' : 'Prestasi' }}
+                        </a>
+                    @endif
                     <a href="{{ route('admin.jenjang.show', $j['slug']) }}"
                         class="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2 py-2 text-[10px] font-bold text-slate-600 transition hover:border-emerald-200 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
                         <i class="fa-solid fa-people-group"></i> Data Santri
                     </a>
-                    <a href="{{ route('admin.alumni.index', ['jenjang' => $j['slug']]) }}"
-                        class="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2 py-2 text-[10px] font-bold text-slate-600 transition hover:border-emerald-200 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
-                        <i class="fa-solid fa-user-graduate"></i> Data Alumni
-                    </a>
+                    @if ($bolehAlumni)
+                        <a href="{{ route('admin.alumni.index', ['jenjang' => $j['slug']]) }}"
+                            class="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2 py-2 text-[10px] font-bold text-slate-600 transition hover:border-emerald-200 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                            <i class="fa-solid fa-user-graduate"></i> Data Alumni
+                        </a>
+                    @endif
                 </div>
             </div>
         @endforeach

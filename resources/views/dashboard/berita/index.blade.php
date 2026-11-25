@@ -21,7 +21,7 @@
             </div>
         @endif
 
-        <form method="GET" class="flex gap-2">
+        <form method="GET" class="flex flex-col sm:flex-row gap-2">
             <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari judul berita..."
                 class="w-full sm:w-72 text-xs px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
             <button class="px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold">Cari</button>
@@ -29,7 +29,7 @@
 
         <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden transition-colors duration-300">
             <div class="overflow-x-auto custom-scrollbar">
-                <table class="w-full text-left border-collapse text-xs">
+                <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
                     <thead>
                         <tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-100 dark:border-slate-800">
                             <th class="py-3 px-6 font-extrabold">Judul Berita</th>

@@ -1,11 +1,11 @@
 <header
-    class="h-20 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between px-4 sm:px-6 z-10 shadow-sm relative transition-colors duration-300">
+    class="h-16 sm:h-20 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between px-3 sm:px-6 z-10 shadow-sm relative transition-colors duration-300">
 
     <!-- BAGIAN KIRI & TENGAH (MOBILE) -->
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2 sm:gap-3">
         <!-- Hamburger Menu -->
         <button @click="sidebarOpen = true"
-            class="md:hidden text-[#1b7b32] dark:text-emerald-400 hover:text-[#ee8a2a] py-1.5 px-2.5 rounded-xl flex items-center justify-center transition active:scale-95 shadow-sm">
+            class="md:hidden text-[#1b7b32] dark:text-emerald-400 hover:text-[#ee8a2a] py-1.5 px-2 rounded-xl flex items-center justify-center transition active:scale-95">
             <i class="fa-solid fa-bars-staggered text-lg"></i>
         </button>
 
@@ -15,15 +15,15 @@
     </div>
 
     <!-- LOGO TEKS DI TENGAH (Mobile) -->
-    <div class="absolute left-1/2 -translate-x-1/2 md:hidden flex items-center justify-center">
-        <img src="{{ asset('/assets/img/logo/logo-teks.png') }}" alt="Logo Pesantren" class="h-10 w-auto object-contain">
+    <div class="absolute left-1/2 -translate-x-1/2 md:hidden flex items-center justify-center pointer-events-none">
+        <img src="{{ asset('/assets/img/logo/logo-teks.png') }}" alt="Logo Pesantren" class="h-8 sm:h-10 w-auto object-contain">
     </div>
 
     <!-- BAGIAN KANAN: TOMBOL TOGGLE DARK MODE & USER PROFILE -->
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2 sm:gap-3">
         <!-- Tombol Toggle Dark Mode -->
         <button @click="toggleDarkMode()"
-            class="w-10 h-10 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-400 rounded-xl flex items-center justify-center transition active:scale-95 shadow-sm"
+            class="w-9 h-9 sm:w-10 sm:h-10 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-400 rounded-xl flex items-center justify-center transition active:scale-95 shadow-sm"
             :title="darkMode ? 'Ubah ke Light Mode' : 'Ubah ke Dark Mode'">
             <i class="fa-solid text-sm" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
         </button>
@@ -31,7 +31,7 @@
         <!-- Dropdown Profil Pengguna -->
         <div x-data="{ profileOpen: false }" @click.away="profileOpen = false" class="relative">
             <button @click="profileOpen = !profileOpen"
-                class="w-10 h-10 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center transition transform hover:scale-105 shadow-sm cursor-pointer"
+                class="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center transition transform hover:scale-105 shadow-sm cursor-pointer"
                 :class="{ 'ring-2 ring-emerald-400': profileOpen }">
                 @php
                     $avatarUrl = auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : asset('assets/img/logo/logo.png');
@@ -95,7 +95,7 @@
 </header>
 
 <!-- MODAL RESET PASSWORD -->
-<div x-data="{ resetPasswordModal: false }" x-show="resetPasswordModal" x-cloak
+<div x-show="resetPasswordModal" x-cloak
     class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" @click.away="resetPasswordModal = false"
     @keydown.escape.window="resetPasswordModal = false">
 

@@ -109,7 +109,7 @@
                 class="w-full sm:w-72 text-xs px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
             @if ($bolehSemua)
                 <select name="jenjang"
-                    class="text-xs px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    class="w-full text-xs px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 sm:w-auto">
                     <option value="">Semua jenjang</option>
                     @foreach (($jenjangList ?? []) as $slug => $nama)
                         <option value="{{ $slug }}" @selected(request('jenjang') === $slug)>{{ $nama }}</option>
@@ -125,7 +125,7 @@
 
         <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
             <div class="overflow-x-auto custom-scrollbar">
-                <table class="w-full text-left border-collapse text-xs">
+                <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
                     <thead>
                         <tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-100 dark:border-slate-800">
                             <th class="py-3 px-6 font-extrabold">Pengguna</th>

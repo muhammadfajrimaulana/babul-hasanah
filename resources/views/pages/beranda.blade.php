@@ -1128,7 +1128,7 @@
         @endif
 
         {{-- FASILITAS PESANTREN --}}
-        <section class="py-20 bg-slate-50">
+        <section class="py-14 sm:py-20 bg-slate-50">
             <div class="container">
                 <div class="eyebrow light">Fasilitas</div>
                 <h2 class="text-2xl font-black text-slate-900 mb-6">Fasilitas Pesantren</h2>

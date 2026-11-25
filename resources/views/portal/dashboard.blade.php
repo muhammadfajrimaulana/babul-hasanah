@@ -6,7 +6,7 @@
     <div class="space-y-6">
 
         <!-- BANNER SELAMAT DATANG -->
-        <div class="bg-gradient-to-r from-emerald-900 to-slate-900 text-white p-8 rounded-3xl shadow-lg space-y-3">
+        <div class="bg-gradient-to-r from-emerald-900 to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-lg space-y-3">
             <span class="bg-emerald-500/20 text-emerald-400 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/30 inline-block">
                 Monitoring Santri Aktif
             </span>
@@ -204,7 +204,7 @@
                 </div>
             @empty
                 <!-- Tampilan jika wali santri belum memiliki anak yang di-link ke akunnya -->
-                <div class="bg-amber-50 border border-amber-200 p-8 rounded-3xl text-center space-y-3">
+                <div class="bg-amber-50 border border-amber-200 p-6 sm:p-8 rounded-3xl text-center space-y-3">
                     <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto text-lg">
                         <i class="fa-solid fa-triangle-exclamation"></i>
                     </div>

@@ -4,6 +4,8 @@
 
 @section('content')
 
+@include('pages.partials.profil-dokumen-style')
+
 @php
     // Konten dari dashboard (1 query) + fallback teks lama.
     $konten = \App\Models\Konten::allWithDefaults();
@@ -103,6 +105,23 @@
     $ctaButton = $kv('pembelajaran_cta_button');
     $ctaUrl = $kv('pembelajaran_cta_url');
     $ctaHref = str_starts_with($ctaUrl, 'http') ? $ctaUrl : url($ctaUrl);
+
+    // ==== BAB IV: PERAN PESANTREN ====
+    $bab4Title = $kv('pembelajaran_bab4_title', 'BAB IV. PERAN PONDOK PESANTREN BABUL HASANAH');
+    $bab4 = [
+        [
+            'title' => $kv('pembelajaran_bab4_a_title', 'A. Peran dalam Pendidikan Islam'),
+            'body' => $kv('pembelajaran_bab4_a_body', 'Pondok Pesantren Babul Hasanah berperan menyelenggarakan pendidikan Islam yang berkelanjutan. Melalui kajian kitab kuning, pendidikan formal, dan pembinaan keagamaan, pesantren membantu santri memahami ajaran Islam secara bertahap. Pendidikan diarahkan agar santri tidak hanya mengetahui, tetapi juga mampu mengamalkan ilmu dalam kehidupan sehari-hari.'),
+        ],
+        [
+            'title' => $kv('pembelajaran_bab4_b_title', 'B. Peran dalam Pembinaan Akhlak dan Karakter'),
+            'body' => $kv('pembelajaran_bab4_b_body', 'Pembinaan akhlak dan karakter menjadi bagian yang tidak terpisahkan dari pendidikan. Adab kepada guru, orang tua, dan sesama ditanamkan melalui keteladanan, pembiasaan, dan kegiatan harian. Pesantren berupaya membentuk santri yang disiplin, mandiri, jujur, dan bertanggung jawab.'),
+        ],
+        [
+            'title' => $kv('pembelajaran_bab4_c_title', 'C. Peran dalam Kehidupan Masyarakat'),
+            'body' => $kv('pembelajaran_bab4_c_body', 'Pesantren juga hadir di tengah masyarakat melalui kegiatan keagamaan, sosial, dan pendidikan. Pengajian, kegiatan hari besar Islam, serta keterlibatan santri dalam kegiatan sosial menjadi wujud pengabdian. Kehadiran pesantren diharapkan memberi manfaat dan mempererat hubungan dengan masyarakat sekitar.'),
+        ],
+    ];
 @endphp
 
 <style>
@@ -216,6 +235,15 @@
     .sj-btn:hover { background: #fde68a; }
     .sj-btn:focus-visible { outline: 3px solid #fde68a; outline-offset: 3px; }
 
+    /* ====== Hero terpusat (konsisten dengan halaman profil lain) ====== */
+    .sj-hero { text-align: center; }
+    .sj-crumb { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+    .sj-crumb i { font-size: 10px; opacity: .6; }
+    .sj-hero h1 { margin-inline: auto; }
+    .sj-hero p { margin-inline: auto; }
+    .sj-nav { justify-content: center; }
+    .sj-hero .sj-eyebrow { justify-content: center; }
+
     /* ====== Animasi muncul ====== */
     .sj-rv { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
     .sj-rv.in { opacity: 1; transform: none; }
@@ -274,6 +302,9 @@
                     @endif
                     @if ($visible['metode'] ?? true)
                         <a href="#metode"><i class="fa-solid fa-chalkboard-user"></i> Metode</a>
+                    @endif
+                    @if ($visible['bab4'] ?? true)
+                        <a href="#bab4"><i class="fa-solid fa-seedling"></i> BAB IV</a>
                     @endif
                 </nav>
             </div>
@@ -412,9 +443,31 @@
         </section>
     @endif
 
+    {{-- ============ BAB IV: PERAN PESANTREN ============ --}}
+    @if ($visible['bab4'] ?? true)
+        <section class="sj-sec" id="bab4" style="order: {{ $order['bab4'] ?? 5 }}">
+            <div class="sj-wrap">
+                <div class="pd-page">
+                    <article class="pd-doc">
+                        <div class="pd-chapter">
+                            <h2 class="pd-chapter-title">{{ $bab4Title }}</h2>
+
+                            @foreach ($bab4 as $section)
+                                <div class="pd-section">
+                                    <h3 class="pd-section-title">{{ $section['title'] }}</h3>
+                                    <div class="pd-prose">{!! nl2br(e($section['body'])) !!}</div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+    @endif
+
     {{-- ============ CTA ============ --}}
     @if ($visible['cta'] ?? true)
-        <section class="sj-sec" style="order: {{ $order['cta'] ?? 5 }}">
+        <section class="sj-sec" style="order: {{ $order['cta'] ?? 6 }}">
             <div class="sj-wrap">
                 <div class="sj-cta">
                     <h2>{{ $ctaTitle }}</h2>

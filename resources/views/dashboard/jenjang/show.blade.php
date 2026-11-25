@@ -182,6 +182,7 @@
         </div>
 
         {{-- ===================== DATA PENDAFTAR ===================== --}}
+        @if (auth()->user()->bisa('pendaftaran.lihat'))
         <div class="overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 px-5 py-4">
                 <div>
@@ -231,8 +232,10 @@
                 <div class="px-5 py-10 text-center text-xs text-slate-400">Belum ada pendaftar pada jenjang ini.</div>
             @endif
         </div>
+        @endif
 
         {{-- ===================== DATA ALUMNI ===================== --}}
+        @if (auth()->user()->bisa('alumni.lihat'))
         <div class="overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 px-5 py-4">
                 <div>
@@ -276,6 +279,7 @@
                 <div class="px-5 py-10 text-center text-xs text-slate-400">Belum ada alumni pada jenjang ini.</div>
             @endif
         </div>
+        @endif
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

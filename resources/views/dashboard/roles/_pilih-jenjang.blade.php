@@ -20,9 +20,9 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex w-full items-center gap-2 sm:w-auto">
             <select name="jenjang" onchange="this.form.submit()"
-                class="min-w-[220px] rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+                class="w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 sm:w-auto sm:min-w-[220px]">
                 <option value="">Semua jenjang (gabungan)</option>
                 @foreach ($daftarJenjang ?? \App\Support\Jenjang::semua() as $j)
                     <option value="{{ $j['slug'] }}" @selected($pilihanJenjang === $j['slug'])>

@@ -122,8 +122,10 @@
                                 <span class="text-emerald-700 dark:text-emerald-400 font-bold">
                                     <i class="fa-solid fa-link mr-1"></i> Tertaut ke Data Alumni
                                 </span>
-                                <a href="{{ route('admin.alumni.index', ['q' => $santri->nomor_induk]) }}"
-                                    class="ml-2 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline">Lihat</a>
+                                @if (auth()->user()->bisa('alumni.lihat'))
+                                    <a href="{{ route('admin.alumni.index', ['q' => $santri->nomor_induk]) }}"
+                                        class="ml-2 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline">Lihat</a>
+                                @endif
                                 @if (auth()->user()->bisa('alumni.ubah'))
                                     <a href="{{ route('admin.alumni.edit', $alumniTertaut) }}"
                                         class="ml-1 text-[11px] font-bold text-amber-600 hover:underline">Lengkapi</a>

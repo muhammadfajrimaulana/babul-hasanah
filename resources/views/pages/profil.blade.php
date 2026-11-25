@@ -33,7 +33,7 @@
     </section>
 
     <!-- SEJARAH SINGKAT -->
-    <section class="py-20 bg-white">
+    <section class="py-14 sm:py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="space-y-6">
@@ -62,7 +62,7 @@
     </section>
 
     <!-- VISI & MISI -->
-    <section class="py-20 bg-slate-50 border-y border-slate-200/60">
+    <section class="py-14 sm:py-20 bg-slate-50 border-y border-slate-200/60">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-2xl mx-auto mb-16 space-y-3">
                 <h2 class="text-xs font-semibold text-emerald-600 uppercase tracking-widest">Landasan Utama</h2>
@@ -72,7 +72,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Visi -->
                 <div
-                    class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col justify-between hover:shadow-md transition">
+                    class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col justify-between hover:shadow-md transition">
                     <div>
                         <div
                             class="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center font-bold text-lg mb-6">
@@ -87,7 +87,7 @@
                 </div>
 
                 <!-- Misi -->
-                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200/60 hover:shadow-md transition">
+                <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200/60 hover:shadow-md transition">
                     <div
                         class="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center font-bold text-lg mb-6">
                         <i class="fa-solid fa-bullseye"></i>
@@ -102,7 +102,7 @@
     </section>
 
     <!-- PIMPINAN & STRUKTUR -->
-    <section class="py-20 bg-white">
+    <section class="py-14 sm:py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-12">
             <div class="max-w-2xl mx-auto space-y-3">
                 <h2 class="text-xs font-semibold text-emerald-600 uppercase tracking-widest">Kepengurusan</h2>

@@ -59,7 +59,7 @@
             @endif
 
             <!-- Card Form Pendaftaran -->
-            <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200/80 p-8 sm:p-10 backdrop-blur-sm">
+            <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200/80 p-5 sm:p-8 lg:p-10 backdrop-blur-sm">
                 <form action="{{ route('pendaftaran.store') }}" method="POST" class="space-y-8">
                     @csrf
 

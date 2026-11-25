@@ -3,8 +3,8 @@
 @section('title', 'Ganti Password - Pondok Pesantren Babul Hasanah')
 
 @section('content')
-    <div class="min-h-screen flex items-center justify-center px-4 py-10">
-        <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 space-y-6">
+    <div class="min-h-screen flex items-center justify-center px-4 py-8 sm:py-10">
+        <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6">
             <div class="text-center space-y-2">
                 <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl">
                     <i class="fa-solid fa-shield-halved"></i>

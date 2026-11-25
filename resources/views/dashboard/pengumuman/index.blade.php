@@ -31,8 +31,8 @@
 
         @if ($bolehUbah)
             <div class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900" x-data="{ buka: false }">
-                <div class="flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-3">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex min-w-0 items-center gap-3">
                         <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
                             <i class="fa-solid fa-bullhorn"></i>
                         </span>

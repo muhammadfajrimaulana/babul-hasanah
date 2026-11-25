@@ -401,7 +401,7 @@
             </div>
 
             @if ($santris->isEmpty())
-                <div class="rounded-3xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 p-8 text-center space-y-2">
+                <div class="rounded-3xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 p-6 sm:p-8 text-center space-y-2">
                     <i class="fa-solid fa-user-slash text-2xl text-amber-500"></i>
                     <h3 class="text-sm font-black text-amber-900 dark:text-amber-200">Belum ada santri di kelas ini</h3>
                     <p class="text-xs text-amber-800/80 dark:text-amber-300/80">Pastikan data santri sudah memiliki jenjang dan kelas yang sesuai.</p>

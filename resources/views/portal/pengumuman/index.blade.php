@@ -11,8 +11,8 @@
             </div>
 
             @if ($slugs->isNotEmpty())
-                <form method="GET" action="{{ route('portal.pengumuman.index') }}" class="flex items-center gap-2">
-                    <select name="jenjang" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700">
+                <form method="GET" action="{{ route('portal.pengumuman.index') }}" class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <select name="jenjang" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 sm:w-auto">
                         <option value="">Semua jenjang anak</option>
                         @foreach ($daftarJenjang as $j)
                             @if ($slugs->contains($j['slug']))

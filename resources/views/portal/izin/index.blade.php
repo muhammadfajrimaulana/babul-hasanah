@@ -44,7 +44,7 @@
                                 </select>
                                 @error('santri_id') <p class="mt-1 text-[11px] text-rose-600">{{ $message }}</p> @enderror
                             </div>
-                            <div class="grid grid-cols-2 gap-3">
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div>
                                     <label class="{{ $lb }}">Tanggal Pulang</label>
                                     <input type="date" name="tanggal_pulang" value="{{ old('tanggal_pulang') }}" required min="{{ now()->toDateString() }}" class="{{ $in }}">

@@ -137,7 +137,7 @@
                         <form method="POST" action="{{ route('admin.pembinaan.hafalan.store') }}" class="space-y-3">
                             @csrf
                             <input type="hidden" name="santri_id" value="{{ $santri->id }}">
-                            <div class="grid grid-cols-2 gap-3">
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div>
                                     <label class="{{ $lb }}">Tanggal</label>
                                     <input type="date" name="tanggal" value="{{ now()->toDateString() }}" required class="{{ $in }}">
@@ -166,7 +166,7 @@
                                     <label class="{{ $lb }}">Nilai (0-100)</label>
                                     <input type="number" name="nilai" min="0" max="100" step="0.01" class="{{ $in }}">
                                 </div>
-                                <div class="col-span-2">
+                                <div class="col-span-1 sm:col-span-2">
                                     <label class="{{ $lb }}">Predikat</label>
                                     <input type="text" name="predikat" maxlength="30" class="{{ $in }}" placeholder="Mumtaz / Jayyid">
                                 </div>
@@ -225,7 +225,7 @@
                         <form method="POST" action="{{ route('admin.pembinaan.pelanggaran.store') }}" class="space-y-3">
                             @csrf
                             <input type="hidden" name="santri_id" value="{{ $santri->id }}">
-                            <div class="grid grid-cols-2 gap-3">
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div>
                                     <label class="{{ $lb }}">Tanggal</label>
                                     <input type="date" name="tanggal" value="{{ now()->toDateString() }}" required class="{{ $in }}">
@@ -234,7 +234,7 @@
                                     <label class="{{ $lb }}">Poin</label>
                                     <input type="number" name="poin" min="0" max="1000" value="0" class="{{ $in }}">
                                 </div>
-                                <div class="col-span-2">
+                                <div class="col-span-1 sm:col-span-2">
                                     <label class="{{ $lb }}">Jenis Pelanggaran</label>
                                     <input type="text" name="jenis" required maxlength="100" class="{{ $in }}" placeholder="Telat sholat Subuh">
                                 </div>

@@ -14,7 +14,7 @@
 
     <div class="space-y-6">
         {{-- HERO --}}
-        <div class="rounded-3xl bg-gradient-to-r from-indigo-900 via-emerald-950 to-slate-950 p-8 text-white shadow-lg">
+        <div class="rounded-3xl bg-gradient-to-r from-indigo-900 via-emerald-950 to-slate-950 p-6 sm:p-8 text-white shadow-lg">
             <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-start gap-4">
                     <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-2xl ring-1 ring-white/20">

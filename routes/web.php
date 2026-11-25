@@ -285,15 +285,13 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     });
 
     // 4.5 Baca / monitoring — semua peran panel (tanpa aksi ubah)
-    Route::middleware('role:'.Akses::roles('santri.lihat'))->group(function () {
+    Route::middleware('role:'.Akses::roles('pendaftaran.lihat'))->group(function () {
         Route::get('/pendaftaran', [AdminPendaftaranController::class, 'index'])->name('pendaftaran.index');
+    });
 
+    Route::middleware('role:'.Akses::roles('santri.lihat'))->group(function () {
         Route::get('/santri', [AdminDataSantriController::class, 'index'])->name('santri.index');
         Route::get('/santri/{id}', [AdminDataSantriController::class, 'detail'])->name('santri.detail');
-
-        Route::get('/data-alumni', [AdminAlumniController::class, 'index'])->name('alumni.index');
-        Route::get('/data-alumni/{alumni}/nilai', [AdminAlumniController::class, 'unduhNilai'])->name('alumni.nilai.unduh');
-        Route::get('/data-alumni/{alumni}', [AdminAlumniController::class, 'show'])->name('alumni.show');
 
         Route::get('/pengelolaan-prestasi', [PrestasiAdminController::class, 'index'])->name('prestasi.index');
 
@@ -306,6 +304,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
         // Pengajuan perubahan data dari wali.
         Route::get('/pengajuan-perubahan', [AdminPengajuanController::class, 'index'])->name('pengajuan.index');
+    });
+
+    Route::middleware('role:'.Akses::roles('alumni.lihat'))->group(function () {
+        Route::get('/data-alumni', [AdminAlumniController::class, 'index'])->name('alumni.index');
+        Route::get('/data-alumni/{alumni}/nilai', [AdminAlumniController::class, 'unduhNilai'])->name('alumni.nilai.unduh');
+        Route::get('/data-alumni/{alumni}', [AdminAlumniController::class, 'show'])->name('alumni.show');
 
         // Antrean legalisir alumni.
         Route::get('/legalisir', [AdminLegalisirController::class, 'index'])->name('legalisir.index');
