@@ -67,7 +67,7 @@ Route::prefix('profil')->name('profil.')->group(function () {
     Route::get('/visi-misi', fn () => view('pages.visi-misi'))->name('visi-misi');
     Route::get('/struktur-organisasi', [StrukturOrganisasiController::class, 'index'])->name('struktur-organisasi');
     Route::get('/pembelajaran', fn () => view('pages.pembelajaran'))->name('pembelajaran');
-    Route::get('/fasilitas', fn () => view('pages.fasilitas'))->name('profil.fasilitas');
+    Route::get('/fasilitas', fn () => view('pages.fasilitas'))->name('fasilitas');
 });
 
 // ######## JENJANG ########### //

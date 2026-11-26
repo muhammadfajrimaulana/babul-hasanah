@@ -23,7 +23,7 @@
             --emerald-d: #0e9f73;
             --emerald-l: #2fe0a0;
             --radius: 22px;
-            --sec: 44px; /* jarak vertikal antar-section */
+            --sec: 36px; /* jarak vertikal antar-section */
             --shadow: 0 10px 30px rgba(23, 64, 47, 0.07);
             --shadow-lg: 0 22px 50px rgba(23, 64, 47, 0.14);
             font-family: 'Poppins', system-ui, -apple-system, sans-serif;
@@ -43,6 +43,10 @@
         }
         .dh p { margin: 0; }
         .dh .container { width: min(1180px, 92%); margin-inline: auto; }
+
+        /* Ritme vertikal semua section dibuat seragam */
+        .dh > section:not(.hero2):not(.stats) { padding-block: var(--sec); }
+        .dh section[id] { scroll-margin-top: 96px; }
 
         .dh .eyebrow {
             display: flex; align-items: center; gap: 12px; font-size: 11px; letter-spacing: .12em;
@@ -88,6 +92,8 @@
             border-radius: 12px; font-weight: 600;
         }
         .dh .btn-glass:hover { background: rgba(18, 26, 42, .9); }
+        .dh .btn-ghost-light { background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .3); color: #fff; }
+        .dh .btn-ghost-light:hover { background: #fff; color: var(--green); border-color: #fff; }
         .dh .btn-lg { padding: 16px 32px; font-size: 15px; }
 
         /* ---------- HERO ---------- */
@@ -128,7 +134,7 @@
         .dh .hero2::before {
             content: ""; position: absolute; inset: 0; z-index: 1;
             background:
-                linear-gradient(90deg, rgba(24, 12, 26, .75) 0%, rgba(14, 28, 22, .55) 55%, rgba(10, 22, 16, .35) 100%),
+                linear-gradient(90deg, rgba(10, 27, 19, .82) 0%, rgba(14, 36, 26, .58) 55%, rgba(10, 26, 18, .34) 100%),
                 linear-gradient(0deg, rgba(6, 18, 12, .6), transparent 50%);
         }
         .dh .hero2 .container { position: relative; z-index: 2; padding: 80px 0; }
@@ -158,7 +164,18 @@
             display: inline-flex; align-items: center; gap: 8px; background: var(--emerald); color: #fff;
             font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 999px; flex: none; letter-spacing: .04em;
         }
-        .dh .info-inner marquee { color: #d8e8df; font-size: 13px; }
+        .dh .info-marquee { flex: 1; min-width: 0; overflow: hidden; }
+        .dh .info-track {
+            display: flex; width: max-content; white-space: nowrap;
+            color: #d8e8df; font-size: 13px; animation: dh-marquee 30s linear infinite;
+            will-change: transform;
+        }
+        .dh .info-track > span { flex: none; padding-right: 56px; }
+        .dh .info-inner:hover .info-track { animation-play-state: paused; }
+        @keyframes dh-marquee {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
 
         /* ---------- STATS ---------- */
         .dh .stats { background: linear-gradient(120deg, var(--green) 0%, var(--green-2) 100%); color: #fff; padding: 36px 0; }
@@ -171,7 +188,6 @@
         .dh .stat span { font-size: 11px; color: #a9c4b6; }
 
         /* ---------- PROFIL + SAMBUTAN PIMPINAN ---------- */
-        .dh .profile { padding: 56px 0 var(--sec); }
         .dh .profile-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 70px; align-items: center; }
 
         /* Foto pimpinan (portrait 4:5, wajah tetap terlihat) */
@@ -216,7 +232,7 @@
         .dh .feature p { font-size: 11.5px; color: var(--muted); }
 
         /* ---------- JENJANG / LEVELS ---------- */
-        .dh .levels { background: var(--cream); padding: var(--sec) 0; border-radius: 36px; margin: 0 1.5%; }
+        .dh .levels { background: var(--cream); }
         .dh .section-title { font-size: clamp(26px, 3.4vw, 38px); margin-bottom: 12px; }
         .dh .section-sub { color: var(--muted); font-size: 13.5px; margin-bottom: 36px; max-width: 600px; }
         .dh .level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
@@ -242,9 +258,10 @@
         }
         .dh .level-cta h3 { color: #fff; font-size: 18px; }
         .dh .level-cta p { font-size: 11.5px; color: #b9d0c4; }
+        .dh .level-cta > i { font-size: 22px; color: #e6d3a3; }
+        .dh .level-cta .btn { align-self: flex-start; }
 
         /* ---------- STRUKTUR ORGANISASI (BERANDA) ---------- */
-        .dh .org { padding: 0 0 var(--sec); }
         .dh .org-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
         .dh .org-card {
             background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 20px;
@@ -294,7 +311,6 @@
         .dh .custom-swiper-pagination .swiper-pagination-bullet-active { background: var(--emerald); opacity: 1; width: 22px; border-radius: 99px; }
 
         /* ---------- INFO HARIAN ---------- */
-        .dh .ih-sec { padding: 0 0 var(--sec); }
         .dh .ih-shell {
             position: relative; overflow: hidden; border-radius: 32px; padding: 42px 40px 40px;
             background: linear-gradient(150deg, var(--green) 0%, var(--green-2) 60%, #2a6a50 100%);
@@ -376,9 +392,15 @@
             .dh .ih-today { padding: 20px 18px 14px; }
         }
 
+        /* ---------- KEPALA BAGIAN (dipakai bersama) ---------- */
+        .dh .head-row {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            gap: 20px; margin-bottom: 32px;
+        }
+        .dh .head-row .section-title { margin-bottom: 0; }
+        .dh .head-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
         /* ---------- BERITA ---------- */
-        .dh .news { padding: var(--sec) 0; }
-        .dh .head-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 34px; }
         .dh .news-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
         .dh .news-card { transition: transform .3s ease; }
         .dh .news-card:hover { transform: translateY(-6px); }
@@ -396,7 +418,6 @@
         .dh .link-more:hover { color: var(--emerald-d); }
 
         /* ---------- GALERI ---------- */
-        .dh .gallery { padding: 0 0 var(--sec); }
         .dh .gallery-grid { display: grid; grid-template-columns: 1.8fr 1fr 1fr; gap: 20px; }
         .dh .g-item { margin: 0; }
         .dh .g-item .ph { height: 300px; position: relative; transition: transform .4s ease, box-shadow .3s ease; }
@@ -419,7 +440,6 @@
         .dh .g-video .play { pointer-events: none; }
 
         /* ---------- PRESTASI ---------- */
-        .dh .achv { padding: 0 0 var(--sec); }
         .dh .achv .container { display: grid; grid-template-columns: .8fr 2.2fr; gap: 40px; align-items: center; }
         .dh .achv h2 { font-size: clamp(26px, 3vw, 36px); margin-bottom: 12px; }
         .dh .achv .intro { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
@@ -437,8 +457,29 @@
         .dh .achv-card .lvl { font-size: 11px; color: var(--muted); margin-bottom: 12px; }
         .dh .achv-card .who { font-size: 11px; color: var(--green); font-weight: 600; border-top: 1px solid var(--line); padding-top: 10px; }
 
+        /* ---------- FASILITAS ---------- */
+        .dh .fac-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+        .dh .fac-card {
+            display: flex; flex-direction: column; gap: 10px; background: #fff;
+            border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 24px;
+            transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+        }
+        .dh .fac-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: var(--gold); }
+        .dh .fac-ico {
+            width: 48px; height: 48px; border-radius: 14px; flex: none; margin-bottom: 4px;
+            background: rgba(18, 184, 134, .1); color: var(--emerald-d);
+            display: grid; place-items: center; font-size: 18px;
+        }
+        .dh .fac-card h3 { font-size: 17px; }
+        .dh .fac-card p { font-size: 12.5px; color: var(--muted); flex: 1; }
+        .dh .fac-more {
+            display: inline-flex; align-items: center; gap: 6px; margin-top: 4px;
+            font-size: 12px; font-weight: 600; color: var(--green); transition: color .2s ease;
+        }
+        .dh .fac-card:hover .fac-more { color: var(--emerald-d); }
+        .dh .fac-empty { font-size: 13px; color: var(--muted); }
+
         /* ---------- PENERIMAAN SANTRI BARU ---------- */
-        .dh .psb { padding: 0 0 var(--sec); }
         .dh .psb-box {
             background: linear-gradient(135deg, var(--green), var(--green-2)); border-radius: 32px; padding: 50px;
             display: grid; grid-template-columns: 1.1fr 1fr; gap: 50px; color: #fff; box-shadow: var(--shadow-lg);
@@ -461,7 +502,6 @@
         .dh .step p { font-size: 11px; color: #b9d0c4; }
 
         /* ---------- KONTAK & PETA ---------- */
-        .dh .contact { padding: 0 0 var(--sec); }
         .dh .contact .container { display: grid; grid-template-columns: .9fr 1.1fr; gap: 60px; align-items: start; }
         .dh .contact h2 { font-size: clamp(26px, 3.4vw, 38px); margin-bottom: 16px; }
         .dh .contact .desc { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
@@ -474,7 +514,6 @@
         .dh .contact-two b { font-weight: 600; font-size: 14px; color: var(--green); }
         .dh .hours { background: var(--cream); border-radius: 999px; padding: 12px 22px; font-size: 12px; display: flex; gap: 10px; align-items: center; }
         .dh .hours i { color: var(--gold); }
-        .dh .map-section { padding: 0 0 var(--sec); }
         .dh .map-wrap {
             position: relative; border-radius: 32px; overflow: hidden; box-shadow: var(--shadow-lg);
             border: 1px solid var(--line); background: var(--cream); height: 400px;
@@ -488,7 +527,6 @@
         .dh .map-card p { font-size: 11.5px; color: var(--muted); margin-bottom: 14px; }
 
         /* ---------- TESTIMONI ALUMNI ---------- */
-        .dh .alum { padding: 0 0 var(--sec); }
         .dh .alum-box {
             position: relative; overflow: hidden; border-radius: 32px; padding: 48px 40px 38px;
             background: linear-gradient(140deg, #fff 0%, var(--cream) 100%);
@@ -562,9 +600,9 @@
 
         /* ---------- RESPONSIVE ---------- */
         @media (max-width: 1024px) {
-            .dh .profile-grid { grid-template-columns: 1fr; gap: 50px; }
+            .dh .profile-grid { grid-template-columns: 1fr; gap: 40px; }
             .dh .profile-img { max-width: 460px; width: 100%; margin-inline: auto; }
-            .dh .stats .container { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+            .dh .stats .container { grid-template-columns: repeat(2, 1fr); gap: 18px; }
             .dh .stats .container > div:first-child { grid-column: 1 / -1; }
             .dh .stat { border-left: 0; padding-left: 0; }
             .dh .stat:nth-child(3), .dh .stat:nth-child(5) {
@@ -575,28 +613,49 @@
             }
             .dh .features, .dh .news-grid { grid-template-columns: 1fr; }
             .dh .badge-year { right: 10px; bottom: -10px; }
-            .dh .levels { margin: 0; border-radius: 0; }
             .dh .head-row { flex-direction: column; align-items: flex-start; }
             .dh .level-grid, .dh .org-grid { grid-template-columns: repeat(2, 1fr); }
-            .dh .achv .container, .dh .psb-box, .dh .contact .container { grid-template-columns: 1fr; gap: 40px; }
+            .dh .achv .container, .dh .psb-box, .dh .contact .container { grid-template-columns: 1fr; gap: 36px; }
             .dh .achv-cards, .dh .gallery-grid { grid-template-columns: 1fr; }
+            .dh .fac-grid { grid-template-columns: repeat(2, 1fr); }
+            .dh .fac-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
             .dh .alum-card { flex-basis: calc((100% - 20px) / 2); }
             .dh .alum-box { padding: 40px 30px 32px; }
         }
         @media (max-width: 640px) {
-            .dh { --sec: 36px; }
+            .dh { --sec: 28px; }
+            .dh .hero2 h1 { font-size: 30px; }
+            .dh .hero2 p.lead { font-size: 13.5px; }
+            .dh .hero2-badge { font-size: 10.5px; padding: 8px 14px; margin-bottom: 18px; }
             .dh .hero2-cta { flex-direction: column; width: 100%; }
             .dh .hero2-cta .btn { width: 100%; }
-            .dh .hero2 .container { padding: 56px 0 96px; }
-            .dh .hero2-nav { left: max(4%, 16px); right: max(4%, 16px); bottom: 20px; justify-content: center; }
+            .dh .hero2 .container { padding: 48px 0 88px; }
+            .dh .hero2-nav { left: max(4%, 16px); right: max(4%, 16px); bottom: 16px; justify-content: center; }
             .dh .hero2-dots { flex: 1; justify-content: center; }
             .dh .hero2-dot { width: 16px; }
-            .dh .stats .container { gap: 18px; }
+            .dh .stats { padding: 26px 0; }
+            .dh .stats .container { gap: 16px; }
+            .dh .stats .since { font-size: 18px; }
+            .dh .stat b { font-size: 24px; }
+            .dh .stat span { font-size: 10.5px; }
             .dh .info-inner { border-radius: 16px; }
+            .dh .head-row { margin-bottom: 22px; }
+            .dh .section-title { font-size: 24px; }
+            .dh .section-sub { font-size: 12.5px; margin-bottom: 24px; }
+            .dh .features { gap: 14px; margin-top: 32px; }
+            .dh .feature { padding: 16px; }
+            .dh .level { padding: 18px; }
             .dh .level-grid, .dh .org-grid, .dh .contact-two { grid-template-columns: 1fr; }
-            .dh .psb-box { padding: 28px 20px; border-radius: 20px; }
+            .dh .g-item .ph { height: 220px; }
+            .dh .achv-cards { gap: 14px; }
+            .dh .achv-card { padding: 18px; }
+            .dh .fac-grid { grid-template-columns: 1fr; }
+            .dh .fac-card { padding: 20px; }
+            .dh .psb-box { padding: 26px 18px; border-radius: 20px; gap: 30px; }
             .dh .psb .btns { flex-direction: column; }
             .dh .psb .btn { width: 100%; }
+            .dh .step { gap: 12px; }
+            .dh .contact .container { gap: 28px; }
             .dh .hours { border-radius: 16px; }
             .dh .map-wrap { height: auto; display: flex; flex-direction: column; }
             .dh .map-wrap iframe { height: 280px; order: 2; }
@@ -611,6 +670,7 @@
             .dh .hero2-slide { transition: none !important; }
             .dh .hero2-slide.is-active { transform: none !important; }
             .dh .alum-track { transition: none !important; }
+            .dh .info-track { animation: none !important; }
         }
     </style>
 
@@ -693,6 +753,11 @@
                 ->take(12)
                 ->get();
         }
+
+        // Fasilitas unggulan di beranda (dikelola dari dashboard, maksimal 3 kartu).
+        $fasilitasBeranda = \Illuminate\Support\Facades\Schema::hasTable('konten')
+            ? collect(\App\Models\Konten::fasilitasCards())->take(3)
+            : collect();
     @endphp
 
     <div class="dh">
@@ -715,7 +780,7 @@
                 @endforeach
             </div>
             <div class="container">
-                <span class="hero2-badge">Selamat datang di official website</span>
+                <span class="hero2-badge">Selamat datang di situs resmi</span>
                 <h1>Membangun Generasi Unggul Dalam Penguasaan <span class="accent">Kitab Kuning</span></h1>
                 <p class="lead">
                     Pondok Pesantren Babul Hasanah berkomitmen mendidik santri yang mendalami ilmu agama, unggul dalam
@@ -746,13 +811,19 @@
         </section>
 
         {{-- RUNNING TEXT / INFO BANNER --}}
+        @php
+            $infoTeks = $teksInfo ?: 'Selamat datang di portal resmi Pondok Pesantren Babul Hasanah.';
+        @endphp
         <div class="info-bar">
             <div class="container">
                 <div class="info-inner">
                     <span class="info-tag"><i class="fa-solid fa-bullhorn"></i> INFO</span>
-                    <marquee scrollamount="5">
-                        {{ $teksInfo ?: 'Selamat datang di portal resmi Pondok Pesantren Babul Hasanah.' }}
-                    </marquee>
+                    <div class="info-marquee" aria-label="Info terbaru">
+                        <div class="info-track">
+                            <span>{{ $infoTeks }}</span>
+                            <span aria-hidden="true">{{ $infoTeks }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -846,8 +917,8 @@
                 <div class="ih-shell">
                     <div class="eyebrow">Info Harian</div>
                     <div class="head-row">
-                        <h2 class="section-title" style="margin-bottom:0">Kabar &amp; jadwal pesantren hari ini.</h2>
-                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                        <h2 class="section-title">Kabar &amp; jadwal pesantren hari ini.</h2>
+                        <div class="head-actions">
                             <span class="ih-date"><i class="fa-regular fa-calendar"></i> {{ now()->locale('id')->translatedFormat('l, d F Y') }}</span>
                             <a href="{{ route('info-harian.index') }}" class="btn btn-outline">Semua Info <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                         </div>
@@ -899,7 +970,7 @@
                 <div class="container">
                     <div class="eyebrow">Struktur Organisasi</div>
                     <div class="head-row">
-                        <h2 class="section-title" style="margin-bottom:0">Pengurus &amp; pengasuh pesantren.</h2>
+                        <h2 class="section-title">Pengurus &amp; pengasuh pesantren.</h2>
                         <a href="{{ route('profil.struktur-organisasi') }}" class="btn btn-outline">Lihat Struktur Lengkap <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                     </div>
                     <div class="org-grid">
@@ -934,10 +1005,10 @@
                     <a href="{{ route('jenjang.show', 'pdf-ulya') }}" class="level"><div class="top"><span>Diniyah Formal</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>PDF ULYA</h3><div class="sub">Pendidikan Diniyah Formal</div><p>Penguasaan ilmu syariah dan tradisi keilmuan tingkat lanjutan.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 3 tahun</div></a>
                     <a href="{{ route('jenjang.show', 'mahad-aly') }}" class="level"><div class="top"><span>Pendidikan Tinggi</span><i class="fa-solid fa-arrow-up-right-from-square"></i></div><h3>MA'HAD 'ALY</h3><div class="sub">Pendidikan Tinggi Pesantren</div><p>Mengkaji fikih dan usul fikih untuk calon kader ulama.</p><div class="dur"><i class="fa-regular fa-clock"></i>Program 4 tahun</div></a>
                     <div class="level-cta">
-                        <i class="fa-regular fa-comments" style="font-size:22px"></i>
+                        <i class="fa-regular fa-comments"></i>
                         <h3>Masih mencari jenjang yang tepat?</h3>
                         <p>Tim kami siap mendampingi Anda memilih program.</p>
-                        <a href="#kontak" class="btn btn-light" style="align-self:flex-start">Konsultasi <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                        <a href="#kontak" class="btn btn-light">Konsultasi <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                     </div>
                 </div>
             </div>
@@ -948,7 +1019,7 @@
             <div class="container">
                 <div class="eyebrow">Berita &amp; Pengumuman</div>
                 <div class="head-row">
-                    <h2 class="section-title" style="margin-bottom:0">Kabar terbaru dari pesantren.</h2>
+                    <h2 class="section-title">Kabar terbaru dari pesantren.</h2>
                     <a href="{{ route('berita.index') }}" class="btn btn-outline">Semua Berita <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                 </div>
 
@@ -978,7 +1049,7 @@
             <div class="container">
                 <div class="eyebrow">Galeri Foto &amp; Video Santri</div>
                 <div class="head-row">
-                    <h2 class="section-title" style="margin-bottom:0">Momen sederhana, kenangan berharga.</h2>
+                    <h2 class="section-title">Momen sederhana, kenangan berharga.</h2>
                     <a href="{{ route('galeri') }}" class="btn btn-outline">Jelajahi Galeri <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                 </div>
                 @if ($galeriBeranda->isNotEmpty())
@@ -1128,33 +1199,34 @@
         @endif
 
         {{-- FASILITAS PESANTREN --}}
-        <section class="py-14 sm:py-20 bg-slate-50">
+        <section class="fac" id="fasilitas">
             <div class="container">
-                <div class="eyebrow light">Fasilitas</div>
-                <h2 class="text-2xl font-black text-slate-900 mb-6">Fasilitas Pesantren</h2>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md transition">
-                        <div class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center mb-3">
-                            <i class="fa-solid fa-building-column"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">Gedung Pembelajaran</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">Gedung berkaca dua lantai dilengkapi kursi majelis, papan tulis putih, dan sistem audiovisual.</p>
-                    </div>
-                    <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md transition">
-                        <div class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center mb-3">
-                            <i class="fa-solid fa-user-group"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">Asrama Santri</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">Asrama terpisah untuk santri putra dan putri dengan fasilitas tidur dan area studi.</p>
-                    </div>
-                    <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md transition">
-                        <div class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center mb-3">
-                            <i class="fa-solid fa-mosque"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">Masjid</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">Masjid utama dengan kubah indah untuk shalat jamaah lima waktu dan hari raya.</p>
-                    </div>
+                <div class="eyebrow">Fasilitas</div>
+                <div class="head-row">
+                    <h2 class="section-title">Sarana belajar &amp; hidup santri.</h2>
+                    <a href="{{ route('profil.fasilitas') }}" class="btn btn-outline">Lihat semua fasilitas
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                 </div>
+
+                @php
+                    $ikonFasilitas = ['fa-building-columns', 'fa-bed', 'fa-mosque'];
+                @endphp
+
+                @if ($fasilitasBeranda->isEmpty())
+                    <p class="fac-empty">Belum ada fasilitas yang ditampilkan.</p>
+                @else
+                    <div class="fac-grid">
+                        @foreach ($fasilitasBeranda as $f)
+                            <a href="{{ route('profil.fasilitas') }}" class="fac-card">
+                                <span class="fac-ico"><i
+                                        class="fa-solid {{ $ikonFasilitas[$loop->index % count($ikonFasilitas)] }}"></i></span>
+                                <h3>{{ $f['title'] ?: 'Fasilitas ' . $loop->iteration }}</h3>
+                                <p>{{ \Illuminate\Support\Str::limit($f['desc'] ?: 'Sarana pendukung kegiatan belajar dan kehidupan santri di pesantren.', 130) }}</p>
+                                <span class="fac-more">Selengkapnya <i class="fa-solid fa-arrow-right"></i></span>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </section>
 
@@ -1168,9 +1240,9 @@
                         <p class="txt">Mari bertumbuh bersama keluarga Babul Hasanah. Pendaftaran terbuka untuk santri putra dan putri melalui seleksi sesuai jenjang pendidikan.</p>
                         <div class="btns">
                             <a href="{{ route('pendaftaran.index') }}" class="btn btn-light">Daftar Online Sekarang <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
-                            <a href="https://wa.me/" target="_blank" rel="noopener" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.3)"><i class="fa-brands fa-whatsapp"></i> Hubungi Panitia</a>
+                            <a href="https://wa.me/6281234567890" target="_blank" rel="noopener" class="btn btn-ghost-light"><i class="fa-brands fa-whatsapp"></i> Hubungi Panitia</a>
                         </div>
-                        <div class="period"><i class="fa-regular fa-calendar"></i> Isi periode pendaftaran di sini</div>
+                        <div class="period"><i class="fa-regular fa-calendar"></i> Informasi gelombang pendaftaran diumumkan melalui website dan WhatsApp resmi.</div>
                     </div>
                     <div>
                         <div class="steps-title">Tiga langkah menjadi santri</div>
@@ -1189,18 +1261,18 @@
                     <div class="eyebrow">Kontak</div>
                     <h2>Sapa kami.<br>Mari bersilaturahmi.</h2>
                     <p class="desc">Punya pertanyaan tentang pendidikan atau kehidupan di pesantren? Kami senang membantu Anda.</p>
-                    <a href="https://wa.me/" target="_blank" rel="noopener" class="btn btn-primary">Hubungi via WhatsApp <i class="fa-brands fa-whatsapp"></i></a>
+                    <a href="https://wa.me/6281234567890" target="_blank" rel="noopener" class="btn btn-primary">Hubungi via WhatsApp <i class="fa-brands fa-whatsapp"></i></a>
                 </div>
                 <div class="contact-info">
                     <div class="row">
                         <i class="fa-solid fa-location-dot"></i>
-                        <div><strong>Kunjungi pesantren</strong><p>Ganti dengan alamat lengkap pesantren,<br>Kabupaten Padang Lawas, Sumatera Utara</p></div>
+                        <div><strong>Kunjungi pesantren</strong><p>Jl. Lintas Pinarik&ndash;Papaso Km. 14,<br>Desa Manggis, Kec. Batang Lubu Sutam,<br>Kabupaten Padang Lawas, Sumatera Utara 22763</p></div>
                     </div>
                     <div class="contact-two">
-                        <div><small>Telepon / WhatsApp</small><b>+62 xxx-xxxx-xxxx</b></div>
-                        <div><small>Email sekretariat</small><b>info@babulhasanah.example</b></div>
+                        <div><small>Telepon / WhatsApp</small><b>+62 812-3456-7890</b></div>
+                        <div><small>Email sekretariat</small><b>info@babulhasanah.sch.id</b></div>
                     </div>
-                    <div class="hours"><i class="fa-regular fa-clock"></i>Layanan sekretariat: Senin–Sabtu, 08.00–15.00 WIB</div>
+                    <div class="hours"><i class="fa-regular fa-clock"></i>Layanan sekretariat: Senin&ndash;Sabtu, 08.00&ndash;15.00 WIB</div>
                 </div>
             </div>
         </section>
@@ -1210,13 +1282,15 @@
             <div class="container">
                 <div class="map-wrap">
                     <iframe title="Lokasi Pondok Pesantren Babul Hasanah"
-                        src="https://www.google.com/maps?q=Padang+Lawas,+Sumatera+Utara&output=embed"
+                        src="https://www.google.com/maps?q=Manggis,+Kec.+Batang+Lubu+Sutam,+Kabupaten+Padang+Lawas,+Sumatera+Utara&output=embed"
                         loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
                     <div class="map-card">
                         <div class="eyebrow">Lokasi Kami</div>
                         <h3>Pondok Pesantren Babul Hasanah</h3>
-                        <p>Desa Manggis, Kecamatan Batang Lubu Sutam</p>
-                        <a href="<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63829.14841326984!2d99.89939928887301!3d0.9039505394392833!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x302b75242b5bb17b%3A0x1d2fda5ca1b8d418!2sManggis%2C%20Kec.%20Batang%20Lubu%20Sutam%2C%20Kabupaten%20Padang%20Lawas%2C%20Sumatera%20Utara!5e0!3m2!1sid!2sid!4v1795352249347!5m2!1sid!2sid" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe> <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                        <p>Desa Manggis, Kecamatan Batang Lubu Sutam, Kabupaten Padang Lawas.</p>
+                        <a href="https://www.google.com/maps/search/?api=1&query=Pondok+Pesantren+Babul+Hasanah+Manggis+Batang+Lubu+Sutam"
+                            target="_blank" rel="noopener noreferrer" class="link-more">Buka di Google Maps
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                     </div>
                 </div>
             </div>
@@ -1231,7 +1305,7 @@
             const revealEls = document.querySelectorAll(
                 '.dh .hero2 .container > *, .dh .stats .container > *, .dh .profile-grid > *, .dh .feature, ' +
                 '.dh .program-card, .dh .news-card, .dh .level, .dh .org-card, .dh .ih-card, .dh .ih-today, .dh .g-item, .dh .achv-card, ' +
-                '.dh .psb-box > *, .dh .contact .container > *'
+                '.dh .fac-card, .dh .psb-box > *, .dh .contact .container > *'
             );
             const revealObs = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {

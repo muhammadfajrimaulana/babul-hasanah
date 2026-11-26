@@ -6,6 +6,32 @@
 
 @include('pages.partials.profil-dokumen-style')
 
+<style>
+    /* ====== Selaras dengan halaman Sejarah: lebar penuh & rata kiri ====== */
+    .pd-wide .pd-wrap { width: 100%; max-width: none; padding-inline: clamp(18px, 4vw, 64px); }
+    .pd-wide .pd-hero-inner { max-width: 1040px; margin-left: 0; margin-right: auto; text-align: left; }
+    .pd-wide .pd-crumb { justify-content: flex-start; }
+    .pd-wide .pd-hero h1 { margin-left: 0; margin-right: auto; }
+    .pd-wide .pd-hero p { margin-left: 0; margin-right: auto; }
+    .pd-wide .pd-nav { justify-content: flex-start; }
+    .pd-wide section[id] { scroll-margin-top: 100px; }
+
+    /* Ritme dan lebar bagian dibuat seragam */
+    .pd-section-wrap { padding: 64px 0; }
+    .pd-head { max-width: 760px; }
+    .pd-visi-wrap { gap: 48px; }
+    .pd-numbered { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .pd-feature-grid { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+
+    /* BAB V memakai latar dokumen seperti halaman Sejarah (lihat partial bersama) */
+
+    @media (max-width: 860px) {
+        .pd-hero { padding: 32px 0 48px; }
+        .pd-section-wrap, .pd-doc-area, .pd-motto { padding: 48px 0; }
+        .pd-doc-area .pd-doc { border-radius: 18px; }
+    }
+</style>
+
 @php
     $konten = \App\Models\Konten::allWithDefaults();
     $kv = fn (string $key, string $default = '') => $konten[$key] ?? $default;
@@ -36,6 +62,8 @@
     $heroAccent = $kv('visi_page_hero_title_accent', 'langkah yang nyata.');
     $heroDesc = $kv('visi_page_hero_desc', 'Landasan kami dalam membangun generasi unggul, berilmu, dan berakhlak mulia: dari visi, misi, hingga nilai yang kami tanamkan setiap hari.');
 
+    $visiHeading = $kv('visi_page_visi_heading', 'Arah yang kami tuju bersama');
+    $visiDesc = $kv('visi_page_visi_desc', 'Visi menjadi kompas seluruh kegiatan pendidikan, pembinaan, dan pengabdian di Babul Hasanah.');
     $visi = $kv('visi_page_visi', 'Membangun Generasi Unggul dalam Penguasaan Kitab Kuning, Berakhlak Mulia, dan Berwawasan Luas.');
 
     $misiHeading = $kv('visi_page_misi_heading', 'Misi pondok pesantren');
@@ -55,13 +83,14 @@
 
     $bab5Title = $kv('visi_page_bab5_title', 'BAB V. VISI, HARAPAN, DAN KEBERLANJUTAN');
     $bab5Body = $kv('visi_page_bab5_body', "Pondok Pesantren Babul Hasanah diharapkan terus berkembang sebagai lembaga pendidikan Islam yang berpegang teguh pada nilai-nilai Al-Qur’an dan sunah, menghormati tradisi keilmuan ulama, serta terbuka terhadap perkembangan pendidikan yang membawa manfaat.\n\nSemangat pendirian pada tahun 1997 perlu menjadi landasan untuk melanjutkan perjuangan pendidikan bagi generasi berikutnya. Pengembangan lembaga hendaknya memperhatikan peningkatan kualitas pembelajaran, kompetensi guru, pembinaan karakter santri, penguatan kajian kitab kuning, penyediaan sarana pendidikan, serta pemanfaatan teknologi secara bertanggung jawab.\n\nPengembangan teknologi tidak harus menghilangkan tradisi pesantren. Sebaliknya, teknologi dapat dimanfaatkan untuk memperluas akses terhadap sumber belajar, mengelola administrasi, mendokumentasikan karya dan kegiatan santri, serta menjaga arsip sejarah lembaga. Pemanfaatannya tetap perlu disertai adab, etika, dan bimbingan guru.\n\nHarapan tersebut sejalan dengan cita-cita membangun generasi yang tidak hanya memiliki kecakapan intelektual, tetapi juga kematangan spiritual, kemuliaan akhlak, dan kepedulian sosial.");
+    $bab5Paras = array_values(array_filter(array_map('trim', preg_split('/\R+/', $bab5Body))));
 
     $mottoLabel = $kv('visi_page_motto_label', 'Motto Pesantren');
     $motto = $kv('visi_page_motto', '“Berilmu, Beramal,');
     $mottoAccent = $kv('visi_page_motto_accent', 'Berakhlak Mulia”');
 @endphp
 
-<div class="pd-page">
+<div class="pd-page pd-wide">
 
     {{-- ============ HERO ============ --}}
     @if ($visible['hero'] ?? true)
@@ -99,9 +128,8 @@
                 <div class="pd-visi-wrap">
                     <div class="pd-visi-copy">
                         <div class="pd-eyebrow">Visi Pesantren</div>
-                        <h2>Arah yang kami tuju bersama</h2>
-                        <p>Visi menjadi kompas seluruh kegiatan pendidikan, pembinaan, dan pengabdian di Babul
-                            Hasanah.</p>
+                        <h2>{{ $visiHeading }}</h2>
+                        <p>{{ $visiDesc }}</p>
                     </div>
 
                     <div class="pd-visi-card pd-rv">
@@ -163,12 +191,17 @@
 
     {{-- ============ BAB V ============ --}}
     @if ($visible['bab5'] ?? true)
-        <section class="pd-section-wrap" id="bab5">
+        <section class="pd-doc-area" id="bab5">
             <div class="pd-wrap">
-                <article class="pd-doc">
+                <article class="pd-doc pd-rv">
                     <div class="pd-chapter">
+                        <div class="pd-eyebrow">Penutup</div>
                         <h2 class="pd-chapter-title">{{ $bab5Title }}</h2>
-                        <div class="pd-prose">{!! nl2br(e($bab5Body)) !!}</div>
+                        <div class="pd-prose">
+                            @foreach ($bab5Paras as $paragraf)
+                                <p>{{ $paragraf }}</p>
+                            @endforeach
+                        </div>
                     </div>
                 </article>
             </div>

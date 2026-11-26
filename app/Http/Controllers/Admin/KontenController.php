@@ -49,23 +49,11 @@ class KontenController extends Controller
         $captionItem = $stored->get('sejarah_foto_caption');
         $caption = $captionItem ? $captionItem->value : (Konten::DEFAULTS['sejarah_foto_caption'] ?? '');
 
-        // Foto fasilitas: pakai data baru, lalu cadangan data lama (JSON).
-        $legacyFasilitas = json_decode((string) ($stored->get('fasilitas_photos')->value ?? '[]'), true);
-        $legacyFasilitas = is_array($legacyFasilitas) ? array_values($legacyFasilitas) : [];
+        // Kartu fasilitas (bisa ditambah / dihapus dari admin).
+        $fasilitasCards = Konten::fasilitasCards();
+        $fasilitasNext = ($fasilitasCards ? max(array_column($fasilitasCards, 'index')) : 0) + 1;
 
-        $fasilitasFoto = [];
-        for ($i = 1; $i <= 4; $i++) {
-            $item = $stored->get("fasilitas_{$i}_foto");
-            $path = $item ? (string) $item->value : '';
-
-            if ($path === '' && isset($legacyFasilitas[$i - 1])) {
-                $path = (string) $legacyFasilitas[$i - 1];
-            }
-
-            $fasilitasFoto[$i] = $path;
-        }
-
-        return view('dashboard.konten.index', compact('rows', 'foto', 'caption', 'fasilitasFoto'));
+        return view('dashboard.konten.index', compact('rows', 'foto', 'caption', 'fasilitasCards', 'fasilitasNext'));
     }
 
     public function updateProfil(Request $request)
@@ -81,6 +69,45 @@ class KontenController extends Controller
             return redirect()->back()->with('success', 'Konten berhasil dihapus / dikembalikan ke nilai bawaan.');
         }
 
+        // Tombol "Hapus" pada tiap bagian mengirim daftar key (dipisah koma).
+        $deleteKeys = (string) $request->input('delete_keys', '');
+
+        if ($deleteKeys !== '') {
+            foreach (array_filter(array_map('trim', explode(',', $deleteKeys))) as $key) {
+                if (preg_match('/^[a-z0-9_]+$/', $key)) {
+                    Konten::where('key', $key)->delete();
+                }
+            }
+
+            return redirect()->back()->with('success', 'Isi bagian berhasil dikembalikan ke nilai bawaan.');
+        }
+
+        // Tombol "Hapus" pada kartu fasilitas: kosongkan key + hapus fotonya.
+        $emptyKeys = (string) $request->input('empty_keys', '');
+
+        if ($emptyKeys !== '') {
+            foreach (array_filter(array_map('trim', explode(',', $emptyKeys))) as $key) {
+                if (! preg_match('/^[a-z0-9_]+$/', $key)) {
+                    continue;
+                }
+
+                if (str_ends_with($key, '_foto')) {
+                    $lama = Konten::getVal($key);
+
+                    if ($lama) {
+                        Storage::disk('public')->delete(preg_replace('#^storage/#', '', $lama));
+                    }
+                }
+
+                Konten::updateOrCreate(
+                    ['key' => $key],
+                    ['value' => '', 'type' => str_ends_with($key, '_foto') ? 'image' : 'text']
+                );
+            }
+
+            return redirect()->back()->with('success', 'Kartu fasilitas berhasil dihapus.');
+        }
+
         $rules = [
             'items' => ['required', 'array'],
             'items.*' => ['nullable', 'string', 'max:20000'],
@@ -89,7 +116,25 @@ class KontenController extends Controller
             'sejarah_foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ];
 
-        foreach (range(1, 4) as $i) {
+        // Nomor kartu fasilitas bisa bertambah dari admin, jadi aturan
+        // validasi foto dibuat mengikuti nomor yang benar-benar dikirim.
+        $fotoIndices = [];
+
+        foreach (array_keys((array) $request->input('items', [])) as $key) {
+            if (preg_match('/^fasilitas_(\d{1,3})_(title|desc)$/', (string) $key, $m)
+                && (int) $m[1] >= 1 && (int) $m[1] <= 60) {
+                $fotoIndices[(int) $m[1]] = true;
+            }
+        }
+
+        foreach (array_keys($request->allFiles()) as $key) {
+            if (preg_match('/^fasilitas_(\d{1,3})_foto$/', (string) $key, $m)
+                && (int) $m[1] >= 1 && (int) $m[1] <= 60) {
+                $fotoIndices[(int) $m[1]] = true;
+            }
+        }
+
+        foreach (array_keys($fotoIndices) as $i) {
             $rules["fasilitas_{$i}_foto"] = ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'];
         }
 
@@ -141,6 +186,22 @@ class KontenController extends Controller
             );
         }
 
+        // Tombol "Hapus foto" pada kartu foto sejarah / fasilitas.
+        $hapusFoto = (string) $request->input('delete_foto', '');
+
+        if ($hapusFoto !== '' && preg_match('/^(sejarah_foto|fasilitas_\d{1,3}_foto)$/', $hapusFoto)) {
+            $lama = Konten::getVal($hapusFoto);
+
+            if ($lama) {
+                Storage::disk('public')->delete(preg_replace('#^storage/#', '', $lama));
+            }
+
+            Konten::updateOrCreate(
+                ['key' => $hapusFoto],
+                ['value' => '', 'type' => 'image']
+            );
+        }
+
         if ($request->hasFile('sejarah_foto')) {
             $lama = Konten::getVal('sejarah_foto');
             if ($lama) {
@@ -154,8 +215,8 @@ class KontenController extends Controller
             );
         }
 
-        // Foto 4 fasilitas utama.
-        foreach (range(1, 4) as $i) {
+        // Foto kartu fasilitas (jumlah mengikuti kartu yang dikirim).
+        foreach (array_keys($fotoIndices) as $i) {
             $field = "fasilitas_{$i}_foto";
 
             if (! $request->hasFile($field)) {

@@ -78,6 +78,8 @@
 
     /* ====== Section umum ====== */
     .pd-section-wrap { padding: 60px 0; }
+    .pd-doc-area { padding: 64px 0; background: linear-gradient(180deg, #f7f5ef 0%, #fbfaf6 45%, #f7f5ef 100%); }
+    .pd-doc-area .pd-doc { max-width: none; }
     .pd-alt { background: var(--cream); }
     .pd-head { max-width: 680px; margin: 0 0 30px; }
     .pd-head h2 { margin: 0 0 10px; font-size: clamp(1.5rem, 2.6vw, 2.05rem); font-weight: 800; line-height: 1.3; letter-spacing: -.015em; color: var(--green); }

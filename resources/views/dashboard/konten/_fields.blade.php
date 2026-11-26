@@ -1,5 +1,5 @@
 @php
-    $listKeys = [
+    $listKeys = $listKeys ?? [
         'sejarah_pilar',
         'sejarah_budaya',
         'sejarah_motivasi',
@@ -88,7 +88,9 @@
                             .filter(row => row.replace(/\s*\|\s*/g, '') !== '')
                             .join('\n');
                     }
-                }" class="space-y-2">
+                }" data-kb-key="{{ $row['key'] }}"
+                    x-on:kb-add-row.window="if ($event.detail === $el.dataset.kbKey) add()"
+                    class="space-y-2">
                     <div x-show="items.length === 0"
                         class="rounded-lg border border-dashed border-slate-300 dark:border-slate-600 px-4 py-5 text-center text-[11px] text-slate-400">
                         Belum ada item. Klik tombol di bawah untuk menambah.

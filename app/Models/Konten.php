@@ -53,6 +53,7 @@ class Konten extends Model
         'sejarah_doc_intro' => 'Menelusuri perjalanan Pondok Pesantren Babul Hasanah sejak masa perintisan hingga tumbuh menjadi lembaga pendidikan Islam yang bersama masyarakat.',
         'sejarah_doc_year' => '1997',
         'sejarah_doc_year_caption' => 'Awal perintisan di Padang Lawas',
+        'sejarah_doc_note' => 'Sejak {tahun}, Babul Hasanah tumbuh bersama masyarakat sebagai rumah belajar Al-Qur’an, kitab kuning, dan pembinaan akhlak.',
         'sejarah_foto_caption' => 'Komplek Pondok Pesantren Babul Hasanah, tempat pendidikan dan pembinaan santri dari berbagai daerah.',
         'sejarah_bab1_a_title' => 'A. Latar Belakang Pendirian',
         'sejarah_bab1_a_body' => 'Pondok Pesantren Babul Hasanah lahir dari kepedulian terhadap pendidikan agama di tengah masyarakat Padang Lawas. Pada masa itu, akses pendidikan Islam yang terarah dan berkelanjutan masih terbatas. Anak-anak di sekitar lingkungan pesantren membutuhkan wadah untuk belajar membaca Al-Qur’an, memahami dasar-dasar ibadah, dan menanamkan akhlak mulia. Dari kebutuhan itulah para tokoh masyarakat dan keluarga besar pendiri berinisiatif menghadirkan majelis pendidikan yang sederhana namun berkelanjutan.',
@@ -75,11 +76,18 @@ class Konten extends Model
         'sejarah_bab3_c_title' => 'C. Sarana Pendidikan, Kehidupan Keagamaan, dan Kegiatan Santri',
         'sejarah_bab3_c_body' => 'Seiring waktu, sarana pendidikan dilengkapi untuk mendukung pembelajaran dan kehidupan santri. Kegiatan keagamaan seperti shalat berjamaah, pengajian, dan peringatan hari besar Islam menjadi bagian dari keseharian. Santri juga dibina melalui kegiatan ekstrakurikuler, latihan pidato, seni Islam, dan kegiatan sosial agar tumbuh mandiri serta peduli terhadap lingkungan.',
 
+        // Halaman Sejarah — ajakan pendaftaran
+        'sejarah_daftar_title' => 'Bergabung bersama Pondok Pesantren Babul Hasanah',
+        'sejarah_daftar_desc' => 'Pondok Pesantren Babul Hasanah membuka pendaftaran santri baru. Sejak perintisan pada tahun 1997, pesantren mendidik santri melalui kajian kitab kuning, pendidikan formal, dan pembinaan akhlak di lingkungan asrama.',
+        'sejarah_daftar_button' => 'Daftar Santri Baru',
+
         // Halaman Visi & Misi
         'visi_page_hero_eyebrow' => 'Pondok Pesantren Babul Hasanah',
         'visi_page_hero_title' => 'Cita-cita yang jelas,',
         'visi_page_hero_title_accent' => 'langkah yang nyata.',
         'visi_page_hero_desc' => 'Landasan kami dalam membangun generasi unggul, berilmu, dan berakhlak mulia: dari visi, misi, hingga nilai yang kami tanamkan setiap hari.',
+        'visi_page_visi_heading' => 'Arah yang kami tuju bersama',
+        'visi_page_visi_desc' => 'Visi menjadi kompas seluruh kegiatan pendidikan, pembinaan, dan pengabdian di Babul Hasanah.',
         'visi_page_visi' => 'Membangun Generasi Unggul dalam Penguasaan Kitab Kuning, Berakhlak Mulia, dan Berwawasan Luas.',
         'visi_page_misi_heading' => 'Misi pondok pesantren',
         'visi_page_misi_desc' => 'Untuk mewujudkan visi tersebut, kami menjalankan lima misi berikut dengan penuh komitmen.',
@@ -136,13 +144,6 @@ class Konten extends Model
         'pembelajaran_cta_desc' => 'Mulai langkah pertama menuju ilmu yang bermanfaat dan akhlak yang mulia.',
         'pembelajaran_cta_button' => 'Daftar online',
         'pembelajaran_cta_url' => '/pendaftaran',
-        'pembelajaran_bab4_title' => 'BAB IV. PERAN PONDOK PESANTREN BABUL HASANAH',
-        'pembelajaran_bab4_a_title' => 'A. Peran dalam Pendidikan Islam',
-        'pembelajaran_bab4_a_body' => 'Pondok Pesantren Babul Hasanah berperan menyelenggarakan pendidikan Islam yang berkelanjutan. Melalui kajian kitab kuning, pendidikan formal, dan pembinaan keagamaan, pesantren membantu santri memahami ajaran Islam secara bertahap. Pendidikan diarahkan agar santri tidak hanya mengetahui, tetapi juga mampu mengamalkan ilmu dalam kehidupan sehari-hari.',
-        'pembelajaran_bab4_b_title' => 'B. Peran dalam Pembinaan Akhlak dan Karakter',
-        'pembelajaran_bab4_b_body' => 'Pembinaan akhlak dan karakter menjadi bagian yang tidak terpisahkan dari pendidikan. Adab kepada guru, orang tua, dan sesama ditanamkan melalui keteladanan, pembiasaan, dan kegiatan harian. Pesantren berupaya membentuk santri yang disiplin, mandiri, jujur, dan bertanggung jawab.',
-        'pembelajaran_bab4_c_title' => 'C. Peran dalam Kehidupan Masyarakat',
-        'pembelajaran_bab4_c_body' => 'Pesantren juga hadir di tengah masyarakat melalui kegiatan keagamaan, sosial, dan pendidikan. Pengajian, kegiatan hari besar Islam, serta keterlibatan santri dalam kegiatan sosial menjadi wujud pengabdian. Kehadiran pesantren diharapkan memberi manfaat dan mempererat hubungan dengan masyarakat sekitar.',
     ];
 
     /** Susunan section bawaan tiap halaman (untuk fitur ubah tata letak). */
@@ -167,7 +168,6 @@ class Konten extends Model
             ['id' => 'kajian', 'label' => 'Kajian & Kitab'],
             ['id' => 'jenjang', 'label' => 'Jenjang Pendidikan'],
             ['id' => 'metode', 'label' => 'Metode Pembelajaran'],
-            ['id' => 'bab4', 'label' => 'BAB IV — Peran Pesantren'],
             ['id' => 'cta', 'label' => 'Ajakan / CTA'],
         ],
         'fasilitas' => [
@@ -187,6 +187,7 @@ class Konten extends Model
         'sejarah_doc_intro' => ['label' => 'Deskripsi pembuka', 'group' => 'Sejarah'],
         'sejarah_doc_year' => ['label' => 'Tahun perintisan', 'group' => 'Sejarah'],
         'sejarah_doc_year_caption' => ['label' => 'Keterangan tahun', 'group' => 'Sejarah'],
+        'sejarah_doc_note' => ['label' => 'Catatan pengantar (di atas Daftar Isi)', 'group' => 'Sejarah'],
         'sejarah_bab1_a_title' => ['label' => 'BAB I A — judul', 'group' => 'Sejarah'],
         'sejarah_bab1_a_body' => ['label' => 'BAB I A — isi', 'group' => 'Sejarah'],
         'sejarah_bab1_b_title' => ['label' => 'BAB I B — judul', 'group' => 'Sejarah'],
@@ -207,12 +208,17 @@ class Konten extends Model
         'sejarah_bab3_b_body' => ['label' => 'BAB III B — isi', 'group' => 'Sejarah'],
         'sejarah_bab3_c_title' => ['label' => 'BAB III C — judul', 'group' => 'Sejarah'],
         'sejarah_bab3_c_body' => ['label' => 'BAB III C — isi', 'group' => 'Sejarah'],
+        'sejarah_daftar_title' => ['label' => 'Pendaftaran — judul', 'group' => 'Sejarah'],
+        'sejarah_daftar_desc' => ['label' => 'Pendaftaran — deskripsi', 'group' => 'Sejarah'],
+        'sejarah_daftar_button' => ['label' => 'Pendaftaran — teks tombol', 'group' => 'Sejarah'],
 
         // Halaman Visi & Misi
         'visi_page_hero_eyebrow' => ['label' => 'Label kecil di atas judul', 'group' => 'Visi & Misi'],
         'visi_page_hero_title' => ['label' => 'Judul pembuka — baris 1', 'group' => 'Visi & Misi'],
         'visi_page_hero_title_accent' => ['label' => 'Judul pembuka — baris 2 (emas)', 'group' => 'Visi & Misi'],
         'visi_page_hero_desc' => ['label' => 'Deskripsi pembuka', 'group' => 'Visi & Misi'],
+        'visi_page_visi_heading' => ['label' => 'Visi — judul bagian', 'group' => 'Visi & Misi'],
+        'visi_page_visi_desc' => ['label' => 'Visi — deskripsi', 'group' => 'Visi & Misi'],
         'visi_page_visi' => ['label' => 'Teks visi', 'group' => 'Visi & Misi'],
         'visi_page_misi_heading' => ['label' => 'Judul bagian misi', 'group' => 'Visi & Misi'],
         'visi_page_misi_desc' => ['label' => 'Deskripsi misi', 'group' => 'Visi & Misi'],
@@ -252,29 +258,14 @@ class Konten extends Model
         'pembelajaran_metode_heading' => ['label' => 'Metode — judul bagian', 'group' => 'Pembelajaran'],
         'pembelajaran_metode_desc' => ['label' => 'Metode — deskripsi', 'group' => 'Pembelajaran'],
         'pembelajaran_metode' => ['label' => 'Metode — kartu penjelasan', 'group' => 'Pembelajaran'],
-        'pembelajaran_bab4_title' => ['label' => 'Judul BAB IV', 'group' => 'Pembelajaran'],
-        'pembelajaran_bab4_a_title' => ['label' => 'BAB IV A — judul', 'group' => 'Pembelajaran'],
-        'pembelajaran_bab4_a_body' => ['label' => 'BAB IV A — isi', 'group' => 'Pembelajaran'],
-        'pembelajaran_bab4_b_title' => ['label' => 'BAB IV B — judul', 'group' => 'Pembelajaran'],
-        'pembelajaran_bab4_b_body' => ['label' => 'BAB IV B — isi', 'group' => 'Pembelajaran'],
-        'pembelajaran_bab4_c_title' => ['label' => 'BAB IV C — judul', 'group' => 'Pembelajaran'],
-        'pembelajaran_bab4_c_body' => ['label' => 'BAB IV C — isi', 'group' => 'Pembelajaran'],
         'pembelajaran_cta_title' => ['label' => 'Ajakan — judul', 'group' => 'Pembelajaran'],
         'pembelajaran_cta_desc' => ['label' => 'Ajakan — deskripsi', 'group' => 'Pembelajaran'],
         'pembelajaran_cta_button' => ['label' => 'Ajakan — teks tombol', 'group' => 'Pembelajaran'],
         'pembelajaran_cta_url' => ['label' => 'Ajakan — tautan tombol', 'group' => 'Pembelajaran'],
 
-        // Halaman Fasilitas
+        // Halaman Fasilitas (kartu dikelola terpisah, jumlahnya bisa bertambah)
         'fasilitas_heading' => ['label' => 'Judul halaman', 'group' => 'Fasilitas'],
         'fasilitas_desc' => ['label' => 'Deskripsi pembuka', 'group' => 'Fasilitas'],
-        'fasilitas_1_title' => ['label' => 'Fasilitas 1 — judul', 'group' => 'Fasilitas'],
-        'fasilitas_1_desc' => ['label' => 'Fasilitas 1 — keterangan', 'group' => 'Fasilitas'],
-        'fasilitas_2_title' => ['label' => 'Fasilitas 2 — judul', 'group' => 'Fasilitas'],
-        'fasilitas_2_desc' => ['label' => 'Fasilitas 2 — keterangan', 'group' => 'Fasilitas'],
-        'fasilitas_3_title' => ['label' => 'Fasilitas 3 — judul', 'group' => 'Fasilitas'],
-        'fasilitas_3_desc' => ['label' => 'Fasilitas 3 — keterangan', 'group' => 'Fasilitas'],
-        'fasilitas_4_title' => ['label' => 'Fasilitas 4 — judul', 'group' => 'Fasilitas'],
-        'fasilitas_4_desc' => ['label' => 'Fasilitas 4 — keterangan', 'group' => 'Fasilitas'],
     ];
 
     // Helper cepat untuk ambil nilai konten berdasarkan key
@@ -291,6 +282,58 @@ class Konten extends Model
         return array_merge(self::DEFAULTS, self::query()->pluck('value', 'key')->all());
     }
 
+    /**
+     * Daftar kartu fasilitas yang sedang aktif.
+     * Kartu memakai key fasilitas_{nomor}_title / _desc / _foto sehingga
+     * admin bisa menambah atau menghapus kartu kapan saja.
+     */
+    public static function fasilitasCards(): array
+    {
+        $all = self::allWithDefaults();
+
+        // Cadangan foto dari data lama (format JSON).
+        $legacy = json_decode((string) ($all['fasilitas_photos'] ?? '[]'), true);
+        $legacy = is_array($legacy) ? array_values($legacy) : [];
+
+        $max = 0;
+        foreach (array_keys($all) as $key) {
+            if (preg_match('/^fasilitas_(\d{1,3})_(title|desc|foto)$/', (string) $key, $m)
+                && trim((string) $all[$key]) !== '') {
+                $max = max($max, (int) $m[1]);
+            }
+        }
+
+        $cards = [];
+
+        for ($i = 1; $i <= $max; $i++) {
+            $title = trim((string) ($all["fasilitas_{$i}_title"] ?? ''));
+            $desc = trim((string) ($all["fasilitas_{$i}_desc"] ?? ''));
+            $fotoKey = "fasilitas_{$i}_foto";
+            $foto = trim((string) ($all[$fotoKey] ?? ''));
+
+            // Foto lama hanya dipakai bila key foto belum pernah disimpan,
+            // supaya foto yang sengaja dihapus admin tidak muncul lagi.
+            if (! array_key_exists($fotoKey, $all)
+                && ($title !== '' || $desc !== '')
+                && isset($legacy[$i - 1])) {
+                $foto = trim((string) $legacy[$i - 1]);
+            }
+
+            if ($title === '' && $desc === '' && $foto === '') {
+                continue;
+            }
+
+            $cards[] = [
+                'index' => $i,
+                'title' => $title,
+                'desc' => $desc,
+                'foto' => $foto,
+            ];
+        }
+
+        return $cards;
+    }
+
     /** Sub-bagian tampilan admin berdasarkan prefix key. */
     public static function sectionFor(string $key): string
     {
@@ -298,11 +341,16 @@ class Konten extends Model
             return 'Visi';
         }
 
+        if (str_starts_with($key, 'sejarah_doc_note')) {
+            return 'Daftar Isi';
+        }
+
         $prefixes = [
             'sejarah_doc_' => 'Hero',
             'sejarah_bab1_' => 'BAB I',
             'sejarah_bab2_' => 'BAB II',
             'sejarah_bab3_' => 'BAB III',
+            'sejarah_daftar_' => 'Pendaftaran',
             'sejarah_hero_' => 'Hero',
             'sejarah_budaya_' => 'Budaya',
             'sejarah_kajian_' => 'Kajian',
@@ -319,7 +367,6 @@ class Konten extends Model
             'pembelajaran_diniyah_' => 'Jenjang',
             'pembelajaran_madrasah_' => 'Jenjang',
             'pembelajaran_metode_' => 'Metode',
-            'pembelajaran_bab4_' => 'BAB IV',
             'pembelajaran_cta_' => 'CTA',
             'fasilitas_' => 'Fasilitas',
         ];
