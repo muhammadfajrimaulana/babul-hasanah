@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\GambarPublik;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -65,16 +66,27 @@ class Berita extends Model
 
     public function getGambarUrlAttribute(): string
     {
-        if ($this->gambar) {
-            return asset('storage/' . $this->gambar);
+        $tersimpan = GambarPublik::dariStorage($this->gambar);
+        if ($tersimpan) {
+            return $tersimpan;
         }
 
-        // Fallback: pakai gambar pertama yang disisipkan di dalam isi berita.
+        // Fallback: gambar pertama yang disisipkan di dalam isi berita.
         if (preg_match('/<img[^>]+src\s*=\s*["\']([^"\']+)["\']/i', (string) $this->isi, $cocok)) {
-            return $cocok[1];
+            $sisipan = trim($cocok[1]);
+
+            // URL eksternal dari editor tetap dipakai; berkas lokal divalidasi dulu.
+            if (! str_contains($sisipan, '/storage/')) {
+                return $sisipan;
+            }
+
+            $valid = GambarPublik::dariStorage($sisipan);
+            if ($valid) {
+                return $valid;
+            }
         }
 
-        return asset('assets/img/banner/banner.png');
+        return asset(GambarPublik::FALLBACK_BANNER);
     }
 
     public function getRingkasanOtomatisAttribute(): string

@@ -11,6 +11,15 @@ return new class extends Migration {
             return;
         }
 
+        // SQLite menolak drop kolom yang masih dipakai indeks UNIQUE.
+        // MySQL menghapus indeks itu otomatis, jadi pemeriksaan ini aman
+        // untuk kedua driver dan membuat RefreshDatabase bisa dijalankan.
+        if (Schema::hasIndex('pendaftaran_online', ['nik'], 'unique')) {
+            Schema::table('pendaftaran_online', function (Blueprint $table) {
+                $table->dropUnique(['nik']);
+            });
+        }
+
         Schema::table('pendaftaran_online', function (Blueprint $table) {
             // Hapus kolom 'nik' yang lama karena diganti menjadi nik_santri
             $table->dropColumn('nik');

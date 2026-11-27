@@ -674,90 +674,12 @@
         }
     </style>
 
+    {{-- Data dinamis (berita, pengurus, info harian, statistik, galeri, prestasi,
+         testimoni, fasilitas) kini disiapkan di Public\HomeController@index.
+         Blade ini hanya menampilkan variabel yang sudah dikirim controller. --}}
     @php
-        // ----- Data dinamis dari database -----
-        $beritaTerbaru = \App\Models\Berita::published()->terbaru()->take(3)->get();
+        // Warna placeholder kartu murni presentasi, jadi tetap di sini.
         $warna = ['', 'c', 'd'];
-
-        // Kolom diasumsikan: nama, jabatan, foto. Sesuaikan jika berbeda di model StrukturOrganisasi.
-        $pengurus = \App\Models\StrukturOrganisasi::where('aktif', 1)
-            ->where('kategori', 'bagan')
-            ->orderBy('urutan')->orderBy('id')
-            ->take(4)->get();
-
-        // INFO HARIAN: konten section "Kabar & jadwal pesantren hari ini", dikelola lewat
-        // dashboard super admin (menu Pengelolaan > Info Harian).
-        // Guard hasTable membuat beranda tetap tampil selama migrasi info_harian belum dijalankan.
-        $infoHarian = collect();
-        $jadwalHariIni = collect();
-
-        if (\Illuminate\Support\Facades\Schema::hasTable('info_harian')) {
-            $infoHarian = \App\Models\InfoHarian::info()->aktif()->berlaku()->sudahTerbit()
-                ->orderByDesc('penting')->orderByDesc('tanggal')->orderByDesc('id')
-                ->take(4)->get();
-
-            $jadwalHariIni = \App\Models\InfoHarian::jadwal()->aktif()->berlaku()
-                ->orderBy('jam')->orderBy('urutan')->orderBy('id')->get();
-        }
-
-        $teksInfo = $infoHarian->where('penting', true)->pluck('judul')->implode('   •   ');
-
-        // ----- Angka statistik section "Bersama Babul Hasanah" (dihitung langsung dari data admin) -----
-        $jumlahSantri   = \Illuminate\Support\Facades\Schema::hasTable('santri')
-            ? \App\Models\Santri::count() : 0;
-        $jumlahPrestasi = \Illuminate\Support\Facades\Schema::hasTable('prestasi_santri')
-            ? \App\Models\PrestasiSantri::count() : 0;
-        $jumlahBerita   = \Illuminate\Support\Facades\Schema::hasTable('berita')
-            ? \App\Models\Berita::published()->count() : 0;
-        $jumlahAlumni   = \Illuminate\Support\Facades\Schema::hasTable('alumni')
-            ? \App\Models\Alumni::count() : 0;
-
-        // Prestasi: urutan sama dengan halaman /prestasi (tahun terbaru, juara 1-3 dulu, penghargaan di akhir)
-        $prestasiTerbaru = \App\Models\PrestasiSantri::query()
-            ->orderByDesc('tahun')
-            ->orderByRaw('peringkat = 0, peringkat')
-            ->orderByDesc('id')
-            ->take(3)->get();
-
-        // Galeri: ambil album terbaru (relasi `media` sama seperti di Public\GaleriController).
-        // Slot besar diprioritaskan untuk album yang memuat video, sisanya 2 album terbaru.
-        $albumTerbaru = \App\Models\Album::with('media')
-            ->orderByDesc('tanggal')->orderByDesc('id')->take(6)->get();
-        $albumUtama = $albumTerbaru->first(fn ($a) => $a->media->where('tipe', '!=', 'foto')->isNotEmpty())
-            ?? $albumTerbaru->first();
-        $albumLain = $albumTerbaru->reject(fn ($a) => $albumUtama && $a->id === $albumUtama->id)->take(2);
-        $galeriBeranda = $albumUtama ? collect([$albumUtama])->merge($albumLain) : collect();
-        $gambarDefault = asset('assets/img/banner/banner.png');
-
-        $sampulAlbum = function ($a) use ($gambarDefault) {
-            if ($a->sampul) {
-                return \Illuminate\Support\Facades\Storage::url($a->sampul);
-            }
-            $foto = $a->media->first(fn ($m) => $m->tipe === 'foto' && $m->path);
-            if ($foto) {
-                return \Illuminate\Support\Facades\Storage::url($foto->path);
-            }
-            $poster = $a->media->first(fn ($m) => ! empty($m->poster));
-            return $poster ? \Illuminate\Support\Facades\Storage::url($poster->poster) : $gambarDefault;
-        };
-
-        // Testimoni alumni: hanya data yang kolom testimoni-nya terisi (dikelola lewat
-        // dashboard admin Data Alumni). Section disembunyikan bila belum ada testimoni.
-        $testimoniAlumni = collect();
-        if (\Illuminate\Support\Facades\Schema::hasTable('alumni')) {
-            $testimoniAlumni = \App\Models\Alumni::query()
-                ->whereNotNull('testimoni')
-                ->where('testimoni', '<>', '')
-                ->orderByDesc('tahun_lulus')
-                ->orderBy('nama')
-                ->take(12)
-                ->get();
-        }
-
-        // Fasilitas unggulan di beranda (dikelola dari dashboard, maksimal 3 kartu).
-        $fasilitasBeranda = \Illuminate\Support\Facades\Schema::hasTable('konten')
-            ? collect(\App\Models\Konten::fasilitasCards())->take(3)
-            : collect();
     @endphp
 
     <div class="dh">

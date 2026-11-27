@@ -24,7 +24,7 @@
                 Modul Santri
             </span>
             <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">Tambah Santri Baru</h1>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Input data santri secara manual. Untuk banyak santri sekaligus, gunakan Import Excel.</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Input data santri secara manual. Untuk banyak santri sekaligus, gunakan Import CSV.</p>
         </div>
         <a href="{{ route('admin.santri.index') }}"
             class="self-start sm:self-center bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
@@ -67,6 +67,18 @@
                 </div>
 
                 <div>
+                    <label class="{{ $labelCls }}" for="jenis_kelamin">Jenis Kelamin</label>
+                    <select id="jenis_kelamin" name="jenis_kelamin" class="{{ $inputCls }}">
+                        <option value="">-- Belum diisi --</option>
+                        @foreach (\App\Models\Santri::JENIS_KELAMIN as $kode => $label)
+                            <option value="{{ $kode }}" @selected(old('jenis_kelamin') === $kode)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    <p class="{{ $hintCls }}">Dipakai untuk komposisi putra/putri pada dashboard.</p>
+                    @error('jenis_kelamin') <p class="{{ $errCls }}">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
                     <label class="{{ $labelCls }}" for="nomor_induk">Nomor Induk</label>
                     <input id="nomor_induk" type="text" name="nomor_induk" value="{{ old('nomor_induk') }}"
                         class="{{ $inputCls }} font-mono" placeholder="Kosongkan untuk otomatis">
@@ -104,6 +116,14 @@
                     <label class="{{ $labelCls }}" for="alamat">Alamat</label>
                     <textarea id="alamat" name="alamat" rows="3" class="{{ $inputCls }}"
                         placeholder="Alamat lengkap santri">{{ old('alamat') }}</textarea>
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="{{ $labelCls }}" for="email_santri">Email Santri (Login Alumni)</label>
+                    <input id="email_santri" type="email" name="email_santri" value="{{ old('email_santri') }}"
+                        class="{{ $inputCls }}" placeholder="email.santri@gmail.com">
+                    <p class="{{ $hintCls }}">Opsional. Isi email pribadi santri agar akun alumni dan kredensialnya dikirim ke email ini saat kelulusan. Harus berbeda dari email wali dan belum dipakai akun lain.</p>
+                    @error('email_santri') <p class="{{ $errCls }}">{{ $message }}</p> @enderror
                 </div>
             </div>
         </div>

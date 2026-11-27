@@ -1,11 +1,11 @@
 {{--
-    TEMPLATE BERSAMA untuk semua halaman program/jenjang.
-    Simpan di: resources/views/pages/program/_detail.blade.php
-    Dipanggil dari mdta.blade.php, mts.blade.php, dst. dengan @include('pages.program._detail', ['p' => $p])
-    Semua isi (teks, angka, nama) diatur di file masing-masing program, bukan di sini.
+    TEMPLATE BERSAMA untuk semua halaman jenjang.
+    Dipanggil dari mdta.blade.php, mts.blade.php, dst. dengan @include('pages.jenjang._detail', ['p' => $p]).
+    Isi ($p) disiapkan di Public\JenjangController@show dari App\Support\DataJenjang,
+    bukan ditulis ulang di masing-masing file Blade.
 --}}
 @php
-    $foto = fn ($f) => asset('images/program/' . $f);
+    $foto = fn ($f) => \App\Support\GambarPublik::banner($f);
 
     $semua = [
         ['mdta',       'MDTA',        'Madrasah Diniyah Takmiliyah'],
@@ -130,8 +130,8 @@
     <section class="sj-top">
         <div class="sj-wrap">
             <div class="sj-crumb">
-                <a href="{{ url('/') }}">Beranda</a> <i class="fa-solid fa-chevron-right" style="font-size:10px"></i>
-                Program <i class="fa-solid fa-chevron-right" style="font-size:10px"></i> {{ $p['kode'] }}
+                <a href="{{ route('home') }}">Beranda</a> <i class="fa-solid fa-chevron-right" style="font-size:10px"></i>
+                Jenjang <i class="fa-solid fa-chevron-right" style="font-size:10px"></i> {{ $p['kode'] }}
             </div>
             <span class="pg-kode"><i class="fa-solid {{ $p['ikon'] }}"></i> {{ $p['kode'] }}</span>
             <h1>{{ $p['nama'] }}</h1>
@@ -143,7 +143,7 @@
     <section>
         <div class="sj-wrap">
             <div class="sj-photo sj-banner">
-                <img src="{{ $foto($p['banner']) }}" alt="{{ $p['nama'] }}" onerror="this.remove()">
+                <img src="{{ $foto($p['banner']) }}" alt="{{ $p['nama'] }}">
                 <i class="fa-solid {{ $p['ikon'] }}"></i>
             </div>
 
@@ -217,7 +217,7 @@
             <div class="sj-narrow">
                 <div class="ketua">
                     <div class="sj-photo">
-                        <img src="{{ asset('images/pengurus/' . $p['ketua']['foto']) }}" alt="{{ $p['ketua']['nama'] }}" loading="lazy" onerror="this.remove()">
+                        <img src="{{ \App\Support\GambarPublik::ketua($p['ketua']['foto']) }}" alt="{{ $p['ketua']['nama'] }}" loading="lazy">
                         <i class="fa-solid fa-user-tie"></i>
                     </div>
                     <div>
@@ -236,9 +236,9 @@
             <div class="sj-head">
                 <h2>Jenjang dan program lainnya</h2>
             </div>
-            <nav class="lain" aria-label="Program lainnya">
+            <nav class="lain" aria-label="Jenjang lainnya">
                 @foreach ($semua as $s)
-                    <a href="{{ url('/program/' . $s[0]) }}" @if ($s[1] === $p['kode']) aria-current="page" @endif>
+                    <a href="{{ route('jenjang.show', $s[0]) }}" @if ($s[1] === $p['kode']) aria-current="page" @endif>
                         <b>{{ $s[1] }}</b><small>{{ $s[2] }}</small>
                     </a>
                 @endforeach
@@ -252,7 +252,7 @@
             <div class="sj-cta">
                 <h2>Tertarik mendaftar di {{ $p['kode'] }}?</h2>
                 <p>Daftarkan putra-putri Anda secara online, atau hubungi kami untuk informasi syarat dan biaya.</p>
-                <a href="{{ url('/pendaftaran') }}" class="sj-btn">Daftar online <i class="fa-solid fa-arrow-right"></i></a>
+                <a href="{{ route('pendaftaran.index') }}" class="sj-btn">Daftar online <i class="fa-solid fa-arrow-right"></i></a>
             </div>
         </div>
     </section>

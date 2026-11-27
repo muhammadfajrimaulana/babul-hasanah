@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Mail\PendaftaranMasukMail;
 use App\Models\PendaftaranOnline;
 use App\Models\User;
+use App\Support\KodeUnik;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 
 class PendaftaranOnlineController extends Controller
 {
@@ -31,6 +31,7 @@ class PendaftaranOnlineController extends Controller
             'no_hp_aktif' => ['required', 'string', 'regex:/^[0-9\+\-\s]+$/', 'max:16'],
             'alamat_domisili' => ['required', 'string', 'max:1000'],
             'email' => ['required', 'email', 'max:255'],
+            'email_santri' => ['required', 'email', 'max:255', 'different:email'],
             'nama_ortu_wali' => ['required', 'string', 'max:255'],
             'no_hp_ortu' => ['required', 'string', 'regex:/^[0-9\+\-\s]+$/', 'max:16'],
             'asal_sekolah' => ['required', 'string', 'max:255'],
@@ -38,6 +39,8 @@ class PendaftaranOnlineController extends Controller
             'tahun_lulus' => ['required', 'digits:4'],
             'nisn' => ['nullable', 'string', 'max:20'],
             'jenjang_tujuan' => ['required', 'in:'.implode(',', self::JENJANG)],
+            // Honeypot: kolom tersembunyi yang hanya diisi bot.
+            'website' => ['prohibited'],
         ], [
             'nama_lengkap.required' => 'Nama lengkap wajib diisi.',
             'tempat_tanggal_lahir.required' => 'Tempat tanggal lahir wajib diisi.',
@@ -45,6 +48,9 @@ class PendaftaranOnlineController extends Controller
             'alamat_domisili.required' => 'Alamat tinggal (domisili) wajib diisi.',
             'email.required' => 'Email orang tua/wali wajib diisi.',
             'email.email' => 'Format email orang tua/wali tidak valid.',
+            'email_santri.required' => 'Email santri wajib diisi untuk akun alumni kelak.',
+            'email_santri.email' => 'Format email santri tidak valid.',
+            'email_santri.different' => 'Email santri harus berbeda dengan email orang tua/wali.',
             'nama_ortu_wali.required' => 'Nama orang tua/wali wajib diisi.',
             'no_hp_ortu.required' => 'Nomor handphone orang tua wajib diisi.',
             'asal_sekolah.required' => 'Sekolah asal wajib diisi.',
@@ -53,6 +59,7 @@ class PendaftaranOnlineController extends Controller
             'tahun_lulus.digits' => 'Tahun lulus harus 4 angka, contoh: 2026.',
             'jenjang_tujuan.required' => 'Pilihan jenjang wajib dipilih.',
             'jenjang_tujuan.in' => 'Pilihan jenjang tidak valid.',
+            'website.prohibited' => 'Pengiriman formulir ditolak.',
         ]);
 
         if ($kolomHilang = PendaftaranOnline::kolomFormHilang()) {
@@ -72,9 +79,23 @@ class PendaftaranOnlineController extends Controller
             ]);
         }
 
-        do {
-            $noPendaftaran = 'PPDB-'.date('Y').'-'.strtoupper(Str::random(5));
-        } while (PendaftaranOnline::where('no_pendaftaran', $noPendaftaran)->exists());
+        // Email santri akan jadi username akun alumni, jadi tidak boleh
+        // bentrok dengan akun yang sudah ada maupun pendaftaran lain.
+        $emailSantri = $validated['email_santri'];
+
+        if (User::query()->where('email', $emailSantri)->exists()) {
+            return redirect()->back()->withInput()->withErrors([
+                'email_santri' => 'Email santri ini sudah dipakai akun lain. Gunakan email berbeda.',
+            ]);
+        }
+
+        if (PendaftaranOnline::query()->where('email_santri', $emailSantri)->exists()) {
+            return redirect()->back()->withInput()->withErrors([
+                'email_santri' => 'Email santri ini sudah dipakai pendaftaran lain.',
+            ]);
+        }
+
+        $noPendaftaran = KodeUnik::pendaftaran();
 
         $pendaftaran = PendaftaranOnline::create([
             'no_pendaftaran' => $noPendaftaran,
@@ -83,6 +104,7 @@ class PendaftaranOnlineController extends Controller
             'no_hp_aktif' => $validated['no_hp_aktif'],
             'alamat_domisili' => $validated['alamat_domisili'],
             'email' => $email,
+            'email_santri' => $emailSantri,
             'nama_ortu_wali' => $validated['nama_ortu_wali'],
             'no_hp_ortu' => $validated['no_hp_ortu'],
             'asal_sekolah' => $validated['asal_sekolah'],
@@ -104,7 +126,8 @@ class PendaftaranOnlineController extends Controller
 
         $pesan = 'Pendaftaran berhasil dikirim! Nomor Pendaftaran Anda: '.$noPendaftaran.'. '
             .'Data Anda masuk ke antrian verifikasi Admin Jenjang '.$validated['jenjang_tujuan'].'. '
-            .'Akun Wali Santri akan dibuat otomatis setelah pendaftaran diterima. ';
+            .'Akun Wali Santri akan dibuat otomatis setelah pendaftaran diterima, dan email santri '
+            .'dipakai untuk akun alumni saat kelulusan. ';
 
         $pesan .= $emailTerkirim
             ? 'Konfirmasi telah dikirim ke '.$email.'.'

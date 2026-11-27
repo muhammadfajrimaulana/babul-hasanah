@@ -7,8 +7,9 @@ use App\Models\Izin;
 use App\Models\Santri;
 use App\Support\Akademik;
 use App\Support\CatatanAktivitas;
+use App\Support\KodeUnik;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Verifikasi izin pulang.
@@ -23,6 +24,7 @@ class IzinController extends Controller
         Izin::tandaiTerlambat();
 
         $user = auth()->user();
+        Gate::authorize('viewAny', Izin::class);
 
         $query = Izin::query()
             ->with(['santri', 'wali', 'penyetuju'])
@@ -56,7 +58,7 @@ class IzinController extends Controller
         $izin->update([
             'status' => Izin::DISETUJUI,
             'alasan_penolakan' => null,
-            'kode_izin' => $izin->kode_izin ?: 'IZIN-'.strtoupper(Str::random(8)),
+            'kode_izin' => $izin->kode_izin ?: KodeUnik::kodeIzin(),
             'disetujui_oleh' => auth()->id(),
             'disetujui_pada' => now(),
         ]);
@@ -127,5 +129,7 @@ class IzinController extends Controller
             ->exists();
 
         abort_unless($milikJenjang, 403, 'Izin ini bukan milik santri pada jenjang yang Anda tangani.');
+
+        Gate::authorize('verifikasi', $izin);
     }
 }

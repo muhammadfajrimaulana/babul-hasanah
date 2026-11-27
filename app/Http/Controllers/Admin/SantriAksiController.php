@@ -13,6 +13,7 @@ use App\Support\CatatanAktivitas;
 use App\Support\Jenjang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -171,7 +172,13 @@ class SantriAksiController extends Controller
 
         CatatanAktivitas::catat('arsipkan_santri', $santri, ['status' => $data['status']], $data['alasan']);
 
-        return back()->with('success', 'Data santri diarsipkan. Akun wali tetap aktif untuk melihat riwayat anak.');
+        // Form yang sama dipakai untuk dua status. Pesan harus mengikuti pilihan
+        // pengguna, jadi status "keluar" tidak diberi pesan "diarsipkan".
+        $pesan = $data['status'] === Santri::STATUS_KELUAR
+            ? 'Santri berhasil ditandai Keluar / Berhenti.'
+            : 'Data santri berhasil diarsipkan.';
+
+        return back()->with('success', $pesan.' Akun wali tetap aktif untuk melihat riwayat anak.');
     }
 
     /** Kembalikan santri dari arsip (khusus Superadmin). */
@@ -188,6 +195,31 @@ class SantriAksiController extends Controller
         CatatanAktivitas::catat('kembalikan_santri', $santri, [], 'Dikembalikan dari arsip oleh Superadmin');
 
         return back()->with('success', 'Santri dikembalikan ke status aktif.');
+    }
+
+    /**
+     * Pulihkan santri dari tempat sampah (soft delete).
+     *
+     * Berbeda dengan kembalikan(), aksi ini mengembalikan baris yang sempat
+     * ditandai terhapus. Status kelulusan sengaja tidak diubah agar riwayat
+     * alumni/nilai tetap konsisten.
+     */
+    public function pulihkan($id)
+    {
+        abort_unless(Akses::superAdmin(auth()->user()), 403, 'Hanya Superadmin yang dapat memulihkan data terhapus.');
+
+        $santri = Santri::onlyTrashed()->findOrFail($id);
+
+        Gate::authorize('restore', $santri);
+
+        $santri->restore();
+
+        CatatanAktivitas::catat('pulihkan_santri', $santri, [
+            'nama_lengkap' => $santri->nama_lengkap,
+            'jenjang' => $santri->jenjang_pendidikan,
+        ], 'Dipulihkan dari tempat sampah');
+
+        return back()->with('success', 'Data santri berhasil dipulihkan. Seluruh riwayatnya kembali tersedia.');
     }
 
     /** Form proses naik kelas. */

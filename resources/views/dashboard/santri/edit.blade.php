@@ -66,6 +66,18 @@
             </div>
 
             <div>
+                <label class="{{ $labelCls }}" for="jenis_kelamin">Jenis Kelamin</label>
+                <select id="jenis_kelamin" name="jenis_kelamin" class="{{ $inputCls }}">
+                    <option value="">-- Belum diisi --</option>
+                    @foreach (\App\Models\Santri::JENIS_KELAMIN as $kode => $label)
+                        <option value="{{ $kode }}"
+                            @selected(old('jenis_kelamin', $santri->jenis_kelamin) === $kode)>{{ $label }}</option>
+                    @endforeach
+                </select>
+                @error('jenis_kelamin') <p class="text-[10px] text-rose-500 mt-1">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
                 <label class="{{ $labelCls }}" for="nomor_induk">Nomor Induk</label>
                 <input id="nomor_induk" type="text" name="nomor_induk"
                     value="{{ old('nomor_induk', $santri->nomor_induk) }}" class="{{ $inputCls }} font-mono">
@@ -111,6 +123,15 @@
             <div class="sm:col-span-2">
                 <label class="{{ $labelCls }}" for="alamat">Alamat</label>
                 <textarea id="alamat" name="alamat" rows="3" class="{{ $inputCls }}">{{ old('alamat', $santri->alamat) }}</textarea>
+            </div>
+
+            <div class="sm:col-span-2">
+                <label class="{{ $labelCls }}" for="email_santri">Email Santri (Login Alumni)</label>
+                <input id="email_santri" type="email" name="email_santri"
+                    value="{{ old('email_santri', $santri->email_santri) }}" class="{{ $inputCls }}"
+                    placeholder="email.santri@gmail.com">
+                <p class="text-[10px] text-slate-400 mt-1">Dipakai sebagai username akun alumni saat santri diluluskan. Kosongkan jika belum ada.</p>
+                @error('email_santri') <p class="text-[11px] text-rose-600 mt-1">{{ $message }}</p> @enderror
             </div>
         </div>
 

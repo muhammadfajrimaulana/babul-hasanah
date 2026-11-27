@@ -63,6 +63,13 @@
                 <form action="{{ route('pendaftaran.store') }}" method="POST" class="space-y-8">
                     @csrf
 
+                    {{-- Honeypot: tersembunyi dari pengguna, bot biasanya mengisinya. --}}
+                    <div class="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+                        <label for="website">Jangan isi kolom ini</label>
+                        <input id="website" type="text" name="website" value="{{ old('website') }}"
+                            tabindex="-1" autocomplete="off">
+                    </div>
+
                     <!-- BAGIAN 1: DATA CALON SANTRI -->
                     <div class="space-y-4">
                         <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
@@ -91,6 +98,17 @@
                                 <input id="no_hp_aktif" type="text" name="no_hp_aktif" value="{{ old('no_hp_aktif') }}" required
                                     maxlength="30" class="{{ $inputCls }}" placeholder="Contoh: 081234567890">
                                 @error('no_hp_aktif') <p class="{{ $errorCls }}">{{ $message }}</p> @enderror
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="{{ $labelCls }}" for="email_santri">Email Santri <span class="text-rose-500">*</span></label>
+                                <input id="email_santri" type="email" name="email_santri" value="{{ old('email_santri') }}" required
+                                    maxlength="255" class="{{ $inputCls }}" placeholder="email.santri@gmail.com" autocomplete="email">
+                                <p class="text-xs text-slate-500 mt-1">
+                                    Email pribadi santri yang <b>berbeda dengan email wali</b>. Email ini menjadi username
+                                    Portal Alumni dan tempat pengiriman kredensial saat santri lulus.
+                                </p>
+                                @error('email_santri') <p class="{{ $errorCls }}">{{ $message }}</p> @enderror
                             </div>
 
                             <div class="sm:col-span-2">
@@ -142,8 +160,9 @@
                                 <input id="email" type="email" name="email" value="{{ old('email') }}" required maxlength="255"
                                     class="{{ $inputCls }}" placeholder="email.orangtua@gmail.com" autocomplete="email">
                                 <p class="text-xs text-slate-500 mt-1">
-                                    Email milik orang tua/wali. Setelah pendaftaran dikirim, <b>username dan kata sandi
-                                    Portal Wali Santri</b> akan dikirim ke email ini. Santri tidak perlu memiliki email sendiri.
+                                    Email milik orang tua/wali. Setelah pendaftaran diterima, <b>username dan kata sandi
+                                    Portal Wali Santri</b> akan dikirim ke email ini. Email santri dipakai terpisah untuk
+                                    akun alumni.
                                 </p>
                                 @error('email') <p class="{{ $errorCls }}">{{ $message }}</p> @enderror
                             </div>

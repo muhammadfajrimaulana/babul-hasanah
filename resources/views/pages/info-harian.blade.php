@@ -313,7 +313,7 @@
         <section class="ihp-hero">
             <div class="container">
                 <nav class="ihp-crumb" aria-label="Breadcrumb">
-                    <a href="{{ url('/') }}">Beranda</a>
+                    <a href="{{ route('home') }}">Beranda</a>
                     <i class="fa-solid fa-chevron-right"></i>
                     <span>Info Harian</span>
                 </nav>

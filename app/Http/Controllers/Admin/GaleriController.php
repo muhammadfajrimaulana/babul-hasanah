@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Album;
+use App\Support\GambarPublik;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class GaleriController extends Controller
 {
@@ -97,9 +97,14 @@ class GaleriController extends Controller
 
     public function destroy(Album $galeri)
     {
-        // hapus semua file milik album agar storage tidak menumpuk
-        $files = $galeri->media->flatMap(fn ($m) => [$m->path, $m->poster])->push($galeri->sampul)->filter()->all();
-        Storage::disk('public')->delete($files);
+        // Hapus hanya berkas yang memang berada di disk public. Path publik lama
+        // (public/upload/...) sengaja dibiarkan agar data legacy tidak berubah.
+        $files = $galeri->media->flatMap(fn ($m) => [$m->path, $m->poster])->push($galeri->sampul);
+        $files->each(function ($path) {
+            // Callback tidak boleh mengembalikan false: Collection::each() akan berhenti
+            // lebih awal (mis. saat poster kosong) sehingga sampul tidak terhapus.
+            GambarPublik::hapus($path);
+        });
 
         $galeri->delete(); // baris album_media ikut terhapus (cascade)
 

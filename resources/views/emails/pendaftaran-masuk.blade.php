@@ -37,6 +37,13 @@
                                 username serta password sementara ke email ini.
                             </p>
 
+                            @if (! empty($emailSantri))
+                                <p style="margin:0 0 14px;font-size:13px;line-height:1.8;color:#3c4741;">
+                                    Email santri <strong>{{ $emailSantri }}</strong> telah kami simpan. Email ini akan menjadi
+                                    username Portal Alumni dan kredensialnya dikirim ke alamat tersebut saat santri lulus.
+                                </p>
+                            @endif
+
                             <p style="margin:0 0 14px;font-size:13px;line-height:1.8;color:#3c4741;">
                                 Password sementara hanya berlaku 24 jam dan wajib diganti saat login pertama.
                                 Admin tidak dapat melihat password Anda.

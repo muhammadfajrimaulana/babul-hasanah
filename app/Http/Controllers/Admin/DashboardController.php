@@ -132,10 +132,17 @@ class DashboardController extends Controller
         // nilai/prestasi, tabel alumni, dan santri untuk jenjang terpilih.
         $jenjangPanel = app(RoleDashboardController::class)->dataJenjang($request);
 
+        // ---- Komposisi putra/putri (kolom bisa belum ada sebelum migrasi) ----
+        [$santriPutra, $santriPutri] = $this->komposisiJenisKelamin();
+        $komposisiKelamin = ($santriPutra + $santriPutri) > 0
+            ? "Putra: {$santriPutra} | Putri: {$santriPutri}"
+            : 'Jenis kelamin belum diisi';
+
         $data = [
             'totalSantri' => $totalSantri,
-            'santriPutra' => 0,
-            'santriPutri' => 0,
+            'santriPutra' => $santriPutra,
+            'santriPutri' => $santriPutri,
+            'komposisiKelamin' => $komposisiKelamin,
             'totalPendaftar' => $totalPendaftar,
             'pendaftarMenunggu' => $pendaftarMenunggu,
             'pendaftarTerbaru' => $pendaftarTerbaru,
@@ -289,6 +296,26 @@ class DashboardController extends Controller
             return $query->count();
         } catch (\Throwable $e) {
             return 0;
+        }
+    }
+
+    /** Jumlah santri putra/putri; aman bila kolom belum tersedia. */
+    private function komposisiJenisKelamin(): array
+    {
+        if (! Santri::siapJenisKelamin()) {
+            return [0, 0];
+        }
+
+        try {
+            $rekap = Santri::query()
+                ->selectRaw('jenis_kelamin, COUNT(*) as jml')
+                ->whereIn('jenis_kelamin', array_keys(Santri::JENIS_KELAMIN))
+                ->groupBy('jenis_kelamin')
+                ->pluck('jml', 'jenis_kelamin');
+
+            return [(int) ($rekap['L'] ?? 0), (int) ($rekap['P'] ?? 0)];
+        } catch (\Throwable $e) {
+            return [0, 0];
         }
     }
 

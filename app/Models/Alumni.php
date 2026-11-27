@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\GambarPublik;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 
@@ -18,6 +19,11 @@ class Alumni extends Model
     public const KEGIATAN = ['Kuliah', 'Bekerja', 'Wirausaha', 'Mengabdi', 'Lainnya'];
 
     public const JENJANG = ['MDTA', 'PPS Wustha', 'MTs', 'MA', 'PDF Wustha', 'PDF Ulya', "Ma'had 'Aly"];
+
+    /** Cast timestamp supaya aman dipanggil translatedFormat() di view. */
+    protected $casts = [
+        'nilai_diunggah_pada' => 'datetime',
+    ];
 
     /** Santri asal data alumni ini (null untuk alumni yang diinput manual). */
     public function santri()
@@ -56,7 +62,8 @@ class Alumni extends Model
 
     public function getFotoUrlAttribute(): ?string
     {
-        return $this->foto ? asset('storage/'.$this->foto) : null;
+        // Null bila berkas belum ada: Blade akan menampilkan inisial, bukan <img> rusak.
+        return GambarPublik::dariStorage($this->foto);
     }
 
     /** URL publik berkas nilai/transkrip alumni. */

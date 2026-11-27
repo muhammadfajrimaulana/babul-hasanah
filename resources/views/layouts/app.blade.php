@@ -337,7 +337,7 @@
         <div class="site-container site-nav">
 
             {{-- Logo --}}
-            <a href="{{ url('/') }}" class="site-brand">
+            <a href="{{ route('home') }}" class="site-brand">
                 <span class="site-brand-logo">
                     <img src="{{ asset('assets/img/logo/logo.png') }}" alt="Logo Babul Hasanah">
                 </span>
@@ -347,7 +347,7 @@
             {{-- Menu (desktop) / Drawer (mobile) --}}
             <nav class="site-menu" id="siteMenu" aria-label="Menu utama">
                 <div class="menu-header">
-                    <a href="{{ url('/') }}" class="site-brand">
+                    <a href="{{ route('home') }}" class="site-brand">
                         <span class="site-brand-logo"><img src="{{ asset('assets/img/logo/logo.png') }}" alt="Logo Babul Hasanah"></span>
                         <span><small>Pondok Pesantren</small><strong>Babul Hasanah</strong></span>
                     </a>
@@ -355,7 +355,7 @@
                 </div>
 
                 <div class="menu-links">
-                    <a href="{{ url('/') }}" class="{{ request()->is('/') ? 'active' : '' }}">
+                    <a href="{{ route('home') }}" class="{{ request()->is('/') ? 'active' : '' }}">
                         <span class="mi"><i class="fa-solid fa-house"></i></span>Beranda
                     </a>
 
@@ -375,12 +375,12 @@
                             x-transition:leave-end="opacity-0 translate-y-2"
                             style="display: none;">
                             <div class="dd-title">Tentang Pesantren</div>
-                            <a href="{{ url('/profil/sejarah') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-landmark"></i></span>Sejarah</a>
-                            <a href="{{ url('/profil/visi-misi') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-bullseye"></i></span>Visi &amp; Misi</a>
-                            <a href="{{ url('/profil/struktur-organisasi') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-sitemap"></i></span>Struktur Organisasi</a>
-                            <a href="{{ url('/profil/pembelajaran') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-graduation-cap"></i></span>Pembelajaran</a>
+                            <a href="{{ route('profil.sejarah') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-landmark"></i></span>Sejarah</a>
+                            <a href="{{ route('profil.visi-misi') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-bullseye"></i></span>Visi &amp; Misi</a>
+                            <a href="{{ route('profil.struktur-organisasi') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-sitemap"></i></span>Struktur Organisasi</a>
+                            <a href="{{ route('profil.pembelajaran') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-graduation-cap"></i></span>Pembelajaran</a>
                             <a href="{{ route('alumni.index') }}" class="dd-item {{ request()->is('alumni*') ? 'active' : '' }}"><span class="ic"><i class="fa-solid fa-user-graduate"></i></span>Alumni</a>
-                            <a href="{{ url('/profil/fasilitas') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-box"></i></span>Fasilitas</a>
+                            <a href="{{ route('profil.fasilitas') }}" class="dd-item"><span class="ic"><i class="fa-solid fa-box"></i></span>Fasilitas</a>
                         </div>
                     </div>
 
@@ -410,13 +410,13 @@
                         </div>
                     </div>
 
-                    <a href="{{ url('/berita') }}" class="{{ request()->is('berita*') ? 'active' : '' }}">
+                    <a href="{{ route('berita.index') }}" class="{{ request()->is('berita*') ? 'active' : '' }}">
                         <span class="mi"><i class="fa-solid fa-newspaper"></i></span>Berita
                     </a>
-                    <a href="{{ url('/galeri') }}" class="{{ request()->is('galeri*') ? 'active' : '' }}">
+                    <a href="{{ route('galeri') }}" class="{{ request()->is('galeri*') ? 'active' : '' }}">
                         <span class="mi"><i class="fa-solid fa-images"></i></span>Galeri
                     </a>
-                    <a href="{{ url('/prestasi') }}" class="{{ request()->is('prestasi*') ? 'active' : '' }}">
+                    <a href="{{ route('prestasi.index') }}" class="{{ request()->is('prestasi*') ? 'active' : '' }}">
                         <span class="mi"><i class="fa-solid fa-trophy"></i></span>Prestasi
                     </a>
                     <a href="{{ route('kontak') }}" class="{{ request()->is('kontak*') ? 'active' : '' }}">
@@ -457,7 +457,7 @@
             <div class="foot-grid">
 
                 <div>
-                    <a href="{{ url('/') }}" class="site-brand">
+                    <a href="{{ route('home') }}" class="site-brand">
                         <span class="site-brand-logo">
                             <img src="{{ asset('assets/img/logo/logo.png') }}" alt="Logo Babul Hasanah">
                         </span>
@@ -486,7 +486,7 @@
                 <div>
                     <h5>Tautan Cepat</h5>
                     <ul>
-                        <li><a href="{{ url('/profil/sejarah') }}">Tentang Pesantren</a></li>
+                        <li><a href="{{ route('profil.sejarah') }}">Tentang Pesantren</a></li>
                         <li><a href="{{ route('jenjang.show', 'mdta') }}">Jenjang Pendidikan</a></li>
                         <li><a href="{{ route('info-harian.index') }}">Info Harian</a></li>
                         <li><a href="{{ route('pendaftaran.index') }}">Pendaftaran Santri Baru</a></li>

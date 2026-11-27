@@ -174,7 +174,7 @@
     <header class="sj-hero">
         <div class="sj-wrap">
             <div class="sj-crumb">
-                <a href="{{ url('/') }}">Beranda</a> <i class="fa-solid fa-chevron-right" style="font-size:10px"></i>
+                <a href="{{ route('home') }}">Beranda</a> <i class="fa-solid fa-chevron-right" style="font-size:10px"></i>
                 Profil <i class="fa-solid fa-chevron-right" style="font-size:10px"></i> Struktur Organisasi
             </div>
             <div class="sj-eyebrow light">Pondok Pesantren Babul Hasanah</div>
@@ -225,8 +225,8 @@
                                 <article class="person {{ $depth === 0 ? 'top' : '' }}">
                                     <div class="avatar">
                                         <i class="fa-solid {{ $node->ikon ?: ($depth === 0 ? 'fa-user-tie' : 'fa-user') }}"></i>
-                                        @if ($node->foto)
-                                            <img src="{{ $node->foto_url }}" alt="{{ $node->nama }}" @if ($depth > 1) loading="lazy" @endif onerror="this.remove()">
+                                        @if ($node->foto_url)
+                                            <img src="{{ $node->foto_url }}" alt="{{ $node->nama }}" @if ($depth > 1) loading="lazy" @endif>
                                         @endif
                                     </div>
                                     <span>{{ $node->jabatan }}</span>
@@ -262,8 +262,8 @@
                             <div class="jj-body">
                                 <div class="avatar">
                                     <i class="fa-solid {{ $j->ikon ?: 'fa-user-tie' }}"></i>
-                                    @if ($j->foto)
-                                        <img src="{{ $j->foto_url }}" alt="{{ $j->nama }}" loading="lazy" onerror="this.remove()">
+                                    @if ($j->foto_url)
+                                        <img src="{{ $j->foto_url }}" alt="{{ $j->nama }}" loading="lazy">
                                     @endif
                                 </div>
                                 <h3>{{ $j->nama }}</h3>
@@ -309,7 +309,7 @@
             <div class="sj-cta">
                 <h2>Ada yang ingin ditanyakan kepada pengurus?</h2>
                 <p>Hubungi kami untuk informasi pendaftaran, kunjungan santri, atau kerja sama.</p>
-                <a href="{{ url('/kontak') }}" class="sj-btn">Hubungi kami <i class="fa-solid fa-arrow-right"></i></a>
+                <a href="{{ route('kontak') }}" class="sj-btn">Hubungi kami <i class="fa-solid fa-arrow-right"></i></a>
             </div>
         </div>
     </section>

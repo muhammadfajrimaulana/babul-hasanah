@@ -44,7 +44,7 @@
                             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition">
                                 <td class="py-4 px-6">
                                     <div class="flex items-center gap-3">
-                                        <img src="{{ $berita->gambar_url }}" alt=""
+                                        <img src="{{ $berita->gambar_url }}" alt="Gambar {{ $berita->judul }}"
                                             class="w-14 h-10 object-cover rounded-lg border border-slate-100 dark:border-slate-700">
                                         <div>
                                             <div class="font-black text-slate-900 dark:text-white">{{ $berita->judul }}</div>
@@ -61,7 +61,7 @@
                                     @endif
                                 </td>
                                 <td class="py-4 px-6 text-slate-500 dark:text-slate-400">
-                                    {{ ($berita->published_at ?? $berita->created_at)->format('d M Y, H:i') }}
+                                    {{ ($berita->published_at ?? $berita->created_at)->translatedFormat('d M Y, H:i') }}
                                 </td>
                                 <td class="py-4 px-6 text-right">
                                     <div class="flex items-center justify-end gap-1">

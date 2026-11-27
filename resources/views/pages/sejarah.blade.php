@@ -89,11 +89,8 @@
 </style>
 
 @php
-    $konten = \App\Models\Konten::allWithDefaults();
+    // $konten dan $layout disiapkan di Public\ProfilController@sejarah.
     $kv = fn (string $key, string $default = '') => $konten[$key] ?? $default;
-
-    // Susunan & visibilitas bagian dari dashboard.
-    $layout = \App\Models\Konten::layoutFor('sejarah');
     $visible = [];
     $order = [];
     foreach ($layout as $i => $section) {
@@ -196,7 +193,7 @@
         <header class="pd-hero">
             <div class="pd-wrap">
                 <nav class="pd-crumb" aria-label="Breadcrumb">
-                    <a href="{{ url('/') }}">Beranda</a>
+                    <a href="{{ route('home') }}">Beranda</a>
                     <i class="fa-solid fa-chevron-right"></i>
                     <span>Profil</span>
                     <i class="fa-solid fa-chevron-right"></i>

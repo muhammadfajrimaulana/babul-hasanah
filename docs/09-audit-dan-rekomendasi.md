@@ -1,8 +1,8 @@
 # 09 — Audit, Temuan, dan Rekomendasi
 
-**Pembaruan:** 22 November 2026 (finalisasi 6 role, alur pesantren, portal alumni)
+**Pembaruan:** 28 November 2026 (finalisasi 6 role, alur pesantren, portal alumni, soft delete santri)
 **Metode:** pembacaan langsung kode, migrasi, route, dan view; verifikasi daftar route dengan
-`php artisan route:list --except-vendor` (**189 route aplikasi**).
+`php artisan route:list --except-vendor` (**232 route aplikasi**).
 Tidak ada perintah yang menyentuh database.
 **Batasan:** status migrasi/tabel/isi database **tidak diverifikasi** oleh agen AI sesuai
 [ATURAN.md](ATURAN.md). Semua hal yang bergantung pada kondisi database ditandai
@@ -20,19 +20,19 @@ Tidak ada perintah yang menyentuh database.
 |---|---|---|
 | Autentikasi & redirect per peran | ✅ Baik | 6 peran, satu sumber `Akses`, throttle login 6/menit, akun nonaktif & password sementara |
 | Otorisasi route | ✅ Baik | Middleware `role` di setiap grup; 403 lintas peran |
-| Otorisasi per-record | ⚠️ Lemah | Belum ada Gate/Policy; pengecekan manual tersebar |
+| Otorisasi per-record | ✅ Berjalan | Gate/Policy terpasang di santri, nilai, pembinaan, izin, legalisir, dan portal; pengecekan manual jadi lapisan kedua |
 | Scoping jenjang | ✅ Berjalan | Santri, pendaftaran, alumni, nilai, kelas, izin, pengumuman |
 | Dashboard per peran | ✅ Berjalan | 4 dashboard panel + portal wali + portal alumni |
 | CRUD inti | ✅ Berjalan | Berita, galeri, prestasi, alumni, struktur, info harian |
 | PPDB → akun wali | ✅ Baik | Password acak + email kredensial + wajib ganti 24 jam |
-| Import Excel/CSV | ❌ Stub | Tidak memproses file; belum ada package |
+| Import Excel/CSV | ✅ CSV native | `ImportSantri` + `ImportNilai` memproses CSV, template CSV dinamis, baris error dilaporkan; XLSX tidak didukung |
 | Modul akademik (nilai/transkrip/mapel) | ✅ UI / 🚧 tabel | Kode selesai; tabel menunggu migrasi manusia |
-| Halaman publik | ✅ Sebagian | Beberapa view/aset masih hilang |
-| Test otomatis | ❌ Minim | Hanya 2 test contoh |
+| Halaman publik | ✅ Sebagian | Banner/foto jenjang memakai placeholder `public/images/`; konten statis lain sudah memakai tabel `konten` dengan fallback |
+| Test otomatis | ⚠️ Berkembang | 2 test contoh + 8 feature test (scoping, portal, login/reset, PPDB, nilai/izin, soft delete santri, CRUD kepengurusan, aset GambarPublik) + 1 unit test `AltGambarTest`; ditulis/diperiksa AI, dijalankan manusia |
 | Dokumentasi | ⚠️ Tidak seragam | Beberapa dokumen masih memuat kondisi lama |
 
-**Skala kode aktual:** 189 route aplikasi, 55 controller, 31 model, 43 file migrasi, 133 file Blade,
-7 seeder, 2 test.
+**Skala kode aktual:** 232 route aplikasi, 57 controller, 34 model, 50 file migrasi, 144 file Blade,
+7 seeder, 11 file test (2 contoh + 8 feature + 1 unit `AltGambarTest`).
 
 ---
 
@@ -88,22 +88,25 @@ username akun alumni.
 **Yang masih perlu manusia:** jalankan `php artisan migrate`, lalu verifikasi dengan
 `SHOW INDEX FROM pendaftaran_online` dan `SHOW INDEX FROM santri` bila ingin memastikan indeks benar-benar aktif.
 
-### 3.4 Belum ada otorisasi per-record (Gate/Policy) — ✅ Selesai sebagian (27 Nov 2026)
+### 3.4 Otorisasi per-record (Gate/Policy) — ✅ Selesai (28 Nov 2026)
 
 **Temuan lama:** tidak ada folder `app/Policies`; pengecekan memakai `Akses::cocokJenjang()` dan
 `abort_unless()` manual di controller.
 
 **Implementasi sekarang:**
 
-- `App\Policies\SantriPolicy` dan `App\Policies\NilaiPolicy` dibuat dan didaftarkan eksplisit lewat
-  `Gate::policy()` di `AppServiceProvider`. Keduanya memanggil `Akses` sebagai satu-satunya sumber
-  keputusan, sehingga hasilnya identik dengan middleware `role:` yang sudah ada.
-- Sudah dipakai di `SantriFormController` (create/store/edit/update) dan `NilaiController`
-  (store/terbitkan/konteks jenjang). Pemeriksaan lama sengaja **dipertahankan** sebagai lapisan
-  kedua sekaligus menjaga pesan error spesifik (misalnya "Jenjang di luar wewenang").
-- Modul lain (portal wali/alumni, prestasi, pembinaan) masih memakai pengecekan manual. Adopsi
-  policy ke modul tersebut bisa dilakukan bertahap tanpa mengubah perilaku. Lihat
-  [14-modul-akademik.md](14-modul-akademik.md) §7.
+- `SantriPolicy` dan `NilaiPolicy` (27 Nov) dipakai di `SantriFormController` dan `NilaiController`.
+- Perluasan 28 Nov 2026:
+  - `PembinaanPolicy` — satu policy untuk `Hafalan`, `Pelanggaran`, dan `Absensi`; hak tulis
+    `pembinaan.ubah` + cakupan santri via `Akademik::santriQuery()`.
+  - `IzinPolicy` — verifikasi oleh Pembina/Admin Jenjang versus pengajuan oleh wali pemilik anak.
+  - `LegalisirPolicy` — proses oleh Admin Jenjang versus ajukan/unduh oleh alumni pemilik data.
+  - `PortalPolicy` — ability `portal.*` lewat `Gate::define()` untuk kepemilikan anak, rapor,
+    dokumen, dan data alumni.
+- Semua policy memanggil `Akses`/relasi yang sama dengan middleware `role:` dan `abort_unless()` lama.
+  Pemeriksaan manual sengaja **dipertahankan** sebagai lapisan kedua sekaligus menjaga pesan error
+  spesifik. Tidak ada policy baru untuk prestasi karena datanya sudah difilter per jenjang.
+  Detail rencana: [14-modul-akademik.md](14-modul-akademik.md) §7.
 
 ### 3.5 Import Excel/CSV masih stub — ✅ Selesai (CSV native, 27 Nov 2026)
 
@@ -142,36 +145,48 @@ memperbarui dokumentasi. Setelah tabel ada, hapus fallback dummy di beranda agar
 
 | # | Temuan | Bukti / Dampak | Rekomendasi |
 |:--:|---|---|---|
-| P2-1 | `santriPutra`/`santriPutri` selalu 0 | `DashboardController.php:132-133` mengirim 0; tabel `santri` tidak punya `jenis_kelamin` | Tambah kolom gender atau hapus widget |
-| P2-2 | Prestasi di dashboard Admin Jenjang bersifat global | `RoleDashboardController.php:67` tidak difilter jenjang | Beri label “global” atau tambah kolom jenjang |
-| P2-3 | Pengelolaan kepengurusan hilang | Tidak ada controller/route CRUD `kepengurusan`; hanya ditampilkan di `/profil` | Buat CRUD atau pindahkan ke Struktur Organisasi |
+| P2-1 | `santriPutra`/`santriPutri` selalu 0 | `DashboardController.php` mengirim 0; tabel `santri` tidak punya `jenis_kelamin` | ✅ Selesai 28 Nov 2026: kolom `jenis_kelamin` ditambahkan, diisi dari PPDB/form/import, dan widget dihitung di controller |
+| P2-2 | Prestasi di dashboard Admin Jenjang bersifat global | Temuan lama: filter jenjang belum ada | ✅ Selesai: `prestasi_santri.jenjang` sudah dipakai di `PrestasiAdminController`, `RoleDashboardController`, dan form input |
+| P2-3 | Pengelolaan kepengurusan hilang | Tidak ada controller/route CRUD `kepengurusan`; hanya ditampilkan di `/profil` | ✅ Selesai 28 Nov 2026: `Admin\KepengurusanController` + 6 route `admin.kepengurusan.*` (khusus Superadmin) dengan validasi, urutan, foto disk `public`, dan audit `kepengurusan_*`. Query `/profil` dipindah ke `ProfilController@index`; model punya accessor `foto_url` sehingga foto legacy di `public/upload/kepengurusan/` tetap tampil tanpa diubah. Tabel sengaja dipertahankan terpisah dari `struktur_organisasi` |
 | P2-4 | `program` tidak dikelola | `admin.program.index` hanya closure redirect ke `admin.jenjang.index`; view `dashboard/program` tidak terpakai | ✅ Selesai 28 Nov 2026: diputuskan tetap sebagai alias redirect; `Kegiatan` admin diisi dari data nyata (Info Harian + catatan kalender + absensi) |
-| P2-5 | Aset gambar publik hilang | Folder `public/images/` untuk sejarah, profil, pembelajaran, program, dan pengurus tidak ada | Tambahkan aset atau ganti path |
-| P2-6 | Dua sistem styling | Publik/auth via Vite; admin/portal via Tailwind CDN | Satukan ke Vite |
+| P2-5 | Aset gambar publik hilang | Folder `public/images/` untuk program dan pengurus tidak ada | ✅ Selesai 28 Nov 2026: 14 placeholder dibuat (7 `images/program/{slug}.jpg` 1200×400 dan 7 `images/pengurus/ketua-{slug}.jpg` 320×320, total 230 KB). `GambarPublik` kini menemukan file nyata; fallback bawaan tetap aktif. Bukan foto resmi — ganti dengan aset pesantren bila tersedia; halaman sejarah/profil/pembelajaran memakai `konten`/`StrukturOrganisasi`, bukan folder ini |
+| P2-6 | Dua sistem styling | Publik/auth via Vite; admin/portal via Tailwind CDN | ✅ Selesai 28 Nov 2026: 5 layout memakai `@vite`; CDN dihapus; `dark:` memakai `@custom-variant` kelas `.dark`; `.nav-scroll` disatukan di `app.css` |
 | P2-7 | Query database di Blade | `beranda`, `profil` | Pindahkan ke controller/view composer |
 | P2-8 | Penyimpanan file tidak seragam | Mayoritas disk `public`; sisa `public/upload` | Standarkan disk `public` + `Storage::delete` |
-| P2-9 | Audit log baru mencakup aksi penting | `log_aktivitas` + `LogAktivitasController` sudah ada; belum semua perubahan kecil tercatat | Perluas pencatatan ke CRUD sensitif |
+| P2-9 | Audit log baru mencakup aksi penting | `log_aktivitas` + `LogAktivitasController` sudah ada | ✅ Selesai 28 Nov 2026: dicatat pula import CSV santri/nilai, lulus massal, buat akun massal, reset password, ubah role/jenjang pengguna, `hapus_santri`/`pulihkan_santri`, dan `kepengurusan_*` |
 | P2-10 | PPDB tanpa throttle/captcha | Form publik bisa spam | ✅ Selesai 27 Nov 2026: `throttle:5,10` pada `POST /pendaftaran`, honeypot `website` (aturan `prohibited`), dan halaman 429 berbahasa Indonesia |
 | P2-11 | Email PPDB bergantung mailer | Mailer `log` di lokal | Pastikan SMTP produksi + fallback reset admin |
-| P2-12 | `APP_NAME`/locale belum branding | `APP_NAME=Laravel`, locale `en` | Set nama pesantren + locale `id` |
-| P2-13 | Tidak ada halaman error kustom | 403/404/500 memakai bawaan | ✅ Sebagian: `errors/429.blade.php` sudah ditambahkan; 403/404/500 menyusul |
-| P2-14 | Arsip santri sudah ada, hapus permanen masih mungkin | `santri.arsipkan` + `kembalikan`; `destroy` masih tersedia untuk Superadmin/Admin | Pertimbangkan soft delete & batasi hapus permanen |
-| P2-15 | Test minim | Hanya 2 contoh | Tambah feature test untuk login, scoping, izin, nilai, portal |
+| P2-12 | `APP_NAME`/locale belum branding | `APP_NAME=Laravel`, locale `en` | ✅ Selesai 28 Nov 2026: `APP_NAME="Pondok Pesantren Babul Hasanah"` di `.env` dan default `config/app.php` ikut diganti; locale sudah `id` sejak item format tanggal. `SESSION_COOKIE=laravel-session` ditambahkan secara eksplisit agar perubahan `APP_NAME` tidak mengganti nama cookie dan memaksa pengguna logout. Dijaga `NamaAplikasiTest`. |
+| P2-13 | Tidak ada halaman error kustom | 403/404/500 memakai bawaan | ✅ Selesai 28 Nov 2026: `errors/403`, `404`, `429`, `500` berbahasa Indonesia, gaya seragam, tombol `route('home')` |
+| P2-14 | Arsip santri sudah ada, hapus permanen masih mungkin | `santri.arsipkan` + `kembalikan`; `destroy` masih hard delete untuk Superadmin | ✅ Selesai 28 Nov 2026: `santri.deleted_at` ditambahkan, model memakai `SoftDeletes`, `destroy()` jadi soft delete + audit `hapus_santri`, halaman `admin.santri.terhapus` (`onlyTrashed`) dan aksi `admin.santri.pulihkan` (`restore` + audit `pulihkan_santri`) hanya untuk Superadmin. Status PPDB sengaja tidak diubah saat hapus agar pemulihan tidak perlu verifikasi ulang. `forceDelete` tidak diekspos ke UI; unique index NIS/email tetap dipakai baris terhapus |
+| P2-15 | Test minim | 2 contoh + 2 feature scoping | ✅ Sebagian 28 Nov 2026: `ScopingJenjangTest`, `PortalKepemilikanAnakTest`, `LoginDanResetPasswordTest`, `VerifikasiPPDBTest`, `NilaiDanIzinTest` (16 method), `SoftDeleteSantriTest` (6 method), `KepengurusanCrudTest` (7 method), dan `GambarPublikTest` (3 method) ditulis; manusia yang menjalankan, portal lain masih menyusul |
 
 ---
 
 ## 5. P3 — Rendah
 
-- `resources/views/welcome.blade.php` (72 KB) dan beberapa controller/import/service 0 byte tidak dipakai.
-- `portal/kegiatan.blade.php` kosong.
-- `layouts/admin-menu-struktur.blade.php` tidak di-include.
-- `resources/views/components/alert.blade.php` dan `card.blade.php` kosong.
-- Gambar `logo.png` 3,8 MB perlu dikompresi.
-- Sebagian pesan sukses salah konteks (sisa modul lama).
-- Penggunaan `rand()`/`Str::random` untuk identifier perlu ditinjau.
-- Format tanggal campur `translatedFormat` dan hardcode.
-- Sebagian gambar tidak punya `alt` deskriptif.
-- Slug berita tidak berubah saat judul diedit (perlu kebijakan redirect).
+- ~~`resources/views/welcome.blade.php` (72 KB) masih ada, tapi tanpa route aktif.~~ ✅ Selesai
+  28 Nov 2026: dihapus setelah audit tidak ada route maupun `@include` yang merujuknya.
+- ~~Template `.env.example` belum ada.~~ ✅ Selesai 28 Nov 2026: template dibuat dengan
+  `APP_LOCALE=id`, `APP_NAME` pesantren, `SESSION_COOKIE`, DB/queue/cache, placeholder Google
+  & SMTP, tanpa kredensial asli. Dijaga `EnvExampleTest`.
+- ~~`layouts/admin-menu-struktur.blade.php` tidak di-include.~~ ✅ Selesai 28 Nov 2026:
+  duplikat lama dihapus; menu Struktur sudah langsung ada di `layouts/admin-sidebar.blade.php`.
+  Dijaga `ViewMatTest`.
+- File 0 byte sudah dibersihkan 28 Nov 2026 (16 file: `app/`, `resources/views/`, dan dua factory di `database/factories/`); `UserFactory.php` tetap dipakai test.
+- ~~Gambar `logo.png` 3,8 MB perlu dikompresi.~~ ✅ Selesai 28 Nov 2026: 6 aset statis dikompresi (6,98 MB → 0,91 MB, hemat 86,9%), path tidak berubah.
+- ~~Sebagian pesan sukses salah konteks (sisa modul lama).~~ ✅ Selesai 28 Nov 2026:
+  aksi **Arsipkan** di `SantriAksiController` melayani dua status (`keluar` dan `arsip`) tetapi
+  selalu mengirim pesan "diarsipkan". Flash kini mengikuti status yang dipilih: "Keluar /
+  Berhenti" atau "berhasil diarsipkan". Dijaga `PesanFlashTest`.
+- ~~Penggunaan `rand()`/`Str::random` untuk identifier perlu ditinjau.~~ ✅ Selesai 28 Nov 2026:
+  pembuatan `PPDB-…`, `SANTRI-…`, dan `IZIN-…` dipusatkan di `App\Support\KodeUnik` dengan
+  pengecekan tabrakan sebelum pakai. Nomor induk **juga memeriksa santri soft-deleted** lewat
+  `withTrashed()`, karena unique index tetap dipakai baris terhapus; import CSV memakai peta
+  nomor yang sama. Format kode tidak berubah. Dijaga `IdentifierUnikTest`.
+- ~~Format tanggal campur `translatedFormat` dan hardcode.~~ ✅ Selesai 28 Nov 2026: `APP_LOCALE`/default `config('app.locale')` jadi `id`, sehingga seluruh `translatedFormat()` memakai nama bulan/hari Indonesia. Sembilan tanggal tampilan yang masih memakai `format('d/m/Y')` / `format('d M Y')` diganti `translatedFormat('d M Y')`. Format teknis (`Y-m-d` untuk input, `date('Y')` untuk tahun, `H:i:s` untuk jam) sengaja tidak diubah. Dijaga `tests/Unit/LocaleTanggalTest.php`.
+- ~~Sebagian gambar tidak punya `alt` deskriptif.~~ ✅ Selesai 28 Nov 2026: 6 `alt=""` diganti teks deskriptif (alumni, berita, galeri, alat potong), `<img>` pratinjau diberi `alt`, dan avatar admin memakai nama pengguna. Dijaga oleh `tests/Unit/AltGambarTest.php`.
+- ~~Slug berita tidak berubah saat judul diedit (perlu kebijakan redirect).~~ ✅ Selesai 28 Nov 2026: diputuskan **permalink bersifat permanen**. Slug dibuat sekali saat berita dibuat dan sengaja tidak diubah saat judul diedit, sehingga tautan lama tidak rusak dan tabel alias/redirect 301 tidak diperlukan. Form edit menampilkan permalink readonly; `SlugBeritaTest` menjaga perilaku ini.
 
 ---
 
@@ -181,27 +196,34 @@ Kode adalah sumber kebenaran. Tabel ini merangkum klaim dokumen yang sudah tidak
 
 | Dokumen | Klaim lama | Kondisi kode sekarang |
 |---|---|---|
-| 01 | 83 route, 30 controller, 15 model, 29 migrasi, 65 Blade, 5 seeder | 189 route, 55 controller, 31 model, 43 migrasi, 133 Blade, 7 seeder |
+| 01 | 83 route, 30 controller, 15 model, 29 migrasi, 65 Blade, 5 seeder | 232 route, 57 controller, 34 model, 50 migrasi, 144 Blade, 7 seeder |
 | 01 | Folder middleware berisi “3 middleware role” | `CheckRole` + `WajibGantiPassword` |
-| 02 | 67 route; 20 migrasi; tanpa alias middleware; PPDB tanpa transaksi | 189 route; 43 migrasi; alias `role` ada; verifikasi PPDB memakai `DB::transaction` |
+| 02 | 67 route; 20 migrasi; tanpa alias middleware; PPDB tanpa transaksi | 232 route; 50 migrasi; alias `role` ada; verifikasi PPDB memakai `DB::transaction` |
 | 03 | `DatabaseSeeder` hanya `RoleAndUserSeeder` + konten; 3 akun | Memanggil 4 seeder + konten; tetap **3 akun inti**, bukan 11 akun dummy |
 | 03 | `User::santri()` tidak ada | Ada (`hasMany`) + pivot `santri_wali` |
-| 03 | Migrasi 20 file | 43 file |
+| 03 | Migrasi 20 file | 50 file |
 | 04 | `/admin/pengurus` + `storeKepengurusan` ada | Route dan method tidak ada |
 | 04 | `admin.program.index` → `ProgramController@index` | Closure redirect ke `admin.jenjang.index` |
 | 05 | Konten menerima semua input tanpa whitelist | Sudah whitelist `items[]`, validasi gambar, layout JSON |
 | 05 | Edit pengguna view tidak ada | `dashboard/pengguna/edit.blade.php` sudah ada |
 | 05 | CRUD kepengurusan di `KontenController` | Tidak ada |
-| 06 | 59 Blade; menu Info Harian tidak ada | 133 Blade; menu Info Harian ada |
+| 06 | 59 Blade; menu Info Harian tidak ada | 144 Blade; menu Info Harian ada |
 | 07 | Portal wali statis; password wali acak `babul####` | Portal dinamis multi-anak; password acak + email + wajib ganti 24 jam |
 | 07 | Edit pengguna/detail santri/tambah santri tidak ada | Sudah tersedia |
 | 08 | Seeder tambahan tidak dipanggil otomatis; akun `admin@…` | 4 seeder otomatis; 3 akun inti (Superadmin, Pengurus, Pembina) |
 | 09 (lama) | Tidak ada rate limit login; PPDB tidak atomik | Login `throttle:6,1`; PPDB transaksi |
 | 10 | Info Harian WIP, route belum ada | Route + menu + seeder sudah ada |
 
-**Tindakan:** dokumen 01–08, 10, dan 14 diperbarui bertahap pada 22 November 2026. Dokumen peran
-(`role-pengguna.md`, 11, 12) adalah sumber utama untuk 6 role final. Sisa risiko utama ada di
-§3.3 (index email PPDB) dan §3.4 (policy per-record).
+**✅ 28 Nov 2026:** doc **03/05/07 dan `role-pengguna.md` telah diselaraskan** dengan kode:
+50 migrasi (termasuk email santri, jenis kelamin, jadwal/kurikulum/rapor, soft delete), import santri
+CSV nyata, template CSV on-the-fly, `settings()` tersedia, soft delete + pemulihan, PPDB 13 field
+(12 wajib + NISN opsional) dengan `email_santri`, multi-anak, email konfirmasi, dan nomor induk
+lewat `KodeUnik`, slug berita permanen, kepengurusan di disk `public`, serta controller akademik/
+Google login. Tabel di atas tetap dipertahankan sebagai catatan historis temuan awal.
+
+**Tindakan:** dokumen 01–08, 10, dan 14 diperbarui bertahap pada 22 November 2026; 03/05/07 dan
+`role-pengguna.md` menyusul 28 November 2026. Dokumen peran (`role-pengguna.md`, 11, 12) adalah
+sumber utama untuk 6 role final. Sisa risiko utama ada di verifikasi migrasi oleh manusia.
 
 ---
 
@@ -209,7 +231,7 @@ Kode adalah sumber kebenaran. Tabel ini merangkum klaim dokumen yang sudah tidak
 
 | Risiko | Level | Keterangan |
 |---|---|---|
-| Nilai/rapor/portal belum punya policy per-record | **Tinggi** | Pemeriksaan manual ada, tetapi wajib diaudit setiap endpoint baru |
+| Nilai/rapor/portal tanpa policy per-record | Dimitigasi | `NilaiPolicy` + `PortalPolicy` + `LegalisirPolicy` terpasang; manual tetap jadi lapisan kedua |
 | Index unik email PPDB vs fitur multi-anak | **Tinggi** | Perlu verifikasi DB; migrasi drop unique sudah ada |
 | `.env` menyimpan kredensial & secret | Tinggi | Rotasi bila pernah dibagikan |
 | `APP_DEBUG=true` di produksi | Tinggi | Stack trace terbuka |
@@ -217,8 +239,8 @@ Kode adalah sumber kebenaran. Tabel ini merangkum klaim dokumen yang sudah tidak
 | Mass assignment konten | Sedang | Sudah dibatasi whitelist, tetap audit |
 | Upload tanpa validasi MIME penuh | Sedang | Konten sudah divalidasi; modul baru wajib ikut |
 | PPDB tanpa captcha/throttle | Sedang | Spam pendaftaran |
-| Otorisasi hanya level route + manual | Sedang | Belum ada policy |
-| Audit log belum mencakup semua CRUD | Sedang | `log_aktivitas` sudah ada untuk aksi penting |
+| Otorisasi hanya level route + manual | Dimitigasi | Gate/Policy aktif pada modul sensitif; endpoint baru tetap wajib diaudit |
+| Audit log belum mencakup semua CRUD | Dimitigasi | `log_aktivitas` mencatat aksi sensitif (lihat P2-9) |
 | XSS pada konten `{!! !!}` | Rendah–Sedang | Hanya admin |
 | Tidak ada HTTPS wajib | Sedang | Hanya host ngrok |
 
@@ -230,20 +252,21 @@ Kebutuhan yang diajukan:
 
 1. Admin Jenjang mengunggah **nilai siswa per kelas**.
 2. **Transkrip nilai**.
-3. **Jadwal pelajaran**.
-4. **Kurikulum**.
+3. **Jadwal pelajaran** — ✅ kode siap 28 Nov 2026 (CRUD + anti-bentrok jam kelas/guru).
+4. **Kurikulum** — ✅ kode siap 28 Nov 2026 (CRUD + item + terbit).
 5. **Pengumuman** per jenjang.
 6. Data tersebut tampil di **akun Wali Santri**.
 7. Wali dapat melihat **kegiatan** dan **progres pembelajaran** anak.
 
-Status: **UI dan validasi sudah diimplementasikan**; tabel `mata_pelajaran`, `nilai_santri`, dan
-`dokumen_nilai` sudah ditulis sebagai migrasi tetapi **belum dijalankan oleh agen AI**. Rancangan dan
-catatan implementasi ada di **[14-modul-akademik.md](14-modul-akademik.md)**.
+Status: **UI dan validasi sudah diimplementasikan**; tabel `mata_pelajaran`, `nilai_santri`,
+`dokumen_nilai`, `jadwal_pelajaran`, `kurikulum`, `kurikulum_item`, dan `rapor_santri` sudah ditulis
+sebagai migrasi tetapi **belum dijalankan oleh agen AI**. Rancangan dan catatan implementasi ada di
+**[14-modul-akademik.md](14-modul-akademik.md)**.
 
 Implikasi audit:
 
 - Modul ini menambah data pribadi sensitif → **policy per-record wajib** (P1-3.4).
-- Unggah massal masih bergantung pada fondasi import yang **stub** (P1-3.5).
+- Unggah massal nilai sudah memakai `App\Support\ImportNilai` (CSV native); XLSX masih belum didukung.
 - Perluasan `Akses::MODUL`, sidebar, dan scoping jenjang **sudah dilakukan**.
 - Status `draft → terbit` sudah ada agar nilai belum final tidak bocor ke wali.
 - Tabel baru + migrasi harus dijalankan **manusia**.
@@ -264,9 +287,9 @@ Implikasi audit:
 1. ✅ Ganti password wali PPDB menjadi acak + paksa ganti saat login pertama.
 2. ✅ Satukan normalisasi role di `CheckRole` lewat `Akses::normalisasi()`.
 3. Verifikasi & perbaiki index unik email PPDB.
-4. Tambah policy per-record untuk nilai, izin, dokumen, dan portal.
-5. Bangun fondasi import CSV/XLSX yang benar.
-6. Audit ulang scoping jenjang (termasuk prestasi di dashboard).
+4. ✅ Tambah policy per-record untuk nilai, izin, dokumen, dan portal — selesai 28 Nov 2026.
+5. ✅ Fondasi import CSV sudah nyata untuk santri dan nilai; XLSX masih opsional (lihat P1-3.5).
+6. ✅ Audit ulang scoping jenjang (termasuk prestasi di dashboard) — selesai 28 Nov 2026.
 
 ### Sprint 2 — Modul Akademik (bertahap)
 
@@ -274,9 +297,9 @@ Mengikuti fase di [14-modul-akademik.md](14-modul-akademik.md) §8:
 
 1. Fase 0: jalankan migrasi (manusia), verifikasi model/relasi, policy.
 2. Fase 1: mapel + guru pengampu (sudah ada UI).
-3. Fase 2: nilai, terbitkan, transkrip (sudah ada UI); unggah massal masih rencana.
-4. Fase 3: portal wali nilai/rapor (sudah ada); jadwal/kurikulum masih rencana.
-5. Fase 4: perluas audit log, PDF, test.
+3. Fase 2: nilai, terbitkan, transkrip, dan unggah massal CSV (sudah ada UI).
+4. Fase 3: portal wali nilai/rapor/jadwal/kurikulum (kode siap 28 Nov 2026, menunggu migrasi).
+5. Fase 4: perluas audit log (sudah: buka nilai, jadwal/kurikulum/rapor, login Google), PDF, test.
 
 ### Sprint 3 — Konsolidasi & Kualitas (P2/P3)
 
@@ -284,8 +307,8 @@ Mengikuti fase di [14-modul-akademik.md](14-modul-akademik.md) §8:
 2. Satukan styling ke Vite, pindahkan query dari Blade.
 3. Hapus file/tabel/view legacy.
 4. Tambah rate limit PPDB, captcha, email konfirmasi.
-5. Tambah halaman error kustom, SEO, audit aksesibilitas.
-6. Tambah feature test untuk login, scoping jenjang, dan CRUD.
+5. ~~Tambah halaman error kustom~~ ✅ (403/404/429/500 selesai 28 Nov 2026); SEO, audit aksesibilitas.
+6. ~~Tambah feature test untuk login, verifikasi PPDB, nilai CRUD, dan izin~~ ✅ (28 Nov 2026).
 
 ---
 
@@ -293,7 +316,7 @@ Mengikuti fase di [14-modul-akademik.md](14-modul-akademik.md) §8:
 
 ### Boleh dijalankan AI (tidak menyentuh database)
 
-- [ ] `php artisan route:list --except-vendor` → 189 route; satu-satunya handler hilang adalah `DashboardController@settings` (P0-3)
+- [ ] `php artisan route:list --except-vendor` → 232 route; satu-satunya handler hilang adalah `DashboardController@settings` (P0-3)
 - [ ] `vendor\bin\pint`
 - [ ] `npm run build`
 - [ ] `php artisan view:clear` / `config:clear` / `route:clear`
@@ -319,7 +342,7 @@ Mengikuti fase di [14-modul-akademik.md](14-modul-akademik.md) §8:
 
 | Temuan | Lokasi |
 |---|---|
-| 189 route aplikasi & 3 route rusak | `routes/web.php`; `php artisan route:list --except-vendor` |
+| 232 route aplikasi & 3 route rusak (temuan awal) | `routes/web.php`; `php artisan route:list --except-vendor` |
 | Password sementara + email kredensial | `app/Http/Controllers/Admin/PendaftaranController.php`; `app/Mail/KredensialMail.php` |
 | Normalisasi role | `app/Support/Akses.php`; `app/Http/Middleware/CheckRole.php` |
 | Index unik email | `database/migrations/2026_08_24_203449_add_email_to_pendaftaran_online_table.php`; `2026_11_17_000002_drop_unique_email_on_pendaftaran_online_table.php` |

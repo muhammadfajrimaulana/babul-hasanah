@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Santri;
 use App\Models\User;
 use App\Support\Akses;
+use App\Support\CatatanAktivitas;
 use App\Support\Jenjang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -171,6 +172,13 @@ class PenggunaController extends Controller
             $this->tautkanSantri($pengguna, $santriIds);
         }
 
+        CatatanAktivitas::catat('buat_pengguna', $pengguna, [
+            'nama' => $pengguna->name,
+            'email' => $pengguna->email,
+            'role' => $pengguna->role,
+            'jenjang' => $pengguna->jenjang,
+        ]);
+
         return redirect()->route('super.pengguna.index', $this->kategoriRedirect($pengguna->role))
             ->with('success', 'Pengguna berhasil ditambahkan.');
     }
@@ -189,6 +197,8 @@ class PenggunaController extends Controller
     {
         $this->pastikanBolehKelola($pengguna);
 
+        $roleLama = $pengguna->role;
+        $jenjangLama = $pengguna->jenjang;
         $user = auth()->user();
         $data = $this->validasi($request, $pengguna);
 
@@ -238,6 +248,17 @@ class PenggunaController extends Controller
             $this->sinkronTautan($pengguna, $santriIds);
         }
 
+        if ($roleLama !== $pengguna->role || $jenjangLama !== $pengguna->jenjang) {
+            CatatanAktivitas::catat('ubah_role_pengguna', $pengguna, [
+                'nama' => $pengguna->name,
+                'email' => $pengguna->email,
+                'role_lama' => $roleLama,
+                'role_baru' => $pengguna->role,
+                'jenjang_lama' => $jenjangLama,
+                'jenjang_baru' => $pengguna->jenjang,
+            ], 'Peran/jenjang diubah dari menu Pengguna.');
+        }
+
         return redirect()->route('super.pengguna.index', $this->kategoriRedirect($pengguna->role))
             ->with('success', 'Pengguna berhasil diperbarui.');
     }
@@ -263,7 +284,15 @@ class PenggunaController extends Controller
         $pengguna->anak()->detach();
 
         $role = $pengguna->role;
+        $nama = $pengguna->name;
+        $email = $pengguna->email;
         $pengguna->delete();
+
+        CatatanAktivitas::catat('hapus_pengguna', null, [
+            'nama' => $nama,
+            'email' => $email,
+            'role' => $role,
+        ]);
 
         return redirect()->route('super.pengguna.index', $this->kategoriRedirect($role))
             ->with('success', 'Pengguna berhasil dihapus.');

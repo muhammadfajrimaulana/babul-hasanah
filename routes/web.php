@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\Akademik\JadwalController as AdminJadwalController;
+use App\Http\Controllers\Admin\Akademik\KurikulumController as AdminKurikulumController;
 use App\Http\Controllers\Admin\Akademik\MataPelajaranController as AdminMapelController;
 use App\Http\Controllers\Admin\Akademik\NilaiController as AdminNilaiController;
+use App\Http\Controllers\Admin\Akademik\RaporController as AdminRaporController;
 use App\Http\Controllers\Admin\Akademik\TranskripController as AdminTranskripController;
 use App\Http\Controllers\Admin\AlumniController as AdminAlumniController;
 use App\Http\Controllers\Admin\BeritaController as AdminBeritaController;
@@ -12,6 +15,7 @@ use App\Http\Controllers\Admin\InfoHarianController as AdminInfoHarianController
 use App\Http\Controllers\Admin\IzinController as AdminIzinController;
 use App\Http\Controllers\Admin\JenjangController as AdminJenjangController;
 use App\Http\Controllers\Admin\KegiatanController as AdminKegiatanController;
+use App\Http\Controllers\Admin\KepengurusanController as AdminKepengurusanController;
 use App\Http\Controllers\Admin\KelasController as AdminKelasController;
 use App\Http\Controllers\Admin\KontenController as AdminKontenController;
 use App\Http\Controllers\Admin\LegalisirController as AdminLegalisirController;
@@ -31,6 +35,7 @@ use App\Http\Controllers\Alumni\AlumniPortalController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GantiPasswordController;
+use App\Http\Controllers\Auth\GoogleLoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Portal\PortalAkademikController;
 use App\Http\Controllers\Portal\PortalDashboardController as PortalDashboard;
@@ -43,36 +48,36 @@ use App\Http\Controllers\Portal\PortalSantriController;
 use App\Http\Controllers\Public\AlumniController as PublicAlumniController;
 use App\Http\Controllers\Public\BeritaController as PublicBeritaController;
 use App\Http\Controllers\Public\GaleriController as PublicGaleriController;
+use App\Http\Controllers\Public\HomeController as PublicHomeController;
 use App\Http\Controllers\Public\InfoHarianController as PublicInfoHarianController;
+use App\Http\Controllers\Public\JenjangController as PublicJenjangController;
 use App\Http\Controllers\Public\PendaftaranOnlineController;
+use App\Http\Controllers\Public\ProfilController as PublicProfilController;
 use App\Http\Controllers\Public\PrestasiController;
 use App\Http\Controllers\Public\StrukturOrganisasiController;
 use App\Support\Akses;
+use App\Support\DataJenjang;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================
 // 1. PUBLIC ROUTES (Halaman Depan & Pendaftaran)
 // ==========================================
-Route::get('/', function () {
-    return view('pages.beranda');
-})->name('home');
+Route::get('/', [PublicHomeController::class, 'index'])->name('home');
 
 // ######## PROFIL ########### //
-Route::get('/profil', function () {
-    return view('pages.profil');
-})->name('profil');
+Route::get('/profil', [PublicProfilController::class, 'index'])->name('profil');
 
 Route::prefix('profil')->name('profil.')->group(function () {
-    Route::get('/sejarah', fn () => view('pages.sejarah'))->name('sejarah');
-    Route::get('/visi-misi', fn () => view('pages.visi-misi'))->name('visi-misi');
+    Route::get('/sejarah', [PublicProfilController::class, 'sejarah'])->name('sejarah');
+    Route::get('/visi-misi', [PublicProfilController::class, 'visiMisi'])->name('visi-misi');
     Route::get('/struktur-organisasi', [StrukturOrganisasiController::class, 'index'])->name('struktur-organisasi');
-    Route::get('/pembelajaran', fn () => view('pages.pembelajaran'))->name('pembelajaran');
-    Route::get('/fasilitas', fn () => view('pages.fasilitas'))->name('fasilitas');
+    Route::get('/pembelajaran', [PublicProfilController::class, 'pembelajaran'])->name('pembelajaran');
+    Route::get('/fasilitas', [PublicProfilController::class, 'fasilitas'])->name('fasilitas');
 });
 
 // ######## JENJANG ########### //
-Route::get('/jenjang/{slug}', fn (string $slug) => view('pages.jenjang.'.$slug))
-    ->whereIn('slug', ['mdta', 'pps-wustha', 'mts', 'ma', 'pdf-wustha', 'pdf-ulya', 'mahad-aly'])
+Route::get('/jenjang/{slug}', [PublicJenjangController::class, 'show'])
+    ->whereIn('slug', DataJenjang::SLUGS)
     ->name('jenjang.show');
 
 // ######## BERITA, GALERI, KEGIATAN ########### //
@@ -81,9 +86,9 @@ Route::get('/berita/{berita:slug}', [PublicBeritaController::class, 'show'])->na
 
 Route::get('/galeri', [PublicGaleriController::class, 'index'])->name('galeri');
 
-Route::get('/kegiatan', function () {
-    return view('pages.kegiatan');
-})->name('kegiatan');
+// Halaman kegiatan publik kini digabung ke Info Harian (agenda & jadwal).
+// Route lama dipertahankan agar tautan/bookmark lama tidak error 500.
+Route::get('/kegiatan', fn () => redirect()->route('info-harian.index'))->name('kegiatan');
 
 // ######## PRESTASI SANTRI ########### //
 Route::get('/prestasi', [PrestasiController::class, 'index'])->name('prestasi.index');
@@ -99,7 +104,10 @@ Route::get('/pendaftaran', function () {
     return view('pages.pendaftaran');
 })->name('pendaftaran.index');
 
-Route::post('/pendaftaran', [PendaftaranOnlineController::class, 'store'])->name('pendaftaran.store');
+// Batasi 5 pengiriman per 10 menit per IP untuk mencegah spam pendaftaran.
+Route::post('/pendaftaran', [PendaftaranOnlineController::class, 'store'])
+    ->middleware('throttle:5,10')
+    ->name('pendaftaran.store');
 
 Route::get('/kontak', function () {
     return view('pages.kontak');
@@ -112,6 +120,13 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     // Batasi 6 percobaan per menit per IP untuk mencegah brute force.
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->middleware('throttle:6,1');
+
+    // Login Google (Socialite). Tombol di halaman login hanya tampil bila
+    // kredensial sudah diisi; lihat docs/17-google-oauth.md.
+    Route::get('/auth/google', [GoogleLoginController::class, 'redirect'])
+        ->name('auth.google');
+    Route::get('/auth/google/callback', [GoogleLoginController::class, 'callback'])
+        ->name('auth.google.callback');
 
     // Lupa kata sandi: tautan reset dikirim ke email akun yang terdaftar.
     Route::get('/lupa-kata-sandi', [ForgotPasswordController::class, 'create'])->name('password.request');
@@ -221,6 +236,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::post('/santri/{id}/reset-password-wali', [SantriAksiController::class, 'resetPasswordWali'])->name('santri.reset-wali');
         Route::post('/santri/{id}/pindah-jenjang', [SantriAksiController::class, 'pindahJenjang'])->name('santri.pindah-jenjang');
         Route::post('/santri/{id}/arsipkan', [SantriAksiController::class, 'arsipkan'])->name('santri.arsipkan');
+        Route::post('/santri/luluskan-massal', [AdminDataSantriController::class, 'luluskanMassal'])->name('santri.luluskan-massal');
         Route::post('/santri/{id}/luluskan', [AdminDataSantriController::class, 'luluskan'])->name('santri.luluskan');
         Route::post('/santri/{id}/batalkan-kelulusan', [AdminDataSantriController::class, 'batalkanKelulusan'])->name('santri.batalkan-kelulusan');
 
@@ -231,12 +247,14 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::delete('/pendaftaran/{id}', [AdminPendaftaranController::class, 'destroy'])->name('pendaftaran.destroy');
 
         // Alumni (CRUD, tanpa index yang sudah ada di grup baca)
+        Route::post('/data-alumni/buat-akun-massal', [AdminAlumniController::class, 'buatAkunMassal'])->name('alumni.buat-akun-massal');
         Route::post('/data-alumni/tarik-santri-lulus', [AdminAlumniController::class, 'tarikSantriLulus'])->name('alumni.tarik-santri-lulus');
         Route::get('/data-alumni/create', [AdminAlumniController::class, 'create'])->name('alumni.create');
         Route::post('/data-alumni', [AdminAlumniController::class, 'store'])->name('alumni.store');
         Route::get('/data-alumni/{alumni}/edit', [AdminAlumniController::class, 'edit'])->name('alumni.edit');
         Route::put('/data-alumni/{alumni}', [AdminAlumniController::class, 'update'])->name('alumni.update');
         Route::delete('/data-alumni/{alumni}', [AdminAlumniController::class, 'destroy'])->name('alumni.destroy');
+        Route::post('/data-alumni/{alumni}/reset-password', [AdminAlumniController::class, 'resetPassword'])->name('alumni.reset-password');
 
         // Berkas nilai/transkrip alumni.
         Route::post('/data-alumni/{alumni}/nilai', [AdminAlumniController::class, 'uploadNilai'])->name('alumni.nilai.upload');
@@ -268,6 +286,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/santri/{id}/kembalikan', [SantriAksiController::class, 'kembalikan'])
         ->middleware('role:super_admin')->name('santri.kembalikan');
 
+    Route::post('/santri/{id}/pulihkan', [SantriAksiController::class, 'pulihkan'])
+        ->middleware('role:super_admin')->name('santri.pulihkan');
+
     // 4.4 Konten website — Superadmin & Admin Jenjang
     Route::middleware('role:'.Akses::roles('berita'))->group(function () {
         Route::resource('pengelolaan-berita', AdminBeritaController::class)
@@ -291,6 +312,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     Route::middleware('role:'.Akses::roles('santri.lihat'))->group(function () {
         Route::get('/santri', [AdminDataSantriController::class, 'index'])->name('santri.index');
+
+        // Didaftarkan sebelum /santri/{id} agar tidak tertangkap sebagai id.
+        Route::get('/santri/terhapus', [AdminDataSantriController::class, 'terhapus'])
+            ->middleware('role:super_admin')->name('santri.terhapus');
+
         Route::get('/santri/{id}', [AdminDataSantriController::class, 'detail'])->name('santri.detail');
 
         Route::get('/pengelolaan-prestasi', [PrestasiAdminController::class, 'index'])->name('prestasi.index');
@@ -377,6 +403,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
             ->parameters(['struktur-organisasi' => 'struktur'])
             ->except('show')
             ->names('struktur');
+
+        // Kartu pimpinan di /profil memakai tabel kepengurusan (terpisah dari bagan).
+        Route::resource('kepengurusan', AdminKepengurusanController::class)
+            ->parameters(['kepengurusan' => 'kepengurusan'])
+            ->except('show')
+            ->names('kepengurusan');
     });
 
     Route::middleware('role:'.Akses::roles('info'))->group(function () {
@@ -397,15 +429,58 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
             Route::get('/transkrip', [AdminTranskripController::class, 'index'])->name('transkrip.index');
             Route::get('/transkrip/{santri}/cetak', [AdminTranskripController::class, 'cetak'])->name('transkrip.cetak');
             Route::get('/transkrip/{santri}', [AdminTranskripController::class, 'show'])->name('transkrip.show');
+            Route::get('/jadwal', [AdminJadwalController::class, 'index'])->name('jadwal.index');
+            Route::get('/kurikulum', [AdminKurikulumController::class, 'index'])->name('kurikulum.index');
+            Route::get('/rapor', [AdminRaporController::class, 'index'])->name('rapor.index');
         });
 
         Route::middleware('role:'.Akses::roles('akademik.ubah'))->group(function () {
+            Route::get('/nilai/template', [AdminNilaiController::class, 'downloadTemplate'])->name('nilai.template');
+            Route::post('/nilai/import', [AdminNilaiController::class, 'import'])->name('nilai.import');
+            Route::get('/nilai/{nilai}/buka-kembali', [AdminNilaiController::class, 'bukaKembaliForm'])
+                ->name('nilai.buka-kembali.form');
+            Route::post('/nilai/{nilai}/buka-kembali', [AdminNilaiController::class, 'bukaKembali'])
+                ->name('nilai.buka-kembali');
             Route::post('/nilai', [AdminNilaiController::class, 'store'])->name('nilai.store');
+
+            // Jadwal pelajaran.
+            Route::get('/jadwal/tambah', [AdminJadwalController::class, 'create'])->name('jadwal.create');
+            Route::post('/jadwal', [AdminJadwalController::class, 'store'])->name('jadwal.store');
+            Route::get('/jadwal/{jadwal}/edit', [AdminJadwalController::class, 'edit'])->name('jadwal.edit');
+            Route::put('/jadwal/{jadwal}', [AdminJadwalController::class, 'update'])->name('jadwal.update');
+            Route::patch('/jadwal/{jadwal}', [AdminJadwalController::class, 'update']);
+            Route::delete('/jadwal/{jadwal}', [AdminJadwalController::class, 'destroy'])->name('jadwal.destroy');
+
+            // Kurikulum & item. Route /tambah sengaja sebelum /{kurikulum}.
+            Route::get('/kurikulum/tambah', [AdminKurikulumController::class, 'create'])->name('kurikulum.create');
+            Route::post('/kurikulum', [AdminKurikulumController::class, 'store'])->name('kurikulum.store');
+            Route::get('/kurikulum/{kurikulum}/edit', [AdminKurikulumController::class, 'edit'])->name('kurikulum.edit');
+            Route::put('/kurikulum/{kurikulum}', [AdminKurikulumController::class, 'update'])->name('kurikulum.update');
+            Route::patch('/kurikulum/{kurikulum}', [AdminKurikulumController::class, 'update']);
+            Route::delete('/kurikulum/{kurikulum}', [AdminKurikulumController::class, 'destroy'])->name('kurikulum.destroy');
+            Route::post('/kurikulum/{kurikulum}/item', [AdminKurikulumController::class, 'itemStore'])->name('kurikulum.item.store');
+            Route::put('/kurikulum/{kurikulum}/item/{item}', [AdminKurikulumController::class, 'itemUpdate'])->name('kurikulum.item.update');
+            Route::delete('/kurikulum/{kurikulum}/item/{item}', [AdminKurikulumController::class, 'itemDestroy'])->name('kurikulum.item.destroy');
+
+            // Rapor rekap.
+            Route::post('/rapor/hitung-ulang', [AdminRaporController::class, 'hitungUlang'])->name('rapor.hitung-ulang');
+            Route::get('/rapor/{rapor}/edit', [AdminRaporController::class, 'edit'])->name('rapor.edit');
+            Route::put('/rapor/{rapor}', [AdminRaporController::class, 'update'])->name('rapor.update');
+            Route::patch('/rapor/{rapor}', [AdminRaporController::class, 'update']);
         });
 
-        Route::post('/nilai/terbitkan', [AdminNilaiController::class, 'terbitkan'])
-            ->middleware('role:'.Akses::roles('akademik.terbit'))
-            ->name('nilai.terbitkan');
+        Route::middleware('role:'.Akses::roles('akademik.terbit'))->group(function () {
+            Route::post('/nilai/terbitkan', [AdminNilaiController::class, 'terbitkan'])->name('nilai.terbitkan');
+            Route::post('/kurikulum/{kurikulum}/terbitkan', [AdminKurikulumController::class, 'terbitkan'])->name('kurikulum.terbitkan');
+            Route::post('/rapor/terbitkan-semua', [AdminRaporController::class, 'terbitkanSemua'])->name('rapor.terbitkan-semua');
+            Route::post('/rapor/{rapor}/terbitkan', [AdminRaporController::class, 'terbitkan'])->name('rapor.terbitkan');
+        });
+
+        // Didaftarkan paling akhir agar /kurikulum/tambah tidak tertangkap
+        // sebagai {kurikulum}.
+        Route::get('/kurikulum/{kurikulum}', [AdminKurikulumController::class, 'show'])
+            ->middleware('role:'.Akses::roles('akademik.lihat'))
+            ->name('kurikulum.show');
 
         Route::middleware('role:'.Akses::roles('akademik.mapel'))->group(function () {
             Route::resource('mata-pelajaran', AdminMapelController::class)

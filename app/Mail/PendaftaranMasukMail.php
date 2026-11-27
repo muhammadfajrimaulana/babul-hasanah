@@ -33,6 +33,7 @@ class PendaftaranMasukMail extends Mailable
                 'namaSantri' => $this->pendaftaran->nama_lengkap,
                 'noPendaftaran' => $this->pendaftaran->no_pendaftaran,
                 'jenjang' => $this->pendaftaran->jenjang_tujuan,
+                'emailSantri' => $this->pendaftaran->email_santri,
                 'loginUrl' => route('login'),
             ],
         );

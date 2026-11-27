@@ -115,6 +115,59 @@
             </div>
         @endif
 
+        @if ($tautanSiap && $tanpaAkun->isNotEmpty())
+            <div class="rounded-3xl border border-emerald-200 bg-emerald-50/70 p-5 dark:border-emerald-500/30 dark:bg-emerald-500/10">
+                <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                    <div class="space-y-2">
+                        <p class="text-xs font-black text-emerald-800 dark:text-emerald-300">
+                            <i class="fa-solid fa-user-lock mr-1.5"></i>
+                            {{ $tanpaAkun->count() }} alumni belum punya akun login
+                        </p>
+                        <p class="text-[11px] leading-relaxed text-emerald-900/70 dark:text-emerald-300/70">
+                            Akun alumni seharusnya dibuat otomatis saat kelulusan. Untuk data lama yang belum punya akun,
+                            centang nama di bawah lalu buat sekaligus. Kredensial dikirim ke email santri bila tersedia,
+                            atau ke email alumni yang tersimpan.
+                        </p>
+                    </div>
+
+                    @if (auth()->user()->bisa('alumni.ubah'))
+                        <form action="{{ route('admin.alumni.buat-akun-massal') }}" method="POST" class="lg:w-96 shrink-0"
+                            onsubmit="return confirm('Buat akun dan kirim kredensial untuk ' + document.querySelectorAll('.pilih-akun-alumni:checked').length + ' alumni?');">
+                            @csrf
+                            <div class="max-h-44 overflow-y-auto custom-scrollbar rounded-xl border border-emerald-200 bg-white/80 p-2 dark:border-emerald-500/20 dark:bg-slate-900/50">
+                                @foreach ($tanpaAkun as $a)
+                                    <label class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-[11px] font-bold text-emerald-900 dark:text-emerald-200 hover:bg-emerald-100/60 dark:hover:bg-emerald-500/10">
+                                        <input type="checkbox" name="ids[]" value="{{ $a->id }}" checked
+                                            class="pilih-akun-alumni rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500">
+                                        <span class="truncate">{{ $a->nama }}</span>
+                                        <span class="font-normal text-emerald-800/60 dark:text-emerald-300/60">
+                                            · {{ $a->tahun_lulus }}{{ $a->jenjang ? ' · '.$a->jenjang : '' }}
+                                        </span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            <div class="mt-3 flex flex-wrap items-center gap-2">
+                                <button type="button"
+                                    onclick="document.querySelectorAll('.pilih-akun-alumni').forEach(function (cb) { cb.checked = true; })"
+                                    class="rounded-lg border border-emerald-300 bg-white/70 px-2.5 py-2 text-[10px] font-bold text-emerald-800 transition hover:bg-white dark:border-emerald-500/30 dark:bg-slate-900/50 dark:text-emerald-300">
+                                    Pilih semua
+                                </button>
+                                <button type="button"
+                                    onclick="document.querySelectorAll('.pilih-akun-alumni').forEach(function (cb) { cb.checked = false; })"
+                                    class="rounded-lg border border-emerald-200 bg-white/70 px-2.5 py-2 text-[10px] font-bold text-emerald-700 transition hover:bg-white dark:border-emerald-500/20 dark:bg-slate-900/50 dark:text-emerald-300">
+                                    Kosongkan
+                                </button>
+                                <button type="submit"
+                                    class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-[11px] font-black text-white transition hover:bg-emerald-700">
+                                    <i class="fa-solid fa-user-plus"></i> Buat Akun Massal
+                                </button>
+                            </div>
+                        </form>
+                    @endif
+                </div>
+            </div>
+        @endif
+
         <!-- RINGKASAN ALUMNI (mengikuti halaman publik /alumni) -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <div class="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -259,7 +312,7 @@
                                 <td class="py-4 px-4">
                                     <div class="flex items-center gap-3">
                                         @if ($a->foto_url)
-                                            <img src="{{ $a->foto_url }}" alt=""
+                                            <img src="{{ $a->foto_url }}" alt="Foto {{ $a->nama }}"
                                                 class="w-9 h-9 object-cover rounded-full border border-slate-100 dark:border-slate-700">
                                         @else
                                             <span class="w-9 h-9 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-[11px] font-black">
@@ -346,6 +399,15 @@
                                     @if (auth()->user()->bisa('alumni.ubah'))
                                         <a href="{{ route('admin.alumni.edit', $a) }}"
                                             class="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/50 text-amber-600 hover:bg-amber-100 rounded-lg text-[10px] font-bold transition">Edit</a>
+                                        @if ($a->user_id)
+                                            <form action="{{ route('admin.alumni.reset-password', $a) }}" method="POST"
+                                                class="inline-block"
+                                                onsubmit="return confirm('Reset password alumni {{ $a->nama }}? Password sementara akan dikirim ke {{ $a->user?->email ?: $a->email }} dan berlaku 24 jam.');">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-[10px] font-bold transition">Reset Password</button>
+                                            </form>
+                                        @endif
                                         <form action="{{ route('admin.alumni.destroy', $a) }}" method="POST"
                                             class="inline-block"
                                             onsubmit="return confirm('Hapus data alumni {{ $a->nama }}? Berkas nilai/transkrip yang tersimpan juga akan dihapus.');">

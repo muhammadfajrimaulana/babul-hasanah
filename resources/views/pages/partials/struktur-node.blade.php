@@ -7,8 +7,8 @@
     <div class="person {{ $kelas }}">
         <div class="avatar">
             <i class="fa-solid {{ $ikon }}"></i>
-            @if ($node->foto)
-                <img src="{{ $node->foto_url }}" alt="{{ $node->nama }}" @if ($level > 1) loading="lazy" @endif onerror="this.remove()">
+            @if ($node->foto_url)
+                <img src="{{ $node->foto_url }}" alt="{{ $node->nama }}" @if ($level > 1) loading="lazy" @endif>
             @endif
         </div>
         <h3>{{ $node->nama }}</h3>

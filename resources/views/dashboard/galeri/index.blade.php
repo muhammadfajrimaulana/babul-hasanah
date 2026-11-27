@@ -52,8 +52,9 @@
                                 <td class="py-4 px-6">
                                     <div
                                         class="w-16 h-12 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden flex items-center justify-center border border-slate-200 dark:border-slate-700">
-                                        @if ($cover)
-                                            <img src="{{ asset('storage/' . $cover) }}" alt="{{ $album->judul }}"
+                                        @php $coverUrl = \App\Support\GambarPublik::dariStorage($cover); @endphp
+                                        @if ($coverUrl)
+                                            <img src="{{ $coverUrl }}" alt="{{ $album->judul }}"
                                                 class="w-full h-full object-cover">
                                         @else
                                             <i
@@ -83,7 +84,7 @@
                                     </div>
                                 </td>
                                 <td class="py-4 px-6 text-slate-500 dark:text-slate-400">
-                                    {{ ($album->tanggal ?? $album->created_at)->format('d M Y') }}
+                                    {{ ($album->tanggal ?? $album->created_at)?->translatedFormat('d M Y') }}
                                 </td>
                                 <td class="py-4 px-6 text-right">
                                     <form method="POST" action="{{ route('admin.galeri.destroy', $album) }}"

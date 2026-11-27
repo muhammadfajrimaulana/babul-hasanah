@@ -8,9 +8,12 @@ use App\Models\MataPelajaran;
 use App\Models\NilaiSantri;
 use App\Support\Akademik;
 use App\Support\Akses;
+use App\Support\CatatanAktivitas;
+use App\Support\ImportNilai;
 use App\Support\Jenjang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -106,6 +109,7 @@ class NilaiController extends Controller
 
     public function store(Request $request)
     {
+        Gate::authorize('create', NilaiSantri::class);
         abort_unless($request->user()->bisa('akademik.ubah'), 403);
 
         $konteks = $this->konteks($request);
@@ -193,10 +197,131 @@ class NilaiController extends Controller
             ->with('success', $pesan);
     }
 
+    /* ============================================================= Import */
+
+    /**
+     * Import nilai massal dari CSV.
+     *
+     * Konteks (jenjang, kelas, mapel, tahun, semester, kategori) diambil dari
+     * filter halaman dan diverifikasi ulang lewat konteks(). Kolom pada CSV
+     * boleh menimpa konteks tersebut selama masih dalam kewenangan user.
+     */
+    public function import(Request $request)
+    {
+        Gate::authorize('create', NilaiSantri::class);
+        abort_unless($request->user()->bisa('akademik.ubah'), 403);
+
+        $konteks = $this->konteks($request);
+
+        $data = $request->validate([
+            'file_csv' => ['required', 'file', 'extensions:csv,txt', 'max:5120'],
+        ], [
+            'file_csv.required' => 'Pilih berkas CSV terlebih dahulu.',
+            'file_csv.extensions' => 'Berkas harus berformat CSV/TXT.',
+            'file_csv.max' => 'Ukuran berkas maksimal 5 MB.',
+        ]);
+
+        $namaFile = $request->file('file_csv')->getClientOriginalName();
+
+        try {
+            $hasil = ImportNilai::proses(
+                $request->file('file_csv')->getRealPath(),
+                $request->user(),
+                $konteks
+            );
+        } catch (\Throwable $e) {
+            CatatanAktivitas::catat('import_nilai_csv_gagal', null, [
+                'file' => $namaFile,
+                'alasan' => $e->getMessage(),
+            ]);
+
+            return redirect()
+                ->route('admin.akademik.nilai.index', $this->queryKonteks($konteks))
+                ->with('error', 'Gagal membaca berkas CSV: '.$e->getMessage());
+        }
+
+        CatatanAktivitas::catat('import_nilai_csv', null, [
+            'file'               => $namaFile,
+            'jenjang'            => $konteks['jenjang'],
+            'kelas'              => $konteks['kelas'],
+            'mata_pelajaran_id'  => $konteks['mapel']->id,
+            'tahun_ajaran'       => $konteks['tahun'],
+            'semester'           => $konteks['semester'],
+            'kategori'           => $konteks['kategori'],
+            'berhasil'           => $hasil['berhasil'],
+            'gagal'              => $hasil['gagal'],
+            'dikembalikan'       => $hasil['dikembalikan'],
+            'contoh_error'       => array_slice($hasil['errors'], 0, 3),
+        ]);
+
+        $pesan = "Import selesai: {$hasil['berhasil']} nilai disimpan sebagai draft, {$hasil['gagal']} baris dilewati.";
+
+        if ($hasil['dikembalikan'] > 0) {
+            $pesan .= ' '.$hasil['dikembalikan'].' nilai yang sudah terbit dikembalikan ke draft karena diubah.';
+        }
+
+        $flash = ['success' => $pesan];
+
+        if ($hasil['errors'] !== []) {
+            $flash['import_errors'] = array_slice($hasil['errors'], 0, 20);
+        }
+
+        return redirect()
+            ->route('admin.akademik.nilai.index', $this->queryKonteks($konteks))
+            ->with($flash);
+    }
+
+    /** Template CSV dihasilkan langsung, tanpa berkas statis di public/. */
+    public function downloadTemplate()
+    {
+        $handle = fopen('php://temp', 'r+');
+
+        fputcsv($handle, ImportNilai::kolomTemplate(), ';');
+        fputcsv($handle, [
+            '',
+            'SANTRI-2026-AB12',
+            'Siti Aminah',
+            '',
+            '',
+            'MTs',
+            '7A',
+            Akademik::tahunAjaranSekarang(),
+            Akademik::semesterSekarang(),
+            'tugas',
+            '85',
+            'Contoh catatan singkat',
+        ], ';');
+        fputcsv($handle, [
+            '',
+            'SANTRI-2026-CD34',
+            'Ahmad Amin',
+            '',
+            'FIQIH',
+            'MTs',
+            '7A',
+            Akademik::tahunAjaranSekarang(),
+            Akademik::semesterSekarang(),
+            'uts',
+            '90,5',
+            '',
+        ], ';');
+
+        rewind($handle);
+        $isi = stream_get_contents($handle);
+        fclose($handle);
+
+        return response("\xEF\xBB\xBF".$isi, 200, [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="template_import_nilai.csv"',
+            'Cache-Control'       => 'no-store',
+        ]);
+    }
+
     /* ========================================================= Publikasi */
 
     public function terbitkan(Request $request)
     {
+        Gate::authorize('terbitkan', NilaiSantri::class);
         abort_unless($request->user()->bisa('akademik.terbit'), 403);
 
         $konteks = $this->konteks($request);
@@ -225,6 +350,62 @@ class NilaiController extends Controller
         return redirect()
             ->route('admin.akademik.nilai.index', $this->queryKonteks($konteks))
             ->with($jumlah > 0 ? 'success' : 'info', $pesan);
+    }
+
+    /**
+     * Form alasan pembukaan nilai published.
+     *
+     * Nilai yang sudah terbit tidak boleh berubah diam-diam: Superadmin dan
+     * Admin Jenjang wajib menyebut alasan dan aksinya dicatat.
+     */
+    public function bukaKembaliForm(NilaiSantri $nilai)
+    {
+        Gate::authorize('bukaKembali', $nilai);
+
+        abort_unless($nilai->status === 'published', 404, 'Nilai ini tidak berstatus terbit.');
+
+        return view('dashboard.akademik.nilai.buka-kembali', [
+            'nilai' => $nilai->load(['santri', 'mataPelajaran']),
+        ]);
+    }
+
+    public function bukaKembali(Request $request, NilaiSantri $nilai)
+    {
+        Gate::authorize('bukaKembali', $nilai);
+
+        abort_unless($nilai->status === 'published', 404, 'Nilai ini tidak berstatus terbit.');
+
+        $data = $request->validate([
+            'alasan' => ['required', 'string', 'min:5', 'max:255'],
+        ], [
+            'alasan.required' => 'Alasan pembukaan nilai wajib diisi.',
+            'alasan.min' => 'Alasan minimal 5 karakter.',
+        ]);
+
+        $alasan = trim($data['alasan']);
+        $riwayat = [
+            'santri_id' => $nilai->santri_id,
+            'mata_pelajaran_id' => $nilai->mata_pelajaran_id,
+            'nilai' => $nilai->nilai,
+            'jenjang' => $nilai->jenjang,
+            'kelas' => $nilai->kelas,
+            'tahun_ajaran' => $nilai->tahun_ajaran,
+            'semester' => $nilai->semester,
+            'kategori' => $nilai->kategori,
+        ];
+
+        $nilai->update([
+            'status' => 'draft',
+            'published_at' => null,
+            'diterbitkan_oleh' => null,
+            'diperbarui_oleh' => $request->user()->id,
+        ]);
+
+        CatatanAktivitas::catat('nilai_dibuka_kembali', $nilai, $riwayat, $alasan);
+
+        return redirect()
+            ->route('admin.akademik.nilai.index', $this->queryKonteksNilai($nilai))
+            ->with('success', 'Nilai berhasil dibuka kembali menjadi draft. Alasan tercatat di log aktivitas.');
     }
 
     /* ============================================================= Helper */
@@ -320,6 +501,7 @@ class NilaiController extends Controller
             ?: Jenjang::normalisasi($data['jenjang'] ?? '')
             ?: $mapel->jenjang;
 
+        Gate::authorize('jenjang', [NilaiSantri::class, $jenjang]);
         abort_unless(Akses::cocokJenjang($user, $jenjang), 403, 'Jenjang ini di luar kewenangan Anda.');
 
         if ($mapel->jenjang !== $jenjang) {
@@ -345,6 +527,19 @@ class NilaiController extends Controller
             'semester' => $data['semester'],
             'kategori' => $data['kategori'],
             'mapel' => $mapel,
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function queryKonteksNilai(NilaiSantri $nilai): array
+    {
+        return [
+            'jenjang' => $nilai->jenjang,
+            'kelas' => $nilai->kelas,
+            'mata_pelajaran_id' => $nilai->mata_pelajaran_id,
+            'tahun_ajaran' => $nilai->tahun_ajaran,
+            'semester' => $nilai->semester,
+            'kategori' => $nilai->kategori,
         ];
     }
 

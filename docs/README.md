@@ -11,11 +11,11 @@ yang ada di repositori (bukan asumsi dari README bawaan Laravel).
 > dijalankan manusia**, bukan oleh AI.
 
 - **Tanggal analisis awal:** 31 Oktober 2026
-- **Pembaruan terakhir:** 27 November 2026 (email santri/akun alumni, import CSV, policy, anti-spam PPDB, dan checklist per menu)
+- **Pembaruan terakhir:** 28 November 2026 (checklist per menu, jadwal/kurikulum/rapor, Google OAuth, test scoping, peta tampilan per menu, query beranda/profil dipindah ke controller, data 7 jenjang dipusatkan, fallback gambar publik, tautan Blade memakai named route, pembersihan 16 file 0 byte, halaman error 403/404/500, feature test login/reset password, verifikasi PPDB, nilai/izin & soft delete santri, CRUD kepengurusan, aset placeholder `public/images/`, alt gambar deskriptif, panduan verifikasi manusia, satukan styling Vite, kompresi aset)
 - **Status working tree:** ada perubahan yang belum di-commit; folder `docs/` di-*ignore* Git sehingga perubahan dokumentasi tidak muncul di `git status`
 - **Framework:** Laravel 13.29 (requirement `^13.17`), PHP 8.3+ (runtime terpasang PHP 8.5.5)
 - **Basis data:** MySQL `babul_hasanah` (XAMPP)
-- **Skala kode saat ini:** 189 route aplikasi, 55 file controller, 31 model, 43 file migrasi, 133 file Blade
+- **Skala kode saat ini:** 232 route aplikasi, 57 file controller, 34 model, 50 file migrasi, 144 file Blade
 
 ## Daftar Dokumen
 
@@ -35,9 +35,12 @@ yang ada di repositori (bukan asumsi dari README bawaan Laravel).
 | 11 | [11-role-dan-login.md](11-role-dan-login.md) | **6 peran**, alur login, redirect per role, middleware, matriks hak akses |
 | 12 | [12-halaman-per-role.md](12-halaman-per-role.md) | **Dashboard per role**, menu sidebar/portal, scoping jenjang, checklist uji |
 | 13 | [role-pengguna.md](role-pengguna.md) | **Panduan role pengguna**: 6 peran, 3 akun inti, alur login, dashboard, pengelolaan akun & wali, troubleshooting |
-| 14 | [14-modul-akademik.md](14-modul-akademik.md) | **UI selesai, tabel belum dibuat**: nilai per kelas, transkrip, mata pelajaran, portal nilai wali; migrasi harus dijalankan manusia |
+| 14 | [14-modul-akademik.md](14-modul-akademik.md) | **Modul akademik**: nilai, transkrip, mapel, jadwal (anti-bentrok), kurikulum + item, rapor rekap (rata-rata/peringkat/catatan wali), portal wali; kode siap, tabel baru menunggu migrasi manusia |
 | 15 | [15-email-santri-akun-alumni.md](15-email-santri-akun-alumni.md) | **Email santri → username akun alumni**: kolom baru, alur PPDB, sinkronisasi kelulusan, dan pengiriman kredensial |
 | 16 | [16-checklist-per-menu.md](16-checklist-per-menu.md) | **Checklist kerja per menu**: kondisi terkini, yang masih kurang, prioritas, dan urutan perbaikan untuk sesi berikutnya |
+| 17 | [17-google-oauth.md](17-google-oauth.md) | **Google Login**: langkah Google Cloud Console, `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`, callback, `composer install`, dan batasan akun harus sudah terdaftar |
+| 18 | [18-peta-tampilan-per-menu.md](18-peta-tampilan-per-menu.md) | **Peta tampilan per menu**: tabel menu → route → controller → file Blade untuk publik, auth, admin, portal wali, alumni, email/error, plus alias & view tanpa route |
+| 19 | [19-panduan-verifikasi-manusia.md](19-panduan-verifikasi-manusia.md) | **Panduan verifikasi manusia**: urutan `migrate`/test/build, jumlah method test, checklist UI per role, dan format lapor hasil |
 
 ## Ringkasan Cepat
 
@@ -87,12 +90,15 @@ namanya tampil pada halaman Nilai.
 | Portal wali | Dinamis, multi-anak, mendukung mode riwayat setelah anak lulus |
 | Portal alumni | Berjalan: profil, nilai, dokumen, legalisir, tracer study, pengumuman |
 | Naik kelas | Berjalan + rollback khusus Superadmin dengan alasan & log |
+| Hapus santri | Soft delete + Tempat Sampah; pemulihan khusus Superadmin; `forceDelete` tidak diekspos ke UI |
+| Kepengurusan | CRUD Superadmin di `/admin/kepengurusan`; kartu `/profil` dari tabel `kepengurusan`; foto lama tetap terbaca |
+| Aset gambar publik | 14 placeholder di `public/images/program/` (banner 1200×400) dan `public/images/pengurus/` (foto ketua 320×320), total 230 KB; fallback `GambarPublik` tetap aktif. Belum foto resmi |
 | Info Harian | **Berjalan**: CRUD via menu Superadmin + tampil di beranda |
 | Import santri | **Berjalan via CSV native** (tanpa package): validasi per baris, laporan error, template CSV dinamis; XLSX tidak didukung |
-| Modul akademik | **UI berjalan** (nilai, transkrip, mata pelajaran, portal nilai wali); tabel `mata_pelajaran` & `nilai_santri` menunggu migrasi oleh manusia — lihat [14-modul-akademik.md](14-modul-akademik.md) |
+| Modul akademik | **Kode siap** (nilai, transkrip, mapel, jadwal anti-bentrok, kurikulum + item, rapor rekap, portal wali); tabel baru menunggu migrasi oleh manusia — lihat [14-modul-akademik.md](14-modul-akademik.md) |
 | Notifikasi nilai wali | Indikator in-app di dashboard portal (tanpa WhatsApp gateway) |
-| Google Login | **Belum aktif**, tombol hanya `href="#"` |
-| Test | Hanya 2 contoh test bawaan |
+| Google Login | **Kode siap** via Socialite; tombol muncul setelah kredensial diisi. Butuh `composer install` + env — lihat [17-google-oauth.md](17-google-oauth.md) |
+| Test | 2 contoh bawaan + 13 feature test (`ScopingJenjangTest`, `PortalKepemilikanAnakTest`, `LoginDanResetPasswordTest`, `VerifikasiPPDBTest`, `NilaiDanIzinTest`, `SoftDeleteSantriTest`, `KepengurusanCrudTest`, `GambarPublikTest`, `PencarianSantriTest`, `SlugBeritaTest`, `GaleriStorageTest`, `IdentifierUnikTest`, `PesanFlashTest`) + 7 unit test (`AltGambarTest`, `LocaleTanggalTest`, `PathGambarStorageTest`, `NamaAplikasiTest`, `EnvExampleTest`, `ViewMatTest`, `DokumenSinkronTest`); dijalankan manusia, lihat [16-checklist-per-menu.md](16-checklist-per-menu.md) |
 
 ### Peringatan Awal
 

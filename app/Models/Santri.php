@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Schema;
 
 class Santri extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     // Menyesuaikan dengan nama tabel di database migrasi kita
     protected $table = 'santri';
@@ -20,11 +23,18 @@ class Santri extends Model
 
     public const STATUS_ARSIP = 'arsip';
 
+    /** Pilihan jenis kelamin untuk komposisi santri. */
+    public const JENIS_KELAMIN = [
+        'L' => 'Laki-laki',
+        'P' => 'Perempuan',
+    ];
+
     protected $fillable = [
         'user_id',
         'pendaftaran_online_id',
         'nomor_induk',
         'nama_lengkap',
+        'jenis_kelamin',
         'jenjang_pendidikan',
         'kelas',
         'kelas_id',
@@ -33,7 +43,51 @@ class Santri extends Model
         'tahun_lulus',
         'alamat',
         'nama_wali',
+        'email_santri',
     ];
+
+    /** Apakah kolom tertentu sudah tersedia (sebelum migrasi dijalankan). */
+    public static function siapKolom(string $kolom): bool
+    {
+        try {
+            return Schema::hasColumn('santri', $kolom);
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /** Email santri dipakai sebagai username akun alumni saat kelulusan. */
+    public static function siapEmailSantri(): bool
+    {
+        return self::siapKolom('email_santri');
+    }
+
+    /** Apakah kolom jenis kelamin sudah tersedia (sebelum migrasi). */
+    public static function siapJenisKelamin(): bool
+    {
+        return self::siapKolom('jenis_kelamin');
+    }
+
+    /** Terima "L"/"P" maupun label lengkap dari CSV atau arsip PPDB. */
+    public static function normalisasiJenisKelamin(mixed $nilai): ?string
+    {
+        if ($nilai === null) {
+            return null;
+        }
+
+        $teks = strtolower(trim((string) $nilai));
+
+        return match (true) {
+            $teks === 'l', str_starts_with($teks, 'laki'), $teks === 'pria' => 'L',
+            $teks === 'p', str_starts_with($teks, 'perempuan'), $teks === 'wanita' => 'P',
+            default => null,
+        };
+    }
+
+    public function labelJenisKelamin(): string
+    {
+        return self::JENIS_KELAMIN[$this->jenis_kelamin] ?? '-';
+    }
 
     // Relasi ke tabel users (akun wali utama)
     public function user()
@@ -71,6 +125,12 @@ class Santri extends Model
     public function nilai()
     {
         return $this->hasMany(NilaiSantri::class, 'santri_id');
+    }
+
+    /** Rapor rekap per tahun ajaran & semester. */
+    public function rapor()
+    {
+        return $this->hasMany(RaporSantri::class, 'santri_id');
     }
 
     /** Hafalan / setoran santri. */

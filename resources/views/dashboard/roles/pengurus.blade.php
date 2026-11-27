@@ -139,7 +139,7 @@
                                 <td class="px-5 py-3">
                                     <span class="rounded-lg px-2 py-1 text-[10px] font-bold {{ $statusClass }}">{{ ucfirst($status ?: 'menunggu') }}</span>
                                 </td>
-                                <td class="px-5 py-3 text-slate-500">{{ $p->created_at?->format('d/m/Y') ?? '-' }}</td>
+                                <td class="px-5 py-3 text-slate-500">{{ $p->created_at?->translatedFormat('d M Y') ?? '-' }}</td>
                             </tr>
                         @empty
                             <tr><td colspan="4" class="px-5 py-8 text-center text-[11px] text-slate-400">Belum ada data pendaftar.</td></tr>

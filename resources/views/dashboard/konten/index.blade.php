@@ -10,28 +10,28 @@
                 'group' => 'Sejarah',
                 'icon' => 'fa-landmark',
                 'desc' => 'Riwayat pendirian, perkembangan (BAB I–III), dan info pendaftaran.',
-                'url' => url('/profil/sejarah'),
+                'url' => route('profil.sejarah'),
             ],
             'visi' => [
                 'label' => 'Visi & Misi',
                 'group' => 'Visi & Misi',
                 'icon' => 'fa-bullseye',
                 'desc' => 'Visi, misi, nilai, dan harapan pesantren (BAB V).',
-                'url' => url('/profil/visi-misi'),
+                'url' => route('profil.visi-misi'),
             ],
             'pembelajaran' => [
                 'label' => 'Pembelajaran',
                 'group' => 'Pembelajaran',
                 'icon' => 'fa-graduation-cap',
                 'desc' => 'Jalur belajar, kajian, jenjang, dan metode pembelajaran.',
-                'url' => url('/profil/pembelajaran'),
+                'url' => route('profil.pembelajaran'),
             ],
             'fasilitas' => [
                 'label' => 'Fasilitas',
                 'group' => 'Fasilitas',
                 'icon' => 'fa-building',
                 'desc' => 'Judul halaman dan kartu fasilitas (bisa ditambah atau dihapus).',
-                'url' => url('/profil/fasilitas'),
+                'url' => route('profil.fasilitas'),
             ],
         ];
 

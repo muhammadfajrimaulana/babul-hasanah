@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PengajuanPerubahan;
 use App\Support\CatatanAktivitas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 /** Pengajuan perubahan data anak oleh wali. */
@@ -47,6 +48,7 @@ class PortalPengajuanController extends Controller
 
         abort_unless($user->memilikiSantri((int) $data['santri_id']), 403,
             'Data santri ini bukan milik akun Anda.');
+        Gate::authorize('portal.lihatAnakId', (int) $data['santri_id']);
 
         $santri = $user->anakQuery()->with('user')->findOrFail($data['santri_id']);
 

@@ -191,7 +191,7 @@
                                         <span class="text-[10px] text-slate-400">—</span>
                                     @endif
                                 </td>
-                                <td class="py-4 px-6 text-slate-500 dark:text-slate-400">{{ $p->created_at?->format('d/m/Y') }}</td>
+                                <td class="py-4 px-6 text-slate-500 dark:text-slate-400">{{ $p->created_at?->translatedFormat('d M Y') }}</td>
                                 <td class="py-4 px-6 text-right">
                                     <div class="flex items-center justify-end gap-1">
                                         <a href="{{ route('super.pengguna.edit', $p) }}"

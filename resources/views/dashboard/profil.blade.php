@@ -153,7 +153,7 @@
         <!-- Kolom kiri: Foto profil -->
         <div class="pf-card">
             <div class="pf-avatar-wrap">
-                <img src="{{ $avatarUrl }}" alt="Foto Profil" class="pf-avatar" onerror="this.src='{{ asset('assets/img/logo/logo.png') }}'">
+                <img src="{{ $avatarUrl }}" alt="Foto profil {{ $user->name }}" class="pf-avatar" onerror="this.src='{{ asset('assets/img/logo/logo.png') }}'">
                 <label for="avatarInput" class="pf-avatar-edit" title="Ubah Foto Profil">
                     <i class="fa-solid fa-camera"></i>
                 </label>

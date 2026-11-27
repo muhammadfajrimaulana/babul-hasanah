@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\GambarPublik;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -85,7 +86,8 @@ class StrukturOrganisasi extends Model
 
     public function getFotoUrlAttribute(): ?string
     {
-        return $this->foto ? asset('storage/' . $this->foto) : null;
+        // Null bila berkas belum ada: Blade akan menampilkan ikon, bukan <img> rusak.
+        return GambarPublik::dariStorage($this->foto);
     }
 
     /* ------------------------------------------------------------ Bagan */

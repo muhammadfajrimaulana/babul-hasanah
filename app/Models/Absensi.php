@@ -18,6 +18,11 @@ class Absensi extends Model
         'tanggal',
     ];
 
+    /** Tanggal harus Carbon agar aman dipanggil translatedFormat() di view. */
+    protected $casts = [
+        'tanggal' => 'date',
+    ];
+
     // Relasi balik ke santri
     public function santri()
     {

@@ -77,7 +77,8 @@ class BeritaController extends Controller
     {
         $data = $request->validate([
             'judul' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:beritas,slug'.($berita ? ','.$berita->id : ''),
+            // Saat edit, slug tidak diverifikasi/dipakai dari form (lihat bawah).
+            'slug' => $berita ? 'nullable|string' : 'nullable|string|max:255|unique:beritas,slug',
             'kategori' => 'required|string|max:100',
             'ringkasan' => 'nullable|string|max:300',
             'isi' => ['required', 'string', function ($attribute, $value, $fail) {
@@ -96,7 +97,12 @@ class BeritaController extends Controller
             'published_at' => 'nullable|date',
         ]);
 
-        $data['slug'] = $data['slug'] ?: Str::slug($data['judul']);
+        // Kebijakan permalink: slug ditetapkan sekali saat berita dibuat dan
+        // tidak ikut berubah saat judul diedit. Tautan lama tetap berfungsi,
+        // sehingga tidak perlu tabel alias/redirect 301.
+        $data['slug'] = $berita
+            ? $berita->slug
+            : ($data['slug'] ?: Str::slug($data['judul']));
 
         if ($request->hasFile('gambar')) {
             $data['gambar'] = $request->file('gambar')->store('berita', 'public');

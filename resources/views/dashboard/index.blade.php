@@ -2443,7 +2443,7 @@
                 </button>
                 <span class="db-date">{{ $tanggal }}</span>
                 <div class="db-avatar-wrap" @click="location.href='{{ route('admin.profil') }}'">
-                    <img src="{{ $avatarUrl }}" alt="Profil"
+                    <img src="{{ $avatarUrl }}" alt="Foto profil {{ $user->name }}"
                         onerror="this.src='{{ asset('assets/img/logo/logo.png') }}'">
                 </div>
             </div>
@@ -2458,7 +2458,7 @@
                         $totalSantri,
                         'fa-users',
                         'accent',
-                        "Putra: {$santriPutra} | Putri: {$santriPutri}",
+                        $komposisiKelamin,
                     ],
                     [
                         'Pendaftar',

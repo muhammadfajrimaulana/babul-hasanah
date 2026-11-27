@@ -7,6 +7,7 @@ use App\Models\Legalisir;
 use App\Support\Akademik;
 use App\Support\CatatanAktivitas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -16,6 +17,7 @@ class LegalisirController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
+        Gate::authorize('viewAny', Legalisir::class);
 
         $query = Legalisir::query()
             ->with(['alumni.santri', 'pemroses'])
@@ -40,6 +42,7 @@ class LegalisirController extends Controller
     {
         abort_unless(auth()->user()->bisa('alumni.ubah'), 403);
         $this->pastikanBerwenang($legalisir);
+        Gate::authorize('proses', $legalisir);
 
         $data = $request->validate([
             'status' => ['required', Rule::in(array_keys(Legalisir::STATUS))],

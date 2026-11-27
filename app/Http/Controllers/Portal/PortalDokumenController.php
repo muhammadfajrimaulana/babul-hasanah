@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Portal;
 use App\Http\Controllers\Controller;
 use App\Models\DokumenSantri;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -31,6 +32,7 @@ class PortalDokumenController extends Controller
 
         abort_unless($user->memilikiSantri($dokumen->santri_id), 403,
             'Dokumen ini bukan milik akun Anda.');
+        Gate::authorize('portal.lihatDokumenSantri', $dokumen);
 
         abort_unless($dokumen->status === 'published', 404, 'Dokumen belum diterbitkan.');
 

@@ -1,15 +1,15 @@
-@php
-    use App\Models\Konten;
-    use App\Models\Kepengurusan;
-
-    $kepengurusans = Kepengurusan::orderBy('urutan', 'asc')->get();
-@endphp
-
 @extends('layouts.app')
 
 @section('title', 'Profil Pondok Pesantren Babul Hasanah')
 
 @section('content')
+
+    @php
+        // $konten dan $kepengurusans disiapkan di Public\ProfilController@index.
+        $kv = fn (string $key, string $default = '') => $konten[$key] ?? $default;
+        $foto = $kv('sejarah_foto');
+        $fotoUrl = $foto ? asset('storage/'.preg_replace('#^storage/#', '', $foto)) : null;
+    @endphp
 
     <!-- HERO SECTION PROFIL -->
     <section
@@ -24,10 +24,10 @@
                 <i class="fa-solid fa-sparkles mr-1"></i> Tentang Kami
             </span>
             <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
-                {!! Konten::getVal('profil_hero_title', 'Profil & Visi Misi Pondok Pesantren') !!}
+                {!! $kv('profil_hero_title', 'Profil & Visi Misi Pondok Pesantren') !!}
             </h1>
             <p class="text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-                {{ Konten::getVal('profil_hero_desc') }}
+                {{ $kv('profil_hero_desc') }}
             </p>
         </div>
     </section>
@@ -38,17 +38,17 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="space-y-6">
                     <h2 class="text-xs font-semibold text-emerald-600 uppercase tracking-widest">Sejarah Berdirinya</h2>
-                    <h3 class="text-3xl font-bold text-slate-900 leading-tight">{{ Konten::getVal('sejarah_judul') }}</h3>
+                    <h3 class="text-3xl font-bold text-slate-900 leading-tight">{{ $kv('sejarah_judul') }}</h3>
                     <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
-                        {{ Konten::getVal('sejarah_p1') }}
+                        {{ $kv('sejarah_p1') }}
                     </p>
                     <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
-                        {{ Konten::getVal('sejarah_p2') }}
+                        {{ $kv('sejarah_p2') }}
                     </p>
                 </div>
                 <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/60 shadow-sm overflow-hidden">
-                    @if (Konten::getVal('sejarah_foto'))
-                        <img src="{{ asset('storage/' . Konten::getVal('sejarah_foto')) }}" alt="Komplek Pesantren"
+                    @if ($fotoUrl)
+                        <img src="{{ $fotoUrl }}" alt="Foto komplek dan gedung pesantren Babul Hasanah"
                             class="w-full h-80 object-cover rounded-xl">
                     @else
                         <div
@@ -81,7 +81,7 @@
                         <h4 class="text-2xl font-bold text-slate-900 mb-4">Visi</h4>
                         <p
                             class="text-slate-700 leading-relaxed italic bg-emerald-50/50 p-6 rounded-xl border border-emerald-100">
-                            "{!! nl2br(e(Konten::getVal('visi'))) !!}"
+                            "{!! nl2br(e($kv('visi'))) !!}"
                         </p>
                     </div>
                 </div>
@@ -94,7 +94,7 @@
                     </div>
                     <h4 class="text-2xl font-bold text-slate-900 mb-4">Misi</h4>
                     <div class="space-y-3 text-slate-600 text-sm leading-relaxed">
-                        {!! nl2br(e(Konten::getVal('misi'))) !!}
+                        {!! nl2br(e($kv('misi'))) !!}
                     </div>
                 </div>
             </div>
@@ -117,8 +117,8 @@
                         class="bg-slate-50 border border-slate-200/60 rounded-2xl p-6 space-y-4 hover:shadow-md transition">
                         <div
                             class="w-32 h-32 mx-auto bg-slate-200 rounded-full overflow-hidden flex items-center justify-center font-bold text-slate-500 text-xl shadow-inner">
-                            @if ($p->foto)
-                                <img src="{{ asset($p->foto) }}" alt="{{ $p->nama }}" class="w-50 h-50">
+                            @if ($p->foto_url)
+                                <img src="{{ $p->foto_url }}" alt="Foto {{ $p->nama }}" class="h-full w-full object-cover">
                             @else
                                 {{ substr($p->nama, 0, 1) }}
                             @endif

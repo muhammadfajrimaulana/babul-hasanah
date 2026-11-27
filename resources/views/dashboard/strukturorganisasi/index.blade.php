@@ -64,8 +64,8 @@
                 {{-- Avatar --}}
                 <div class="relative w-11 h-11 shrink-0 rounded-full overflow-hidden bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 flex items-center justify-center">
                     <i class="fa-solid {{ $item->ikon ?: 'fa-user' }}"></i>
-                    @if ($item->foto)
-                        <img src="{{ $item->foto_url }}" alt="{{ $item->nama }}" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">
+                    @if ($item->foto_url)
+                        <img src="{{ $item->foto_url }}" alt="{{ $item->nama }}" class="absolute inset-0 w-full h-full object-cover">
                     @endif
                 </div>
 

@@ -141,8 +141,8 @@
                                     </td>
                                     <td><i class="fa-solid {{ $it->ikon }}" style="color:var(--gold);margin-right:6px"></i>{{ $it->kategori }}</td>
                                     <td>
-                                        {{ $it->tanggal?->format('d/m/Y') }}
-                                        @if ($it->berlaku_sampai) <br><small>s/d {{ $it->berlaku_sampai->format('d/m/Y') }}</small> @endif
+                                        {{ $it->tanggal?->translatedFormat('d M Y') }}
+                                        @if ($it->berlaku_sampai) <br><small>s/d {{ $it->berlaku_sampai->translatedFormat('d M Y') }}</small> @endif
                                     </td>
                                 @else
                                     <td class="ia-jam">{{ $it->jam }}</td>

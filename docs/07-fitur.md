@@ -33,32 +33,32 @@ tetapi sisa CSS/JS handler-nya masih ada.
 
 **Tujuan:** halaman profil yang mengambil teks dari tabel `konten` + dewan pengasuh.
 
-**Alur:** `GET /profil` → closure → `pages.profil`.
+**Alur:** `GET /profil` → `Public\ProfilController@index` → `pages.profil`.
 
-**Data:** `Konten::getVal()` untuk 7 key, `Kepengurusan` untuk daftar pengasuh.
+**Data:** `Konten::getVal()` untuk 7 key, `$kepengurusans` dari controller untuk daftar pengasuh.
 
-**Catatan:** hanya halaman `/profil` yang memakai `konten`; sub-halaman sejarah/visi-misi statis.
-`sejarah_foto` tidak bisa diunggah dari dashboard.
+**Catatan:** halaman `/profil` memakai `konten` untuk teks; sub-halaman sejarah, visi-misi,
+pembelajaran, dan fasilitas juga memakai `konten` (bisa diedit Superadmin lewat menu Konten).
+`sejarah_foto` dapat diunggah dari dashboard Konten.
 
-### 1.3 Sejarah — ✅ statis
+### 1.3 Sejarah — ✅
 
-**Alur:** `GET /profil/sejarah` → `pages.sejarah`.
+**Alur:** `GET /profil/sejarah` → `ProfilController@sejarah` → `pages.sejarah`.
 
-**Data:** array `$tonggak`, `$pengasuh`, `$budaya`, `$kajian`, `$jadwal` di file. Gambar mengarah ke
-`public/images/sejarah/*` yang **tidak tersedia**.
+**Data:** `$konten` + `$layout` dari tabel `konten` (default tetap tersedia). Foto memakai
+`konten.sejarah_foto` dengan placeholder bila belum diunggah; tidak memakai `public/images/sejarah/*`.
 
-### 1.4 Visi & Misi — ✅ statis
+### 1.4 Visi & Misi — ✅
 
-**Alur:** `GET /profil/visi-misi` → `pages.visi-misi`.
+**Alur:** `GET /profil/visi-misi` → `ProfilController@visiMisi` → `pages.visi-misi`.
 
-**Data:** `$visi`, `$misi`, `$nilai` hardcoded. Gambar dari `public/images/profil/*` tidak tersedia.
+**Data:** `$konten` + `$layout` dari tabel `konten`. Tidak ada referensi `public/images/profil/*`.
 
-### 1.5 Pembelajaran — ✅ statis
+### 1.5 Pembelajaran — ✅
 
-**Alur:** `GET /profil/pembelajaran` → `pages.pembelajaran`.
+**Alur:** `GET /profil/pembelajaran` → `ProfilController@pembelajaran` → `pages.pembelajaran`.
 
-**Data:** `$jalur`, `$kajian`, `$jalurDiniyah`, `$jalurMadrasah`, `$metode`, `$jadwal`.
-Gambar dari `public/images/pembelajaran/*` tidak tersedia.
+**Data:** `$konten` + `$layout` dari tabel `konten`. Tidak ada referensi `public/images/pembelajaran/*`.
 
 ### 1.6 Struktur Organisasi Publik — ✅
 
@@ -73,15 +73,16 @@ Gambar dari `public/images/pembelajaran/*` tidak tersedia.
 
 **View:** `pages/struktur-organisasi` + `partials/struktur-node` (rekursif, 1 query).
 
-### 1.7 Halaman Jenjang — ✅ statis
+### 1.7 Halaman Jenjang — ✅ sebagian statis
 
-**Alur:** `GET /jenjang/{slug}` dengan 7 slug valid.
+**Alur:** `GET /jenjang/{slug}` dengan 7 slug valid → `JenjangController@show` → `pages/jenjang/_detail`.
 
-**Data:** setiap file mendefinisikan array `$p` (nama, deskripsi, kurikulum, fasilitas, foto, dll.)
-lalu meng-include `pages/jenjang/_detail`.
+**Data:** satu sumber `App\Support\DataJenjang` untuk 7 jenjang (nama, deskripsi, kurikulum,
+fasilitas, ketua, dll.); tautan jenjang lain memakai `route('jenjang.show')`.
 
-**Catatan:** seluruh konten hardcoded; tidak terhubung ke tabel `program`. Gambar
-`public/images/program/*` tidak tersedia.
+**Catatan:** konten masih hardcoded di `DataJenjang`, belum terhubung ke tabel `konten`. Sejak
+28 Nov 2026, `public/images/program/*` dan `public/images/pengurus/*` berisi placeholder yang
+dipakai `GambarPublik`; nama ketua/foto masih contoh dan perlu data resmi.
 
 ### 1.8 Berita — ✅
 
@@ -163,32 +164,38 @@ dan berlaku juga di drawer mobile karena memakai markup yang sama.
 
 1. `GET /pendaftaran` → form.
 2. `POST /pendaftaran` → `Public\PendaftaranOnlineController@store`.
-3. Validasi 12 field:
+3. Validasi 13 field (12 wajib + NISN opsional) + honeypot `website` (`prohibited`):
 
    | Field | Kolom DB | Aturan |
    |-------|----------|--------|
    | Nama Lengkap | `nama_lengkap` | required, max 255 |
    | Tempat Tanggal Lahir | `tempat_tanggal_lahir` | required, max 255 |
-   | Nomor Handphone Aktif (WA) | `no_hp_aktif` | required, max 30 |
+   | Nomor Handphone Aktif (WA) | `no_hp_aktif` | required, max 16, hanya angka/`+`/`-`/spasi |
    | Alamat Tinggal (Domisili) | `alamat_domisili` | required, max 1000 |
-   | Email Orang Tua / Wali | `email` | required, email, unik (dipakai login Portal Wali) |
+   | Email Orang Tua / Wali | `email` | required, email, **tidak unik** (satu wali boleh mendaftarkan beberapa anak; dipakai login Portal Wali) |
+   | Email Santri | `email_santri` | required, email, beda dari email wali, unik (calon username akun alumni) |
    | Nama Orang Tua (Wali) | `nama_ortu_wali` | required, max 255 |
-   | Nomor Handphone Orang Tua | `no_hp_ortu` | required, max 30 |
+   | Nomor Handphone Orang Tua | `no_hp_ortu` | required, max 16, hanya angka/`+`/`-`/spasi |
    | Sekolah Asal | `asal_sekolah` | required, max 255 |
    | Alamat Sekolah Asal | `alamat_sekolah` | required, max 1000 |
    | Tahun Lulus | `tahun_lulus` | required, 4 digit |
    | NISN | `nisn` | opsional, max 20 |
    | Pilihan Jenjang | `jenjang_tujuan` | required, salah satu dari 7 jenjang |
 
-4. Generate `no_pendaftaran` `PPDB-{tahun}-{5 huruf}` (dicek unik).
+4. Generate `no_pendaftaran` lewat `KodeUnik::pendaftaran()` dengan format
+   `PPDB-{tahun}-{5 huruf}` dan pengecekan tabrakan.
 5. Simpan status `pending`.
-6. Redirect back + pesan nomor pendaftaran.
+6. Kirim `PendaftaranMasukMail` ke email wali. Bila pengiriman gagal, error dicatat dan pesan
+   tetap memberitahu pengguna agar menyimpan nomor pendaftaran.
+7. Redirect back + pesan nomor pendaftaran, jenjang tujuan, dan status email konfirmasi.
 
-**Catatan:** tidak ada email konfirmasi, tidak ada upload berkas, tidak ada captcha/rate limit.
-Kolom `email` **milik orang tua/wali** (santri tidak punya email) dan menjadi akun login Portal Wali
-saat pendaftaran diverifikasi; tabel admin `/admin/pendaftaran` serta `/admin/santri` menampilkannya
-sebagai "Email Orang Tua / Wali"; setelah diverifikasi, data masuk ke tabel `santri` dan tertaut
-lewat `santri.pendaftaran_online_id`.
+**Catatan:** tidak ada upload berkas, tidak ada captcha/rate limit; honeypot `website` hanya
+dipakai untuk menolak bot. Kolom `email` **milik orang tua/wali** dan menjadi akun login Portal
+Wali saat pendaftaran diverifikasi; indeks UNIQUE lama sudah dicabut agar satu wali bisa
+mendaftarkan beberapa anak. Kolom `email_santri` dipakai sebagai calon username akun alumni saat
+kelulusan dan dicek terhadap akun serta pendaftaran lain. Tabel admin `/admin/pendaftaran` serta
+`/admin/santri` menampilkan keduanya dengan jelas; setelah diverifikasi, data masuk ke tabel
+`santri` dan tertaut lewat `santri.pendaftaran_online_id`.
 
 ### 2.2 Verifikasi oleh Admin — ✅ dengan risiko
 
@@ -197,10 +204,12 @@ lewat `santri.pendaftaran_online_id`.
 1. Admin membuka `/admin/pendaftaran`.
 2. Menekan **Terima** atau **Tolak** (PATCH `/admin/pendaftaran/{id}` → `admin.pendaftaran.verifikasi`).
 3. Jika diterima:
-   - Cek belum pernah diterima, email wali tidak kosong, dan email belum dipakai akun non-wali.
+   - Cek belum pernah diterima, email wali tidak kosong, dan email belum dipakai akun non-wali;
+     email santri juga dicek agar tidak bentrok dengan akun/pendaftaran lain.
    - Buat/pakai ulang `User` role `wali_santri`; akun baru mendapat password acak
      `Str::password(12)`, `must_change_password`, dan masa berlaku 24 jam.
-   - Buat `Santri` dengan nomor induk acak, jenjang dari pilihan PPDB, `pendaftaran_online_id`
+   - Buat `Santri` dengan nomor induk dari `KodeUnik::nomorInduk()` (pengecekan tabrakan
+     termasuk santri soft-deleted), jenjang dari pilihan PPDB, `pendaftaran_online_id`
      sebagai arsip, serta tautkan wali ke pivot `santri_wali`.
    - Catat `RiwayatKelas` awal dan Log Aktivitas.
    - Kirim **email kredensial**; bila gagal, admin memakai tombol **Reset Password Wali**.
@@ -209,16 +218,22 @@ lewat `santri.pendaftaran_online_id`.
 
 **Edit & hapus:**
 
-- **Edit** (`/admin/pendaftaran/{id}/edit`, PUT `admin.pendaftaran.update`): mengubah 12 field
-  pendaftaran. Jika pendaftar sudah `diterima`, perubahan ikut disinkronkan ke `users`
-  (nama/email/telepon) dan `santri` (nama, jenjang, wali, alamat) dalam satu transaksi.
+- **Edit** (`/admin/pendaftaran/{id}/edit`, PUT `admin.pendaftaran.update`): mengubah 13 field
+  pendaftaran (termasuk `email_santri`). Email wali tidak unik; email santri dicek agar tidak
+  bentrok dengan akun/pendaftaran lain. Jika pendaftar sudah `diterima`, perubahan ikut
+  disinkronkan ke `users` (nama/email/telepon) dan `santri` (nama, jenjang, wali, alamat)
+  dalam satu transaksi.
 - **Hapus** (`DELETE admin.pendaftaran.destroy`): hanya untuk pendaftar yang belum pernah
   diverifikasi. Pendaftar yang sudah tertaut `santri`/alumni **tidak bisa dihapus** karena
   dipertahankan sebagai arsip PPDB (tombol berubah menjadi label **Arsip**). Akun portal wali
   **tidak** dihapus.
-- **Hapus santri** (`DELETE admin.santri.destroy`): menghapus data santri tanpa menghapus arsip
-  pendaftarannya. Status arsip kembali `pending` bila santri belum lulus; tetap `diterima` bila
-  santri sudah lulus/alumni agar riwayat PPDB utuh.
+- **Hapus santri** (`DELETE admin.santri.destroy`): sejak 28 Nov 2026 bersifat **soft delete**
+  (`santri.deleted_at`), bukan penghapusan permanen. Baris dan arsip PPDB tetap tersimpan; status
+  pendaftaran **sengaja tidak diubah** agar pemulihan tidak perlu verifikasi ulang. Data masuk
+  `/admin/santri/terhapus` (`admin.santri.terhapus`) dan hanya Superadmin yang bisa memulihkannya
+  lewat `POST admin.santri.pulihkan` (`restore()` + audit `pulihkan_santri`). Aksi hapus tercatat
+  sebagai `hapus_santri`. Tidak ada UI `forceDelete`; untuk santri keluar/berhenti tetap pakai
+  **Arsipkan**, bukan hapus.
 - **Edit santri** (`GET/PUT admin.santri.edit/update`): mengubah nomor induk, nama, jenjang,
   kelas, wali, dan alamat pada tabel `santri` langsung.
 
@@ -241,8 +256,10 @@ lewat `santri.pendaftaran_online_id`.
 - Akun dengan `must_change_password` dipaksa ke `/ganti-password`.
 - Pesan error Bahasa Indonesia.
 - Toggle password & state loading (JS).
-- Tombol "Masuk dengan Google" **belum berfungsi** (`href="#"`), meski Socialite terpasang dan
-  `.env` memiliki kredensial Google.
+- Tombol **"Masuk dengan Google"** sudah memakai Socialite (`/auth/google` → callback
+  `/auth/google/callback`). Tombol hanya tampil bila `GOOGLE_CLIENT_ID` dan
+  `GOOGLE_CLIENT_SECRET` terisi. Email Google wajib sudah terdaftar & akun aktif; tidak ada
+  auto-registrasi. Login dicatat sebagai `login_google`. Panduan: [17-google-oauth.md](17-google-oauth.md).
 
 ### 3.2 Logout — ✅
 
@@ -260,15 +277,14 @@ atau menu Pengguna (Superadmin).
 
 ## 4. Dashboard Admin
 
-### 4.1 Dashboard — ⚠️
+### 4.1 Dashboard — ✅ / ⚠️
 
 **Data:** statistik, tren pendaftar, komposisi santri, agenda, pendaftar terbaru, shortcut fitur.
 
-**Masalah:**
-
-- `santriPutra/Putri` masih **hardcode 0** karena kolom `jenis_kelamin` tidak ada di `santri`.
-- "Asatidz" menghitung tabel `kepengurusan`, bukan data asatidz.
-- `komposisi` dan `agenda` **sudah berjalan** (`jenjang_pendidikan` dan `info_harian`).
+- ✅ `santriPutra/Putri` dihitung dari `santri.jenis_kelamin` (migrasi 28 Nov 2026).
+  Bila belum diisi, labelnya "Jenis kelamin belum diisi", bukan "0".
+- ⚠️ "Asatidz" masih menghitung tabel `kepengurusan`, bukan data asatidz.
+- ✅ `komposisi` dan `agenda` berjalan (`jenjang_pendidikan` dan `info_harian`).
 
 ### 4.1b Dashboard per Jenjang (multi-role) — ✅
 
@@ -330,7 +346,8 @@ Lihat bagian 2.2. Tampilan responsif: kartu di mobile, tabel di desktop, pencari
 - Form teks per halaman (sejarah, visi, pembelajaran) memakai `items[]` + `layout[]`.
 - Unggah `sejarah_foto` (jpg/jpeg/png/webp maks 2 MB) tersedia.
 - Validasi key dan layout memakai whitelist; key di luar daftar diabaikan.
-- Tidak ada CRUD pengurus/kepengurusan di panel; data itu hanya dibaca dari tabel `kepengurusan`.
+- Sejak 28 Nov 2026, CRUD pengurus tersedia di `admin.kepengurusan.*` (Superadmin): nama, jabatan, urutan, foto.
+  Foto baru masuk disk `public`; berkas lama di `public/upload/kepengurusan/` tetap dibaca lewat `foto_url`.
 
 ### 4.6 Program — ✅ (alias)
 
@@ -359,6 +376,8 @@ Lihat 1.9. Kuat untuk create + delete, belum ada edit.
 ### 4.10 Prestasi — ✅
 
 CRUD lengkap: judul, nama, kelas, kategori, tingkat, wilayah, tahun, peringkat, label, deskripsi.
+Kolom `jenjang` membatasi Admin Jenjang; role global bisa memilih satu jenjang atau melihat agregat.
+Halaman prestasi publik sengaja menampilkan seluruh jenjang.
 
 ### 4.11 Struktur Organisasi — ✅
 
@@ -406,7 +425,7 @@ Belum ada (butuh migrasi manusia):
 
 - Jalankan `php artisan migrate` (lihat [ATURAN.md](ATURAN.md)) → tabel `info_harian` terbentuk, data seeder masuk
 - Isi data di tabel via `InfoHarianSeeder` atau form admin
-- Google OAuth aktif (masih dummy)
+- Google OAuth: kode siap, menunggu `composer install` + kredensial (lihat doc 17)
 
 ### 4.15 Pembinaan — ✅
 
@@ -416,6 +435,8 @@ Belum ada (butuh migrasi manusia):
 - **Presensi:** hadir/izin/sakit/alpa + keterangan.
 - Superadmin, Admin Jenjang, dan Pembina boleh menulis; Pengurus hanya membaca.
 - Admin Jenjang dibatasi ke jenjangnya. Setiap input mencatat `dicatat_oleh`.
+- Sejak 28 Nov 2026, aksi tulis melewati `PembinaanPolicy` (hak `pembinaan.ubah` + cakupan santri).
+  Pengecekan manual lama tetap dipertahankan.
 
 ### 4.16 Izin Pulang — ✅
 
@@ -427,6 +448,8 @@ Belum ada (butuh migrasi manusia):
 - `Izin::tandaiTerlambat()` dipanggil saat halaman admin/portal dibuka; izin yang melewati
   `tanggal_kembali` otomatis menjadi **TERLAMBAT**.
 - Superadmin, Admin Jenjang, dan Pembina boleh memverifikasi; Pengurus hanya membaca.
+- Verifikasi melewati `IzinPolicy` (hak `izin.verifikasi` + cakupan jenjang); pengajuan wali
+  melewati `portal.ajukanIzin`. Pengecekan manual tetap jadi lapisan kedua.
 
 ### 4.17 Pengumuman — ✅
 
@@ -454,17 +477,33 @@ Belum ada (butuh migrasi manusia):
 
 - **Nilai:** filter jenjang/kelas/mapel/tahun ajaran/semester/kategori; input & edit oleh
   Superadmin/Admin Jenjang; status `draft` → `published`; nilai `draft` tidak terlihat wali.
+- **Import nilai CSV:** template dinamis, konteks dari filter bisa ditimpa per baris, baris error
+  dilewati dan ditampilkan sebagai daftar error; hasil import berstatus `draft`.
 - **Transkrip:** tampilan & cetak per santri, menampilkan guru pengampu.
 - **Mata Pelajaran:** CRUD per jenjang + pilih guru pengampu.
+- **Buka kembali nilai:** Superadmin/Admin Jenjang mengubah nilai `published` jadi `draft`
+  lewat form alasan wajib (min. 5 karakter); aksi `nilai_dibuka_kembali` tercatat di log.
+- **Jadwal Pelajaran (kode siap 28 Nov 2026):** CRUD per jenjang/kelas/tahun/semester;
+  bentrok jam kelas dan jam guru ditolak; tampil di portal wali.
+- **Kurikulum (kode siap 28 Nov 2026):** CRUD kurikulum + item (mapel, KKM, target KD, urutan);
+  status `draft` → `published` oleh pemegang `akademik.terbit`; hanya kurikulum terbit yang
+  tampil di portal wali.
+- **Rapor Santri (kode siap 28 Nov 2026):** tabel `rapor_santri` berisi rata-rata & peringkat
+  yang dihitung ulang dari nilai `published` (`App\Support\Rapor`), catatan wali kelas diisi
+  manual, terbit satuan/massal, dan tampil di portal wali.
 - **Rapor PDF:** unggah per santri/semester (`dokumen_nilai`), bisa diunduh wali.
-- Tabel `mata_pelajaran`, `nilai_santri`, dan `dokumen_nilai` sudah ditulis sebagai migrasi;
-  status pembuatan tabel perlu diverifikasi manusia.
+- Tabel `mata_pelajaran`, `nilai_santri`, `dokumen_nilai`, `jadwal_pelajaran`, `kurikulum`,
+  `kurikulum_item`, dan `rapor_santri` sudah ditulis sebagai migrasi; status pembuatan tabel
+  perlu diverifikasi manusia (`php artisan migrate` dijalankan manusia).
 
 ### 4.20 Log Aktivitas — ✅
 
 - Khusus Superadmin (`/admin/log-aktivitas`).
 - Mencatat aksi penting: verifikasi PPDB, pembuatan akun, kelulusan, naik kelas, rollback,
   pindah jenjang, arsip, perubahan nilai, dan pengajuan wali.
+- Sejak 28 Nov 2026 juga mencatat: import CSV santri dan nilai (beserta jumlah baris/error),
+  kelulusan massal, pembuatan akun alumni massal, reset password alumni/wali,
+  serta tambah/ubah (role & jenjang)/hapus pengguna.
 - Menyimpan `user_id`, `aksi`, `model_type/model_id`, `data` (JSON), `alasan`, `ip`, `user_agent`.
 - Rollback dan aksi sensitif lain **wajib alasan** dan tercatat.
 
@@ -499,6 +538,8 @@ Lihat §5.3.
 Aturan:
 
 - Wali **hanya** dapat membuka anak miliknya (`User::memilikiSantri()`), bukan hanya tautan disembunyikan.
+  Sejak 28 Nov 2026 kepemilikan itu juga ditegakkan via `PortalPolicy` (`portal.lihatAnak`,
+  `portal.lihatDokumen`, `portal.lihatDokumenSantri`, `portal.ajukanIzin`, `portal.lihatAnakId`).
 - Wali tidak dapat mengubah nilai, presensi, atau data akademik.
 - Setelah anak lulus, akun wali **tetap aktif** dan tampilan berubah menjadi history anak.
 
@@ -513,11 +554,13 @@ Aturan:
 - **Legalisir:** ajukan legalisir (jenis dokumen + jumlah) dan unduh hasil bila sudah selesai.
 - **Pengumuman:** membaca pengumuman untuk alumni.
 - History nilai dan pelanggaran **tidak dapat diubah** oleh alumni.
+- Sejak 28 Nov 2026 seluruh endpoint alumni melewati `portal.lihatAlumni`; unduh dokumen dan
+  legalisir masing-masing melewati `portal.lihatDokumenAlumni` dan `portal.unduhLegalisir`.
+  Proses admin memakai `LegalisirPolicy` (hak `alumni.ubah` + cakupan jenjang).
 
 ### 5.4 Rencana yang Terlihat dari Kode
 
-- `LaporanSantriController` masih kosong.
-- `portal/kegiatan.blade.php` masih kosong.
+- `LaporanSantriController` dan `portal/kegiatan.blade.php` yang kosong sudah dihapus 28 Nov 2026.
 - Tabel `absensi` sudah dipakai halaman pembinaan dan portal.
 
 ## 6. Fitur Pendukung
@@ -576,5 +619,5 @@ Hanya area admin; disimpan di `localStorage`.
 | Kelas & guru | — | ✅ | ✅ + rekap wali kelas |
 | Akademik | — | ✅ | ✅ UI; tabel menunggu migrasi manusia |
 | Log aktivitas | — | ✅ | ✅ khusus Superadmin |
-| Google Login | ❌ | — | ❌ |
+| Google Login | 🚧 kode siap | — | 🚧 menunggu kredensial + `composer install` (doc 17) |
 | Reset password | ✅ | — | ✅ route + email |

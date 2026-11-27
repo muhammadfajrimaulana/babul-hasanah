@@ -199,7 +199,7 @@
         <section class="al-hero">
             <div class="container">
                 <div class="al-crumb">
-                    <a href="{{ url('/') }}">Beranda</a>
+                    <a href="{{ route('home') }}">Beranda</a>
                     <i class="fa-solid fa-chevron-right" style="font-size:9px"></i>
                     <span>Alumni</span>
                 </div>
@@ -274,8 +274,7 @@
                                 <span class="al-initials" aria-hidden="true">{{ $item['inisial'] }}</span>
 
                                 @if ($item['foto'])
-                                    <img src="{{ $item['foto'] }}" alt="Foto {{ $item['nama'] }}" loading="lazy"
-                                        onerror="this.remove()">
+                                    <img src="{{ $item['foto'] }}" alt="Foto {{ $item['nama'] }}" loading="lazy">
                                 @endif
 
                                 @if ($item['kegiatan'])

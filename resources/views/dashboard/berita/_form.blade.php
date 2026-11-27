@@ -242,7 +242,7 @@
             <div class="{{ $card }}">
                 <span class="{{ $label }}">Gambar Utama <span class="text-[10px] text-slate-500">(maks. 2 MB)</span></span>
                 <div class="relative group">
-                    <img id="preview-gambar" src="{{ $berita?->gambar_url ?? '' }}"
+                    <img id="preview-gambar" src="{{ $berita?->gambar_url ?? '' }}" alt="Pratinjau gambar utama"
                         class="{{ $berita?->gambar ? '' : 'hidden' }} w-full h-32 object-cover rounded-xl mb-2 border border-slate-100 dark:border-slate-800">
                     <label class="block w-full h-32 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-emerald-500 dark:hover:border-emerald-700 transition"
                         onclick="document.getElementById('gambar-input').click()">
@@ -288,9 +288,16 @@
                 <div class="space-y-4 mt-4">
                     <div>
                         <label for="slug-input" class="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-1.5">Permalink</label>
-                        <input type="text" name="slug" id="slug-input" value="{{ old('slug', $berita?->slug ?? '') }}"
-                            placeholder="otomatis-dari-judul" class="{{ $inputClass }} font-mono">
-                        <p class="{{ $hint }} break-all">{{ url('/berita') }}/<span id="slug-preview">{{ old('slug', $berita?->slug ?? '…') }}</span></p>
+                        @if ($berita)
+                            <input id="slug-input" type="text" value="{{ $berita->slug }}" readonly
+                                class="{{ $inputClass }} font-mono bg-slate-50 dark:bg-slate-800/60 cursor-not-allowed">
+                            <p class="{{ $hint }} break-all">{{ route('berita.index') }}/{{ $berita->slug }}</p>
+                            <p class="{{ $hint }}">Permalink bersifat permanen agar tautan yang sudah dibagikan tidak rusak. Judul boleh diubah tanpa mengganti alamat ini.</p>
+                        @else
+                            <input type="text" name="slug" id="slug-input" value="{{ old('slug') }}"
+                                placeholder="otomatis-dari-judul" class="{{ $inputClass }} font-mono">
+                            <p class="{{ $hint }} break-all">{{ route('berita.index') }}/<span id="slug-preview">{{ old('slug', '…') }}</span></p>
+                        @endif
                         @error('slug') <p class="{{ $errCls }}">{{ $message }}</p> @enderror
                     </div>
                     <div>
@@ -321,7 +328,7 @@
         </div>
 
         <div class="bg-slate-900" style="height: min(55vh, 480px);">
-            <img id="crop-img" alt="">
+            <img id="crop-img" alt="Pratinjau gambar yang akan dipotong">
         </div>
 
         <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
@@ -779,15 +786,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     gambarInput.addEventListener('change', () => previewGambar(gambarInput));
 
-    // ---- Slug otomatis ----
-    const slugify = s => s.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
-    let slugManual = slugInput.value !== '';
-    slugInput.addEventListener('input', () => { slugManual = true; slugPreview.textContent = slugInput.value || '…'; });
-    judul.addEventListener('input', () => {
-        if (slugManual) return;
-        slugInput.value = slugify(judul.value);
-        slugPreview.textContent = slugInput.value || '…';
-    });
+    // ---- Slug otomatis (hanya saat create; edit memakai permalink permanen) ----
+    if (slugInput && slugPreview) {
+        const slugify = s => s.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+        let slugManual = slugInput.value !== '';
+        slugInput.addEventListener('input', () => { slugManual = true; slugPreview.textContent = slugInput.value || '…'; });
+        judul.addEventListener('input', () => {
+            if (slugManual) return;
+            slugInput.value = slugify(judul.value);
+            slugPreview.textContent = slugInput.value || '…';
+        });
+    }
 
     // ---- Pratinjau ----
     const modal = $('preview-modal');

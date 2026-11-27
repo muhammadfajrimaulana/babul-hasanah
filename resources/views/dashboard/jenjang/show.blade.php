@@ -219,7 +219,7 @@
                                         </span>
                                     </td>
                                     <td class="hidden px-4 py-3 text-slate-400 md:table-cell md:px-5">
-                                        {{ optional($p->created_at)->format('d M Y') }}
+                                        {{ optional($p->created_at)->translatedFormat('d M Y') }}
                                     </td>
                                 </tr>
                             @endforeach

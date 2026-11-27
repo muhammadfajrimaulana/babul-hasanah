@@ -33,7 +33,7 @@
 </style>
 
 @php
-    $konten = \App\Models\Konten::allWithDefaults();
+    // $konten dan $layout disiapkan di Public\ProfilController@visiMisi.
     $kv = fn (string $key, string $default = '') => $konten[$key] ?? $default;
 
     $baris = function (string $key, string $default = '') use ($kv): array {
@@ -51,7 +51,6 @@
         return $hasil;
     };
 
-    $layout = \App\Models\Konten::layoutFor('visi');
     $visible = [];
     foreach ($layout as $section) {
         $visible[$section['id']] = $section['visible'];
@@ -97,7 +96,7 @@
         <header class="pd-hero">
             <div class="pd-wrap">
                 <nav class="pd-crumb" aria-label="Breadcrumb">
-                    <a href="{{ url('/') }}">Beranda</a>
+                    <a href="{{ route('home') }}">Beranda</a>
                     <i class="fa-solid fa-chevron-right"></i>
                     <span>Profil</span>
                     <i class="fa-solid fa-chevron-right"></i>

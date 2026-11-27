@@ -108,7 +108,7 @@
     <div class="sm:col-span-2">
         <label class="{{ $lb }}">Foto (maks. 2 MB)</label>
         @if (!empty($alumni?->foto_url))
-            <img src="{{ $alumni->foto_url }}" alt="" class="w-16 h-16 object-cover rounded-full mb-2 border border-slate-200 dark:border-slate-700">
+            <img src="{{ $alumni->foto_url }}" alt="Foto {{ $alumni->nama }}" class="w-16 h-16 object-cover rounded-full mb-2 border border-slate-200 dark:border-slate-700">
         @endif
         <input type="file" name="foto" accept=".jpg,.jpeg,.png,.webp" class="{{ $in }}">
         @error('foto') <p class="{{ $err }}">{{ $message }}</p> @enderror

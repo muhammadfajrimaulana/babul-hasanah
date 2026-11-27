@@ -84,10 +84,9 @@
 </style>
 
 @php
-    $konten = \App\Models\Konten::allWithDefaults();
+    // $konten, $layout, dan $semuaKartu disiapkan di Public\ProfilController@fasilitas.
     $kv = fn (string $key, string $default = '') => $konten[$key] ?? $default;
 
-    $layout = \App\Models\Konten::layoutFor('fasilitas');
     $visible = [];
     foreach ($layout as $section) {
         $visible[$section['id']] = $section['visible'];
@@ -119,7 +118,6 @@
     $ikonUntuk = fn (int $nomor): string => $ikonPool[max(0, $nomor - 1) % count($ikonPool)];
 
     // Kartu fasilitas bisa ditambah / dihapus dari dashboard.
-    $semuaKartu = \App\Models\Konten::fasilitasCards();
     $totalKartu = count($semuaKartu);
 
     // Kartu pertama tampil sebagai kartu utama.
@@ -133,7 +131,7 @@
         <header class="pd-hero">
             <div class="pd-wrap">
                 <nav class="pd-crumb" aria-label="Breadcrumb">
-                    <a href="{{ url('/') }}">Beranda</a>
+                    <a href="{{ route('home') }}">Beranda</a>
                     <i class="fa-solid fa-chevron-right"></i>
                     <span>Profil</span>
                     <i class="fa-solid fa-chevron-right"></i>
@@ -236,9 +234,9 @@
                             baru.</p>
                     </div>
                     <div class="pd-fac-actions">
-                        <a href="{{ url('/kontak') }}" class="pd-fac-btn ghost"><i
+                        <a href="{{ route('kontak') }}" class="pd-fac-btn ghost"><i
                                 class="fa-solid fa-location-dot"></i> Hubungi kami</a>
-                        <a href="{{ url('/pendaftaran') }}" class="pd-fac-btn primary">Info pendaftaran <i
+                        <a href="{{ route('pendaftaran.index') }}" class="pd-fac-btn primary">Info pendaftaran <i
                                 class="fa-solid fa-arrow-right"></i></a>
                     </div>
                 </div>

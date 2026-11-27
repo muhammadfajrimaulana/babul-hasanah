@@ -31,7 +31,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
             <div class="flex items-center gap-4">
                 @if ($alumni->foto_url)
-                    <img src="{{ $alumni->foto_url }}" alt=""
+                    <img src="{{ $alumni->foto_url }}" alt="Foto {{ $alumni->nama }}"
                         class="w-16 h-16 rounded-2xl object-cover border border-slate-100 dark:border-slate-700">
                 @else
                     <div class="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-2xl font-black">
@@ -58,6 +58,17 @@
                         class="bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
                         <i class="fa-solid fa-pen"></i> Edit
                     </a>
+                    @if ($akunSiap)
+                        <form action="{{ route('admin.alumni.reset-password', $alumni) }}" method="POST"
+                            onsubmit="return confirm('{{ $akunAlumni ? 'Reset password' : 'Buat akun' }} alumni {{ $alumni->nama }}? Kredensial dikirim ke {{ $akunAlumni?->email ?: ($alumni->email ?: 'email alumni') }} dan berlaku 24 jam.');">
+                            @csrf
+                            <button type="submit"
+                                class="bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                                <i class="fa-solid fa-rotate"></i>
+                                {{ $akunAlumni ? 'Reset Password Alumni' : 'Buat Akun Alumni' }}
+                            </button>
+                        </form>
+                    @endif
                 @endif
                 <a href="{{ route('admin.alumni.index') }}"
                     class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
@@ -168,6 +179,69 @@
                         <dd class="font-medium text-slate-900 dark:text-white leading-relaxed">{{ $v($alumni->alamat) }}</dd>
                     </div>
                 </dl>
+            </div>
+
+            <!-- AKUN LOGIN ALUMNI -->
+            <div class="{{ $cardCls }}">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-user-lock"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">Akun Login Alumni</h2>
+                        <p class="text-[11px] text-slate-400">Username dan status kredensial Portal Alumni</p>
+                    </div>
+                </div>
+
+                @if (! $akunSiap)
+                    <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+                        <p class="font-black"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Kolom akun alumni belum tersedia.</p>
+                        <p class="mt-1">Jalankan <b>php artisan migrate</b> terlebih dahulu.</p>
+                    </div>
+                @elseif ($akunAlumni)
+                    <dl class="grid grid-cols-1 gap-4 text-xs">
+                        <div class="{{ $boxCls }}">
+                            <dt class="{{ $labelCls }}">Username (Email)</dt>
+                            <dd class="font-bold text-slate-900 dark:text-white break-all">{{ $akunAlumni->email }}</dd>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="{{ $boxCls }}">
+                                <dt class="{{ $labelCls }}">Status Akun</dt>
+                                <dd class="font-bold text-slate-900 dark:text-white">
+                                    @if ($akunAlumni->is_active)
+                                        <span class="text-emerald-700 dark:text-emerald-400">Aktif</span>
+                                    @else
+                                        <span class="text-rose-600 dark:text-rose-400">Nonaktif</span>
+                                    @endif
+                                </dd>
+                            </div>
+                            <div class="{{ $boxCls }}">
+                                <dt class="{{ $labelCls }}">Password</dt>
+                                <dd class="font-bold text-slate-900 dark:text-white">
+                                    @if ($akunAlumni->must_change_password)
+                                        <span class="inline-flex items-center gap-1 rounded-lg bg-indigo-50 px-2.5 py-1 text-[10px] font-bold text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300">
+                                            Sementara{{ $akunAlumni->passwordSementaraKedaluwarsa() ? ' · kedaluwarsa' : '' }}
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
+                                            Sudah diganti
+                                        </span>
+                                    @endif
+                                </dd>
+                            </div>
+                        </div>
+                    </dl>
+                    <p class="mt-4 text-[10px] leading-relaxed text-slate-400">
+                        Gunakan tombol <b>Reset Password Alumni</b> untuk mengirim password sementara baru ke username di atas.
+                        Password hanya dikirim lewat email dan tidak dapat dilihat oleh admin.
+                    </p>
+                @else
+                    <div class="rounded-2xl border border-dashed border-slate-200 px-4 py-6 text-center text-xs text-slate-400 dark:border-slate-700">
+                        <i class="fa-solid fa-user-lock mb-2 block text-2xl text-slate-300"></i>
+                        Alumni ini belum memiliki akun login. Gunakan <b>Buat Akun Massal</b> pada halaman Data Alumni
+                        atau tombol Reset Password Alumni untuk membuat akun sekaligus mengirim kredensial.
+                    </div>
+                @endif
             </div>
 
             <!-- KEGIATAN SETELAH LULUS -->

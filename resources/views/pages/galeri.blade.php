@@ -23,7 +23,7 @@
      *                      'poster' => URL (opsional), 'keterangan' => '...']
      *     (platform dideteksi otomatis dari URL)
      */
-    $img = asset('assets/img/banner/banner.png');
+    $img = asset(\App\Support\GambarPublik::FALLBACK_BANNER);
 
     $album = $galeri ?? [
         [
@@ -535,7 +535,7 @@
                     <template x-for="(t, ti) in (album ? album.foto : [])" :key="ti">
                         <button type="button" class="gl-th" :id="'gl-th-' + ti" :class="{ 'on': f === ti }" @click="ke(ti)" :aria-label="(t.tipe === 'foto' ? 'Foto ' : 'Video ') + (ti + 1)">
                             <template x-if="t.gambar">
-                                <img :src="t.gambar" alt="" loading="lazy">
+                                <img :src="t.gambar" :alt="t.judul ? t.judul : 'Foto galeri ' + (ti + 1)" loading="lazy">
                             </template>
                             <template x-if="!t.gambar">
                                 <i class="gl-th-ic" :class="ikon(t.tipe)"></i>

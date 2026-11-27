@@ -371,6 +371,24 @@
                             <span class="truncate">Transkrip Nilai</span>
                         </a>
 
+                        <a href="{{ route('admin.akademik.jadwal.index') }}" @click="sidebarOpen = false"
+                            class="{{ $subClass(request()->routeIs('admin.akademik.jadwal.*')) }}">
+                            <i class="fa-solid fa-calendar-week"></i>
+                            <span class="truncate">Jadwal Pelajaran</span>
+                        </a>
+
+                        <a href="{{ route('admin.akademik.kurikulum.index') }}" @click="sidebarOpen = false"
+                            class="{{ $subClass(request()->routeIs('admin.akademik.kurikulum.*')) }}">
+                            <i class="fa-solid fa-book-open"></i>
+                            <span class="truncate">Kurikulum</span>
+                        </a>
+
+                        <a href="{{ route('admin.akademik.rapor.index') }}" @click="sidebarOpen = false"
+                            class="{{ $subClass(request()->routeIs('admin.akademik.rapor.*')) }}">
+                            <i class="fa-solid fa-file-lines"></i>
+                            <span class="truncate">Rapor Santri</span>
+                        </a>
+
                         @if ($u?->bisa('akademik.mapel'))
                             <a href="{{ route('admin.akademik.mapel.index') }}" @click="sidebarOpen = false"
                                 class="{{ $subClass(request()->routeIs('admin.akademik.mapel.*')) }}">
@@ -569,6 +587,13 @@
                     @if (request()->routeIs('admin.struktur.*')) aria-current="page" @endif title="Struktur">
                     <i class="fa-solid fa-sitemap"></i>
                     <span x-show="!sidebarMinimize" class="truncate whitespace-nowrap">Struktur</span>
+                    <span class="sb-dot" x-show="!sidebarMinimize" aria-hidden="true"></span>
+                </a>
+                <a href="{{ route('admin.kepengurusan.index') }}" @click="sidebarOpen = false"
+                    class="{{ $itemClass(request()->routeIs('admin.kepengurusan.*')) }}"
+                    @if (request()->routeIs('admin.kepengurusan.*')) aria-current="page" @endif title="Kepengurusan">
+                    <i class="fa-solid fa-users-gear"></i>
+                    <span x-show="!sidebarMinimize" class="truncate whitespace-nowrap">Kepengurusan</span>
                     <span class="sb-dot" x-show="!sidebarMinimize" aria-hidden="true"></span>
                 </a>
             @endif

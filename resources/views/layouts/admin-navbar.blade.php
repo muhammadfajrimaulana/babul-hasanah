@@ -16,7 +16,7 @@
 
     <!-- LOGO TEKS DI TENGAH (Mobile) -->
     <div class="absolute left-1/2 -translate-x-1/2 md:hidden flex items-center justify-center pointer-events-none">
-        <img src="{{ asset('/assets/img/logo/logo-teks.png') }}" alt="Logo Pesantren" class="h-8 sm:h-10 w-auto object-contain">
+        <img src="{{ asset('/assets/img/logo/logo-teks.png') }}" alt="Logo Pondok Pesantren Babul Hasanah" class="h-8 sm:h-10 w-auto object-contain">
     </div>
 
     <!-- BAGIAN KANAN: TOMBOL TOGGLE DARK MODE & USER PROFILE -->
@@ -36,7 +36,7 @@
                 @php
                     $avatarUrl = auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : asset('assets/img/logo/logo.png');
                 @endphp
-                <img src="{{ $avatarUrl }}" alt="Profil" class="w-full h-full object-cover" onerror="this.src='{{ asset('assets/img/logo/logo.png') }}'">
+                <img src="{{ $avatarUrl }}" alt="Foto profil {{ auth()->user()->name }}" class="w-full h-full object-cover" onerror="this.src='{{ asset('assets/img/logo/logo.png') }}'">
                 <i class="fa-solid fa-chevron-down ml-1 text-[10px] text-slate-500 dark:text-slate-400 transition-transform duration-200"
                    :class="profileOpen ? 'rotate-180' : ''"></i>
             </button>
@@ -48,7 +48,7 @@
                 <!-- Header Profil -->
                 <div class="p-4 border-b border-slate-100 dark:border-slate-800">
                     <div class="flex items-center gap-3">
-                        <img src="{{ $avatarUrl }}" alt="Profil" class="w-10 h-10 rounded-full object-cover" onerror="this.src='{{ asset('assets/img/logo/logo.png') }}'">
+                        <img src="{{ $avatarUrl }}" alt="Foto profil {{ auth()->user()->name }}" class="w-10 h-10 rounded-full object-cover" onerror="this.src='{{ asset('assets/img/logo/logo.png') }}'">
                         <div>
                             <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ Auth::user()->name }}</h3>
                             <p class="text-[11px] text-slate-500 dark:text-slate-400">{{ Auth::user()->email }}</p>

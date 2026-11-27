@@ -4,11 +4,17 @@ namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
 use App\Models\DokumenNilai;
+use App\Models\JadwalPelajaran;
+use App\Models\Kurikulum;
 use App\Models\NilaiSantri;
 use App\Models\Santri;
 use App\Support\Akademik;
+use App\Support\Jenjang;
+use App\Support\Rapor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class PortalAkademikController extends Controller
@@ -27,6 +33,9 @@ class PortalAkademikController extends Controller
                 'opsi' => collect(),
                 'data' => null,
                 'dokumen' => collect(),
+                'jadwal' => collect(),
+                'kurikulum' => null,
+                'rapor' => null,
                 'siap' => false,
             ]);
         }
@@ -41,6 +50,9 @@ class PortalAkademikController extends Controller
             'opsi' => $anak ? $this->opsi($anak) : collect(),
             'data' => $data,
             'dokumen' => $anak ? $this->dokumen($anak, $filter) : collect(),
+            'jadwal' => $anak ? $this->jadwal($anak, $filter) : collect(),
+            'kurikulum' => $anak ? $this->kurikulum($anak, $filter) : null,
+            'rapor' => $anak ? Rapor::untukPortal($anak, $filter['tahun'], $filter['semester']) : null,
             'siap' => true,
         ]);
     }
@@ -65,6 +77,63 @@ class PortalAkademikController extends Controller
 
     /* ============================================================= Helper */
 
+    /**
+     * Jadwal anak pada jenjang & periode terpilih. Jika kelas anak belum
+     * tersedia di jadwal, tampilkan seluruh jadwal jenjang tersebut.
+     */
+    private function jadwal(Santri $anak, array $filter): Collection
+    {
+        if (! $this->tabelAda('jadwal_pelajaran')) {
+            return collect();
+        }
+
+        $jenjang = Jenjang::normalisasi($anak->jenjang_pendidikan);
+
+        $semua = JadwalPelajaran::query()
+            ->with(['mataPelajaran', 'guru'])
+            ->where('jenjang', $jenjang)
+            ->where('tahun_ajaran', $filter['tahun'])
+            ->where('semester', $filter['semester'])
+            ->get();
+
+        $kelasAnak = trim((string) $anak->kelas);
+        $sesuaiKelas = $kelasAnak === ''
+            ? $semua
+            : $semua->filter(fn ($row) => strcasecmp((string) $row->kelas, $kelasAnak) === 0);
+
+        return ($sesuaiKelas->isNotEmpty() ? $sesuaiKelas : $semua)
+            ->sortBy(fn ($row) => [
+                array_search($row->hari, JadwalPelajaran::HARI, true) ?: 99,
+                (string) $row->jam_mulai,
+            ])
+            ->values();
+    }
+
+    /** Kurikulum published untuk jenjang & periode anak. */
+    private function kurikulum(Santri $anak, array $filter): ?Kurikulum
+    {
+        if (! $this->tabelAda('kurikulum')) {
+            return null;
+        }
+
+        return Kurikulum::query()
+            ->with('item.mataPelajaran')
+            ->where('status', 'published')
+            ->where('jenjang', Jenjang::normalisasi($anak->jenjang_pendidikan))
+            ->where('tahun_ajaran', $filter['tahun'])
+            ->where('semester', $filter['semester'])
+            ->first();
+    }
+
+    private function tabelAda(string $nama): bool
+    {
+        try {
+            return Schema::hasTable($nama);
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
     private function pilihAnak(Request $request, Collection $anakList): ?Santri
     {
         if ($anakList->isEmpty()) {
@@ -82,6 +151,7 @@ class PortalAkademikController extends Controller
         // Jangan pernah mengandalkan dropdown saja: kepemilikan anak dicek
         // di server pada setiap request.
         abort_unless($anak, 403, 'Data anak ini bukan milik akun Anda.');
+        Gate::authorize('portal.lihatAnak', $anak);
 
         return $anak;
     }
@@ -206,6 +276,8 @@ class PortalAkademikController extends Controller
             ->exists();
 
         abort_unless($milik, 403, 'Dokumen ini bukan milik akun Anda.');
+        Gate::authorize('portal.lihatDokumen', $dokumen);
+
         abort_unless(
             filled($dokumen->file_path) && Storage::disk('public')->exists($dokumen->file_path),
             404,

@@ -116,26 +116,35 @@ class Kelulusan
             $alumni->alamat = $santri->alamat;
         }
 
-        if (blank($alumni->email)) {
-            $alumni->email = $santri->user?->email ?: $santri->pendaftaranOnline?->email;
+        // Email pribadi santri lebih diutamakan sebagai username akun alumni.
+        // Email wali tetap jadi cadangan untuk data lama yang belum punya
+        // email santri (lihat AlumniAkun::pastikan untuk penanganan bentrok).
+        $emailSantri = $santri->email_santri;
+        $emailWali = $santri->user?->email ?: $santri->pendaftaranOnline?->email;
+        $emailSaatIni = (string) $alumni->email;
+        $emailWarisan = blank($emailSaatIni)
+            || strcasecmp($emailSaatIni, (string) $emailWali) === 0
+            || str_ends_with(strtolower($emailSaatIni), '@alumni.babulhasanah.sch.id');
+
+        // Jangan timpa email yang sengaja diisi admin untuk akun yang sudah ada.
+        if (! $alumni->user_id && $emailWarisan) {
+            $alumni->email = $emailSantri ?: $emailWali;
         }
 
         if (blank($alumni->no_hp)) {
             $alumni->no_hp = $santri->user?->phone ?: $santri->pendaftaranOnline?->no_hp_aktif;
         }
 
-        // NISN & jenis kelamin hanya ada pada arsip PPDB, jadi ikut disalin
-        // bila kolomnya sudah tersedia dan belum diisi admin.
+        // NISN hanya ada pada arsip PPDB, jadi ikut disalin bila kolomnya
+        // sudah tersedia dan belum diisi admin.
         if (Alumni::siapKolom('nisn') && blank($alumni->nisn)) {
             $alumni->nisn = $santri->pendaftaranOnline?->nisn;
         }
 
         if (blank($alumni->jenis_kelamin)) {
-            $kelamin = $santri->pendaftaranOnline?->jenis_kelamin;
-
-            if (in_array($kelamin, ['L', 'P'], true)) {
-                $alumni->jenis_kelamin = $kelamin;
-            }
+            $kelamin = Santri::siapJenisKelamin() ? $santri->jenis_kelamin : null;
+            $kelamin = $kelamin ?: $santri->pendaftaranOnline?->jenis_kelamin;
+            $alumni->jenis_kelamin = Santri::normalisasiJenisKelamin($kelamin);
         }
 
         $alumni->save();

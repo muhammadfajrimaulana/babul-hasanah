@@ -14,6 +14,7 @@ use App\Support\Akses;
 use App\Support\CatatanAktivitas;
 use App\Support\Jenjang;
 use App\Support\Kelulusan;
+use App\Support\KodeUnik;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -136,9 +137,7 @@ class PendaftaranController extends Controller
                 ]);
             }
 
-            do {
-                $nomorInduk = 'SANTRI-'.date('Y').'-'.strtoupper(Str::random(4));
-            } while (Santri::where('nomor_induk', $nomorInduk)->exists());
+            $nomorInduk = KodeUnik::nomorInduk();
 
             $alamat = $pendaftaran->alamat_domisili ?: collect([
                 $pendaftaran->alamat_jalan,
@@ -149,7 +148,7 @@ class PendaftaranController extends Controller
                 $pendaftaran->alamat_provinsi,
             ])->filter()->implode(', ');
 
-            $santri = Santri::create([
+            $dataSantri = [
                 'user_id' => $user->id,
                 'pendaftaran_online_id' => $pendaftaran->id,
                 'nomor_induk' => $nomorInduk,
@@ -160,7 +159,20 @@ class PendaftaranController extends Controller
                 'status_kelulusan' => Santri::STATUS_AKTIF,
                 'alamat' => $alamat ?: 'Asal sekolah: '.$pendaftaran->asal_sekolah,
                 'nama_wali' => $namaWali,
-            ]);
+            ];
+
+            // Email santri dibawa ke data santri untuk dipakai akun alumni.
+            if (Santri::siapEmailSantri()) {
+                $dataSantri['email_santri'] = $pendaftaran->email_santri ?: null;
+            }
+
+            // Jenis kelamin dari PPDB ikut disalin agar komposisi putra/putri
+            // pada dashboard langsung terisi tanpa input ulang.
+            if (Santri::siapJenisKelamin()) {
+                $dataSantri['jenis_kelamin'] = Santri::normalisasiJenisKelamin($pendaftaran->jenis_kelamin);
+            }
+
+            $santri = Santri::create($dataSantri);
 
             // Dukung ayah & ibu dengan akun berbeda lewat pivot.
             $user->anak()->syncWithoutDetaching([
@@ -261,7 +273,9 @@ class PendaftaranController extends Controller
             'tempat_tanggal_lahir' => ['required', 'string', 'max:255'],
             'no_hp_aktif' => ['required', 'string', 'max:30'],
             'alamat_domisili' => ['required', 'string', 'max:1000'],
-            'email' => ['required', 'email', 'max:255', 'unique:pendaftaran_online,email,'.$pendaftaran->id],
+            // Email wali sengaja TIDAK unik: satu wali boleh mendaftarkan banyak anak.
+            'email' => ['required', 'email', 'max:255'],
+            'email_santri' => ['required', 'email', 'max:255', 'different:email'],
             'nama_ortu_wali' => ['required', 'string', 'max:255'],
             'no_hp_ortu' => ['required', 'string', 'max:30'],
             'asal_sekolah' => ['required', 'string', 'max:255'],
@@ -276,7 +290,9 @@ class PendaftaranController extends Controller
             'alamat_domisili.required' => 'Alamat tinggal (domisili) wajib diisi.',
             'email.required' => 'Email orang tua/wali wajib diisi.',
             'email.email' => 'Format email orang tua/wali tidak valid.',
-            'email.unique' => 'Email orang tua/wali ini sudah dipakai pendaftar lain.',
+            'email_santri.required' => 'Email santri wajib diisi untuk akun alumni kelak.',
+            'email_santri.email' => 'Format email santri tidak valid.',
+            'email_santri.different' => 'Email santri harus berbeda dengan email orang tua/wali.',
             'nama_ortu_wali.required' => 'Nama orang tua/wali wajib diisi.',
             'no_hp_ortu.required' => 'Nomor handphone orang tua wajib diisi.',
             'asal_sekolah.required' => 'Sekolah asal wajib diisi.',
@@ -287,7 +303,7 @@ class PendaftaranController extends Controller
             'jenjang_tujuan.in' => 'Pilihan jenjang tidak valid.',
         ]);
 
-        // Pastikan struktur tabel sudah mendukung 12 field PPDB.
+        // Pastikan struktur tabel sudah mendukung 13 field PPDB.
         if ($kolomHilang = PendaftaranOnline::kolomFormHilang()) {
             return back()->withInput()->withErrors([
                 'database' => PendaftaranOnline::pesanSkemaBelumSiap($kolomHilang),
@@ -306,15 +322,40 @@ class PendaftaranController extends Controller
             ]);
         }
 
+        // Email santri akan jadi username akun alumni. Akun alumni yang sudah
+        // terbentuk boleh mempertahankan email yang sama.
+        $emailSantri = $validated['email_santri'];
+        $pemilikEmailSantri = User::where('email', $emailSantri)->first();
+        $pemilikDiperbolehkan = array_filter([
+            $userTertaut?->id,
+            Kelulusan::siapTautan() ? $santri?->alumni?->user_id : null,
+        ]);
+
+        if ($pemilikEmailSantri && ! in_array($pemilikEmailSantri->id, $pemilikDiperbolehkan, true)) {
+            return back()->withInput()->withErrors([
+                'email_santri' => "Email santri {$emailSantri} sudah dipakai akun lain.",
+            ]);
+        }
+
+        if (PendaftaranOnline::where('email_santri', $emailSantri)
+            ->whereKeyNot($pendaftaran->id)
+            ->exists()
+        ) {
+            return back()->withInput()->withErrors([
+                'email_santri' => 'Email santri ini sudah dipakai pendaftaran lain.',
+            ]);
+        }
+
         $namaWali = $validated['nama_ortu_wali'] ?: $validated['nama_lengkap'];
 
-        DB::transaction(function () use ($validated, $pendaftaran, $santri, $userTertaut, $namaWali) {
+        DB::transaction(function () use ($validated, $pendaftaran, $santri, $userTertaut, $namaWali, $emailSantri) {
             $pendaftaran->update([
                 'nama_lengkap' => $validated['nama_lengkap'],
                 'tempat_tanggal_lahir' => $validated['tempat_tanggal_lahir'],
                 'no_hp_aktif' => $validated['no_hp_aktif'],
                 'alamat_domisili' => $validated['alamat_domisili'],
                 'email' => $validated['email'],
+                'email_santri' => $emailSantri,
                 'nama_ortu_wali' => $validated['nama_ortu_wali'],
                 'no_hp_ortu' => $validated['no_hp_ortu'],
                 'asal_sekolah' => $validated['asal_sekolah'],
@@ -335,12 +376,18 @@ class PendaftaranController extends Controller
 
             // Sinkronkan data santri yang sudah diverifikasi.
             if ($santri) {
-                $santri->update([
+                $dataSantri = [
                     'nama_lengkap' => $validated['nama_lengkap'],
                     'jenjang_pendidikan' => $validated['jenjang_tujuan'],
                     'nama_wali' => $namaWali,
                     'alamat' => $validated['alamat_domisili'],
-                ]);
+                ];
+
+                if (Santri::siapEmailSantri()) {
+                    $dataSantri['email_santri'] = $emailSantri;
+                }
+
+                $santri->update($dataSantri);
             }
         });
 

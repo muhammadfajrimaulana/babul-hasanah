@@ -131,9 +131,20 @@
                         value="{{ old('email', $pendaftaran->email) }}" class="{{ $inputCls }}"
                         placeholder="email.orangtua@gmail.com">
                     <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                        Email milik orang tua/wali yang dipakai untuk <b>login Portal Wali Santri</b>. Santri tidak perlu email sendiri.
+                        Email milik orang tua/wali yang dipakai untuk <b>login Portal Wali Santri</b>.
                     </p>
                     @error('email') <p class="text-[11px] text-rose-600 mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="{{ $labelCls }}" for="email_santri">Email Santri <span class="text-rose-500">*</span></label>
+                    <input id="email_santri" type="email" name="email_santri" required maxlength="255"
+                        value="{{ old('email_santri', $pendaftaran->email_santri) }}" class="{{ $inputCls }}"
+                        placeholder="email.santri@gmail.com">
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                        Harus berbeda dari email wali. Dipakai sebagai username dan pengirim kredensial Portal Alumni saat kelulusan.
+                    </p>
+                    @error('email_santri') <p class="text-[11px] text-rose-600 mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="sm:col-span-2 pt-2 border-t border-slate-100 dark:border-slate-800">

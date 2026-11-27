@@ -15,6 +15,7 @@ use App\Support\Akademik;
 use App\Support\CatatanAktivitas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -222,6 +223,7 @@ class AlumniPortalController extends Controller
 
         abort_unless($alumni->santri_id === $dokumen->santri_id, 403,
             'Dokumen ini bukan milik data alumni Anda.');
+        Gate::authorize('portal.lihatDokumenAlumni', [$dokumen, $alumni]);
 
         abort_unless($dokumen->status === 'published', 404, 'Dokumen belum diterbitkan.');
 
@@ -295,6 +297,7 @@ class AlumniPortalController extends Controller
     public function ajukanLegalisir(Request $request)
     {
         $alumni = $this->alumni($request);
+        Gate::authorize('portal.ajukanLegalisir', $alumni);
 
         $data = $request->validate([
             'jenis_dokumen' => ['required', 'string', 'max:100'],
@@ -325,6 +328,8 @@ class AlumniPortalController extends Controller
         $alumni = $this->alumni($request);
 
         abort_unless($legalisir->alumni_id === $alumni->id, 403, 'Berkas ini bukan milik Anda.');
+        Gate::authorize('portal.unduhLegalisir', [$legalisir, $alumni]);
+
         abort_unless($legalisir->status === 'selesai', 404, 'Legalisir belum selesai diproses.');
         abort_unless(
             filled($legalisir->file_hasil) && Storage::disk('public')->exists($legalisir->file_hasil),
@@ -354,6 +359,7 @@ class AlumniPortalController extends Controller
 
         abort_unless($alumni, 403,
             'Akun ini belum tertaut ke data alumni. Hubungi Admin Jenjang.');
+        Gate::authorize('portal.lihatAlumni', $alumni);
 
         return $alumni;
     }

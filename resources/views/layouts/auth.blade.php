@@ -30,7 +30,6 @@
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--color-pharmaceutical-green) !important;
         }
     </style>

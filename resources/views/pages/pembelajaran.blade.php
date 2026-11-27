@@ -7,8 +7,7 @@
 @include('pages.partials.profil-dokumen-style')
 
 @php
-    // Konten dari dashboard (1 query) + fallback teks lama.
-    $konten = \App\Models\Konten::allWithDefaults();
+    // $konten dan $layout disiapkan di Public\ProfilController@pembelajaran.
     $kv = fn (string $key, string $default = '') => $konten[$key] ?? $default;
 
     $baris = function (string $key, string $default = '', int $parts = 2) use ($kv): array {
@@ -26,8 +25,7 @@
         return $hasil;
     };
 
-    // Susunan & visibilitas section dari dashboard.
-    $layout = \App\Models\Konten::layoutFor('pembelajaran');
+    // Susunan & visibilitas section dari dashboard (dikirim controller).
     $visible = [];
     $order = [];
     foreach ($layout as $i => $section) {
@@ -271,7 +269,7 @@
         <header class="sj-hero" style="order: {{ $order['hero'] ?? 0 }}">
             <div class="sj-wrap">
                 <nav class="sj-crumb" aria-label="Breadcrumb">
-                    <a href="{{ url('/') }}">Beranda</a>
+                    <a href="{{ route('home') }}">Beranda</a>
                     <i class="fa-solid fa-chevron-right"></i>
                     <span>Profil</span>
                     <i class="fa-solid fa-chevron-right"></i>

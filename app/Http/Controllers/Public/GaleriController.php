@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Album;
-use Illuminate\Support\Facades\Storage;
+use App\Support\GambarPublik;
 
 class GaleriController extends Controller
 {
@@ -20,16 +20,21 @@ class GaleriController extends Controller
                     'kategori'  => $a->kategori,
                     'tanggal'   => $a->tanggal?->toDateString(),
                     'deskripsi' => $a->deskripsi,
-                    'sampul'    => $a->sampul ? Storage::url($a->sampul) : null,
+                    'sampul'    => GambarPublik::dariStorage($a->sampul),
                     'foto'      => $a->media->map(function ($m) {
-                        $poster = $m->poster ? Storage::url($m->poster) : null;
+                        $poster = GambarPublik::dariStorage($m->poster);
 
                         return match ($m->tipe) {
-                            'foto'  => ['gambar' => Storage::url($m->path), 'keterangan' => $m->keterangan],
-                            'video' => ['tipe' => 'video', 'url' => Storage::url($m->path), 'poster' => $poster, 'keterangan' => $m->keterangan],
+                            // Berkas upload yang hilang dibuang, jangan dikirim sebagai <img> mati.
+                            'foto'  => ($path = GambarPublik::dariStorage($m->path))
+                                ? ['gambar' => $path, 'keterangan' => $m->keterangan]
+                                : null,
+                            'video' => ($path = GambarPublik::dariStorage($m->path))
+                                ? ['tipe' => 'video', 'url' => $path, 'poster' => $poster, 'keterangan' => $m->keterangan]
+                                : null,
                             default => ['url' => $m->url, 'poster' => $poster, 'keterangan' => $m->keterangan],
                         };
-                    })->all(),
+                    })->filter()->values()->all(),
                 ];
             })->all();
 

@@ -327,6 +327,123 @@
                     @endif
                 @endif
             @endif
+
+            {{-- RAPOR REKAP --}}
+            @if ($rapor)
+                <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 space-y-4">
+                    <div class="flex items-center justify-between gap-3">
+                        <h3 class="text-sm font-black text-slate-900">
+                            <i class="fa-solid fa-file-lines mr-1.5 text-emerald-600"></i> Rapor Akademik
+                        </h3>
+                        <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black text-emerald-700">
+                            <i class="fa-solid fa-circle-check mr-1"></i> Terbit
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                        <div class="rounded-2xl bg-slate-50 px-3 py-2.5">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Rata-rata</p>
+                            <p class="text-lg font-black text-emerald-700">{{ Akademik::formatNilai($rapor->rata_rata) }}</p>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 px-3 py-2.5">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Predikat</p>
+                            <p class="text-lg font-black text-slate-800">{{ Akademik::predikat($rapor->rata_rata) }}</p>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 px-3 py-2.5">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Peringkat Kelas</p>
+                            <p class="text-lg font-black text-slate-800">{{ $rapor->peringkat ?? '—' }} <span class="text-xs font-bold text-slate-400">/ {{ $rapor->jumlah_santri }}</span></p>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 px-3 py-2.5">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kelas</p>
+                            <p class="text-lg font-black text-slate-800">{{ $rapor->kelas }}</p>
+                        </div>
+                    </div>
+                    @if ($rapor->catatan_wali_kelas)
+                        <div class="rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
+                            <p class="text-[10px] font-black uppercase tracking-wider text-emerald-700">Catatan Wali Kelas</p>
+                            <p class="mt-1 text-xs leading-relaxed text-emerald-900 whitespace-pre-line">{{ $rapor->catatan_wali_kelas }}</p>
+                        </div>
+                    @endif
+                    @if ($rapor->published_at)
+                        <p class="text-[10px] text-slate-400 text-center">
+                            Diterbitkan {{ $rapor->published_at->translatedFormat('d F Y H:i') }} WIB
+                        </p>
+                    @endif
+                </section>
+            @endif
+
+            {{-- JADWAL PELAJARAN --}}
+            @if ($jadwal && $jadwal->isNotEmpty())
+                @php $hariSekarang = null; @endphp
+                <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-100 px-5 py-4">
+                        <h3 class="text-sm font-black text-slate-900">
+                            <i class="fa-solid fa-calendar-week mr-1.5 text-emerald-600"></i> Jadwal Pelajaran
+                        </h3>
+                        <p class="mt-0.5 text-[10px] text-slate-400">{{ $filter['tahun'] }} · Semester {{ Akademik::labelSemester($filter['semester']) }}</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full min-w-[620px] text-left">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Hari</th>
+                                    <th class="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Jam</th>
+                                    <th class="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Kelas</th>
+                                    <th class="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Mata Pelajaran</th>
+                                    <th class="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Guru</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                @foreach ($jadwal as $row)
+                                    @if ($hariSekarang !== $row->hari)
+                                        @php $hariSekarang = $row->hari; @endphp
+                                        <tr class="bg-emerald-50/70">
+                                            <td colspan="5" class="px-4 py-2 text-[11px] font-black uppercase tracking-wider text-emerald-700">
+                                                <i class="fa-solid fa-calendar-day mr-1.5"></i>{{ $row->hari }}
+                                            </td>
+                                        </tr>
+                                    @endif
+                                    <tr>
+                                        <td class="px-4 py-3 text-xs text-slate-400">—</td>
+                                        <td class="px-4 py-3 text-xs font-black font-mono text-slate-800">{{ $row->labelWaktu() }}</td>
+                                        <td class="px-4 py-3 text-xs font-bold text-slate-700">{{ $row->kelas }}</td>
+                                        <td class="px-4 py-3 text-xs font-bold text-slate-800">{{ $row->mataPelajaran?->nama ?? '—' }}</td>
+                                        <td class="px-4 py-3 text-xs text-slate-600">{{ $row->guru?->nama ?? '—' }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            @endif
+
+            {{-- KURIKULUM --}}
+            @if ($kurikulum)
+                <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 space-y-4">
+                    <div>
+                        <h3 class="text-sm font-black text-slate-900">
+                            <i class="fa-solid fa-book-open mr-1.5 text-emerald-600"></i> Kurikulum
+                        </h3>
+                        <p class="mt-0.5 text-xs font-bold text-slate-700">{{ $kurikulum->nama }}</p>
+                        <p class="mt-0.5 text-[10px] text-slate-400">{{ $kurikulum->jenjang }} · {{ $filter['tahun'] }} · Semester {{ Akademik::labelSemester($filter['semester']) }}</p>
+                    </div>
+                    @if ($kurikulum->deskripsi)
+                        <p class="text-xs leading-relaxed text-slate-600 whitespace-pre-line">{{ $kurikulum->deskripsi }}</p>
+                    @endif
+                    @if ($kurikulum->item->isNotEmpty())
+                        <div class="divide-y divide-slate-100 rounded-2xl border border-slate-200">
+                            @foreach ($kurikulum->item as $item)
+                                <div class="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <p class="text-xs font-bold text-slate-800">{{ $item->mataPelajaran?->nama ?? '—' }}</p>
+                                    <p class="text-[10px] text-slate-500">KKM {{ $item->kkm }}</p>
+                                    @if ($item->target_kd)
+                                        <p class="text-[11px] leading-relaxed text-slate-500 sm:max-w-[55%]">{{ $item->target_kd }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </section>
+            @endif
         @endif
     </div>
 @endsection

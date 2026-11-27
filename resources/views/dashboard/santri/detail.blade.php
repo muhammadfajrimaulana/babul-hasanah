@@ -61,7 +61,7 @@
                     </a>
                     @if (\App\Support\Akses::superAdmin(auth()->user()))
                         <form action="{{ route('admin.santri.destroy', $santri->id) }}" method="POST"
-                            onsubmit="return confirm('Hapus permanen data santri ini? Tindakan ini hanya untuk Superadmin.');">
+                            onsubmit="return confirm('Pindahkan data santri ini ke Tempat Sampah? Tindakan ini hanya untuk Superadmin dan dapat dipulihkan.');">
                             @csrf
                             @method('DELETE')
                             <button type="submit"
@@ -217,6 +217,10 @@
                     <div class="{{ $boxCls }}">
                         <dt class="{{ $labelCls }}">Nama Wali</dt>
                         <dd class="font-bold text-slate-900 dark:text-white">{{ $v($santri->nama_wali) }}</dd>
+                    </div>
+                    <div class="{{ $boxCls }}">
+                        <dt class="{{ $labelCls }}">Email Santri <span class="font-normal">(login alumni)</span></dt>
+                        <dd class="font-medium text-slate-700 dark:text-slate-300 break-all">{{ $v($santri->email_santri) }}</dd>
                     </div>
                 </dl>
             </div>

@@ -5,12 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>@yield('title', 'Portal Alumni') - Pondok Pesantren Babul Hasanah</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .nav-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        .nav-scroll::-webkit-scrollbar { display: none; }
-    </style>
 </head>
 
 <body class="bg-slate-100 text-slate-900 font-sans antialiased">

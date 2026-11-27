@@ -32,7 +32,7 @@
                 </div>
                 <h2 class="mt-1 text-xl font-black text-slate-900 dark:text-white">Manajemen Nilai Santri</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400 max-w-2xl">
-                    Satu halaman untuk input massal per kelas (draft → terbit), input cepat satu santri, dan unggah rapor PDF.
+                    Satu halaman untuk input massal per kelas (draft → terbit), import nilai CSV, input cepat satu santri, dan unggah rapor PDF.
                 </p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
@@ -40,6 +40,10 @@
                     <a href="#input-cepat"
                         class="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-bold text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
                         <i class="fa-solid fa-bolt"></i> Input Cepat
+                    </a>
+                    <a href="#import-nilai"
+                        class="inline-flex items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-[11px] font-bold text-sky-700 transition hover:bg-sky-100 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-300">
+                        <i class="fa-solid fa-file-arrow-up"></i> Import CSV
                     </a>
                 @endif
                 <span class="inline-flex items-center gap-2 rounded-xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-2 text-[11px] font-bold text-emerald-800 dark:text-emerald-300">
@@ -76,6 +80,22 @@
             <div class="rounded-2xl border border-sky-200 dark:border-sky-500/30 bg-sky-50 dark:bg-sky-500/10 px-4 py-3.5 text-xs font-bold text-sky-800 dark:text-sky-300 flex items-start gap-2.5">
                 <i class="fa-solid fa-circle-info mt-0.5"></i>
                 <span>{{ session('info') }}</span>
+            </div>
+        @endif
+
+        @if (session('import_errors'))
+            <div class="rounded-2xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 px-4 py-3.5 text-xs text-amber-800 dark:text-amber-300">
+                <p class="font-black flex items-start gap-2">
+                    <i class="fa-solid fa-list-check mt-0.5"></i> Sebagian baris dilewati:
+                </p>
+                <ul class="mt-1.5 list-disc space-y-0.5 pl-5">
+                    @foreach (session('import_errors') as $pesanError)
+                        <li>{{ $pesanError }}</li>
+                    @endforeach
+                </ul>
+                @if (count(session('import_errors')) >= 20)
+                    <p class="mt-1.5 text-[10px] font-bold">Hanya 20 error pertama yang ditampilkan.</p>
+                @endif
             </div>
         @endif
 
@@ -317,6 +337,59 @@
             @endif
         @endif
 
+        {{-- IMPORT NILAI MASSAL DARI CSV --}}
+        @if ($bisaUbah && $filter['jenjang'])
+            <section id="import-nilai"
+                class="scroll-mt-24 rounded-3xl border border-sky-200 dark:border-sky-500/30 bg-white dark:bg-slate-900 p-5 shadow-sm sm:p-6">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="max-w-2xl">
+                        <h3 class="inline-flex items-center gap-2 text-sm font-black text-slate-900 dark:text-white">
+                            <i class="fa-solid fa-file-arrow-up text-sky-600"></i> Import Nilai dari CSV
+                        </h3>
+                        <p class="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+                            Kolom <b>nomor_induk</b> dan <b>nilai</b> wajib. Jenjang, kelas, mapel, tahun ajaran,
+                            semester, dan kategori mengikuti filter di atas, tetapi boleh ditimpa per baris.
+                        </p>
+                    </div>
+                    <a href="{{ route('admin.akademik.nilai.template') }}"
+                        class="inline-flex items-center justify-center gap-2 rounded-xl border border-sky-200 dark:border-sky-500/30 px-4 py-2.5 text-[11px] font-bold text-sky-700 dark:text-sky-300 transition hover:bg-sky-50 dark:hover:bg-sky-500/10">
+                        <i class="fa-solid fa-download"></i> Unduh Template
+                    </a>
+                </div>
+
+                <form method="POST" action="{{ route('admin.akademik.nilai.import') }}" enctype="multipart/form-data"
+                    class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+                    @csrf
+                    @foreach ($queryKonteks as $kunciKonteks => $nilaiKonteks)
+                        <input type="hidden" name="{{ $kunciKonteks }}" value="{{ $nilaiKonteks }}">
+                    @endforeach
+
+                    <div>
+                        <label class="{{ $labelCls }}">Berkas CSV</label>
+                        <input type="file" name="file_csv" accept=".csv,.txt,text/csv" required class="{{ $inputCls }}">
+                        <p class="mt-1 text-[10px] leading-relaxed text-slate-400">
+                            Maksimal 5 MB. CSV dari Excel dipisah titik koma; dipisah koma juga didukung.
+                            Desimal boleh ditulis <b>85.5</b> atau <b>85,5</b>.
+                        </p>
+                    </div>
+
+                    <button type="submit"
+                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-sky-600 px-6 py-3 text-xs font-black text-white shadow-sm transition hover:bg-sky-700">
+                        <i class="fa-solid fa-upload"></i> Import &amp; Simpan Draft
+                    </button>
+                </form>
+
+                <div class="mt-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/40 px-3.5 py-2.5">
+                    <p class="text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
+                        <i class="fa-solid fa-circle-info mr-1 text-sky-600"></i>
+                        Hasil import berstatus <b>draft</b> dan belum terlihat wali. Gunakan tombol
+                        <b>Terbitkan</b> pada konteks ini setelah data diperiksa. Baris yang error dilewati
+                        dan daftar errornya ditampilkan di atas halaman.
+                    </p>
+                </div>
+            </section>
+        @endif
+
         @if (! $filter['lengkap'])
             <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-5">
                 <div class="max-w-xl space-y-1">
@@ -449,6 +522,9 @@
                                         <th class="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400 w-32">Nilai</th>
                                         <th class="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Status</th>
                                         <th class="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Catatan</th>
+                                        @if ($bisaUbah)
+                                            <th class="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Aksi</th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -494,6 +570,19 @@
                                                     @disabled(! $bisaUbah)
                                                     class="w-full min-w-[140px] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs text-slate-700 dark:text-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 disabled:bg-slate-100 dark:disabled:bg-slate-800">
                                             </td>
+                                            @if ($bisaUbah)
+                                                <td class="px-4 py-3 text-center">
+                                                    @if ($row?->status === 'published')
+                                                        <a href="{{ route('admin.akademik.nilai.buka-kembali.form', $row) }}"
+                                                            title="Buka kembali nilai terbit menjadi draft (wajib alasan)"
+                                                            class="inline-flex items-center gap-1 rounded-lg border border-amber-200 px-2.5 py-1.5 text-[10px] font-bold text-amber-700 transition hover:bg-amber-50 dark:border-amber-500/30 dark:text-amber-300 dark:hover:bg-amber-500/10">
+                                                            <i class="fa-solid fa-lock-open"></i> Buka
+                                                        </a>
+                                                    @else
+                                                        <span class="text-[10px] text-slate-300 dark:text-slate-600">—</span>
+                                                    @endif
+                                                </td>
+                                            @endif
                                         </tr>
                                     @endforeach
                                 </tbody>

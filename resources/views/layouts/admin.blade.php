@@ -12,32 +12,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>@yield('title', 'Pondok Pesantren Babul Hasanah')</title>
     <link rel="icon" type="image/png" href="{{ asset('assets/img/logo/logo.png') }}">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
-        :root {
-            /* Palette Colors */
-            --color-white: #fefefe;
-            --color-pharmaceutical-green: #1b7b32;
-            --color-kashmir: #698d6e;
-            --color-misty-marsh: #cdd9cf;
-            --color-copper-patina: #9cb49d;
-            --color-woodgrain: #916438;
-            --color-queen-of-the-night: #44467e;
-            --color-bourbon-peach: #ee8a3e;
-        }
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
         [x-cloak] {
             display: none !important;
         }

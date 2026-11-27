@@ -12,6 +12,7 @@ use App\Support\Akses;
 use App\Support\CatatanAktivitas;
 use App\Support\Jenjang;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 /**
@@ -25,6 +26,8 @@ class PembinaanController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
+        Gate::authorize('viewAny', Hafalan::class);
+
         $jenjang = Akses::dibatasiJenjang($user) ? null : $request->input('jenjang');
 
         $santriQuery = Akademik::santriQuery($user, $jenjang)
@@ -64,6 +67,7 @@ class PembinaanController extends Controller
     public function simpanHafalan(Request $request)
     {
         abort_unless(auth()->user()->bisa('pembinaan.ubah'), 403);
+        Gate::authorize('create', Hafalan::class);
 
         $data = $request->validate([
             'santri_id' => ['required', 'integer'],
@@ -105,6 +109,7 @@ class PembinaanController extends Controller
     {
         abort_unless(auth()->user()->bisa('pembinaan.ubah'), 403);
         $this->santriBerwenang($hafalan->santri_id);
+        Gate::authorize('delete', $hafalan);
 
         $hafalan->delete();
 
@@ -116,6 +121,7 @@ class PembinaanController extends Controller
     public function simpanPelanggaran(Request $request)
     {
         abort_unless(auth()->user()->bisa('pembinaan.ubah'), 403);
+        Gate::authorize('create', Pelanggaran::class);
 
         $data = $request->validate([
             'santri_id' => ['required', 'integer'],
@@ -151,6 +157,7 @@ class PembinaanController extends Controller
     {
         abort_unless(auth()->user()->bisa('pembinaan.ubah'), 403);
         $this->santriBerwenang($pelanggaran->santri_id);
+        Gate::authorize('delete', $pelanggaran);
 
         $pelanggaran->delete();
 
@@ -162,6 +169,7 @@ class PembinaanController extends Controller
     public function simpanAbsensi(Request $request)
     {
         abort_unless(auth()->user()->bisa('pembinaan.ubah'), 403);
+        Gate::authorize('create', Absensi::class);
 
         $data = $request->validate([
             'santri_id' => ['required', 'integer'],
@@ -200,6 +208,8 @@ class PembinaanController extends Controller
         $santri = Akademik::santriQuery(auth()->user())->find($santriId);
 
         abort_unless($santri, 403, 'Santri ini bukan bagian dari kewenangan Anda.');
+
+        Gate::authorize('santri', [Hafalan::class, $santriId]);
 
         return $santri;
     }

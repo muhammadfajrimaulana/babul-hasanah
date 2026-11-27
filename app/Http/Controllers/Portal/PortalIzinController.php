@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Izin;
 use App\Support\CatatanAktivitas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 /** Izin pulang dari portal wali. */
 class PortalIzinController extends Controller
@@ -49,6 +50,7 @@ class PortalIzinController extends Controller
 
         abort_unless($user->memilikiSantri((int) $data['santri_id']), 403,
             'Data santri ini bukan milik akun Anda.');
+        Gate::authorize('portal.ajukanIzin', (int) $data['santri_id']);
 
         $masihAktif = Izin::query()
             ->where('santri_id', $data['santri_id'])

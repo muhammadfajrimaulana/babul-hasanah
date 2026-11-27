@@ -3,13 +3,21 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\KredensialMail;
 use App\Models\Alumni;
+use App\Models\Santri;
+use App\Models\User;
 use App\Support\Akses;
+use App\Support\AlumniAkun;
+use App\Support\CatatanAktivitas;
 use App\Support\Jenjang;
 use App\Support\Kelulusan;
 use App\Support\RekapJenjang;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AlumniController extends Controller
 {
@@ -78,6 +86,7 @@ class AlumniController extends Controller
 
         $query = Alumni::query()
             ->when($tautanSiap, fn ($q) => $q->with('santri'))
+            ->when(Alumni::siapKolom('user_id'), fn ($q) => $q->with('user'))
             ->when($jenjangFilterDb, fn ($q) => $q->whereIn('jenjang', $jenjangFilterDb))
             ->when($filterKegiatan !== '', fn ($q) => $q->where('kegiatan', $filterKegiatan))
             ->when($request->angkatan, fn ($q, $a) => $q->where('tahun_lulus', $a));
@@ -120,6 +129,17 @@ class AlumniController extends Controller
         // Santri yang sudah lulus tetapi belum punya baris Data Alumni.
         $santriLulus = Kelulusan::santriLulusBelumAlumni($user);
 
+        // Alumni yang belum memiliki akun login (dibatasi jenjang user).
+        $tanpaAkun = Alumni::siapKolom('user_id')
+            ? Alumni::query()
+                ->when($tautanSiap, fn ($q) => $q->with('santri'))
+                ->when($jenjangDb, fn ($q) => $q->whereIn('jenjang', $jenjangDb))
+                ->whereNull('user_id')
+                ->orderByDesc('tahun_lulus')
+                ->orderBy('nama')
+                ->get()
+            : collect();
+
         return view('dashboard.alumni.index', [
             'alumnis' => $alumnis,
             'daftarAngkatan' => $daftarAngkatan,
@@ -127,6 +147,7 @@ class AlumniController extends Controller
             'daftarKegiatan' => $daftarKegiatan,
             'statistik' => $statistik,
             'santriLulus' => $santriLulus,
+            'tanpaAkun' => $tanpaAkun,
             'tautanSiap' => $tautanSiap,
             'nilaiSiap' => $nilaiSiap,
             'totalLulus' => Kelulusan::jumlahLulus($user),
@@ -172,20 +193,201 @@ class AlumniController extends Controller
         );
     }
 
+    /**
+     * Buat akun login untuk banyak alumni sekaligus.
+     *
+     * Hanya alumni yang belum punya akun dan masih berada di jenjang pengguna
+     * yang diproses. Kredensial dikirim ke email alumni, atau email santri bila
+     * kolomnya sudah tersedia. Kegagalan satu alumni tidak menghentikan yang lain.
+     */
+    public function buatAkunMassal(Request $request)
+    {
+        abort_unless($request->user()->bisa('alumni.ubah'), 403);
+
+        if (! Alumni::siapKolom('user_id')) {
+            return back()->with(
+                'error',
+                'Kolom akun alumni belum tersedia. Jalankan php artisan migrate terlebih dahulu.'
+            );
+        }
+
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer'],
+        ], [
+            'ids.required' => 'Pilih minimal satu alumni.',
+            'ids.min' => 'Pilih minimal satu alumni.',
+        ]);
+
+        $tautanSiap = Kelulusan::siapTautan();
+
+        $alumnis = Alumni::query()
+            ->when($tautanSiap, fn ($q) => $q->with('santri'))
+            ->whereIn('id', array_values(array_unique($data['ids'])))
+            ->get();
+
+        $berhasil = 0;
+        $dilewati = 0;
+        $gagal = [];
+
+        foreach ($alumnis as $alumni) {
+            if (! Akses::cocokJenjang($request->user(), $alumni->jenjang)) {
+                $dilewati++;
+                continue;
+            }
+
+            if ($alumni->user_id) {
+                $dilewati++;
+                continue;
+            }
+
+            try {
+                $this->pakaiEmailSantri($alumni, $tautanSiap);
+
+                $hasil = AlumniAkun::pastikan($alumni->fresh());
+                $emailTerkirim = false;
+
+                if ($hasil['password']) {
+                    $emailTerkirim = $this->kirimKredensial(
+                        $hasil['user'],
+                        $hasil['password'],
+                        'Akun Portal Alumni & Unduh Ijazah',
+                        'Ijazah dan dokumen kelulusan Anda dapat diunduh setelah login pertama.'
+                    );
+                }
+
+                CatatanAktivitas::catat('buat_akun_alumni', $alumni, [
+                    'akun_alumni' => $hasil['user']->email,
+                    'email_terkirim' => $emailTerkirim,
+                ]);
+
+                $berhasil++;
+            } catch (\Throwable $e) {
+                report($e);
+                $gagal[] = $alumni->nama;
+            }
+        }
+
+        $pesan = $berhasil.' akun alumni berhasil dibuat dan kredensialnya dikirim.';
+
+        if ($dilewati > 0) {
+            $pesan .= ' '.$dilewati.' alumni dilewati (sudah punya akun atau di luar jenjang Anda).';
+        }
+
+        if ($gagal !== []) {
+            $pesan .= ' Gagal: '.implode(', ', array_slice($gagal, 0, 5))
+                .(count($gagal) > 5 ? ' dan '.(count($gagal) - 5).' lainnya' : '').'.';
+        }
+
+        if ($alumnis->isEmpty()) {
+            $pesan = 'Tidak ada alumni yang dipilih.';
+        }
+
+        CatatanAktivitas::catat('buat_akun_alumni_massal', null, [
+            'diminta' => count(array_unique($data['ids'])),
+            'berhasil' => $berhasil,
+            'dilewati' => $dilewati,
+            'gagal' => count($gagal),
+            'nama_gagal' => array_slice($gagal, 0, 5),
+        ]);
+
+        return back()->with($berhasil > 0 ? 'success' : 'error', $pesan);
+    }
+
+    /**
+     * Reset password alumni menjadi password sementara 24 jam.
+     *
+     * Bila alumni belum punya akun, akun dibuat lebih dulu agar tombol ini
+     * tetap berguna untuk data lama yang belum tersinkron.
+     */
+    public function resetPassword(Alumni $alumni)
+    {
+        abort_unless(auth()->user()->bisa('alumni.ubah'), 403);
+        $this->pastikanJenjang($alumni->jenjang);
+
+        if (! Alumni::siapKolom('user_id')) {
+            return back()->with(
+                'error',
+                'Kolom akun alumni belum tersedia. Jalankan php artisan migrate terlebih dahulu.'
+            );
+        }
+
+        $tautanSiap = Kelulusan::siapTautan();
+        $akun = $alumni->user;
+        $akunBaru = false;
+
+        if (! $akun) {
+            $this->pakaiEmailSantri($alumni, $tautanSiap);
+
+            $hasil = AlumniAkun::pastikan($alumni->fresh());
+            $akun = $hasil['user'];
+            $password = $hasil['password'];
+            $akunBaru = true;
+        } else {
+            if (! $akun->isAlumni()) {
+                return back()->with('error', 'Akun yang tertaut bukan akun alumni. Periksa menu Pengguna.');
+            }
+
+            $password = Str::password(12, symbols: false);
+
+            $akun->forceFill([
+                'password' => Hash::make($password),
+                'must_change_password' => true,
+                'temp_password_expires_at' => now()->addDay(),
+                'is_active' => true,
+            ])->save();
+        }
+
+        $judul = $akunBaru ? 'Akun Portal Alumni & Unduh Ijazah' : 'Reset Password Portal Alumni';
+        $catatan = $akunBaru
+            ? 'Akun alumni dibuat oleh admin. Ijazah dan dokumen kelulusan dapat diunduh setelah login pertama.'
+            : 'Password sementara untuk akun alumni '.$alumni->nama.'. Harap ganti setelah login pertama.';
+
+        $terkirim = $this->kirimKredensial($akun, $password, $judul, $catatan);
+
+        CatatanAktivitas::catat('reset_password_alumni', $alumni, [
+            'akun_alumni' => $akun->email,
+            'akun_baru' => $akunBaru,
+            'email_terkirim' => $terkirim,
+        ]);
+
+        $kata = $akunBaru ? 'Akun alumni dibuat' : 'Password alumni direset';
+
+        if ($terkirim) {
+            return back()->with(
+                'success',
+                $kata.'. Password sementara dikirim ke '.$akun->email.' dan berlaku 24 jam.'
+            );
+        }
+
+        return back()->with(
+            'error',
+            $kata.', tetapi email gagal dikirim ke '.$akun->email
+                .'. Periksa konfigurasi email atau ubah password lewat menu Pengguna.'
+        );
+    }
+
     public function show(Alumni $alumni)
     {
         $this->pastikanJenjang($alumni->jenjang);
 
         $tautanSiap = Kelulusan::siapTautan();
+        $akunSiap = Alumni::siapKolom('user_id');
 
         if ($tautanSiap) {
             $alumni->loadMissing('santri');
+        }
+
+        if ($akunSiap) {
+            $alumni->loadMissing('user');
         }
 
         return view('dashboard.alumni.show', [
             'alumni' => $alumni,
             'nilaiSiap' => Alumni::siapNilai(),
             'tautanSiap' => $tautanSiap,
+            'akunSiap' => $akunSiap,
+            'akunAlumni' => $akunSiap ? $alumni->user : null,
         ]);
     }
 
@@ -348,6 +550,50 @@ class AlumniController extends Controller
         ])->save();
 
         return back()->with('success', 'Berkas nilai '.$alumni->nama.' berhasil dihapus.');
+    }
+
+    /**
+     * Samakan email alumni dengan email santri bila belum dipakai akun lain.
+     *
+     * Dipakai saat membuat akun, termasuk oleh aksi reset password bila akun
+     * lama belum ada. Email yang sengaja diisi admin tidak ditimpa.
+     */
+    private function pakaiEmailSantri(Alumni $alumni, bool $tautanSiap): void
+    {
+        if (! $tautanSiap || ! Santri::siapEmailSantri() || blank($alumni->santri?->email_santri)) {
+            return;
+        }
+
+        $emailSantri = $alumni->santri->email_santri;
+
+        if (User::where('email', $emailSantri)->exists()) {
+            return;
+        }
+
+        if (strcasecmp((string) $alumni->email, $emailSantri) !== 0) {
+            $alumni->forceFill(['email' => $emailSantri])->save();
+        }
+    }
+
+    /** Kirim kredensial alumni dan laporkan hasil pengirimannya. */
+    private function kirimKredensial(User $user, string $password, string $judul, string $catatan): bool
+    {
+        try {
+            Mail::to($user->email, $user->name)->send(new KredensialMail(
+                nama: $user->name,
+                email: $user->email,
+                passwordSementara: $password,
+                peran: 'Alumni',
+                judul: $judul,
+                catatan: $catatan,
+            ));
+
+            return true;
+        } catch (\Throwable $e) {
+            report($e);
+
+            return false;
+        }
     }
 
     /** Tolak akses bila data alumni berada di luar jenjang user. */

@@ -197,7 +197,7 @@
         <section class="pr-hero">
             <div class="container">
                 <div class="pr-crumb">
-                    <a href="{{ url('/') }}">Beranda</a>
+                    <a href="{{ route('home') }}">Beranda</a>
                     <i class="fa-solid fa-chevron-right" style="font-size:9px"></i>
                     <span>Prestasi</span>
                 </div>
