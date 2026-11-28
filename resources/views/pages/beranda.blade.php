@@ -417,27 +417,41 @@
         .dh .link-more { font-size: 12px; font-weight: 600; color: var(--green); display: inline-flex; gap: 6px; align-items: center; }
         .dh .link-more:hover { color: var(--emerald-d); }
 
-        /* ---------- GALERI ---------- */
-        .dh .gallery-grid { display: grid; grid-template-columns: 1.8fr 1fr 1fr; gap: 20px; }
+        /* ---------- GALERI: tiga kartu sampul yang seragam ---------- */
+        .dh .gallery-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
         .dh .g-item { margin: 0; }
-        .dh .g-item .ph { height: 300px; position: relative; transition: transform .4s ease, box-shadow .3s ease; }
-        .dh .g-item:hover .ph { transform: scale(1.01); box-shadow: var(--shadow-lg); }
-        .dh .g-item figcaption { font-size: 11px; color: var(--muted); margin-top: 8px; }
-        .dh .g-video .ph { display: flex; align-items: flex-end; padding: 24px; }
-        .dh .g-video .ph::before {
-            content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 30, 20, .7), transparent 60%);
-        }
-        .dh .g-video .play {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 58px; height: 58px;
-            border-radius: 50%; background: rgba(255, 255, 255, .35); display: grid; place-items: center;
-            color: #fff; border: 0; cursor: pointer; z-index: 2; transition: all .3s ease; font-size: 18px;
-        }
-        .dh .g-video .play:hover { transform: translate(-50%, -50%) scale(1.1); background: rgba(255, 255, 255, .6); }
-        .dh .g-video .cap { position: relative; z-index: 2; }
-        .dh .g-video .cap strong { display: block; font-size: 20px; color: #fff; }
-        .dh .g-video .cap span { font-size: 10px; letter-spacing: .08em; color: #e8efe9; text-transform: uppercase; }
         .dh .g-item > a { display: block; }
-        .dh .g-video .play { pointer-events: none; }
+        .dh .g-item .ph {
+            position: relative; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 20px;
+            background: linear-gradient(145deg, var(--green), var(--green-2));
+            transition: box-shadow .3s ease;
+        }
+        .dh .g-item:hover .ph { box-shadow: var(--shadow-lg); }
+        .dh .g-item .ph img {
+            display: block; width: 100%; height: 100%; object-fit: cover;
+            transition: transform .6s ease;
+        }
+        .dh .g-item:hover .ph img { transform: scale(1.06); }
+        .dh .g-item .ph::after {
+            content: ""; position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(to top, rgba(10, 30, 20, .74), transparent 62%);
+        }
+        .dh .g-item .cap {
+            position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 18px 20px;
+        }
+        .dh .g-item .cap strong {
+            display: block; font-size: 16px; line-height: 1.3; font-weight: 700; color: #fff;
+        }
+        .dh .g-item .cap span {
+            font-size: 10px; letter-spacing: .08em; color: #e8efe9; text-transform: uppercase;
+        }
+        .dh .g-item .play {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 54px; height: 54px; border-radius: 50%; z-index: 2; pointer-events: none;
+            background: rgba(255, 255, 255, .35); display: grid; place-items: center;
+            color: #fff; font-size: 17px; transition: transform .3s ease, background .3s ease;
+        }
+        .dh .g-item:hover .play { transform: translate(-50%, -50%) scale(1.1); background: rgba(255, 255, 255, .6); }
 
         /* ---------- PRESTASI ---------- */
         .dh .achv .container { display: grid; grid-template-columns: .8fr 2.2fr; gap: 40px; align-items: center; }
@@ -457,24 +471,56 @@
         .dh .achv-card .lvl { font-size: 11px; color: var(--muted); margin-bottom: 12px; }
         .dh .achv-card .who { font-size: 11px; color: var(--green); font-weight: 600; border-top: 1px solid var(--line); padding-top: 10px; }
 
-        /* ---------- FASILITAS ---------- */
-        .dh .fac-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+        /* ---------- FASILITAS: empat kartu foto + keterangan ---------- */
+        .dh .fac-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
         .dh .fac-card {
-            display: flex; flex-direction: column; gap: 10px; background: #fff;
-            border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 24px;
+            display: flex; flex-direction: column; overflow: hidden; background: #fff;
+            border: 1px solid var(--line); border-radius: 20px; text-decoration: none;
+            box-shadow: 0 18px 44px -34px rgba(23, 64, 47, .5);
             transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
         }
         .dh .fac-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: var(--gold); }
-        .dh .fac-ico {
-            width: 48px; height: 48px; border-radius: 14px; flex: none; margin-bottom: 4px;
-            background: rgba(18, 184, 134, .1); color: var(--emerald-d);
-            display: grid; place-items: center; font-size: 18px;
+        .dh .fac-media {
+            position: relative; aspect-ratio: 4 / 3; overflow: hidden;
+            background: linear-gradient(145deg, var(--green), var(--green-2));
         }
-        .dh .fac-card h3 { font-size: 17px; }
-        .dh .fac-card p { font-size: 12.5px; color: var(--muted); flex: 1; }
+        .dh .fac-media img {
+            display: block; width: 100%; height: 100%; object-fit: cover;
+            transition: transform .6s ease;
+        }
+        .dh .fac-card:hover .fac-media img { transform: scale(1.07); }
+        .dh .fac-media::after {
+            content: ""; position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(180deg, rgba(9, 40, 28, 0) 45%, rgba(9, 40, 28, .42) 100%);
+        }
+        .dh .fac-ph {
+            position: absolute; inset: 0; display: grid; place-items: center;
+            color: rgba(255, 255, 255, .9); font-size: 44px;
+            background: radial-gradient(circle at 28% 18%, rgba(255, 255, 255, .18), transparent 58%),
+                        linear-gradient(145deg, var(--green), var(--green-2));
+        }
+        .dh .fac-num {
+            position: absolute; top: 12px; left: 12px; z-index: 2;
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 34px; height: 30px; padding: 0 9px; border-radius: 10px;
+            background: rgba(255, 255, 255, .94); color: var(--green);
+            font-size: 11px; font-weight: 800; letter-spacing: .08em;
+            box-shadow: 0 10px 24px -14px rgba(0, 0, 0, .5);
+        }
+        .dh .fac-body { display: flex; flex-direction: column; gap: 8px; padding: 18px; flex: 1; }
+        .dh .fac-kicker {
+            font-size: 10px; font-weight: 700; letter-spacing: .12em;
+            text-transform: uppercase; color: var(--gold);
+        }
+        .dh .fac-card h3 { font-size: 15.5px; line-height: 1.35; color: var(--green); }
+        .dh .fac-card p {
+            font-size: 12px; line-height: 1.65; color: var(--muted); flex: 1;
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+        }
         .dh .fac-more {
-            display: inline-flex; align-items: center; gap: 6px; margin-top: 4px;
-            font-size: 12px; font-weight: 600; color: var(--green); transition: color .2s ease;
+            display: inline-flex; align-items: center; gap: 6px; margin-top: 2px;
+            padding-top: 10px; border-top: 1px solid var(--line);
+            font-size: 11.5px; font-weight: 700; color: var(--green); transition: color .2s ease;
         }
         .dh .fac-card:hover .fac-more { color: var(--emerald-d); }
         .dh .fac-empty { font-size: 13px; color: var(--muted); }
@@ -616,9 +662,9 @@
             .dh .head-row { flex-direction: column; align-items: flex-start; }
             .dh .level-grid, .dh .org-grid { grid-template-columns: repeat(2, 1fr); }
             .dh .achv .container, .dh .psb-box, .dh .contact .container { grid-template-columns: 1fr; gap: 36px; }
-            .dh .achv-cards, .dh .gallery-grid { grid-template-columns: 1fr; }
-            .dh .fac-grid { grid-template-columns: repeat(2, 1fr); }
-            .dh .fac-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+            .dh .achv-cards { grid-template-columns: 1fr; }
+            .dh .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .dh .fac-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .dh .alum-card { flex-basis: calc((100% - 20px) / 2); }
             .dh .alum-box { padding: 40px 30px 32px; }
         }
@@ -646,11 +692,12 @@
             .dh .feature { padding: 16px; }
             .dh .level { padding: 18px; }
             .dh .level-grid, .dh .org-grid, .dh .contact-two { grid-template-columns: 1fr; }
-            .dh .g-item .ph { height: 220px; }
+            .dh .gallery-grid { grid-template-columns: 1fr; }
+            .dh .g-item .ph { aspect-ratio: 16 / 9; }
             .dh .achv-cards { gap: 14px; }
             .dh .achv-card { padding: 18px; }
             .dh .fac-grid { grid-template-columns: 1fr; }
-            .dh .fac-card { padding: 20px; }
+            .dh .fac-media { aspect-ratio: 16 / 9; }
             .dh .psb-box { padding: 26px 18px; border-radius: 20px; gap: 30px; }
             .dh .psb .btns { flex-direction: column; }
             .dh .psb .btn { width: 100%; }
@@ -976,7 +1023,7 @@
                 </div>
                 @if ($galeriBeranda->isNotEmpty())
                     <div class="gallery-grid">
-                        @foreach ($galeriBeranda as $i => $a)
+                        @foreach ($galeriBeranda as $a)
                             @php
                                 $jmlVideo = $a->media->where('tipe', '!=', 'foto')->count();
                                 $jmlFoto = $a->media->where('tipe', 'foto')->count();
@@ -985,29 +1032,22 @@
                                     $jmlVideo ? $jmlVideo . ' video' : null,
                                 ])->filter()->implode(' • ');
                             @endphp
-
-                            @if ($i === 0)
-                                <figure class="g-item g-video">
-                                    <a href="{{ route('galeri') }}" aria-label="Buka album {{ $a->judul }}">
-                                        <div class="ph c" style="background-image:url('{{ $sampulAlbum($a) }}')">
-                                            @if ($jmlVideo)
-                                                <span class="play"><i class="fa-solid fa-play"></i></span>
-                                            @endif
-                                            <div class="cap">
-                                                <strong>{{ $a->judul }}</strong>
-                                                <span>{{ $a->kategori }}@if ($ringkas) • {{ $ringkas }}@endif</span>
-                                            </div>
+                            <figure class="g-item">
+                                <a href="{{ route('galeri') }}" aria-label="Buka album {{ $a->judul }}">
+                                    <div class="ph">
+                                        <img src="{{ $a->sampul_url }}" alt="Sampul album {{ $a->judul }}"
+                                            loading="lazy">
+                                        @if ($jmlVideo)
+                                            <span class="play" aria-hidden="true"><i
+                                                    class="fa-solid fa-play"></i></span>
+                                        @endif
+                                        <div class="cap">
+                                            <strong>{{ $a->judul }}</strong>
+                                            <span>{{ $a->kategori }}@if ($ringkas) • {{ $ringkas }}@endif</span>
                                         </div>
-                                    </a>
-                                </figure>
-                            @else
-                                <figure class="g-item">
-                                    <a href="{{ route('galeri') }}" aria-label="Buka album {{ $a->judul }}">
-                                        <div class="ph {{ $i === 1 ? 'd' : 'b' }}" style="background-image:url('{{ $sampulAlbum($a) }}')"></div>
-                                    </a>
-                                    <figcaption>{{ $a->judul }}</figcaption>
-                                </figure>
-                            @endif
+                                    </div>
+                                </a>
+                            </figure>
                         @endforeach
                     </div>
                 @else
@@ -1131,7 +1171,7 @@
                 </div>
 
                 @php
-                    $ikonFasilitas = ['fa-building-columns', 'fa-bed', 'fa-mosque'];
+                    $ikonFasilitas = ['fa-building-columns', 'fa-bed', 'fa-mosque', 'fa-book-open'];
                 @endphp
 
                 @if ($fasilitasBeranda->isEmpty())
@@ -1139,12 +1179,28 @@
                 @else
                     <div class="fac-grid">
                         @foreach ($fasilitasBeranda as $f)
-                            <a href="{{ route('profil.fasilitas') }}" class="fac-card">
-                                <span class="fac-ico"><i
-                                        class="fa-solid {{ $ikonFasilitas[$loop->index % count($ikonFasilitas)] }}"></i></span>
-                                <h3>{{ $f['title'] ?: 'Fasilitas ' . $loop->iteration }}</h3>
-                                <p>{{ \Illuminate\Support\Str::limit($f['desc'] ?: 'Sarana pendukung kegiatan belajar dan kehidupan santri di pesantren.', 130) }}</p>
-                                <span class="fac-more">Selengkapnya <i class="fa-solid fa-arrow-right"></i></span>
+                            @php
+                                $judul = $f['title'] ?: 'Fasilitas ' . $loop->iteration;
+                                $nomor = str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT);
+                            @endphp
+                            <a href="{{ route('profil.fasilitas') }}" class="fac-card"
+                                aria-label="Lihat fasilitas {{ $judul }}">
+                                <div class="fac-media">
+                                    @if (! empty($f['gambar']))
+                                        <img src="{{ $f['gambar'] }}" alt="Foto {{ $judul }}" loading="lazy">
+                                    @else
+                                        <span class="fac-ph" aria-hidden="true"><i
+                                                class="fa-solid {{ $ikonFasilitas[$loop->index % count($ikonFasilitas)] }}"></i></span>
+                                    @endif
+                                    <span class="fac-num">{{ $nomor }}</span>
+                                </div>
+                                <div class="fac-body">
+                                    <span class="fac-kicker">Fasilitas {{ $nomor }}</span>
+                                    <h3>{{ $judul }}</h3>
+                                    <p>{{ \Illuminate\Support\Str::limit($f['desc'] ?: 'Sarana pendukung kegiatan belajar dan kehidupan santri di pesantren.', 130) }}</p>
+                                    <span class="fac-more">Lihat detail <i
+                                            class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                                </div>
                             </a>
                         @endforeach
                     </div>

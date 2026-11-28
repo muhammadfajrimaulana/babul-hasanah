@@ -7,10 +7,12 @@
 {{-- Data dikelola admin: Dashboard > Struktur Organisasi (controller: Public\StrukturOrganisasiController) --}}
 
 <style>
-    .sj-page { --g900:#0a3a24; --g800:#0f5132; --g700:#13693f; --g600:#15803d; --g500:#10b981; --g50:#f0fdf6;
-        --gold:#b7791f; --gold-text:#955f0f; --gold-soft:#fdf3dc; --gold-light:#fde68a; --line:#7fc9a4; color:#1e293b; }
+    /* Token & container disamakan dengan halaman jenjang/profil (Poppins + .pd-wrap). */
+    .sj-page { --g900:#073a26; --g800:var(--green); --g700:var(--green-2); --g600:var(--emerald-d); --g500:var(--emerald);
+        --g50:var(--paper); --gold:#b7791f; --gold-text:#955f0f; --gold-soft:#fdf4e0; --gold-light:#f3d9a0;
+        color: var(--ink); font-family: 'Poppins', system-ui, -apple-system, sans-serif; }
     .sj-page *, .sj-page *::before, .sj-page *::after { box-sizing: border-box; }
-    .sj-wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+    .sj-wrap { width: min(1100px, 92%); margin-inline: auto; }
     .sj-page section[id] { scroll-margin-top: 80px; }
 
     .sj-eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--gold-text); margin-bottom: 14px; }
@@ -19,7 +21,7 @@
     .sj-eyebrow.light::before { background: var(--gold-light); }
 
     /* ====== Hero ====== */
-    .sj-hero { position: relative; overflow: hidden; color: #fff; padding: 56px 0 72px;
+    .sj-hero { position: relative; overflow: hidden; color: #fff; padding: 48px 0 58px;
         background:
             radial-gradient(600px 300px at 90% 0%, rgba(253,230,138,.18), transparent 65%),
             radial-gradient(500px 300px at 0% 100%, rgba(16,185,129,.28), transparent 65%),
@@ -44,16 +46,16 @@
     .sj-nav a:focus-visible { outline: 3px solid var(--gold-light); outline-offset: 2px; }
 
     /* ====== Section umum ====== */
-    .sj-sec { padding: 84px 0; }
-    .sj-sec.alt { background: var(--g50); }
-    .sj-head { max-width: 680px; margin: 0 0 48px; }
+    .sj-sec { padding: 64px 0; }
+    .sj-sec.alt { background: var(--cream); }
+    .sj-head { max-width: 680px; margin: 0 0 30px; }
     .sj-head.center { margin-left: auto; margin-right: auto; text-align: center; }
     .sj-head.center .sj-eyebrow { justify-content: center; }
     .sj-head h2 { font-size: clamp(1.7rem, 3.2vw, 2.4rem); line-height: 1.25; margin: 0 0 12px; color: var(--g800); }
-    .sj-head p { margin: 0; color: #475569; line-height: 1.75; font-size: 1.05rem; }
+    .sj-head p { margin: 0; color: var(--muted); line-height: 1.75; font-size: .98rem; }
 
     /* ====== Bagan: level bertumpuk (mengacu pada struktur manajemen) ====== */
-    .org-tree { display: flex; flex-direction: column; align-items: center; gap: 40px; width: 100%; max-width: 1120px; margin: 0 auto; position: relative; }
+    .org-tree { display: flex; flex-direction: column; align-items: center; gap: 40px; width: 100%; margin: 0 auto; position: relative; }
     .tree-level { position: relative; display: flex; flex-wrap: wrap; justify-content: center; align-items: stretch; gap: 40px 18px; width: 100%; }
     /* Level berisi banyak kartu: rapatkan baris agar terbaca sebagai satu kelompok */
     .tree-level.is-grid { gap: 18px; }
@@ -71,7 +73,7 @@
 
     .person span { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
         color: var(--g700); line-height: 1.45; margin-bottom: 7px; min-height: 30px; }
-    .person h3 { margin: 0; font-size: .98rem; font-weight: 800; line-height: 1.35; color: #0f172a; overflow-wrap: anywhere; }
+    .person h3 { margin: 0; font-size: .98rem; font-weight: 800; line-height: 1.35; color: var(--ink); overflow-wrap: anywhere; }
 
     /* Pimpinan puncak */
     .person.top { width: 270px; padding: 28px 20px 24px; overflow: hidden; border: 0;
@@ -95,7 +97,7 @@
         .tree-level.is-grid .person::before { display: none; }
     }
 
-    .tree-empty { text-align: center; color: #64748b; padding: 40px 0; }
+    .tree-empty { text-align: center; color: var(--muted); padding: 40px 0; }
     .tree-empty i { display: block; font-size: 32px; color: #a7d8bd; margin-bottom: 12px; }
 
     /* ====== Ketua jenjang ====== */
@@ -109,7 +111,7 @@
     .jj-head small { position: relative; display: block; margin-top: 6px; font-size: .85rem; line-height: 1.4; color: rgba(255,255,255,.85); }
     .jj-body { padding: 0 16px 24px; }
     .jj .avatar { width: 88px; height: 88px; margin: -44px auto 12px; border-color: #fff; box-shadow: 0 8px 18px rgba(20,83,45,.22); }
-    .jj h3 { margin: 0 0 8px; font-size: 1.02rem; line-height: 1.35; color: #0f172a; overflow-wrap: anywhere; }
+    .jj h3 { margin: 0 0 8px; font-size: 1.02rem; line-height: 1.35; color: var(--ink); overflow-wrap: anywhere; }
     .jj span { display: inline-block; font-size: 13px; font-weight: 600; color: var(--g700); background: var(--g50); padding: 5px 14px; border-radius: 999px; }
     .jj:nth-child(even) span { color: var(--gold-text); background: var(--gold-soft); }
 
@@ -125,15 +127,15 @@
     .bidang-item:hover .bidang-ico { background: var(--g600); color: #fff; }
     .bidang-item:nth-child(even):hover .bidang-ico { background: var(--gold); color: #fff; }
     .bidang-item h3 { margin: 2px 0 6px; font-size: 1.12rem; line-height: 1.35; color: var(--g800); }
-    .bidang-item p { margin: 0; color: #475569; line-height: 1.7; }
+    .bidang-item p { margin: 0; color: var(--muted); line-height: 1.7; }
 
-    /* ====== CTA ====== */
-    .sj-cta { background: linear-gradient(135deg, #0f5132, #15803d); color: #fff; border-radius: 28px; padding: 52px 40px; text-align: center; }
-    .sj-cta h2 { margin: 0 0 12px; color: #fff; font-size: clamp(1.5rem, 3vw, 2.1rem); }
-    .sj-cta p { margin: 0 auto 24px; max-width: 54ch; color: rgba(255,255,255,.9); line-height: 1.7; }
-    .sj-btn { display: inline-flex; align-items: center; gap: 10px; background: #fff; color: var(--g800); font-weight: 700; padding: 14px 30px; border-radius: 14px; text-decoration: none; }
-    .sj-btn:hover { background: #fde68a; }
-    .sj-btn:focus-visible { outline: 3px solid #fde68a; outline-offset: 3px; }
+    /* ====== CTA: kotak ajakan sama seperti halaman jenjang/alumni ====== */
+    .sj-cta { background: linear-gradient(135deg, var(--green), var(--green-2)); color: #fff; border-radius: 32px; padding: 50px; display: flex; justify-content: space-between; align-items: center; gap: 30px; flex-wrap: wrap; box-shadow: var(--shadow-lg); }
+    .sj-cta h2 { margin: 0 0 8px; color: #fff; font-size: clamp(22px, 3vw, 32px); }
+    .sj-cta p { margin: 0; max-width: 520px; color: rgba(255,255,255,.82); line-height: 1.7; }
+    .sj-btn { display: inline-flex; align-items: center; gap: 10px; background: var(--cream); color: var(--green); font-weight: 600; font-size: 13.5px; padding: 14px 28px; border-radius: 999px; text-decoration: none; white-space: nowrap; transition: all .25s ease; }
+    .sj-page .sj-btn:hover { background: #fff; color: var(--green); transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.18); }
+    .sj-btn:focus-visible { outline: 3px solid var(--gold-light); outline-offset: 3px; }
 
     /* ====== Animasi muncul ====== */
     .sj-rv { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
@@ -149,7 +151,8 @@
         .sj-hero { padding: 40px 0 56px; }
         .sj-hero::after { width: 240px; height: 240px; right: -70px; bottom: -70px; }
         .bidang { grid-template-columns: 1fr; }
-        .sj-cta { padding: 44px 24px; }
+        .sj-cta { padding: 30px 22px; border-radius: 22px; }
+        .sj-btn { width: 100%; justify-content: center; }
 
         /* Bagan: satu kolom, kartu menyesuaikan layar */
         .org-tree { gap: 26px; }
@@ -307,8 +310,10 @@
     <section class="sj-sec" id="kontak">
         <div class="sj-wrap">
             <div class="sj-cta">
-                <h2>Ada yang ingin ditanyakan kepada pengurus?</h2>
-                <p>Hubungi kami untuk informasi pendaftaran, kunjungan santri, atau kerja sama.</p>
+                <div>
+                    <h2>Ada yang ingin ditanyakan kepada pengurus?</h2>
+                    <p>Hubungi kami untuk informasi pendaftaran, kunjungan santri, atau kerja sama.</p>
+                </div>
                 <a href="{{ route('kontak') }}" class="sj-btn">Hubungi kami <i class="fa-solid fa-arrow-right"></i></a>
             </div>
         </div>

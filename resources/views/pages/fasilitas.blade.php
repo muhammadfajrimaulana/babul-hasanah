@@ -50,20 +50,21 @@
     /* ====== Keadaan kosong ====== */
     .pd-fac-empty { padding: 42px 24px; border: 1px dashed var(--line); border-radius: 20px; background: #fff; text-align: center; font-size: .94rem; line-height: 1.7; color: var(--muted); }
 
-    /* ====== Ajakan bawah ====== */
-    .pd-fac-cta { position: relative; overflow: hidden; padding: 64px 0; color: #fff; background: linear-gradient(135deg, var(--green) 0%, var(--green-2) 65%, #2a6a4d 100%); }
-    .pd-fac-cta::before { content: ""; position: absolute; inset: 0; opacity: .5; background-image: radial-gradient(rgba(255, 255, 255, .12) 1px, transparent 1px); background-size: 22px 22px; -webkit-mask-image: radial-gradient(ellipse at center, #000, transparent 78%); mask-image: radial-gradient(ellipse at center, #000, transparent 78%); }
-    .pd-fac-cta .pd-wrap { position: relative; z-index: 1; }
-    .pd-fac-cta-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 26px; }
-    .pd-fac-cta .pd-eyebrow { color: var(--gold-light); }
-    .pd-fac-cta h2 { margin: 6px 0 8px; font-size: clamp(1.35rem, 2.8vw, 2rem); font-weight: 800; line-height: 1.3; color: #fff; }
-    .pd-fac-cta p { margin: 0; max-width: 56ch; font-size: .96rem; line-height: 1.8; color: rgba(255, 255, 255, .82); }
-    .pd-fac-actions { display: flex; flex-wrap: wrap; gap: 12px; }
-    .pd-fac-btn { display: inline-flex; align-items: center; gap: 9px; padding: 12px 22px; border-radius: 12px; font-size: .9rem; font-weight: 700; text-decoration: none; transition: transform .2s ease, background .2s ease, color .2s ease; }
-    .pd-fac-btn.primary { background: var(--gold); color: #fff; box-shadow: 0 14px 30px -16px rgba(0, 0, 0, .55); }
-    .pd-fac-btn.primary:hover { background: #a06a18; transform: translateY(-2px); }
-    .pd-fac-btn.ghost { border: 1px solid rgba(255, 255, 255, .35); background: rgba(255, 255, 255, .08); color: #fff; }
-    .pd-fac-btn.ghost:hover { background: #fff; color: var(--green); transform: translateY(-2px); }
+    /* ====== Ajakan bawah: satu kotak seperti halaman Alumni ====== */
+    .pd-fac-cta { padding: 0 0 80px; }
+    .pd-fac-cta-box {
+        background: linear-gradient(135deg, var(--green), var(--green-2)); border-radius: 32px; padding: 50px; color: #fff;
+        display: flex; justify-content: space-between; align-items: center; gap: 30px; flex-wrap: wrap; box-shadow: var(--shadow-lg);
+    }
+    .pd-fac-cta-box h2 { color: #fff; font-size: clamp(22px, 3vw, 32px); margin-bottom: 8px; }
+    .pd-fac-cta-box p { font-size: 13px; color: #b9d0c4; max-width: 520px; }
+    .pd-fac-btn {
+        display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; border-radius: 999px;
+        font-size: 13.5px; font-weight: 600; text-decoration: none; transition: all .25s ease; white-space: nowrap;
+    }
+    /* Spesifisitas dinaikkan agar warna teks tidak mewarisi putih dari kotak hijau. */
+    .pd-page .pd-fac-btn { background: var(--cream); color: var(--green); }
+    .pd-page .pd-fac-btn:hover { background: #fff; color: var(--green); transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0, 0, 0, .18); }
 
     @media (max-width: 980px) {
         .pd-fac-hero { grid-template-columns: 1fr; }
@@ -73,13 +74,15 @@
 
     @media (max-width: 860px) {
         .pd-hero { padding: 32px 0 48px; }
-        .pd-section-wrap, .pd-fac-cta { padding: 48px 0; }
+        .pd-section-wrap { padding: 48px 0; }
+        .pd-fac-cta { padding: 0 0 64px; }
     }
 
     @media (max-width: 600px) {
         .pd-facilities { grid-template-columns: 1fr; }
         .pd-fac-hero-media { aspect-ratio: 4 / 3; }
-        .pd-fac-cta-inner { flex-direction: column; align-items: flex-start; }
+        .pd-fac-cta-box { padding: 30px 22px; border-radius: 22px; }
+        .pd-fac-btn { width: 100%; justify-content: center; }
     }
 </style>
 
@@ -223,22 +226,17 @@
             </div>
         </section>
 
-        {{-- ============ AJAKAN ============ --}}
+        {{-- ============ AJAKAN: kotak pendaftaran yang sama dengan halaman Alumni ============ --}}
         <section class="pd-fac-cta">
             <div class="pd-wrap">
-                <div class="pd-fac-cta-inner">
+                <div class="pd-fac-cta-box">
                     <div>
-                        <div class="pd-eyebrow light">Berkunjung</div>
-                        <h2>Ingin melihat fasilitas kami langsung?</h2>
-                        <p>Silakan datang atau hubungi kami untuk informasi kunjungan, kerja sama, dan pendaftaran santri
-                            baru.</p>
+                        <h2>Jadilah bagian dari jejak berikutnya.</h2>
+                        <p>Pendaftaran santri baru terbuka. Daftarkan putra-putri Anda dan biarkan mereka tumbuh bersama
+                            keluarga besar Babul Hasanah.</p>
                     </div>
-                    <div class="pd-fac-actions">
-                        <a href="{{ route('kontak') }}" class="pd-fac-btn ghost"><i
-                                class="fa-solid fa-location-dot"></i> Hubungi kami</a>
-                        <a href="{{ route('pendaftaran.index') }}" class="pd-fac-btn primary">Info pendaftaran <i
-                                class="fa-solid fa-arrow-right"></i></a>
-                    </div>
+                    <a href="{{ route('pendaftaran.index') }}" class="pd-fac-btn">Daftar Santri Baru <i
+                            class="fa-solid fa-arrow-up-right-from-square" style="font-size:12px"></i></a>
                 </div>
             </div>
         </section>

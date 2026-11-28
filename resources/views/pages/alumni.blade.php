@@ -157,11 +157,12 @@
         }
         .al-cta-box h2 { color: #fff; font-size: clamp(22px, 3vw, 32px); margin-bottom: 8px; }
         .al-cta-box p { font-size: 13px; color: #b9d0c4; max-width: 520px; }
-        .al-btn {
+        /* Spesifisitas dinaikkan (.al .al-btn) agar tidak tertimpa `.al a { color: inherit; }`. */
+        .al .al-btn {
             display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; border-radius: 999px; font-size: 13.5px;
             font-weight: 600; background: var(--cream); color: var(--green); transition: all .25s ease; white-space: nowrap;
         }
-        .al-btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0, 0, 0, .18); }
+        .al .al-btn:hover { background: #fff; color: var(--green); transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0, 0, 0, .18); }
 
         /* animasi muncul */
         .al .reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s cubic-bezier(.2, .7, .2, 1); }

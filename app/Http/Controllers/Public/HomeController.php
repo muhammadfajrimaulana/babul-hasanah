@@ -82,20 +82,22 @@ class HomeController extends Controller
         $galeriBeranda = $albumUtama ? collect([$albumUtama])->merge($albumLain) : collect();
         $gambarDefault = asset('assets/img/banner/banner.png');
 
-        $sampulAlbum = function ($a) use ($gambarDefault) {
-            $foto = $a->media->first(fn ($m) => $m->tipe === 'foto' && $m->path);
-            $poster = $a->media->first(fn ($m) => ! empty($m->poster));
+        // Sampul yang ditampilkan selalu diambil dari kolom sampul album.
+        // Foto/poster pertama hanya dipakai bila sampul belum diunggah.
+        $galeriBeranda->each(function ($album) use ($gambarDefault) {
+            $foto = $album->media->first(fn ($m) => $m->tipe === 'foto' && $m->path);
+            $poster = $album->media->first(fn ($m) => ! empty($m->poster));
 
-            // Cari berkas pertama yang benar-benar ada di disk.
-            foreach ([$a->sampul, $foto?->path, $poster?->poster] as $path) {
-                $url = GambarPublik::dariStorage($path);
-                if ($url) {
-                    return $url;
+            $sampul = null;
+            foreach ([$album->sampul, $foto?->path, $poster?->poster] as $path) {
+                if ($url = GambarPublik::dariStorage($path)) {
+                    $sampul = $url;
+                    break;
                 }
             }
 
-            return $gambarDefault;
-        };
+            $album->sampul_url = $sampul ?? $gambarDefault;
+        });
 
         // Testimoni alumni: section disembunyikan bila belum ada testimoni.
         $testimoniAlumni = collect();
@@ -109,15 +111,20 @@ class HomeController extends Controller
                 ->get();
         }
 
-        // Fasilitas unggulan di beranda, maksimal 3 kartu.
+        // Fasilitas unggulan di beranda: empat kartu foto + keterangan.
+        // Foto diambil dari key fasilitas_{n}_foto yang dikelola di /admin/konten.
         $fasilitasBeranda = Schema::hasTable('konten')
-            ? collect(Konten::fasilitasCards())->take(3)
+            ? collect(Konten::fasilitasCards())
+                ->take(4)
+                ->map(fn (array $f) => array_merge($f, [
+                    'gambar' => GambarPublik::dariStorage($f['foto'] ?? null),
+                ]))
             : collect();
 
         return view('pages.beranda', compact(
             'beritaTerbaru', 'pengurus', 'infoHarian', 'jadwalHariIni', 'teksInfo',
             'jumlahSantri', 'jumlahPrestasi', 'jumlahBerita', 'jumlahAlumni',
-            'prestasiTerbaru', 'galeriBeranda', 'gambarDefault', 'sampulAlbum',
+            'prestasiTerbaru', 'galeriBeranda', 'gambarDefault',
             'testimoniAlumni', 'fasilitasBeranda'
         ));
     }

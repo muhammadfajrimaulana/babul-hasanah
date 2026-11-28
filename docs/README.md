@@ -11,7 +11,7 @@ yang ada di repositori (bukan asumsi dari README bawaan Laravel).
 > dijalankan manusia**, bukan oleh AI.
 
 - **Tanggal analisis awal:** 31 Oktober 2026
-- **Pembaruan terakhir:** 28 November 2026 (checklist per menu, jadwal/kurikulum/rapor, Google OAuth, test scoping, peta tampilan per menu, query beranda/profil dipindah ke controller, data 7 jenjang dipusatkan, fallback gambar publik, tautan Blade memakai named route, pembersihan 16 file 0 byte, halaman error 403/404/500, feature test login/reset password, verifikasi PPDB, nilai/izin & soft delete santri, CRUD kepengurusan, aset placeholder `public/images/`, alt gambar deskriptif, panduan verifikasi manusia, satukan styling Vite, kompresi aset)
+- **Pembaruan terakhir:** 28 November 2026 (checklist per menu, jadwal/kurikulum/rapor, Google OAuth, test scoping, peta tampilan per menu, query beranda/profil dipindah ke controller, data 7 jenjang dipusatkan, fallback gambar publik, tautan Blade memakai named route, pembersihan 16 file 0 byte, halaman error 403/404/500, feature test login/reset password, verifikasi PPDB, nilai/izin & soft delete santri, CRUD kepengurusan, aset placeholder `public/images/`, alt gambar deskriptif, panduan verifikasi manusia, satukan styling Vite, kompresi aset, panduan praktis role dan jalur akses, pembersihan view/controller mati)
 - **Status working tree:** ada perubahan yang belum di-commit; folder `docs/` di-*ignore* Git sehingga perubahan dokumentasi tidak muncul di `git status`
 - **Framework:** Laravel 13.29 (requirement `^13.17`), PHP 8.3+ (runtime terpasang PHP 8.5.5)
 - **Basis data:** MySQL `babul_hasanah` (XAMPP)
@@ -41,6 +41,7 @@ yang ada di repositori (bukan asumsi dari README bawaan Laravel).
 | 17 | [17-google-oauth.md](17-google-oauth.md) | **Google Login**: langkah Google Cloud Console, `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`, callback, `composer install`, dan batasan akun harus sudah terdaftar |
 | 18 | [18-peta-tampilan-per-menu.md](18-peta-tampilan-per-menu.md) | **Peta tampilan per menu**: tabel menu → route → controller → file Blade untuk publik, auth, admin, portal wali, alumni, email/error, plus alias & view tanpa route |
 | 19 | [19-panduan-verifikasi-manusia.md](19-panduan-verifikasi-manusia.md) | **Panduan verifikasi manusia**: urutan `migrate`/test/build, jumlah method test, checklist UI per role, dan format lapor hasil |
+| 20 | [20-panduan-role-dan-jalur.md](20-panduan-role-dan-jalur.md) | **Panduan praktis role & jalur akses**: kenapa `pengasuh` masih ada di migrasi, 6 role final, asal akun, redirect login, matriks modul, dan batas data |
 
 ## Ringkasan Cepat
 

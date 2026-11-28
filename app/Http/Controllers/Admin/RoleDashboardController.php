@@ -35,9 +35,10 @@ use Illuminate\Validation\ValidationException;
  * Dashboard khusus per role.
  *
  * - admin   -> dashboard-jenjang (data dibatasi ke jenjang yang ditangani)
- * - pengasuh-> dashboard-pengasuh (monitoring seluruh pesantren, hanya baca)
+ * - pengurus-> dashboard-pengurus (monitoring seluruh pesantren, hanya baca)
  * - pembina -> dashboard-pembina (fokus asrama & kehadiran, hanya baca)
  *
+ * Route lama /admin/dashboard-pengasuh kini hanya mengalihkan ke dashboard pengurus.
  * Super Admin tetap memakai DashboardController@index (dashboard lengkap).
  */
 class RoleDashboardController extends Controller

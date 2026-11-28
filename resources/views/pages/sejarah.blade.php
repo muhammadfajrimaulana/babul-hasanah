@@ -7,24 +7,26 @@
 @include('pages.partials.profil-dokumen-style')
 
 <style>
-    /* ====== Halaman sejarah: lebar penuh kanan-kiri ====== */
-    .pd-wide .pd-wrap { width: 100%; max-width: none; padding-inline: clamp(18px, 4vw, 64px); }
+    /* ====== Container, font, dan judul mengikuti halaman alumni/jenjang ====== */
+    .pd-wide { font-family: 'Poppins', system-ui, sans-serif; font-size: 15px; line-height: 1.6; }
+    /* Lebar konten: maksimal 1200px dengan margin 5% tiap sisi (acuan baru semua halaman). */
+    .pd-wide .pd-wrap { width: min(1200px, 90%); margin-inline: auto; padding-inline: 0; }
     .pd-wide .pd-doc { max-width: none; margin: 0; }
-    .pd-wide .pd-section[id] { scroll-margin-top: 100px; }
+    .pd-wide .pd-section[id] { scroll-margin-top: 90px; }
 
-    /* Hero rata kiri */
-    .pd-wide .pd-hero-inner { max-width: 1040px; margin-left: 0; margin-right: auto; text-align: left; }
+    /* Judul hero rata kiri, sejajar dengan tepi konten halaman lain */
+    .pd-wide .pd-hero-inner { max-width: 680px; margin-left: 0; margin-right: auto; text-align: left; }
     .pd-wide .pd-crumb { justify-content: flex-start; }
     .pd-wide .pd-hero h1 { margin-left: 0; margin-right: auto; }
     .pd-wide .pd-hero p { margin-left: 0; margin-right: auto; }
     .pd-wide .pd-nav { justify-content: flex-start; }
 
     /* ====== Area dokumen ====== */
-    .pd-doc-area { padding: 56px 0 72px; background: linear-gradient(180deg, #f7f5ef 0%, #fbfaf6 40%, #f7f5ef 100%); }
-    .pd-doc-layout { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 30px; align-items: start; }
+    .pd-doc-area { padding: 56px 0 72px; background: linear-gradient(180deg, var(--cream) 0%, var(--paper) 40%, var(--cream) 100%); }
+    .pd-doc-layout { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 22px; align-items: start; }
 
     /* ====== Daftar isi ====== */
-    .pd-toc { position: sticky; top: 96px; display: flex; flex-direction: column; gap: 14px; }
+    .pd-toc { position: sticky; top: 96px; display: flex; flex-direction: column; gap: 12px; }
     .pd-toc-card { padding: 22px; border-radius: 18px; border: 1px solid var(--line); background: #fff; box-shadow: 0 18px 40px -34px rgba(23, 64, 47, .4); }
     .pd-toc-card > h2, .pd-toc-title { margin: 0 0 14px; font-size: .78rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
     .pd-toc-mobile { display: none; }
@@ -48,16 +50,16 @@
     .pd-wide .pd-section-title { font-size: 1.08rem; }
     .pd-wide .pd-prose { font-size: 1.02rem; line-height: 1.95; }
 
-    /* ====== Pendaftaran (kartu hijau terpusat) ====== */
-    .pd-daftar { padding: 8px 0 84px; background: #f7f5ef; }
-    .pd-daftar-card { position: relative; overflow: hidden; max-width: 1180px; margin-inline: auto; padding: clamp(46px, 7vw, 82px) clamp(24px, 5vw, 60px); border-radius: 30px; text-align: center; color: #fff; background: radial-gradient(620px 300px at 85% 0%, rgba(255, 255, 255, .10), transparent 65%), linear-gradient(140deg, #0f5132 0%, #15803d 72%, #1a8a48 100%); box-shadow: 0 34px 70px -46px rgba(15, 81, 50, .85); }
+    /* ====== CTA: kotak ajakan dua kolom + pill krem seperti alumni/jenjang ====== */
+    .pd-daftar { padding: 8px 0 84px; background: var(--cream); }
+    .pd-daftar-card { position: relative; overflow: hidden; max-width: none; margin-inline: auto; padding: 50px; border-radius: 32px; display: flex; justify-content: space-between; align-items: center; gap: 30px; flex-wrap: wrap; text-align: left; color: #fff; background: radial-gradient(620px 300px at 85% 0%, rgba(255, 255, 255, .10), transparent 65%), linear-gradient(135deg, var(--green), var(--green-2)); box-shadow: var(--shadow-lg); }
     .pd-daftar-card::before { content: ""; position: absolute; inset: 0; opacity: .35; background-image: radial-gradient(rgba(255, 255, 255, .16) 1px, transparent 1px); background-size: 26px 26px; -webkit-mask-image: radial-gradient(ellipse at 50% 0%, #000, transparent 75%); mask-image: radial-gradient(ellipse at 50% 0%, #000, transparent 75%); }
     .pd-daftar-card > * { position: relative; z-index: 1; }
-    .pd-daftar-card h2 { margin: 0 auto 14px; max-width: 26ch; font-size: clamp(1.55rem, 3.6vw, 2.45rem); font-weight: 800; line-height: 1.28; letter-spacing: -.01em; color: #fff; }
-    .pd-daftar-card p { margin: 0 auto 30px; max-width: 66ch; font-size: clamp(.9rem, 1.4vw, 1.02rem); line-height: 1.85; color: rgba(255, 255, 255, .85); }
-    .pd-daftar-btn { display: inline-flex; align-items: center; gap: 10px; padding: 15px 32px; border-radius: 12px; background: #fff; color: #166534; font-weight: 800; font-size: .95rem; text-decoration: none; box-shadow: 0 14px 30px -18px rgba(0, 0, 0, .45); transition: transform .2s ease, background .2s ease; }
+    .pd-daftar-card h2 { margin: 0 0 8px; max-width: 26ch; font-size: clamp(22px, 3vw, 32px); font-weight: 800; line-height: 1.28; color: #fff; }
+    .pd-daftar-card p { margin: 0; max-width: 520px; font-size: 13.5px; line-height: 1.7; color: rgba(255, 255, 255, .82); }
+    .pd-daftar-btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; border-radius: 999px; background: var(--cream); color: var(--green); font-weight: 600; font-size: 13.5px; text-decoration: none; white-space: nowrap; transition: all .25s ease; }
     .pd-daftar-btn i { font-size: .9rem; transition: transform .2s ease; }
-    .pd-daftar-btn:hover { background: #fde68a; transform: translateY(-2px); }
+    .pd-daftar-btn:hover { background: #fff; color: var(--green); transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0, 0, 0, .18); }
     .pd-daftar-btn:hover i { transform: translateX(3px); }
 
     /* ====== Responsif ====== */
@@ -69,19 +71,20 @@
     @media (max-width: 860px) {
         .pd-doc-area { padding: 40px 0 52px; }
         .pd-daftar { padding: 4px 0 56px; }
-        .pd-daftar-card { border-radius: 24px; }
+        .pd-daftar-card { padding: 30px 22px; border-radius: 22px; }
+        .pd-daftar-btn { width: 100%; justify-content: center; }
 
         /* Daftar isi versi mobile: 4 kartu judul, mengisi lebar layar */
         .pd-toc-card { display: none; }
         .pd-toc-mobile { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; padding: 2px 0 4px; }
-        .pd-toc-chip { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px; width: auto; min-width: 0; padding: 11px 3px 9px; border-radius: 14px; border: 1px solid #eceae2; background: #fff; box-shadow: 0 10px 22px -20px rgba(23, 64, 47, .55); text-align: center; text-decoration: none; transition: transform .18s ease, box-shadow .18s ease; }
+        .pd-toc-chip { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px; width: auto; min-width: 0; padding: 11px 3px 9px; border-radius: 14px; border: 1px solid var(--line); background: #fff; box-shadow: 0 10px 22px -20px rgba(23, 64, 47, .55); text-align: center; text-decoration: none; transition: transform .18s ease, box-shadow .18s ease; }
         .pd-toc-chip:hover, .pd-toc-chip:active { transform: translateY(-2px); box-shadow: 0 14px 26px -20px rgba(23, 64, 47, .55); }
         .pd-toc-chip i { font-size: .95rem; }
-        .pd-toc-chip span { font-size: .55rem; font-weight: 600; line-height: 1.25; letter-spacing: -.01em; overflow-wrap: break-word; color: #6b7280; }
-        .pd-toc-chip:nth-child(1) i { color: #d97706; }
-        .pd-toc-chip:nth-child(2) i { color: #16a34a; }
-        .pd-toc-chip:nth-child(3) i { color: #2563eb; }
-        .pd-toc-chip:nth-child(4) i { color: #0d9488; }
+        .pd-toc-chip span { font-size: .55rem; font-weight: 600; line-height: 1.25; letter-spacing: -.01em; overflow-wrap: break-word; color: var(--muted); }
+        .pd-toc-chip:nth-child(1) i { color: var(--gold); }
+        .pd-toc-chip:nth-child(2) i { color: var(--green-3); }
+        .pd-toc-chip:nth-child(3) i { color: var(--green-2); }
+        .pd-toc-chip:nth-child(4) i { color: var(--green); }
     }
     @media (max-width: 560px) {
         .pd-toc-group ol { grid-template-columns: 1fr; }
@@ -328,8 +331,10 @@
     <section class="pd-daftar" id="pendaftaran">
         <div class="pd-wrap">
             <div class="pd-daftar-card pd-rv">
-                <h2>{{ $daftarTitle }}</h2>
-                <p>{{ $daftarDesc }}</p>
+                <div>
+                    <h2>{{ $daftarTitle }}</h2>
+                    <p>{{ $daftarDesc }}</p>
+                </div>
 
                 <a href="{{ route('pendaftaran.index') }}" class="pd-daftar-btn">
                     {{ $daftarButton }} <i class="fa-solid fa-arrow-right"></i>

@@ -7,28 +7,57 @@
 @include('pages.partials.profil-dokumen-style')
 
 <style>
-    /* ====== Selaras dengan halaman Sejarah: lebar penuh & rata kiri ====== */
-    .pd-wide .pd-wrap { width: 100%; max-width: none; padding-inline: clamp(18px, 4vw, 64px); }
-    .pd-wide .pd-hero-inner { max-width: 1040px; margin-left: 0; margin-right: auto; text-align: left; }
+    /* ====== Selaras dengan halaman Sejarah: container, font, dan judul ====== */
+    .pd-wide { font-family: 'Poppins', system-ui, sans-serif; font-size: 15px; line-height: 1.6; }
+    .pd-wide .pd-wrap { width: min(1200px, 90%); margin-inline: auto; padding-inline: 0; }
+    .pd-wide .pd-hero-inner { max-width: 680px; margin-left: 0; margin-right: auto; text-align: left; }
     .pd-wide .pd-crumb { justify-content: flex-start; }
     .pd-wide .pd-hero h1 { margin-left: 0; margin-right: auto; }
     .pd-wide .pd-hero p { margin-left: 0; margin-right: auto; }
     .pd-wide .pd-nav { justify-content: flex-start; }
-    .pd-wide section[id] { scroll-margin-top: 100px; }
+    .pd-wide section[id] { scroll-margin-top: 90px; }
 
-    /* Ritme dan lebar bagian dibuat seragam */
+    /* Ritme dan jarak kartu seragam dengan halaman lain */
     .pd-section-wrap { padding: 64px 0; }
-    .pd-head { max-width: 760px; }
-    .pd-visi-wrap { gap: 48px; }
-    .pd-numbered { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-    .pd-feature-grid { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+    .pd-head { max-width: 680px; }
+    .pd-visi-wrap { gap: 22px; }
+    .pd-numbered { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px; }
+    .pd-feature-grid { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 22px; }
+    .pd-doc-area { background: linear-gradient(180deg, var(--cream) 0%, var(--paper) 40%, var(--cream) 100%); }
 
-    /* BAB V memakai latar dokumen seperti halaman Sejarah (lihat partial bersama) */
+    /* Bagian penutup memakai latar dokumen seperti halaman Sejarah (lihat partial bersama). */
+
+    /* Motto dibungkus kartu tersendiri supaya tidak menyatu dengan footer hijau. */
+    /* Jarak atas/bawah sama dengan bagian Harapan & Keberlanjutan (.pd-doc-area). */
+    .pd-motto {
+        padding: 64px clamp(18px, 4vw, 64px);
+        background: var(--cream);
+        text-align: center;
+    }
+    .pd-motto .pd-wrap { max-width: none; padding-inline: 0; }
+    /* Lebar, padding, dan tepian kartu disamakan dengan .pd-doc di atasnya. */
+    .pd-motto-card {
+        position: relative; overflow: hidden; width: 100%; max-width: none;
+        padding: clamp(24px, 4vw, 46px);
+        border-radius: 22px;
+        background: linear-gradient(135deg, var(--green) 0%, var(--green-2) 100%);
+        box-shadow: 0 26px 54px -30px rgba(23, 64, 47, .6);
+    }
+    .pd-motto-card::after {
+        content: ""; position: absolute; right: -64px; bottom: -104px;
+        width: 240px; height: 240px; border-radius: 50%;
+        border: 36px solid rgba(255, 255, 255, .05); pointer-events: none;
+    }
+    .pd-motto-card > * { position: relative; z-index: 1; }
+    .pd-motto-card h2 {
+        margin: 14px 0 0; font-size: clamp(1.6rem, 3.4vw, 2.4rem); line-height: 1.4;
+    }
 
     @media (max-width: 860px) {
         .pd-hero { padding: 32px 0 48px; }
-        .pd-section-wrap, .pd-doc-area, .pd-motto { padding: 48px 0; }
-        .pd-doc-area .pd-doc { border-radius: 18px; }
+        .pd-section-wrap, .pd-doc-area { padding: 48px 0; }
+        .pd-motto { padding: 48px 18px; }
+        .pd-doc-area .pd-doc, .pd-motto-card { border-radius: 18px; }
     }
 </style>
 
@@ -80,7 +109,6 @@
         $nilai[] = [$nilaiIkon[$i] ?? 'fa-circle', $row[0], $row[1]];
     }
 
-    $bab5Title = $kv('visi_page_bab5_title', 'BAB V. VISI, HARAPAN, DAN KEBERLANJUTAN');
     $bab5Body = $kv('visi_page_bab5_body', "Pondok Pesantren Babul Hasanah diharapkan terus berkembang sebagai lembaga pendidikan Islam yang berpegang teguh pada nilai-nilai Al-Qur’an dan sunah, menghormati tradisi keilmuan ulama, serta terbuka terhadap perkembangan pendidikan yang membawa manfaat.\n\nSemangat pendirian pada tahun 1997 perlu menjadi landasan untuk melanjutkan perjuangan pendidikan bagi generasi berikutnya. Pengembangan lembaga hendaknya memperhatikan peningkatan kualitas pembelajaran, kompetensi guru, pembinaan karakter santri, penguatan kajian kitab kuning, penyediaan sarana pendidikan, serta pemanfaatan teknologi secara bertanggung jawab.\n\nPengembangan teknologi tidak harus menghilangkan tradisi pesantren. Sebaliknya, teknologi dapat dimanfaatkan untuk memperluas akses terhadap sumber belajar, mengelola administrasi, mendokumentasikan karya dan kegiatan santri, serta menjaga arsip sejarah lembaga. Pemanfaatannya tetap perlu disertai adab, etika, dan bimbingan guru.\n\nHarapan tersebut sejalan dengan cita-cita membangun generasi yang tidak hanya memiliki kecakapan intelektual, tetapi juga kematangan spiritual, kemuliaan akhlak, dan kepedulian sosial.");
     $bab5Paras = array_values(array_filter(array_map('trim', preg_split('/\R+/', $bab5Body))));
 
@@ -112,7 +140,7 @@
                         <a href="#visi"><i class="fa-solid fa-eye"></i> Visi</a>
                         <a href="#misi"><i class="fa-solid fa-bullseye"></i> Misi</a>
                         <a href="#nilai"><i class="fa-solid fa-gem"></i> Nilai</a>
-                        <a href="#bab5"><i class="fa-solid fa-seedling"></i> BAB V</a>
+                        <a href="#bab5"><i class="fa-solid fa-seedling"></i> Harapan</a>
                         <a href="#motto"><i class="fa-solid fa-star-and-crescent"></i> Motto</a>
                     </nav>
                 </div>
@@ -188,14 +216,13 @@
         </section>
     @endif
 
-    {{-- ============ BAB V ============ --}}
+    {{-- ============ HARAPAN & KEBERLANJUTAN ============ --}}
     @if ($visible['bab5'] ?? true)
         <section class="pd-doc-area" id="bab5">
             <div class="pd-wrap">
                 <article class="pd-doc pd-rv">
                     <div class="pd-chapter">
-                        <div class="pd-eyebrow">Penutup</div>
-                        <h2 class="pd-chapter-title">{{ $bab5Title }}</h2>
+                        <div class="pd-eyebrow">Harapan &amp; Keberlanjutan</div>
                         <div class="pd-prose">
                             @foreach ($bab5Paras as $paragraf)
                                 <p>{{ $paragraf }}</p>
@@ -211,8 +238,10 @@
     @if ($visible['motto'] ?? true)
         <section class="pd-motto" id="motto">
             <div class="pd-wrap">
-                <div class="pd-eyebrow light">{{ $mottoLabel }}</div>
-                <h2 class="pd-rv">{{ $motto }} <span>{{ $mottoAccent }}</span></h2>
+                <div class="pd-motto-card">
+                    <div class="pd-eyebrow light">{{ $mottoLabel }}</div>
+                    <h2 class="pd-rv">{{ $motto }} <span>{{ $mottoAccent }}</span></h2>
+                </div>
             </div>
         </section>
     @endif
