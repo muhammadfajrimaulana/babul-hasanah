@@ -45,13 +45,6 @@
                 'href' => route('admin.prestasi.index'),
             ])
             @include('dashboard.roles._stat', [
-                'label' => 'Asatidz / Pengurus',
-                'nilai' => number_format($totalAsatidz, 0, ',', '.'),
-                'sub' => 'Data kepengurusan',
-                'ikon' => 'fa-user-tie',
-                'ikonBg' => 'bg-cyan-50 text-cyan-600 dark:bg-cyan-950/50 dark:text-cyan-400',
-            ])
-            @include('dashboard.roles._stat', [
                 'label' => 'Berita Terbit',
                 'nilai' => number_format($totalBerita, 0, ',', '.'),
                 'sub' => 'Website pesantren',
@@ -67,11 +60,11 @@
                     <h2 class="text-sm font-black text-slate-900 dark:text-white">Sebaran per Jenjang</h2>
                     <p class="text-[10px] text-slate-400">Santri, pendaftar, dan alumni pada 7 jenjang resmi.</p>
                 </div>
-                <a href="{{ route('admin.jenjang.index') }}" class="text-[10px] font-bold text-emerald-600 hover:underline">Kelola data jenjang</a>
+                <a href="{{ route('admin.dashboard.jenjang') }}" class="text-[10px] font-bold text-emerald-600 hover:underline">Dashboard jenjang</a>
             </div>
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 @foreach ($jenjangStats as $j)
-                    <a href="{{ route('admin.jenjang.show', $j['slug']) }}"
+                    <a href="{{ route('admin.dashboard.jenjang', ['jenjang' => $j['slug']]) }}"
                         class="rounded-xl border border-slate-100 bg-slate-50/60 p-4 transition hover:border-emerald-200 hover:bg-white dark:border-slate-800 dark:bg-slate-800/40 dark:hover:bg-slate-800">
                         <div class="flex items-center gap-2">
                             <span class="flex h-8 w-8 items-center justify-center rounded-lg text-white" style="background: {{ $j['warna'] }}">

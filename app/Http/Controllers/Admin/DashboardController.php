@@ -7,7 +7,6 @@ use App\Models\Album;
 use App\Models\Alumni;
 use App\Models\Berita;
 use App\Models\InfoHarian;
-use App\Models\Kepengurusan;
 use App\Models\PendaftaranOnline;
 use App\Models\PrestasiSantri;
 use App\Models\Program;
@@ -48,7 +47,6 @@ class DashboardController extends Controller
             ->whereYear('published_at', $now->year)
             ->count();
 
-        $totalAsatidz = $this->hitung(Kepengurusan::class);
         $jmlGaleri = $this->hitung(Album::class);
         $totalAlumni = $this->hitung(Alumni::class);
         $totalPengguna = $this->hitung(User::class);
@@ -148,7 +146,6 @@ class DashboardController extends Controller
             'pendaftarTerbaru' => $pendaftarTerbaru,
             'totalBerita' => $totalBerita,
             'beritaBulanIni' => $beritaBulanIni,
-            'totalAsatidz' => $totalAsatidz,
             'jmlGaleri' => $jmlGaleri,
             'totalAlumni' => $totalAlumni,
             'totalPengguna' => $totalPengguna,

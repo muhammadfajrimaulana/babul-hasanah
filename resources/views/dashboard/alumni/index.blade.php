@@ -378,7 +378,7 @@
                                             <i class="fa-solid fa-file-pdf"></i> PDF
                                         </a>
                                     @elseif (auth()->user()->bisa('alumni.ubah'))
-                                        <a href="{{ route('admin.alumni.show', $a) }}#nilai"
+                                        <a href="{{ route('admin.alumni.show', $a) }}#dokumen"
                                             class="inline-flex items-center gap-1 bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 px-2.5 py-1 rounded-lg text-[10px] font-bold transition">
                                             <i class="fa-solid fa-cloud-arrow-up"></i> Unggah
                                         </a>

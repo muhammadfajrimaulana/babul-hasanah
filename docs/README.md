@@ -11,11 +11,11 @@ yang ada di repositori (bukan asumsi dari README bawaan Laravel).
 > dijalankan manusia**, bukan oleh AI.
 
 - **Tanggal analisis awal:** 31 Oktober 2026
-- **Pembaruan terakhir:** 28 November 2026 (checklist per menu, jadwal/kurikulum/rapor, Google OAuth, test scoping, peta tampilan per menu, query beranda/profil dipindah ke controller, data 7 jenjang dipusatkan, fallback gambar publik, tautan Blade memakai named route, pembersihan 16 file 0 byte, halaman error 403/404/500, feature test login/reset password, verifikasi PPDB, nilai/izin & soft delete santri, CRUD kepengurusan, aset placeholder `public/images/`, alt gambar deskriptif, panduan verifikasi manusia, satukan styling Vite, kompresi aset, panduan praktis role dan jalur akses, pembersihan view/controller mati)
+- **Pembaruan terakhir:** 28 November 2026 (checklist per menu, jadwal/kurikulum/rapor, Google OAuth, test scoping, peta tampilan per menu, query beranda/profil dipindah ke controller, data 7 jenjang dipusatkan, fallback gambar publik, tautan Blade memakai named route, pembersihan 16 file 0 byte, halaman error 403/404/500, feature test login/reset password, verifikasi PPDB, nilai/izin & soft delete santri, penghapusan total fitur Kepengurusan (Struktur Organisasi tetap), aset placeholder `public/images/`, alt gambar deskriptif, panduan verifikasi manusia, satukan styling Vite, kompresi aset, panduan praktis role dan jalur akses, pembersihan view/controller mati, penyatuan halaman Jenjang ke Dashboard Jenjang)
 - **Status working tree:** ada perubahan yang belum di-commit; folder `docs/` di-*ignore* Git sehingga perubahan dokumentasi tidak muncul di `git status`
 - **Framework:** Laravel 13.29 (requirement `^13.17`), PHP 8.3+ (runtime terpasang PHP 8.5.5)
 - **Basis data:** MySQL `babul_hasanah` (XAMPP)
-- **Skala kode saat ini:** 232 route aplikasi, 57 file controller, 34 model, 50 file migrasi, 144 file Blade
+- **Skala kode saat ini:** 227 route aplikasi (`admin.kepengurusan.*` = 0, `admin.struktur.*` = 6; `admin.jenjang.index/show` = 2 alias redirect), 54 file controller, 33 model, 53 file migrasi, 136 file Blade; 21 file test (2 contoh + 12 feature + 7 unit, 87 method)
 
 ## Daftar Dokumen
 
@@ -53,8 +53,8 @@ dalam satu proyek Laravel monolitik.
 | Role | Label | Area |
 |------|-------|------|
 | `super_admin` | Superadmin | `/admin/*` (semua modul), `/super/pengguna`, log aktivitas |
-| `pengurus` | Pengurus | `/admin/dashboard-pengurus` + monitoring & pengumuman |
-| `pembina` | Pembina | `/admin/dashboard-pembina` + pembinaan, izin, monitoring |
+| `pengurus` | Pengurus | `/admin/dashboard-pengurus` + monitoring & pengumuman (juga `/admin/dashboard-jenjang` baca-saja) |
+| `pembina` | Pembina | `/admin/dashboard-pembina` + pembinaan, izin, monitoring (juga `/admin/dashboard-jenjang` baca-saja) |
 | `admin` | Admin Jenjang | `/admin/dashboard-jenjang` + operasional **satu jenjang** |
 | `wali_santri` | Wali Santri | `/portal/*` (hanya anak sendiri) |
 | `alumni` | Alumni | `/alumni/*` (hanya data sendiri) |
@@ -77,8 +77,8 @@ namanya tampil pada halaman Nilai.
 - **Superadmin:** semua modul + akun pengguna + log aktivitas + rollback kenaikan kelas.
 - **Wali Santri:** portal multi-anak (satu akun bisa banyak anak), nilai/rapor, prestasi, izin pulang,
   pengumuman, pengajuan perubahan data, dan dokumen kelulusan.
-- **Alumni:** dashboard profil, nomor ijazah, kelas/kamar terakhir, history nilai & pelanggaran,
-  presensi, dokumen, tracer study, pengumuman, dan pengajuan legalisir. History terkunci.
+- **Alumni:** dashboard profil & tracer study, nomor ijazah, kelas/kamar terakhir, history nilai &
+  pelanggaran, presensi, dokumen, testimoni, pengumuman, dan pengajuan legalisir. History terkunci.
 
 ### Kondisi Singkat
 
@@ -90,17 +90,18 @@ namanya tampil pada halaman Nilai.
 | Batas data per jenjang | **Berjalan** untuk santri, pendaftaran, alumni, nilai, kelas, pengumuman, dan izin (role `admin`) |
 | PPDB | Berjalan sampai verifikasi + pembuatan santri + akun wali + email kredensial; email wali boleh multi-anak, email santri unik, form dilindungi throttle + honeypot |
 | Portal wali | Dinamis, multi-anak, mendukung mode riwayat setelah anak lulus |
-| Portal alumni | Berjalan: profil, nilai, dokumen, legalisir, tracer study, pengumuman |
+| Portal alumni | Berjalan: profil + tracer + testimoni, nilai, dokumen, legalisir, pengumuman |
 | Naik kelas | Berjalan + rollback khusus Superadmin dengan alasan & log |
 | Hapus santri | Soft delete + Tempat Sampah; pemulihan khusus Superadmin; `forceDelete` tidak diekspos ke UI |
-| Kepengurusan | CRUD Superadmin di `/admin/kepengurusan`; kartu `/profil` dari tabel `kepengurusan`; foto lama tetap terbaca |
+| Kepengurusan | **Dihapus 28 Nov 2026:** controller, model, view, 6 route `admin.kepengurusan.*`, kartu `/profil`, dan tabel `kepengurusan` (migrasi `2026_11_28_000008_hapus_tabel_kepengurusan`, `down()` hanya struktur kosong). Menu **Struktur Organisasi** tetap ada; `admin.struktur.*` (6 route) dan bagan lengkap di `/struktur-organisasi` tidak berubah |
+| Dashboard Jenjang | **Halaman kanonik tunggal sejak 28 Nov 2026:** `/admin/dashboard-jenjang` (`admin.dashboard.jenjang`, `RoleDashboardController@adminJenjang`, `dashboard/roles/admin-jenjang`). `Admin\JenjangController` dan dua view dihapus; `/admin/pengelolaan-jenjang`, `/admin/pengelolaan-jenjang/{jenjang}`, `/admin/pengelolaan-program` hanya redirect. `jenjang.lihat` = Superadmin/Admin/Pengurus/Pembina (baca-saja bila tanpa hak ubah); sidebar hanya satu menu **Dashboard Jenjang** |
 | Aset gambar publik | 14 placeholder di `public/images/program/` (banner 1200×400) dan `public/images/pengurus/` (foto ketua 320×320), total 230 KB; fallback `GambarPublik` tetap aktif. Belum foto resmi |
 | Info Harian | **Berjalan**: CRUD via menu Superadmin + tampil di beranda |
 | Import santri | **Berjalan via CSV native** (tanpa package): validasi per baris, laporan error, template CSV dinamis; XLSX tidak didukung |
 | Modul akademik | **Kode siap** (nilai, transkrip, mapel, jadwal anti-bentrok, kurikulum + item, rapor rekap, portal wali); tabel baru menunggu migrasi oleh manusia — lihat [14-modul-akademik.md](14-modul-akademik.md) |
 | Notifikasi nilai wali | Indikator in-app di dashboard portal (tanpa WhatsApp gateway) |
 | Google Login | **Kode siap** via Socialite; tombol muncul setelah kredensial diisi. Butuh `composer install` + env — lihat [17-google-oauth.md](17-google-oauth.md) |
-| Test | 2 contoh bawaan + 13 feature test (`ScopingJenjangTest`, `PortalKepemilikanAnakTest`, `LoginDanResetPasswordTest`, `VerifikasiPPDBTest`, `NilaiDanIzinTest`, `SoftDeleteSantriTest`, `KepengurusanCrudTest`, `GambarPublikTest`, `PencarianSantriTest`, `SlugBeritaTest`, `GaleriStorageTest`, `IdentifierUnikTest`, `PesanFlashTest`) + 7 unit test (`AltGambarTest`, `LocaleTanggalTest`, `PathGambarStorageTest`, `NamaAplikasiTest`, `EnvExampleTest`, `ViewMatTest`, `DokumenSinkronTest`); dijalankan manusia, lihat [16-checklist-per-menu.md](16-checklist-per-menu.md) |
+| Test | 2 contoh bawaan + **12 feature test** (`ScopingJenjangTest`, `PortalKepemilikanAnakTest`, `LoginDanResetPasswordTest`, `VerifikasiPPDBTest`, `NilaiDanIzinTest`, `SoftDeleteSantriTest`, `GambarPublikTest`, `PencarianSantriTest`, `SlugBeritaTest`, `GaleriStorageTest`, `IdentifierUnikTest`, `PesanFlashTest`) + 7 unit test (`AltGambarTest`, `LocaleTanggalTest`, `PathGambarStorageTest`, `NamaAplikasiTest`, `EnvExampleTest`, `ViewMatTest`, `DokumenSinkronTest`) = 21 file / 87 method (`KepengurusanCrudTest` dihapus 28 Nov 2026); dijalankan manusia, lihat [16-checklist-per-menu.md](16-checklist-per-menu.md) |
 
 ### Peringatan Awal
 
@@ -111,4 +112,7 @@ pengguna, Info Harian, dan pemanggilan seeder juga sudah diperbaiki — daftarny
 
 > **Catatan migrasi:** seluruh perubahan skema ditulis sebagai file migrasi dan **tidak dijalankan
 > oleh agen AI**. Status “sudah/belum dimigrasi” harus diverifikasi manusia. Dokumentasi ini
-> membedakan tegas antara “kode tersedia” dan “tabel sudah ada di database”.
+> membedakan tegas antara “kode tersedia” dan “tabel sudah ada di database”. Migrasi
+> `2026_11_28_000008_hapus_tabel_kepengurusan` menghapus tabel `kepengurusan` (fitur kartu pimpinan
+> dihapus 28 Nov 2026; `down()` hanya membuat ulang struktur kosong), sedangkan menu Struktur
+> Organisasi dan bagan lengkap di `/struktur-organisasi` tetap ada.

@@ -7,29 +7,58 @@
     <title>@yield('title', 'Portal Alumni') - Pondok Pesantren Babul Hasanah</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* Token global yang sama dengan halaman publik, dipakai seluruh portal alumni. */
+        :root {
+            --green: #17402f;
+            --green-2: #1d4d3a;
+            --cream: #f1eee6;
+            --paper: #fbfaf6;
+            --gold: #b7791f;
+            --ink: #1f2a24;
+            --muted: #6b756f;
+            --line: #e4e0d4;
+            --emerald: #12b886;
+            --emerald-d: #0e9f73;
+        }
+
+        body {
+            font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            background: var(--paper);
+            color: var(--ink);
+        }
+
+        .alumni-wrap { width: min(1200px, 90%); margin-inline: auto; }
+    </style>
 </head>
 
-<body class="bg-slate-100 text-slate-900 font-sans antialiased">
+<body class="antialiased">
     <div class="min-h-screen flex flex-col justify-between">
         <!-- Top Navbar -->
         <div class="sticky top-0 z-20">
-        <header class="bg-white border-b border-slate-200 py-3 px-4 sm:py-4 sm:px-6 lg:px-10 flex items-center justify-between gap-3 shadow-sm">
+        <header class="bg-white border-b border-[#e4e0d4] py-3 px-4 sm:py-4 sm:px-6 lg:px-10 flex items-center justify-between gap-3 shadow-sm">
             <div class="flex items-center gap-3 min-w-0">
-                <div class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-[#17402f] text-[#f1eee6] flex items-center justify-center font-extrabold">
                     <i class="fa-solid fa-user-graduate"></i>
                 </div>
                 <div class="min-w-0">
-                    <h1 class="font-black text-slate-900 text-sm sm:text-base truncate">Portal Alumni</h1>
-                    <p class="text-[10px] text-indigo-600 font-semibold uppercase tracking-wider truncate">Pondok Pesantren Babul Hasanah</p>
+                    <h1 class="font-extrabold text-[#17402f] text-sm sm:text-base truncate">Portal Alumni</h1>
+                    <p class="text-[10px] text-[#b7791f] font-bold uppercase tracking-wider truncate">Pondok Pesantren Babul Hasanah</p>
                 </div>
             </div>
 
             <div class="flex items-center gap-3 shrink-0">
-                <span class="text-xs font-bold text-slate-700 hidden sm:inline">Halo, {{ Auth::user()->name }}</span>
+                <span class="text-xs font-bold text-[#1f2a24] hidden sm:inline">Halo, {{ Auth::user()->name }}</span>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit"
-                        class="bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition duration-300 whitespace-nowrap">
+                        class="bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition duration-300 whitespace-nowrap">
                         <i class="fa-solid fa-right-from-bracket sm:mr-1.5"></i><span class="hidden sm:inline">Keluar</span>
                     </button>
                 </form>
@@ -37,30 +66,27 @@
         </header>
 
         <!-- Menu -->
-        <nav class="bg-white border-b border-slate-200">
-            <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-10">
+        <nav class="bg-white border-b border-[#e4e0d4]">
+            <div class="alumni-wrap">
                 <div class="nav-scroll flex items-center gap-1.5 overflow-x-auto py-2">
                 @php
                     $navClass = fn (bool $aktif) => 'inline-flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-[11px] font-bold transition '
                         .($aktif
-                            ? 'bg-indigo-700 text-white shadow-sm'
-                            : 'text-slate-600 hover:bg-slate-100 hover:text-indigo-700');
+                            ? 'bg-[#17402f] text-white shadow-sm'
+                            : 'text-[#6b756f] hover:bg-[#f1eee6] hover:text-[#17402f]');
                 @endphp
 
                 <a href="{{ route('alumni.dashboard') }}" class="{{ $navClass(request()->routeIs('alumni.dashboard')) }}">
                     <i class="fa-solid fa-house"></i> Beranda
                 </a>
                 <a href="{{ route('alumni.profil') }}" class="{{ $navClass(request()->routeIs('alumni.profil*')) }}">
-                    <i class="fa-solid fa-id-card"></i> Profil
+                    <i class="fa-solid fa-id-card"></i> Profil &amp; Tracer
                 </a>
                 <a href="{{ route('alumni.nilai') }}" class="{{ $navClass(request()->routeIs('alumni.nilai*')) }}">
                     <i class="fa-solid fa-book-open"></i> Nilai &amp; Riwayat
                 </a>
                 <a href="{{ route('alumni.dokumen') }}" class="{{ $navClass(request()->routeIs('alumni.dokumen*')) }}">
                     <i class="fa-solid fa-folder-open"></i> Dokumen
-                </a>
-                <a href="{{ route('alumni.tracer') }}" class="{{ $navClass(request()->routeIs('alumni.tracer*')) }}">
-                    <i class="fa-solid fa-briefcase"></i> Tracer Study
                 </a>
                 <a href="{{ route('alumni.legalisir') }}" class="{{ $navClass(request()->routeIs('alumni.legalisir*')) }}">
                     <i class="fa-solid fa-stamp"></i> Legalisir
@@ -73,7 +99,7 @@
         </div>
 
         <!-- Content -->
-        <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+        <main class="alumni-wrap w-full flex-1 py-6 sm:py-8">
             @if (session('success'))
                 <div class="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-bold text-emerald-700">
                     <i class="fa-solid fa-circle-check mr-1"></i> {{ session('success') }}
@@ -92,7 +118,7 @@
             @yield('content')
         </main>
 
-        <footer class="bg-white border-t border-slate-200 py-4 px-4 text-center text-[11px] sm:text-xs text-slate-400">
+        <footer class="bg-white border-t border-[#e4e0d4] py-4 px-4 text-center text-[11px] sm:text-xs text-[#6b756f]">
             &copy; 2026 Pondok Pesantren Babul Hasanah. All rights reserved.
         </footer>
     </div>

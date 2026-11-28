@@ -13,9 +13,7 @@ use App\Http\Controllers\Admin\DokumenAlumniController;
 use App\Http\Controllers\Admin\GaleriController as AdminGaleriController;
 use App\Http\Controllers\Admin\InfoHarianController as AdminInfoHarianController;
 use App\Http\Controllers\Admin\IzinController as AdminIzinController;
-use App\Http\Controllers\Admin\JenjangController as AdminJenjangController;
 use App\Http\Controllers\Admin\KegiatanController as AdminKegiatanController;
-use App\Http\Controllers\Admin\KepengurusanController as AdminKepengurusanController;
 use App\Http\Controllers\Admin\KelasController as AdminKelasController;
 use App\Http\Controllers\Admin\KontenController as AdminKontenController;
 use App\Http\Controllers\Admin\LegalisirController as AdminLegalisirController;
@@ -176,7 +174,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         ->middleware('role:super_admin')->name('dashboard');
 
     Route::get('/dashboard-jenjang', [AdminRoleDashboard::class, 'adminJenjang'])
-        ->middleware('role:admin,super_admin')->name('dashboard.jenjang');
+        ->middleware('role:'.Akses::roles('jenjang.lihat'))->name('dashboard.jenjang');
 
     Route::get('/dashboard-pengurus', [AdminRoleDashboard::class, 'pengurus'])
         ->middleware('role:pengurus')->name('dashboard.pengurus');
@@ -324,10 +322,16 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
         Route::get('/pengelolaan-prestasi', [PrestasiAdminController::class, 'index'])->name('prestasi.index');
 
-        Route::get('/pengelolaan-jenjang', [AdminJenjangController::class, 'index'])->name('jenjang.index');
-        Route::get('/pengelolaan-jenjang/{jenjang}', [AdminJenjangController::class, 'show'])->name('jenjang.show');
+        // Halaman jenjang sudah disatukan di Dashboard Jenjang. Tautan lama dialihkan.
+        Route::get('/pengelolaan-jenjang', fn () => redirect()->route('admin.dashboard.jenjang'))
+            ->name('jenjang.index');
+        Route::get('/pengelolaan-jenjang/{jenjang}', fn (string $jenjang) => redirect()->route(
+            'admin.dashboard.jenjang',
+            ['jenjang' => $jenjang]
+        ))->name('jenjang.show');
 
-        Route::get('/pengelolaan-program', fn () => redirect()->route('admin.jenjang.index'))->name('program.index');
+        Route::get('/pengelolaan-program', fn () => redirect()->route('admin.dashboard.jenjang'))
+            ->name('program.index');
 
         Route::get('/pengelolaan-kegiatan', [AdminKegiatanController::class, 'index'])->name('kegiatan.index');
 
@@ -406,12 +410,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
             ->parameters(['struktur-organisasi' => 'struktur'])
             ->except('show')
             ->names('struktur');
-
-        // Kartu pimpinan di /profil memakai tabel kepengurusan (terpisah dari bagan).
-        Route::resource('kepengurusan', AdminKepengurusanController::class)
-            ->parameters(['kepengurusan' => 'kepengurusan'])
-            ->except('show')
-            ->names('kepengurusan');
     });
 
     Route::middleware('role:'.Akses::roles('info'))->group(function () {
@@ -539,9 +537,6 @@ Route::middleware(['auth', 'role:alumni'])->prefix('alumni')->name('alumni.')->g
 
     Route::get('/dokumen', [AlumniPortalController::class, 'dokumen'])->name('dokumen');
     Route::get('/dokumen/{dokumen}/unduh', [AlumniPortalController::class, 'unduhDokumen'])->name('dokumen.unduh');
-
-    Route::get('/tracer-study', [AlumniPortalController::class, 'tracer'])->name('tracer');
-    Route::put('/tracer-study', [AlumniPortalController::class, 'updateTracer'])->name('tracer.update');
 
     Route::get('/legalisir', [AlumniPortalController::class, 'legalisir'])->name('legalisir');
     Route::post('/legalisir', [AlumniPortalController::class, 'ajukanLegalisir'])->name('legalisir.store');

@@ -3,21 +3,19 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
-use App\Models\Kepengurusan;
 use App\Models\Konten;
 
 class ProfilController extends Controller
 {
     /**
-     * Halaman induk profil. Kartu kepengurusan dan teks profil diambil di sini,
-     * bukan di Blade, agar Blade tidak memanggil kelas model secara langsung.
+     * Halaman induk profil. Teks profil diambil di sini, bukan di Blade,
+     * agar Blade tidak memanggil kelas model secara langsung.
      */
     public function index()
     {
-        $kepengurusans = Kepengurusan::orderBy('urutan')->orderBy('id')->get();
         $konten = Konten::allWithDefaults();
 
-        return view('pages.profil', compact('kepengurusans', 'konten'));
+        return view('pages.profil', compact('konten'));
     }
 
     /**

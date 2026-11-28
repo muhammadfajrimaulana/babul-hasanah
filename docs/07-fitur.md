@@ -31,11 +31,13 @@ tetapi sisa CSS/JS handler-nya masih ada.
 
 ### 1.2 Profil — ✅ (halaman) / ⚠️ (konten)
 
-**Tujuan:** halaman profil yang mengambil teks dari tabel `konten` + dewan pengasuh.
+**Tujuan:** halaman profil yang mengambil teks dari tabel `konten`.
 
 **Alur:** `GET /profil` → `Public\ProfilController@index` → `pages.profil`.
 
-**Data:** `Konten::getVal()` untuk 7 key, `$kepengurusans` dari controller untuk daftar pengasuh.
+**Data:** `Konten::getVal()` untuk 7 key. Kartu pimpinan/`$kepengurusans` dihapus 28 Nov 2026
+(tabel `kepengurusan` dihapus via migrasi `2026_11_28_000008_hapus_tabel_kepengurusan`); menu
+**Struktur Organisasi** tetap ada dan bagan lengkap di `/struktur-organisasi` tidak berubah.
 
 **Catatan:** halaman `/profil` memakai `konten` untuk teks; sub-halaman sejarah, visi-misi,
 pembelajaran, dan fasilitas juga memakai `konten` (bisa diedit Superadmin lewat menu Konten).
@@ -62,7 +64,8 @@ pembelajaran, dan fasilitas juga memakai `konten` (bisa diedit Superadmin lewat 
 
 ### 1.6 Struktur Organisasi Publik — ✅
 
-**Alur:** `GET /profil/struktur-organisasi` → `Public\StrukturOrganisasiController@index`.
+**Alur:** `GET /profil/struktur-organisasi` (halaman Struktur Organisasi, sering disebut
+`/struktur-organisasi`) → `Public\StrukturOrganisasiController@index`. Menu ini tetap ada dan bagan lengkapnya tidak berubah setelah Kepengurusan dihapus 28 Nov 2026.
 
 **Data:**
 
@@ -75,7 +78,8 @@ pembelajaran, dan fasilitas juga memakai `konten` (bisa diedit Superadmin lewat 
 
 ### 1.7 Halaman Jenjang — ✅ sebagian statis
 
-**Alur:** `GET /jenjang/{slug}` dengan 7 slug valid → `JenjangController@show` → `pages/jenjang/_detail`.
+**Alur:** `GET /jenjang/{slug}` dengan 7 slug valid → `Public\JenjangController@show` →
+`pages/jenjang/_detail`. (Ini halaman publik; `Admin\JenjangController` sudah dihapus 28 Nov 2026.)
 
 **Data:** satu sumber `App\Support\DataJenjang` untuk 7 jenjang (nama, deskripsi, kurikulum,
 fasilitas, ketua, dll.); tautan jenjang lain memakai `route('jenjang.show')`.
@@ -285,21 +289,30 @@ atau menu Pengguna (Superadmin).
 
 - ✅ `santriPutra/Putri` dihitung dari `santri.jenis_kelamin` (migrasi 28 Nov 2026).
   Bila belum diisi, labelnya "Jenis kelamin belum diisi", bukan "0".
-- ⚠️ "Asatidz" masih menghitung tabel `kepengurusan`, bukan data asatidz.
+- ✅ Stat "Asatidz"/`totalAsatidz` dihapus 28 Nov 2026 (tidak ada lagi kartu yang menghitung `kepengurusan`).
 - ✅ `komposisi` dan `agenda` berjalan (`jenjang_pendidikan` dan `info_harian`).
 
-### 4.1b Dashboard per Jenjang (multi-role) — ✅
+### 4.1b Dashboard per Jenjang — halaman kanonik tunggal ✅
 
-- `/admin/dashboard-jenjang` dapat dibuka **Superadmin** dan **Admin Jenjang**.
-- Admin Jenjang otomatis dibatasi ke jenjangnya; Superadmin memilih jenjang lewat `?jenjang=slug`
-  atau melihat gabungan seluruh jenjang bila tidak memilih.
-- Komponen: kartu statistik (santri, pendaftar, menunggu, alumni, prestasi), aksi cepat, form input
-  nilai & prestasi (hanya Superadmin/Admin Jenjang), tabel pendaftar/santri terbaru, ringkasan
-  alumni + status nilai/transkrip, dan panel **Akses Cepat per Jenjang**.
+- Sejak 28 Nov 2026 satu halaman kanonik: `/admin/dashboard-jenjang` (`admin.dashboard.jenjang`,
+  `RoleDashboardController@adminJenjang`, view `dashboard/roles/admin-jenjang`).
+  `Admin\JenjangController` dan view `dashboard/jenjang/index`/`show` dihapus; sidebar tidak lagi
+  memuat submenu "Jenjang", hanya satu menu **Dashboard Jenjang** (untuk Admin Jenjang, menu
+  **Dashboard** sudah mengarah ke halaman ini).
+- URL lama hanya redirect: `/admin/pengelolaan-jenjang` → `admin.dashboard.jenjang`,
+  `/admin/pengelolaan-jenjang/{jenjang}` → `admin.dashboard.jenjang?jenjang=slug`, dan
+  `/admin/pengelolaan-program` → langsung ke `admin.dashboard.jenjang`.
+- Route dibuka oleh `jenjang.lihat` = **Superadmin, Admin Jenjang, Pengurus, Pembina** (sebelumnya
+  hanya admin/super_admin). Role tanpa hak ubah melihat mode **baca-saja** otomatis.
+- Admin Jenjang otomatis dibatasi ke jenjangnya; Superadmin/Pengurus/Pembina memilih jenjang lewat
+  `?jenjang=slug` atau melihat agregat bila tidak memilih.
+- Mode agregat: kartu ringkasan 7 jenjang + grafik perbandingan (`RekapJenjang::nilaiDbSemua()`
+  mengambil semua nilai jenjang). Mode satu jenjang: kartu identitas jenjang + tautan publik,
+  grafik **Santri per Kelas** dan **Status Pendaftar** (theme-aware dark mode), kartu statistik,
+  aksi cepat, form nilai/prestasi (Superadmin/Admin Jenjang), tabel terbaru, dan ringkasan alumni.
 - Halaman input nilai/prestasi dan unggah rapor PDF mengikuti pilihan jenjang yang sama.
 - Dashboard **Pengurus** (`/admin/dashboard-pengurus`) dan **Pembina** (`/admin/dashboard-pembina`)
-  memiliki halaman sendiri. Pengurus memantau seluruh jenjang; Pembina fokus pada pembinaan harian.
-- Dashboard Superadmin, Pengurus, dan Pembina menampilkan panel **Akses Cepat per Jenjang**.
+  tetap memiliki halaman sendiri; keduanya kini juga boleh membuka dashboard jenjang (baca-saja).
 
 ### 4.2 Pendaftaran — ✅
 
@@ -349,13 +362,15 @@ Lihat bagian 2.2. Tampilan responsif: kartu di mobile, tabel di desktop, pencari
 - Form teks per halaman (sejarah, visi, pembelajaran) memakai `items[]` + `layout[]`.
 - Unggah `sejarah_foto` (jpg/jpeg/png/webp maks 2 MB) tersedia.
 - Validasi key dan layout memakai whitelist; key di luar daftar diabaikan.
-- Sejak 28 Nov 2026, CRUD pengurus tersedia di `admin.kepengurusan.*` (Superadmin): nama, jabatan, urutan, foto.
-  Foto baru masuk disk `public`; berkas lama di `public/upload/kepengurusan/` tetap dibaca lewat `foto_url`.
+- Kartu pimpinan dan CRUD `admin.kepengurusan.*` **dihapus 28 Nov 2026** bersama controller, model,
+  view, dan tabel `kepengurusan` (migrasi `2026_11_28_000008_hapus_tabel_kepengurusan`). Menu
+  **Struktur Organisasi** tetap ada; bagan lengkap di `/struktur-organisasi` tidak berubah.
 
 ### 4.6 Program — ✅ (alias)
 
-- `admin.program.index` sengaja dipertahankan sebagai redirect ke `admin.jenjang.index`
-  untuk menjaga tautan lama; tidak dibuat CRUD tersendiri.
+- `admin.program.index` sengaja dipertahankan sebagai redirect langsung ke
+  `admin.dashboard.jenjang` (`/admin/dashboard-jenjang`) untuk menjaga tautan lama; tidak dibuat
+  CRUD tersendiri.
 - `ProgramSeeder` tetap dipanggil oleh `DatabaseSeeder` pada instalasi baru.
 - `ProgramController` lama tidak dipakai route mana pun (dead code, bisa dibersihkan).
 
@@ -538,6 +553,10 @@ Lihat §5.3.
 | Pengajuan | Ajukan perubahan data anak (disetujui/ditolak admin) |
 | Dokumen | Unduh ijazah/SKL/transkrip/sertifikat |
 
+Dokumen tersebut berasal dari tabel `dokumen_santri`. Admin Jenjang/Superadmin mengunggahnya dari
+detail santri `/admin/santri/{id}` atau lewat shortcut di detail alumni
+`/admin/data-alumni/{alumni}#dokumen`; berkas yang sama juga tampil di `/alumni/dokumen`.
+
 Aturan:
 
 - Wali **hanya** dapat membuka anak miliknya (`User::memilikiSantri()`), bukan hanya tautan disembunyikan.
@@ -552,8 +571,9 @@ Aturan:
 - **Dashboard:** profil, nomor ijazah, kelas/kamar terakhir, status, ringkasan nilai & pelanggaran.
 - **Nilai & Riwayat:** history nilai terkunci (hanya baca), termasuk nilai lama.
 - **Dokumen:** hanya dapat **mengunduh** ijazah/SKL/transkrip/sertifikat.
-- **Tracer Study:** alumni dapat memperbarui kegiatan, instansi, pekerjaan, alamat, kontak,
-  tahun mulai, dan catatan.
+- **Profil & Tracer Study:** dalam satu form alumni dapat memperbarui kontak, karier, alamat,
+  kegiatan, instansi, pekerjaan, kontak tracer, tahun mulai, catatan, dan testimoni. Testimoni
+  tampil di `/alumni` dan slider “Kata Alumni” di beranda.
 - **Legalisir:** ajukan legalisir (jenis dokumen + jumlah) dan unduh hasil bila sudah selesai.
 - **Pengumuman:** membaca pengumuman untuk alumni.
 - History nilai dan pelanggaran **tidak dapat diubah** oleh alumni.
@@ -575,8 +595,8 @@ Nomor `0...` dikonversi ke `62...`.
 
 ### 6.2 Upload File — ✅ / ⚠️
 
-Berjalan untuk berita, alumni, galeri, struktur, konten, kepengurusan. Namun lokasi penyimpanan
-tidak seragam (`storage` vs `public/upload`).
+Berjalan untuk berita, alumni, galeri, struktur, dan konten. Namun lokasi penyimpanan tidak seragam
+(`storage` vs `public/upload` lama). Upload Kepengurusan dihapus 28 Nov 2026 bersama fiturnya.
 
 ### 6.3 Pencarian & Filter — ✅
 
@@ -614,7 +634,7 @@ Hanya area admin; disimpan di `localStorage`.
 | Pengguna | — | ✅ | ✅ 7 tab, khusus Superadmin |
 | Info Harian | ✅ | ✅ | ✅ CRUD + menu; tabel perlu verifikasi |
 | Portal wali | — | — | ✅ dinamis multi-anak + mode riwayat |
-| Portal alumni | — | — | ✅ profil, nilai, dokumen, legalisir, tracer |
+| Portal alumni | — | — | ✅ profil + tracer + testimoni, nilai, dokumen, legalisir |
 | Pembinaan | — | ✅ | ✅ hafalan/pelanggaran/presensi |
 | Izin pulang | — | ✅ | ✅ status + kode + auto terlambat |
 | Pengumuman | — | ✅ | ✅ per jenjang |

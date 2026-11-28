@@ -41,13 +41,142 @@
             </div>
         @endif
 
+        {{-- Ringkasan jenjang: menggantikan halaman Pengelolaan Jenjang --}}
+        @if ($jenjang)
+            <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <div class="h-1.5" style="background: {{ $jenjang['warna'] }}"></div>
+                <div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex min-w-0 items-start gap-4">
+                        <span class="grid h-12 w-12 shrink-0 place-items-center rounded-xl text-white"
+                            style="background: {{ $jenjang['warna'] }}">
+                            <i class="fa-solid {{ $jenjang['ikon'] }}"></i>
+                        </span>
+                        <div class="min-w-0">
+                            <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">{{ $jenjang['kode'] }}</p>
+                            <h2 class="text-base font-black text-slate-900 dark:text-white">{{ $jenjang['nama'] }}</h2>
+                            <p class="mt-0.5 max-w-2xl text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+                                {{ $jenjang['deskripsi'] }}</p>
+                        </div>
+                    </div>
+                    <a href="{{ route('jenjang.show', $jenjang['slug']) }}" target="_blank" rel="noopener"
+                        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 px-3.5 py-2 text-[11px] font-bold text-slate-600 transition hover:border-emerald-500 hover:text-emerald-600 dark:border-slate-700 dark:text-slate-300">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Halaman publik
+                    </a>
+                </div>
+            </div>
+        @elseif ($modeAgregat)
+            @php
+                $totalSeluruhSantri = array_sum(array_column($rekapJenjang, 'santri'));
+            @endphp
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                @foreach ($rekapJenjang as $j)
+                    @php
+                        $persen = $totalSeluruhSantri > 0 ? round(($j['santri'] / $totalSeluruhSantri) * 100) : 0;
+                    @endphp
+                    <a href="{{ route('admin.dashboard.jenjang', ['jenjang' => $j['slug']]) }}"
+                        class="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
+                        <span class="absolute inset-x-0 top-0 h-1.5" style="background: {{ $j['warna'] }}"></span>
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex min-w-0 items-center gap-3">
+                                <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-white"
+                                    style="background: {{ $j['warna'] }}">
+                                    <i class="fa-solid {{ $j['ikon'] }}"></i>
+                                </span>
+                                <div class="min-w-0">
+                                    <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">{{ $j['kode'] }}</p>
+                                    <h3 class="truncate text-sm font-black leading-tight text-slate-900 dark:text-white"
+                                        title="{{ $j['nama'] }}">{{ $j['nama'] }}</h3>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-arrow-up-right-from-square mt-1 text-xs text-slate-300 transition group-hover:text-emerald-500"></i>
+                        </div>
+                        <div class="mt-4 grid grid-cols-3 gap-2">
+                            <div class="rounded-xl bg-slate-50 px-2.5 py-2 text-center dark:bg-slate-800/60">
+                                <p class="text-base font-black leading-none text-slate-900 dark:text-white">{{ number_format($j['santri'], 0, ',', '.') }}</p>
+                                <p class="mt-1 text-[9px] font-bold uppercase tracking-wide text-slate-400">Santri</p>
+                            </div>
+                            <div class="rounded-xl bg-slate-50 px-2.5 py-2 text-center dark:bg-slate-800/60">
+                                <p class="text-base font-black leading-none text-slate-900 dark:text-white">{{ number_format($j['pendaftar'], 0, ',', '.') }}</p>
+                                <p class="mt-1 text-[9px] font-bold uppercase tracking-wide text-slate-400">Pendaftar</p>
+                            </div>
+                            <div class="rounded-xl bg-slate-50 px-2.5 py-2 text-center dark:bg-slate-800/60">
+                                <p class="text-base font-black leading-none text-slate-900 dark:text-white">{{ number_format($j['alumni'], 0, ',', '.') }}</p>
+                                <p class="mt-1 text-[9px] font-bold uppercase tracking-wide text-slate-400">Alumni</p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                <div class="h-full rounded-full transition-all" style="width: {{ $persen }}%; background: {{ $j['warna'] }}"></div>
+                            </div>
+                            <div class="mt-1.5 flex items-center justify-between text-[10px] text-slate-400">
+                                <span>{{ $persen }}% dari total santri</span>
+                                @if ($j['menunggu'] > 0)
+                                    <span class="font-bold text-amber-600">{{ $j['menunggu'] }} pendaftar menunggu</span>
+                                @else
+                                    <span class="font-semibold text-emerald-600">Tidak ada antrean</span>
+                                @endif
+                            </div>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+
+            <div class="rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+                    <div>
+                        <h3 class="text-sm font-black text-slate-900 dark:text-white">Data per Jenjang</h3>
+                        <p class="text-[11px] text-slate-400">Perbandingan jumlah santri, pendaftar, dan alumni.</p>
+                    </div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">7 Jenjang</span>
+                </div>
+                <div class="p-4 sm:p-5">
+                    <div class="h-72 w-full sm:h-80"><canvas id="chartPerJenjang"></canvas></div>
+                </div>
+            </div>
+        @endif
+
+        @if (! $tanpaJenjang && (count($kelasChart) || count($statusChart)))
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div class="rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+                        <h3 class="text-sm font-black text-slate-900 dark:text-white">Santri per Kelas</h3>
+                        <p class="text-[11px] text-slate-400">{{ $jenjang ? 'Sebaran kelas jenjang '.$jenjang['kode'] : 'Sebaran seluruh jenjang' }}.</p>
+                    </div>
+                    <div class="p-4">
+                        @if (count($kelasChart))
+                            <div class="h-60 w-full"><canvas id="chartKelas"></canvas></div>
+                        @else
+                            <div class="grid h-60 place-items-center text-center text-xs text-slate-400">
+                                Belum ada data kelas.
+                            </div>
+                        @endif
+                    </div>
+                </div>
+                <div class="rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div class="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+                        <h3 class="text-sm font-black text-slate-900 dark:text-white">Status Pendaftar</h3>
+                        <p class="text-[11px] text-slate-400">Rekap verifikasi pendaftaran.</p>
+                    </div>
+                    <div class="p-4">
+                        @if (count($statusChart))
+                            <div class="h-60 w-full"><canvas id="chartStatus"></canvas></div>
+                        @else
+                            <div class="grid h-60 place-items-center text-center text-xs text-slate-400">
+                                Belum ada data pendaftar.
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
             @include('dashboard.roles._stat', [
                 'label' => 'Santri',
                 'nilai' => number_format($totalSantri, 0, ',', '.'),
                 'sub' => $jenjang['nama'] ?? 'Seluruh jenjang',
                 'ikon' => 'fa-people-group',
-                'href' => $jenjang ? route('admin.jenjang.show', $jenjang['slug']) : route('admin.santri.index'),
+                'href' => route('admin.santri.index', $jenjangPilihan ? ['jenjang' => $jenjangPilihan] : []),
             ])
             @include('dashboard.roles._stat', [
                 'label' => 'Pendaftar',
@@ -116,7 +245,7 @@
                     class="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-3 text-[11px] font-bold text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-200">
                     <i class="fa-solid fa-address-book text-emerald-600"></i> Data PPDB
                 </a>
-                <a href="{{ $jenjang ? route('admin.jenjang.show', $jenjang['slug']) : route('admin.santri.index') }}"
+                <a href="{{ route('admin.santri.index', $jenjangPilihan ? ['jenjang' => $jenjangPilihan] : []) }}"
                     class="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-3 text-[11px] font-bold text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-200">
                     <i class="fa-solid fa-people-group text-emerald-600"></i> Data Santri
                 </a>
@@ -125,9 +254,9 @@
                     <i class="fa-solid fa-user-graduate text-emerald-600"></i> Data Alumni
                 </a>
                 @if ($jenjang)
-                    <a href="{{ route('admin.jenjang.show', $jenjang['slug']) }}"
+                    <a href="{{ route('jenjang.show', $jenjang['slug']) }}" target="_blank" rel="noopener"
                         class="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-3 text-[11px] font-bold text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-200">
-                        <i class="fa-solid fa-layer-group text-emerald-600"></i> Profil Jenjang
+                        <i class="fa-solid fa-arrow-up-right-from-square text-emerald-600"></i> Halaman Publik
                     </a>
                 @endif
             </div>
@@ -556,7 +685,7 @@
                         <h2 class="text-sm font-black text-slate-900 dark:text-white">Santri Terbaru</h2>
                         <p class="text-[10px] text-slate-400">{{ $jenjang ? '5 data terakhir jenjang ini' : '5 data terakhir seluruh jenjang' }}</p>
                     </div>
-                    <a href="{{ $jenjang ? route('admin.jenjang.show', $jenjang['slug']) : route('admin.santri.index') }}" class="text-[10px] font-bold text-emerald-600 hover:underline">Lihat semua</a>
+                    <a href="{{ route('admin.santri.index', $jenjangPilihan ? ['jenjang' => $jenjangPilihan] : []) }}" class="text-[10px] font-bold text-emerald-600 hover:underline">Lihat semua</a>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs">
@@ -700,4 +829,136 @@
             </p>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof Chart === 'undefined') return;
+
+            let gelap = document.documentElement.classList.contains('dark');
+            if (!gelap) {
+                try {
+                    gelap = localStorage.getItem('darkMode') === 'true';
+                } catch (e) {
+                    gelap = false;
+                }
+            }
+            const tema = {
+                tick: gelap ? '#94a3b8' : '#64748b',
+                grid: gelap ? '#334155' : '#f1f5f9',
+                legend: gelap ? '#cbd5e1' : '#334155',
+            };
+            const legendBawah = {
+                position: 'bottom',
+                labels: { boxWidth: 10, padding: 14, font: { size: 10 }, color: tema.legend },
+            };
+
+            const rekap = @json($rekapJenjang);
+            const kanvasRekap = document.getElementById('chartPerJenjang');
+            if (kanvasRekap) {
+                new Chart(kanvasRekap, {
+                    type: 'bar',
+                    data: {
+                        labels: rekap.map(d => d.kode),
+                        datasets: [{
+                                label: 'Santri',
+                                data: rekap.map(d => d.santri),
+                                backgroundColor: '#12a67a',
+                                borderRadius: 5,
+                                maxBarThickness: 22,
+                            },
+                            {
+                                label: 'Pendaftar',
+                                data: rekap.map(d => d.pendaftar),
+                                backgroundColor: '#2563eb',
+                                borderRadius: 5,
+                                maxBarThickness: 22,
+                            },
+                            {
+                                label: 'Alumni',
+                                data: rekap.map(d => d.alumni),
+                                backgroundColor: '#b45309',
+                                borderRadius: 5,
+                                maxBarThickness: 22,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: { legend: legendBawah },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: { precision: 0, font: { size: 10 }, color: tema.tick },
+                                grid: { color: tema.grid },
+                            },
+                            y: {
+                                ticks: { font: { size: 9 }, color: tema.tick, autoSkip: false },
+                                grid: { display: false },
+                            },
+                        },
+                    },
+                });
+            }
+
+            const kelas = @json($kelasChart);
+            const kanvasKelas = document.getElementById('chartKelas');
+            if (kanvasKelas && kelas.length) {
+                new Chart(kanvasKelas, {
+                    type: 'bar',
+                    data: {
+                        labels: kelas.map(d => 'Kelas ' + d.label),
+                        datasets: [{
+                            label: 'Santri',
+                            data: kelas.map(d => d.jml),
+                            backgroundColor: @json($jenjang ? $jenjang['warna'] : '#12a67a'),
+                            borderRadius: 6,
+                            maxBarThickness: 36,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: {
+                                ticks: { font: { size: 9 }, color: tema.tick },
+                                grid: { display: false },
+                            },
+                            y: {
+                                beginAtZero: true,
+                                ticks: { precision: 0, font: { size: 10 }, color: tema.tick },
+                                grid: { color: tema.grid },
+                            },
+                        },
+                    },
+                });
+            }
+
+            const status = @json($statusChart);
+            const kanvasStatus = document.getElementById('chartStatus');
+            if (kanvasStatus && status.length) {
+                new Chart(kanvasStatus, {
+                    type: 'doughnut',
+                    data: {
+                        labels: status.map(d => d.label),
+                        datasets: [{
+                            data: status.map(d => d.jml),
+                            backgroundColor: status.map(d => d.warna),
+                            borderWidth: 0,
+                            hoverOffset: 14,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '68%',
+                        plugins: { legend: legendBawah },
+                    },
+                });
+            }
+        });
+    </script>
 @endsection

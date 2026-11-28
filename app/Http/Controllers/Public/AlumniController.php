@@ -27,6 +27,7 @@ class AlumniController extends Controller
 
         $angkatanList = $alumni->pluck('tahun_lulus')->unique()->sortDesc()->values();
         $kegiatanList = $alumni->pluck('kegiatan')->filter()->unique()->values();
+        $testimoni = $alumni->filter(fn (array $a) => filled($a['testimoni']))->values();
 
         $statistik = [
             'total' => $alumni->count(),
@@ -35,6 +36,6 @@ class AlumniController extends Controller
             'bekerja' => $alumni->whereIn('kegiatan', ['Bekerja', 'Wirausaha'])->count(),
         ];
 
-        return view('pages.alumni', compact('alumni', 'angkatanList', 'kegiatanList', 'statistik'));
+        return view('pages.alumni', compact('alumni', 'angkatanList', 'kegiatanList', 'statistik', 'testimoni'));
     }
 }

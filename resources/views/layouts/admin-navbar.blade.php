@@ -10,7 +10,11 @@
         </button>
 
         <!-- Judul Panel untuk Desktop (Tersembunyi di Mobile) -->
-        <h1 class="hidden md:block text-lg font-black text-slate-900 dark:text-white">Panel Admin Pesantren
+        <h1 class="hidden md:flex items-center gap-2.5 text-lg font-black text-slate-900 dark:text-white">
+            <span class="grid h-8 w-8 place-items-center rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+                <i class="fa-solid fa-gauge-high text-sm"></i>
+            </span>
+            Panel Admin <span class="hidden font-bold text-slate-400 lg:inline dark:text-slate-500">Pesantren</span>
         </h1>
     </div>
 
@@ -29,64 +33,78 @@
         </button>
 
         <!-- Dropdown Profil Pengguna -->
+        @php
+            $avatarUrl = auth()->user()->avatar
+                ? asset('storage/' . auth()->user()->avatar)
+                : asset('assets/img/logo/logo.png');
+        @endphp
         <div x-data="{ profileOpen: false }" @click.away="profileOpen = false" class="relative">
-            <button @click="profileOpen = !profileOpen"
-                class="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center transition transform hover:scale-105 shadow-sm cursor-pointer"
-                :class="{ 'ring-2 ring-emerald-400': profileOpen }">
-                @php
-                    $avatarUrl = auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : asset('assets/img/logo/logo.png');
-                @endphp
-                <img src="{{ $avatarUrl }}" alt="Foto profil {{ auth()->user()->name }}" class="w-full h-full object-cover" onerror="this.src='{{ asset('assets/img/logo/logo.png') }}'">
-                <i class="fa-solid fa-chevron-down ml-1 text-[10px] text-slate-500 dark:text-slate-400 transition-transform duration-200"
-                   :class="profileOpen ? 'rotate-180' : ''"></i>
+            <button type="button" @click="profileOpen = !profileOpen"
+                class="group flex h-10 items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-2.5 text-slate-600 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-emerald-500/50 dark:hover:bg-slate-800 sm:h-11 sm:pr-3"
+                :class="{ 'ring-2 ring-emerald-400/60': profileOpen }"
+                :aria-expanded="profileOpen" aria-haspopup="true"
+                aria-label="Menu profil {{ auth()->user()->name }}">
+                <img src="{{ $avatarUrl }}" alt="Foto profil {{ auth()->user()->name }}"
+                    class="h-8 w-8 shrink-0 rounded-full object-cover ring-2 ring-white dark:ring-slate-700 sm:h-9 sm:w-9"
+                    onerror="this.src='{{ asset('assets/img/logo/logo.png') }}'">
+                <span class="hidden max-w-[7rem] truncate text-xs font-bold sm:inline">{{ auth()->user()->name }}</span>
+                <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
+                    :class="profileOpen ? 'rotate-180' : ''"></i>
             </button>
 
             <!-- Dropdown Menu -->
-            <div x-show="profileOpen" x-cloak
-                class="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 z-50 animate-fade-in py-2">
-                
+            <div x-show="profileOpen" x-cloak x-transition:enter="transition ease-out duration-150"
+                x-transition:enter-start="opacity-0 -translate-y-1 scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                x-transition:leave="transition ease-in duration-100"
+                x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                x-transition:leave-end="opacity-0 -translate-y-1 scale-95"
+                class="absolute right-0 z-50 mt-2 w-64 origin-top-right rounded-2xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-900/10 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/30">
+
                 <!-- Header Profil -->
-                <div class="p-4 border-b border-slate-100 dark:border-slate-800">
+                <div class="rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100/50 p-4 dark:from-emerald-950/40 dark:to-slate-800/50">
                     <div class="flex items-center gap-3">
-                        <img src="{{ $avatarUrl }}" alt="Foto profil {{ auth()->user()->name }}" class="w-10 h-10 rounded-full object-cover" onerror="this.src='{{ asset('assets/img/logo/logo.png') }}'">
-                        <div>
-                            <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ Auth::user()->name }}</h3>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400">{{ Auth::user()->email }}</p>
-                            <span class="mt-1 inline-block rounded-md bg-emerald-50 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400">
-                                {{ \App\Support\Akses::label(Auth::user()->role) }}
+                        <img src="{{ $avatarUrl }}" alt="Foto profil {{ auth()->user()->name }}"
+                            class="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-white shadow-sm dark:ring-slate-700"
+                            onerror="this.src='{{ asset('assets/img/logo/logo.png') }}'">
+                        <div class="min-w-0">
+                            <h3 class="truncate text-sm font-black text-slate-900 dark:text-white">{{ auth()->user()->name }}</h3>
+                            <p class="truncate text-[11px] text-slate-500 dark:text-slate-400">{{ auth()->user()->email }}</p>
+                            <span class="mt-1 inline-block rounded-md bg-white/80 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-emerald-700 shadow-sm dark:bg-emerald-900/40 dark:text-emerald-300">
+                                {{ \App\Support\Akses::label(auth()->user()->role) }}
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Menu Item: Setting Akun -->
-                <div class="px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Akun</div>
-                <a href="{{ route('admin.profil') }}"
-                    class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
-                    <i class="fa-solid fa-user-pen w-5 text-slate-500 dark:text-slate-400"></i>
+                <div class="px-3 pb-1 pt-3 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">Akun</div>
+                <a href="{{ route('admin.profil') }}" @click="profileOpen = false"
+                    class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-800 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white">
+                    <span class="grid h-8 w-8 place-items-center rounded-lg bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                        <i class="fa-solid fa-user-pen text-xs"></i>
+                    </span>
                     <span>Setting Akun</span>
                 </a>
 
-                <!-- Divider -->
-                <div class="px-4 py-1">
-                    <div class="h-[1px] bg-slate-200 dark:bg-slate-800 my-1"></div>
-                </div>
+                <div class="mx-3 my-1 h-px bg-slate-200 dark:bg-slate-800"></div>
 
-                <div class="px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Keamanan</div>
+                <div class="px-3 pb-1 pt-1 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">Keamanan</div>
                 <a href="#" @click.prevent="profileOpen = false; resetPasswordModal = true"
-                    class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
-                    <i class="fa-solid fa-key w-5 text-slate-500 dark:text-slate-400"></i>
+                    class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-800 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white">
+                    <span class="grid h-8 w-8 place-items-center rounded-lg bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                        <i class="fa-solid fa-key text-xs"></i>
+                    </span>
                     <span>Reset Password</span>
                 </a>
 
-                <div class="px-4 py-1">
-                    <div class="h-[1px] bg-slate-200 dark:bg-slate-800 my-1"></div>
-                </div>
+                <div class="mx-3 my-1 h-px bg-slate-200 dark:bg-slate-800"></div>
 
                 <!-- Menu Item: Logout -->
-                <button @click="logoutModalOpen = true; profileOpen = false;"
-                    class="flex items-center gap-3 px-4 py-3 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition">
-                    <i class="fa-solid fa-right-from-bracket w-5"></i>
+                <button type="button" @click="logoutModalOpen = true; profileOpen = false;"
+                    class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-rose-600 transition hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-900/20">
+                    <span class="grid h-8 w-8 place-items-center rounded-lg bg-rose-50 dark:bg-rose-900/20">
+                        <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                    </span>
                     <span>Keluar</span>
                 </button>
             </div>

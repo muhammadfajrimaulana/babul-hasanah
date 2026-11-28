@@ -59,7 +59,7 @@
                             {{ $bolehPrestasi ? 'Input Prestasi' : 'Prestasi' }}
                         </a>
                     @endif
-                    <a href="{{ route('admin.jenjang.show', $j['slug']) }}"
+                    <a href="{{ route('admin.dashboard.jenjang', ['jenjang' => $j['slug']]) }}"
                         class="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2 py-2 text-[10px] font-bold text-slate-600 transition hover:border-emerald-200 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
                         <i class="fa-solid fa-people-group"></i> Data Santri
                     </a>

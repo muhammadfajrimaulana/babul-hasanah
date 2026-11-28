@@ -10,7 +10,6 @@ use App\Models\Berita;
 use App\Models\DokumenNilai;
 use App\Models\Hafalan;
 use App\Models\Izin;
-use App\Models\Kepengurusan;
 use App\Models\MataPelajaran;
 use App\Models\NilaiSantri;
 use App\Models\Pelanggaran;
@@ -60,8 +59,18 @@ class RoleDashboardController extends Controller
         $info = $slug ? Jenjang::cari($slug) : null;
         $slug = $info['slug'] ?? null;
 
-        $nilaiSantri = $slug ? RekapJenjang::nilaiDb(Santri::class, 'jenjang_pendidikan', $slug) : [];
-        $nilaiPendaftar = $slug ? RekapJenjang::nilaiDb(PendaftaranOnline::class, 'jenjang_tujuan', $slug) : [];
+        // Satu jenjang memakai nilainya sendiri; mode agregat menggabungkan
+        // seluruh jenjang agar grafik tetap tersedia tanpa halaman terpisah.
+        $kumpulNilai = function (string $model, string $kolom) use ($slug, $tanpaJenjang) {
+            if ($slug) {
+                return RekapJenjang::nilaiDb($model, $kolom, $slug);
+            }
+
+            return $tanpaJenjang ? [] : RekapJenjang::nilaiDbSemua($model, $kolom);
+        };
+
+        $nilaiSantri = $kumpulNilai(Santri::class, 'jenjang_pendidikan');
+        $nilaiPendaftar = $kumpulNilai(PendaftaranOnline::class, 'jenjang_tujuan');
         $nilaiAlumni = $slug ? RekapJenjang::nilaiDb(Alumni::class, 'jenjang', $slug) : [];
 
         // Role global tanpa pilihan jenjang = agregat seluruh jenjang.
@@ -135,6 +144,9 @@ class RoleDashboardController extends Controller
             'tanpaJenjang' => $tanpaJenjang,
             'modeAgregat' => $slug === null && ! $tanpaJenjang,
             'rekapJenjang' => RekapJenjang::ringkasan(),
+            'kelasChart' => RekapJenjang::santriPerKelas($nilaiSantri),
+            'statusChart' => RekapJenjang::statusPendaftar($nilaiPendaftar),
+            'tautanSiap' => \App\Support\Kelulusan::siapTautan(),
             'totalSantri' => $this->hitung(Santri::class, $santri),
             'totalPendaftar' => $this->hitung(PendaftaranOnline::class, $pendaftar),
             'pendaftarMenunggu' => $this->hitung(PendaftaranOnline::class, $pendaftarMenunggu),
@@ -736,7 +748,6 @@ class RoleDashboardController extends Controller
             'pendaftarMenunggu' => $this->hitung(PendaftaranOnline::class, $menunggu),
             'totalAlumni' => $this->hitung(Alumni::class),
             'totalPrestasi' => $this->hitung(PrestasiSantri::class),
-            'totalAsatidz' => $this->hitung(Kepengurusan::class),
             'totalBerita' => $this->hitung(Berita::class, fn ($q) => $q->published()),
             'jumlahPengumuman' => $this->hitung(Pengumuman::class),
             'jenjangStats' => RekapJenjang::ringkasan(),

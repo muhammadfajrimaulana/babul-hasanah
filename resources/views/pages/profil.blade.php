@@ -5,7 +5,7 @@
 @section('content')
 
     @php
-        // $konten dan $kepengurusans disiapkan di Public\ProfilController@index.
+        // $konten disiapkan di Public\ProfilController@index.
         $kv = fn (string $key, string $default = '') => $konten[$key] ?? $default;
         $foto = $kv('sejarah_foto');
         $fotoUrl = $foto ? asset('storage/'.preg_replace('#^storage/#', '', $foto)) : null;
@@ -97,42 +97,6 @@
                         {!! nl2br(e($kv('misi'))) !!}
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- PIMPINAN & STRUKTUR -->
-    <section class="py-14 sm:py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-12">
-            <div class="max-w-2xl mx-auto space-y-3">
-                <h2 class="text-xs font-semibold text-emerald-600 uppercase tracking-widest">Kepengurusan</h2>
-                <h3 class="text-3xl font-bold text-slate-900">Pimpinan & Dewan Pengasuh</h3>
-                <p class="text-slate-600 text-sm">Dikelola oleh para ustadz dan asatidz berpengalaman lulusan pesantren
-                    terkemuka.</p>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 text-center">
-                @forelse($kepengurusans as $p)
-                    <div
-                        class="bg-slate-50 border border-slate-200/60 rounded-2xl p-6 space-y-4 hover:shadow-md transition">
-                        <div
-                            class="w-32 h-32 mx-auto bg-slate-200 rounded-full overflow-hidden flex items-center justify-center font-bold text-slate-500 text-xl shadow-inner">
-                            @if ($p->foto_url)
-                                <img src="{{ $p->foto_url }}" alt="Foto {{ $p->nama }}" class="h-full w-full object-cover">
-                            @else
-                                {{ substr($p->nama, 0, 1) }}
-                            @endif
-                        </div>
-                        <div>
-                            <h4 class="text-lg font-bold text-slate-900">{{ $p->nama }}</h4>
-                            <p class="text-xs text-emerald-600 font-semibold uppercase mt-1">{{ $p->jabatan }}</p>
-                        </div>
-                    </div>
-                @empty
-                    <div class="col-span-full py-8 text-slate-400 text-sm">
-                        Belum ada data struktur pimpinan yang ditampilkan.
-                    </div>
-                @endforelse
             </div>
         </div>
     </section>

@@ -100,7 +100,9 @@
         <label class="{{ $lb }}">Testimoni / pesan untuk pesantren</label>
         <textarea name="testimoni" rows="3" class="{{ $in }}" placeholder="Kesan dan pesan alumni tentang pesantren…">{{ $v('testimoni') }}</textarea>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Jika diisi, testimoni ini otomatis tampil pada slider <b>“Kata Alumni”</b> di halaman beranda.
+            Jika diisi, testimoni ini otomatis tampil pada
+            <a href="{{ route('alumni.index') }}" target="_blank" rel="noopener" class="font-bold text-emerald-700 hover:underline dark:text-emerald-400">halaman Alumni</a>
+            dan slider <b>“Kata Alumni”</b> di beranda. Alumni juga dapat mengubahnya sendiri lewat Portal Alumni &rarr; Profil.
         </p>
         @error('testimoni') <p class="{{ $err }}">{{ $message }}</p> @enderror
     </div>

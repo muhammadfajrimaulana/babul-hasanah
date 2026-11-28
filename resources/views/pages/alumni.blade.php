@@ -167,6 +167,75 @@
         .al .reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s cubic-bezier(.2, .7, .2, 1); }
         .al .reveal.in { opacity: 1; transform: none; }
 
+        /* ---------- HERO: catatan testimoni ---------- */
+        .al-hero-inner { display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; flex-wrap: wrap; }
+        .al-hero-copy { max-width: 680px; }
+        .al .al-hero-note {
+            display: flex; align-items: center; gap: 14px; padding: 16px 20px; border-radius: 20px;
+            background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .18);
+            backdrop-filter: blur(6px); transition: all .25s ease;
+        }
+        .al .al-hero-note:hover { background: rgba(255, 255, 255, .14); transform: translateY(-2px); }
+        .al-hero-avatars { display: flex; align-items: center; flex: none; }
+        .al-hero-avatars span {
+            width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+            font-size: 12px; font-weight: 600; color: var(--green); background: var(--cream);
+            border: 2px solid rgba(255, 255, 255, .85); margin-left: -10px; overflow: hidden;
+        }
+        .al-hero-avatars span:first-child { margin-left: 0; }
+        .al-hero-avatars img { width: 100%; height: 100%; object-fit: cover; }
+        .al-hero-note b { display: block; font-size: 12px; color: #fff; }
+        .al-hero-note small { display: block; font-size: 10.5px; color: #b9d0c4; margin-top: 2px; }
+
+        /* ---------- SPOTLIGHT TESTIMONI ---------- */
+        .al-testi { padding: 0 0 22px; scroll-margin-top: 90px; }
+        .al-testi-box {
+            position: relative; overflow: hidden; padding: 36px 40px 30px; border-radius: 32px;
+            background: linear-gradient(135deg, #fff 0%, var(--cream) 100%); border: 1px solid var(--line);
+            box-shadow: var(--shadow);
+        }
+        .al-testi-box::before {
+            content: "\f10d"; font-family: "Font Awesome 6 Free"; font-weight: 900;
+            position: absolute; right: 24px; top: -30px; font-size: 150px; color: rgba(23, 64, 47, .05); pointer-events: none;
+        }
+        .al-testi-head { position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+        .al-testi-head h2 { font-size: clamp(1.4rem, 2.4vw, 1.9rem); }
+        .al-testi-nav { display: flex; gap: 8px; }
+        .al-testi-nav button {
+            width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: #fff;
+            color: var(--green); cursor: pointer; transition: all .2s ease;
+        }
+        .al-testi-nav button:hover { background: var(--green); border-color: var(--green); color: #fff; }
+        .al-testi-stage { position: relative; min-height: 176px; margin-top: 22px; }
+        .al-testi-slide {
+            position: absolute; inset: 0; margin: 0; display: flex; flex-direction: column; gap: 14px;
+            opacity: 0; transform: translateY(10px); pointer-events: none;
+            transition: opacity .45s ease, transform .45s ease;
+        }
+        .al-testi-slide.active { position: relative; opacity: 1; transform: none; pointer-events: auto; }
+        .al-testi-slide blockquote {
+            margin: 0; max-width: 900px; font-size: clamp(15px, 2vw, 19px); line-height: 1.7;
+            color: var(--green); font-style: italic; overflow-wrap: anywhere;
+        }
+        .al-testi-person { display: flex; align-items: center; gap: 12px; }
+        .al-testi-person .ava {
+            width: 46px; height: 46px; border-radius: 50%; flex: none; display: grid; place-items: center;
+            font-size: 17px; font-weight: 600; color: var(--green); background: #fff; border: 1px solid var(--line); overflow: hidden;
+        }
+        .al-testi-person .ava img { width: 100%; height: 100%; object-fit: cover; }
+        .al-testi-person b { display: block; font-size: 13px; color: var(--green); }
+        .al-testi-person small { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+        .al-testi-dots { display: flex; gap: 7px; justify-content: center; margin-top: 18px; }
+        .al-testi-dots button {
+            width: 7px; height: 7px; border-radius: 999px; border: 0; padding: 0; cursor: pointer;
+            background: rgba(23, 64, 47, .2); transition: all .2s ease;
+        }
+        .al-testi-dots button.active { width: 22px; background: var(--green); }
+        .al-quote-mark {
+            position: absolute; z-index: 2; right: 14px; top: 14px; width: 30px; height: 30px; border-radius: 50%;
+            display: grid; place-items: center; font-size: 11px; color: var(--green); background: rgba(255, 255, 255, .92);
+        }
+
         @media (max-width: 1024px) {
             .al-grid { grid-template-columns: repeat(2, 1fr); }
             .al-stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -194,6 +263,9 @@
             .al-chip { white-space: nowrap; flex: none; }
             .al-cta-box { padding: 30px 22px; border-radius: 22px; }
             .al-btn { width: 100%; justify-content: center; }
+            .al-hero-note { width: 100%; }
+            .al-testi-box { padding: 28px 22px 24px; border-radius: 22px; }
+            .al-testi-stage { min-height: 220px; }
         }
         @media (max-width: 480px) {
             .al-stats { margin-top: -30px; }
@@ -219,9 +291,33 @@
                     <i class="fa-solid fa-chevron-right" style="font-size:9px"></i>
                     <span>Alumni</span>
                 </div>
-                <div class="eyebrow light">Jejak Alumni</div>
-                <h1>Tumbuh di sini, <span>berkarya di mana-mana.</span></h1>
-                <p class="lead">Kisah para alumni Babul Hasanah yang melanjutkan langkah — menuntut ilmu, bekerja, berwirausaha, dan mengabdi untuk umat.</p>
+                <div class="al-hero-inner">
+                    <div class="al-hero-copy">
+                        <div class="eyebrow light">Jejak Alumni</div>
+                        <h1>Tumbuh di sini, <span>berkarya di mana-mana.</span></h1>
+                        <p class="lead">Kisah para alumni Babul Hasanah yang melanjutkan langkah — menuntut ilmu, bekerja, berwirausaha, dan mengabdi untuk umat.</p>
+                    </div>
+
+                    @if ($testimoni->isNotEmpty())
+                        <a href="#testimoni" class="al-hero-note" aria-label="Baca testimoni alumni">
+                            <span class="al-hero-avatars" aria-hidden="true">
+                                @foreach ($testimoni->take(3) as $t)
+                                    <span>
+                                        @if ($t['foto'])
+                                            <img src="{{ $t['foto'] }}" alt="" loading="lazy">
+                                        @else
+                                            {{ $t['inisial'] }}
+                                        @endif
+                                    </span>
+                                @endforeach
+                            </span>
+                            <span>
+                                <b>{{ $testimoni->count() }} alumni berbagi kisah</b>
+                                <small>Baca testimoni mereka <i class="fa-solid fa-arrow-down"></i></small>
+                            </span>
+                        </a>
+                    @endif
+                </div>
             </div>
         </section>
 
@@ -236,6 +332,57 @@
                 </div>
             </div>
         </section>
+
+        {{-- SPOTLIGHT TESTIMONI --}}
+        @if ($testimoni->isNotEmpty())
+            <section class="al-testi" id="testimoni">
+                <div class="container">
+                    <div class="al-testi-box">
+                        <div class="al-testi-head">
+                            <div>
+                                <div class="eyebrow">Kata Alumni</div>
+                                <h2>Kisah mereka, inspirasi kita.</h2>
+                            </div>
+                            <div class="al-testi-nav">
+                                <button type="button" data-testi-prev aria-label="Testimoni sebelumnya"><i class="fa-solid fa-arrow-left"></i></button>
+                                <button type="button" data-testi-next aria-label="Testimoni berikutnya"><i class="fa-solid fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="al-testi-stage" aria-live="polite">
+                            @foreach ($testimoni as $i => $t)
+                                <figure class="al-testi-slide {{ $i === 0 ? 'active' : '' }}" data-testi-slide
+                                    aria-hidden="{{ $i === 0 ? 'false' : 'true' }}">
+                                    <blockquote>&ldquo;{{ $t['testimoni'] }}&rdquo;</blockquote>
+                                    <figcaption class="al-testi-person">
+                                        <span class="ava" aria-hidden="true">
+                                            @if ($t['foto'])
+                                                <img src="{{ $t['foto'] }}" alt="" loading="lazy">
+                                            @else
+                                                {{ $t['inisial'] }}
+                                            @endif
+                                        </span>
+                                        <span>
+                                            <b>{{ $t['nama'] }}</b>
+                                            <small>
+                                                {{ $t['jenjang'] ?: 'Alumni' }} · Lulus {{ $t['tahun_lulus'] }}
+                                                {{ $t['instansi'] ? '· '.$t['instansi'] : '' }}
+                                            </small>
+                                        </span>
+                                    </figcaption>
+                                </figure>
+                            @endforeach
+                        </div>
+
+                        <div class="al-testi-dots" aria-label="Navigasi testimoni">
+                            @foreach ($testimoni as $i => $t)
+                                <button type="button" data-testi-dot="{{ $i }}" class="{{ $i === 0 ? 'active' : '' }}" aria-label="Testimoni {{ $i + 1 }}"></button>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </section>
+        @endif
 
         {{-- DAFTAR ALUMNI --}}
         <section class="al-main">
@@ -266,6 +413,9 @@
                         @foreach ($kegiatanList as $kegiatan)
                             <button type="button" class="al-chip" data-keg="{{ $kegiatan }}">{{ $kegiatan }}</button>
                         @endforeach
+                        @if ($testimoni->isNotEmpty())
+                            <button type="button" class="al-chip" data-keg="testimoni"><i class="fa-solid fa-quote-left mr-1"></i>Bertestimoni</button>
+                        @endif
                     </div>
 
                     <div class="al-count">Menampilkan <b id="alShown">{{ $alumni->count() }}</b> dari {{ $alumni->count() }} alumni</div>
@@ -285,6 +435,7 @@
                         <article class="al-card"
                             data-keg="{{ $item['kegiatan'] ?? '' }}"
                             data-year="{{ $item['tahun_lulus'] }}"
+                            data-testimoni="{{ filled($item['testimoni']) ? '1' : '0' }}"
                             data-text="{{ strtolower($item['nama'] . ' ' . ($item['instansi'] ?? '') . ' ' . ($item['jenjang'] ?? '')) }}">
                             <div class="al-media">
                                 <span class="al-initials" aria-hidden="true">{{ $item['inisial'] }}</span>
@@ -295,6 +446,10 @@
 
                                 @if ($item['kegiatan'])
                                     <span class="al-badge"><i class="fa-solid {{ $ikonKegiatan }}"></i>{{ $item['kegiatan'] }}</span>
+                                @endif
+
+                                @if ($item['testimoni'])
+                                    <span class="al-quote-mark" title="Memiliki testimoni"><i class="fa-solid fa-quote-right"></i></span>
                                 @endif
 
                                 <span class="al-year">Lulus {{ $item['tahun_lulus'] }}</span>
@@ -373,7 +528,8 @@
                 let visible = 0;
 
                 cards.forEach(card => {
-                    const okKeg = activeKeg === 'all' || card.dataset.keg === activeKeg;
+                    const okKeg = activeKeg === 'all'
+                        || (activeKeg === 'testimoni' ? card.dataset.testimoni === '1' : card.dataset.keg === activeKeg);
                     const okYear = y === 'all' || card.dataset.year === y;
                     const okText = q === '' || card.dataset.text.includes(q);
                     const show = okKeg && okYear && okText;
@@ -409,6 +565,65 @@
                 el.style.transitionDelay = ((i % 3) * 70) + 'ms';
                 obs.observe(el);
             });
+
+            // Slider testimoni: manual + auto, berhenti saat disorong/fokus.
+            const slides = document.querySelectorAll('[data-testi-slide]');
+            const dots = document.querySelectorAll('[data-testi-dot]');
+            const testiBox = document.querySelector('.al-testi-box');
+            let testiIndex = 0;
+            let testiTimer = null;
+
+            function showTesti(index) {
+                if (!slides.length) return;
+                testiIndex = (index + slides.length) % slides.length;
+                slides.forEach((slide, i) => {
+                    slide.classList.toggle('active', i === testiIndex);
+                    slide.setAttribute('aria-hidden', String(i !== testiIndex));
+                });
+                dots.forEach((dot, i) => dot.classList.toggle('active', i === testiIndex));
+            }
+
+            function stopTesti() {
+                if (testiTimer) {
+                    clearInterval(testiTimer);
+                    testiTimer = null;
+                }
+            }
+
+            function startTesti() {
+                stopTesti();
+                if (slides.length < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+                testiTimer = setInterval(() => showTesti(testiIndex + 1), 7000);
+            }
+
+            document.querySelector('[data-testi-prev]')?.addEventListener('click', () => { showTesti(testiIndex - 1); startTesti(); });
+            document.querySelector('[data-testi-next]')?.addEventListener('click', () => { showTesti(testiIndex + 1); startTesti(); });
+            dots.forEach(dot => dot.addEventListener('click', () => { showTesti(Number(dot.dataset.testiDot)); startTesti(); }));
+
+            if (testiBox) {
+                testiBox.addEventListener('mouseenter', stopTesti);
+                testiBox.addEventListener('mouseleave', startTesti);
+                testiBox.addEventListener('focusin', stopTesti);
+                testiBox.addEventListener('focusout', startTesti);
+            }
+            startTesti();
+
+            // Animasi angka statistik.
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelectorAll('.al-stat b[data-count]').forEach(el => {
+                    const target = Number(el.dataset.count) || 0;
+                    if (!target) return;
+                    el.textContent = '0';
+                    let start = null;
+                    const step = ts => {
+                        if (start === null) start = ts;
+                        const p = Math.min((ts - start) / 900, 1);
+                        el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+                        if (p < 1) requestAnimationFrame(step);
+                    };
+                    requestAnimationFrame(step);
+                });
+            }
         });
     </script>
 @endsection

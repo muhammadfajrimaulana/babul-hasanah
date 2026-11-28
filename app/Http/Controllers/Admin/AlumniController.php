@@ -376,6 +376,10 @@ class AlumniController extends Controller
 
         if ($tautanSiap) {
             $alumni->loadMissing('santri');
+
+            if ($alumni->santri) {
+                $alumni->santri->loadMissing('dokumen');
+            }
         }
 
         if ($akunSiap) {
@@ -384,7 +388,6 @@ class AlumniController extends Controller
 
         return view('dashboard.alumni.show', [
             'alumni' => $alumni,
-            'nilaiSiap' => Alumni::siapNilai(),
             'tautanSiap' => $tautanSiap,
             'akunSiap' => $akunSiap,
             'akunAlumni' => $akunSiap ? $alumni->user : null,

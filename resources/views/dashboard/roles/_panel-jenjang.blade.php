@@ -32,7 +32,7 @@
             'nilai' => number_format($totalSantri ?? 0, 0, ',', '.'),
             'sub' => $jenjang['nama'] ?? 'Seluruh jenjang',
             'ikon' => 'fa-people-group',
-            'href' => $jenjang ? route('admin.jenjang.show', $jenjang['slug']) : route('admin.santri.index'),
+            'href' => $jenjang ? route('admin.dashboard.jenjang', ['jenjang' => $jenjang['slug']]) : route('admin.santri.index'),
         ])
         @include('dashboard.roles._stat', [
             'label' => 'Pendaftar',

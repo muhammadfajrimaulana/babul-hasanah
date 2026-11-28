@@ -164,9 +164,11 @@ class AlumniPortalController extends Controller
     public function profil(Request $request)
     {
         $alumni = $this->alumni($request);
+        $tracer = TracerStudy::firstOrNew(['alumni_id' => $alumni->id]);
 
         return view('alumni.profil', [
             'alumni' => $alumni,
+            'tracer' => $tracer,
             'kegiatan' => Alumni::KEGIATAN,
         ]);
     }
@@ -183,25 +185,54 @@ class AlumniPortalController extends Controller
             'kegiatan' => ['nullable', Rule::in(Alumni::KEGIATAN)],
             'instansi' => ['nullable', 'string', 'max:255'],
             'pekerjaan' => ['nullable', 'string', 'max:150'],
+            'testimoni' => ['nullable', 'string', 'max:1000'],
+            'kontak' => ['nullable', 'string', 'max:100'],
+            'tahun_mulai' => ['nullable', 'integer', 'min:1900', 'max:'.(date('Y') + 1)],
+            'catatan' => ['nullable', 'string', 'max:2000'],
         ], [
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email ini sudah dipakai akun lain.',
             'kegiatan.in' => 'Pilihan kegiatan tidak dikenali.',
+            'testimoni.max' => 'Testimoni maksimal 1000 karakter.',
+            'kontak.max' => 'Kontak maksimal 100 karakter.',
+            'tahun_mulai.integer' => 'Tahun mulai harus berupa angka.',
+            'catatan.max' => 'Catatan maksimal 2000 karakter.',
         ]);
 
-        $alumni->update($data);
+        $alumni->update([
+            'no_hp' => $data['no_hp'] ?? null,
+            'email' => $data['email'] ?? null,
+            'alamat' => $data['alamat'] ?? null,
+            'kegiatan' => $data['kegiatan'] ?? null,
+            'instansi' => $data['instansi'] ?? null,
+            'pekerjaan' => $data['pekerjaan'] ?? null,
+            'testimoni' => $data['testimoni'] ?? null,
+        ]);
 
         // Sinkronkan email akun agar bisa dipakai login berikutnya.
         if (! empty($data['email']) && $data['email'] !== $user->email) {
             $user->update(['email' => $data['email']]);
         }
 
+        // Tracer study kini disimpan dari satu form yang sama dengan profil.
+        // Kegiatan, instansi, dan alamat memakai nilai profil yang sudah disimpan.
+        $tracer = TracerStudy::updateOrCreate(['alumni_id' => $alumni->id], [
+            'kegiatan' => $data['kegiatan'] ?? null,
+            'instansi' => $data['instansi'] ?? null,
+            'alamat' => $data['alamat'] ?? null,
+            'kontak' => $data['kontak'] ?? null,
+            'tahun_mulai' => $data['tahun_mulai'] ?? null,
+            'catatan' => $data['catatan'] ?? null,
+        ]);
+
         CatatanAktivitas::catat('alumni_update_profil', $alumni, [
             'kegiatan' => $alumni->kegiatan,
             'instansi' => $alumni->instansi,
+            'testimoni' => filled($alumni->testimoni) ? 'diisi' : 'kosong',
+            'tracer' => filled($tracer->kegiatan) ? 'diisi' : 'kosong',
         ]);
 
-        return back()->with('success', 'Data diri berhasil diperbarui. Riwayat akademik tetap terkunci.');
+        return back()->with('success', 'Profil, tracer study, dan testimoni berhasil diperbarui. Riwayat akademik tetap terkunci.');
     }
 
     public function dokumen(Request $request)
@@ -237,50 +268,6 @@ class AlumniPortalController extends Controller
             $dokumen->file_path,
             $dokumen->file_name ?: $dokumen->jenis.'.pdf'
         );
-    }
-
-    public function tracer(Request $request)
-    {
-        $alumni = $this->alumni($request);
-        $tracer = TracerStudy::firstOrNew(['alumni_id' => $alumni->id]);
-
-        return view('alumni.tracer', [
-            'alumni' => $alumni,
-            'tracer' => $tracer,
-            'kegiatan' => Alumni::KEGIATAN,
-        ]);
-    }
-
-    public function updateTracer(Request $request)
-    {
-        $alumni = $this->alumni($request);
-
-        $data = $request->validate([
-            'kegiatan' => ['required', Rule::in(Alumni::KEGIATAN)],
-            'instansi' => ['nullable', 'string', 'max:255'],
-            'alamat' => ['nullable', 'string', 'max:1000'],
-            'kontak' => ['nullable', 'string', 'max:100'],
-            'tahun_mulai' => ['nullable', 'integer', 'min:1900', 'max:'.(date('Y') + 1)],
-            'catatan' => ['nullable', 'string', 'max:2000'],
-        ], [
-            'kegiatan.required' => 'Pilih kegiatan saat ini (kuliah/bekerja/dll).',
-        ]);
-
-        TracerStudy::updateOrCreate(['alumni_id' => $alumni->id], $data);
-
-        // Data tracer juga dipakai untuk akreditasi yayasan.
-        $alumni->update([
-            'kegiatan' => $data['kegiatan'],
-            'instansi' => $data['instansi'] ?? null,
-            'alamat' => $data['alamat'] ?? $alumni->alamat,
-        ]);
-
-        CatatanAktivitas::catat('alumni_update_tracer', $alumni, [
-            'kegiatan' => $data['kegiatan'],
-            'instansi' => $data['instansi'] ?? null,
-        ]);
-
-        return back()->with('success', 'Tracer study berhasil disimpan. Terima kasih atas pembaruannya.');
     }
 
     public function legalisir(Request $request)

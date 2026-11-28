@@ -15,7 +15,6 @@
 
     $akademikAktif = request()->routeIs('admin.akademik.*');
     $prestasiAktif = request()->routeIs('admin.prestasi.*') || request()->routeIs('admin.dashboard.jenjang.prestasi.form');
-    $jenjangAktif = request()->routeIs('admin.jenjang.*');
 
     $itemClass = fn(bool $active) => 'sb-item' . ($active ? ' sb-on' : '');
     $subClass = fn(bool $active) => 'sb-sub' . ($active ? ' sb-on' : '');
@@ -23,7 +22,6 @@
     $grupData = $u?->bisa('pendaftaran.lihat') || $u?->bisa('santri.lihat') || $u?->bisa('alumni.lihat');
     $grupAkademik = $u?->bisa('akademik.lihat') || $u?->bisa('prestasi.lihat');
     $grupKonten =
-        $u?->bisa('jenjang.lihat') ||
         $u?->bisa('berita') ||
         $u?->bisa('galeri') ||
         $u?->bisa('info') ||
@@ -500,57 +498,6 @@
                 <div class="sb-hr"></div>
             </div>
 
-            @if ($u?->bisa('jenjang.lihat'))
-                @php
-                    $jenjangSendiri = \App\Support\Akses::jenjangInfo($u);
-                @endphp
-
-                @if ($jenjangSendiri)
-                    {{-- Admin Jenjang: satu jenjang saja, tanpa daftar 7 jenjang. --}}
-                    <a href="{{ route('admin.jenjang.show', $jenjangSendiri['slug']) }}" @click="sidebarOpen = false"
-                        class="{{ $itemClass($jenjangAktif) }}"
-                        @if ($jenjangAktif) aria-current="page" @endif
-                        title="Jenjang {{ $jenjangSendiri['nama'] }}">
-                        <i class="fa-solid fa-layer-group"></i>
-                        <span x-show="!sidebarMinimize" class="truncate whitespace-nowrap">Jenjang
-                            {{ $jenjangSendiri['kode'] }}</span>
-                        <span class="sb-dot" x-show="!sidebarMinimize" aria-hidden="true"></span>
-                    </a>
-                @else
-                    <div x-data="{ jenjangOpen: {{ $jenjangAktif ? 'true' : 'false' }} }">
-                        <div class="{{ $itemClass($jenjangAktif) }} sb-parent">
-                            <a href="{{ route('admin.jenjang.index') }}" @click="sidebarOpen = false"
-                                class="flex min-w-0 flex-1 items-center gap-3 outline-none" title="Jenjang">
-                                <i class="fa-solid fa-layer-group"></i>
-                                <span x-show="!sidebarMinimize" class="truncate whitespace-nowrap">Jenjang</span>
-                            </a>
-                            <button type="button" x-show="!sidebarMinimize" @click="jenjangOpen = !jenjangOpen"
-                                :aria-expanded="jenjangOpen" aria-label="Buka daftar jenjang"
-                                class="sb-chevron grid h-7 w-7 shrink-0 place-items-center rounded-lg text-emerald-100/60 transition">
-                                <i class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200"
-                                    :class="jenjangOpen && 'rotate-180'"></i>
-                            </button>
-                        </div>
-
-                        <div x-show="jenjangOpen && !sidebarMinimize" x-transition.opacity.duration.150ms
-                            class="mb-1 ml-4 mt-1 space-y-0.5 border-l border-white/10 pl-2">
-                            @foreach (\App\Support\Jenjang::semua() as $j)
-                                @php
-                                    $aktifJenjang =
-                                        request()->routeIs('admin.jenjang.show') &&
-                                        request()->route('jenjang') === $j['slug'];
-                                @endphp
-                                <a href="{{ route('admin.jenjang.show', $j['slug']) }}" @click="sidebarOpen = false"
-                                    class="{{ $subClass($aktifJenjang) }}">
-                                    <span class="h-1.5 w-1.5 shrink-0 rounded-full" style="background: {{ $j['warna'] }}"></span>
-                                    <span class="truncate">{{ $j['kode'] }}</span>
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-            @endif
-
             @if ($u?->bisa('berita'))
                 <a href="{{ route('admin.berita.index') }}" @click="sidebarOpen = false"
                     class="{{ $itemClass(request()->routeIs('admin.berita.*')) }}"
@@ -587,13 +534,6 @@
                     @if (request()->routeIs('admin.struktur.*')) aria-current="page" @endif title="Struktur">
                     <i class="fa-solid fa-sitemap"></i>
                     <span x-show="!sidebarMinimize" class="truncate whitespace-nowrap">Struktur</span>
-                    <span class="sb-dot" x-show="!sidebarMinimize" aria-hidden="true"></span>
-                </a>
-                <a href="{{ route('admin.kepengurusan.index') }}" @click="sidebarOpen = false"
-                    class="{{ $itemClass(request()->routeIs('admin.kepengurusan.*')) }}"
-                    @if (request()->routeIs('admin.kepengurusan.*')) aria-current="page" @endif title="Kepengurusan">
-                    <i class="fa-solid fa-users-gear"></i>
-                    <span x-show="!sidebarMinimize" class="truncate whitespace-nowrap">Kepengurusan</span>
                     <span class="sb-dot" x-show="!sidebarMinimize" aria-hidden="true"></span>
                 </a>
             @endif

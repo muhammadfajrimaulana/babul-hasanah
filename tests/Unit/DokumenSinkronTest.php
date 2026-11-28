@@ -60,14 +60,14 @@ class DokumenSinkronTest extends TestCase
     {
         $expected = [
             '03-database.md' => [
-                '50',
+                '53',
                 '2026_11_28_000005_tambah_soft_deletes_santri',
                 'jenis_kelamin',
                 'KodeUnik',
             ],
             '05-backend.md' => [
                 'GoogleLoginController',
-                'KepengurusanController',
+                'KurikulumController',
                 'RaporController',
                 'ImportSantri',
                 'KodeUnik',

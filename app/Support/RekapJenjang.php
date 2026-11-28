@@ -73,6 +73,32 @@ class RekapJenjang
         }
     }
 
+    /**
+     * Semua nilai jenjang yang dikenal, untuk tampilan gabungan (tanpa filter).
+     *
+     * @return array<int, string>
+     */
+    public static function nilaiDbSemua(string $model, string $kolom): array
+    {
+        if (! self::siap($model)) {
+            return [];
+        }
+
+        try {
+            return $model::query()
+                ->whereNotNull($kolom)
+                ->distinct()
+                ->pluck($kolom)
+                ->map(fn ($nilai) => Jenjang::normalisasi($nilai))
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
     /** @return array<int, array{label: string, jml: int}> */
     public static function santriPerKelas(array $nilaiJenjang): array
     {

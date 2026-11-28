@@ -39,6 +39,11 @@
             --rose-soft: #fff1f2;
             --shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.06);
             --shadow-lg: 0 20px 40px -10px rgba(15, 23, 42, 0.10);
+            /* Warna teks di atas aksen; aksen terang saat dark butuh teks gelap. */
+            --on-accent: #ffffff;
+            --on-blue: #ffffff;
+            --on-gold: #ffffff;
+            --on-rose: #ffffff;
         }
 
         .dark {
@@ -58,6 +63,10 @@
             --rose-soft: #490d14;
             --shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.4);
             --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+            --on-accent: #052e16;
+            --on-blue: #0c1e3f;
+            --on-gold: #2a1200;
+            --on-rose: #3f0413;
         }
 
         * {
@@ -244,7 +253,7 @@
             display: grid;
             place-items: center;
             font-size: 14px;
-            color: #fff;
+            color: var(--on-accent);
             flex-shrink: 0;
             background: var(--accent);
             box-shadow: 0 4px 12px -2px rgba(18, 166, 122, 0.35);
@@ -252,16 +261,19 @@
 
         .db-stat-blue .db-stat-ico {
             background: var(--blue);
+            color: var(--on-blue);
             box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.35);
         }
 
         .db-stat-gold .db-stat-ico {
             background: var(--gold);
+            color: var(--on-gold);
             box-shadow: 0 4px 12px -2px rgba(180, 83, 9, 0.35);
         }
 
         .db-stat-rose .db-stat-ico {
             background: var(--rose);
+            color: var(--on-rose);
             box-shadow: 0 4px 12px -2px rgba(225, 29, 72, 0.35);
         }
 
@@ -571,10 +583,6 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        .dark .db-cal-header {
-            background: var(--ink);
-        }
-
         .db-cal-title {
             display: flex;
             align-items: center;
@@ -670,7 +678,7 @@
 
         .db-cal-day.today {
             background: var(--accent);
-            color: #fff;
+            color: var(--on-accent);
             border-color: var(--accent);
         }
 
@@ -731,7 +739,7 @@
             font-size: 12px;
             font-weight: 600;
             background: var(--ink);
-            color: #fff;
+            color: var(--surface);
             border: none;
             padding: 8px 14px;
             border-radius: 10px;
@@ -741,6 +749,7 @@
 
         .db-cal-add-btn:hover {
             background: var(--accent);
+            color: var(--on-accent);
         }
 
         /* ===================== EVENT LIST ===================== */
@@ -1451,14 +1460,14 @@
             padding: 0 3px;
             border-radius: 999px;
             background: var(--accent);
-            color: #fff;
+            color: var(--on-accent);
             font-size: 8px;
             font-weight: 800;
             line-height: 1;
         }
 
         .db-cal-day.selected .day-count {
-            background: #fff;
+            background: var(--surface);
             color: var(--ink);
         }
 
@@ -1886,7 +1895,7 @@
 
         .db-note-add:hover {
             background: var(--accent);
-            color: #fff;
+            color: var(--on-accent);
         }
 
         .db-event-item {
@@ -2024,7 +2033,7 @@
             padding: 0 3px;
             border-radius: 999px;
             background: var(--rose);
-            color: #fff;
+            color: var(--on-rose);
             font-size: 8px;
             font-weight: 800;
             line-height: 1;
@@ -2201,7 +2210,7 @@
             padding: 0 4px;
             border-radius: 999px;
             background: var(--rose);
-            color: #fff;
+            color: var(--on-rose);
             font-size: 9px;
             font-weight: 800;
             line-height: 1;
@@ -2475,20 +2484,20 @@
                 @php
                     if ($s[3] === 'accent') {
                         $badgeClass = 'db-stat-accent';
-                        $icoColor = '#12a67a';
-                        $icoTextColor = '#fff';
+                        $icoColor = 'var(--accent)';
+                        $icoTextColor = 'var(--on-accent)';
                     } elseif ($s[3] === 'blue') {
                         $badgeClass = 'db-stat-blue';
-                        $icoColor = '#ffffff';
-                        $icoTextColor = '#2563eb';
+                        $icoColor = 'var(--blue)';
+                        $icoTextColor = 'var(--on-blue)';
                     } elseif ($s[3] === 'gold') {
                         $badgeClass = 'db-stat-gold';
-                        $icoColor = '#b45309';
-                        $icoTextColor = '#fff';
+                        $icoColor = 'var(--gold)';
+                        $icoTextColor = 'var(--on-gold)';
                     } else {
                         $badgeClass = 'db-stat-rose';
-                        $icoColor = '#e11d48';
-                        $icoTextColor = '#fff';
+                        $icoColor = 'var(--rose)';
+                        $icoTextColor = 'var(--on-rose)';
                     }
                 @endphp
                 <div class="db-stat {{ $badgeClass }}">
@@ -2602,13 +2611,13 @@
                                 </p>
                             </div>
                         </div>
-                        <a href="{{ $ada('admin.jenjang.index') }}" class="db-panel-link">Kelola jenjang <i
+                        <a href="{{ $ada('admin.dashboard.jenjang') }}" class="db-panel-link">Dashboard jenjang <i
                                 class="fa-solid fa-arrow-right"></i></a>
                     </div>
                     <div class="db-panel-body">
                         <div class="db-jenjang-strip">
                             @foreach ($jenjangStats as $j)
-                                <a href="{{ route('admin.jenjang.show', $j['slug']) }}" class="db-jenjang-mini"
+                                <a href="{{ route('admin.dashboard.jenjang', ['jenjang' => $j['slug']]) }}" class="db-jenjang-mini"
                                     title="{{ $j['nama'] }}">
                                     <span class="dot" style="background: {{ $j['warna'] }}"></span>
                                     <span class="kode">{{ $j['kode'] }}</span>
@@ -2750,7 +2759,7 @@
                                     <span class="day-num" x-text="i"></span>
                                     <span class="day-mark" x-show="jumlahCatatan(i) > 0" aria-hidden="true">
                                         <i class="fa-solid fa-note-sticky"
-                                            :style="'color:' + (warnaHari(i)[0] || '#12a67a')"></i>
+                                            :style="'color:' + warnaTampil(warnaHari(i)[0] || '#12a67a')"></i>
                                     </span>
                                     <span class="day-plus" x-show="jumlahCatatan(i) === 0" aria-hidden="true">
                                         <i class="fa-solid fa-plus"></i>
@@ -2762,10 +2771,10 @@
                     </div>
 
                     <div class="db-cal-legend">
-                        <span><i style="background:#12a67a"></i> Jadwal</span>
-                        <span><i style="background:#b45309"></i> Agenda</span>
-                        <span><i style="background:#2563eb"></i> Pengumuman</span>
-                        <span><i style="background:#e11d48"></i> Libur</span>
+                        <span><i :style="'background:' + warnaTampil('#12a67a')"></i> Jadwal</span>
+                        <span><i :style="'background:' + warnaTampil('#b45309')"></i> Agenda</span>
+                        <span><i :style="'background:' + warnaTampil('#2563eb')"></i> Pengumuman</span>
+                        <span><i :style="'background:' + warnaTampil('#e11d48')"></i> Libur</span>
                     </div>
 
                     <div class="db-cal-add">
@@ -2792,7 +2801,7 @@
                 <div class="mt-4">
                     <div class="db-panel-header" style="border-bottom: none; padding: 0;">
                         <div class="db-panel-left">
-                            <span class="db-panel-ico" style="background: var(--ink)"><i
+                            <span class="db-panel-ico" style="background: var(--ink); color: var(--surface)"><i
                                     class="fa-solid fa-list-check"></i></span>
                             <div>
                                 <h3 class="db-panel-title">Kegiatan Mendatang</h3>
@@ -2811,7 +2820,7 @@
                             <template x-for="ev in agendaMendatang" :key="ev.id">
                                 <button type="button" class="db-event-item" @click="bukaTanggal(ev.date)">
                                     <div class="db-event-ico"
-                                        :style="'background:' + hexSoft(ev.color) + '; color:' + ev.color">
+                                        :style="'background:' + hexSoft(ev.color) + '; color:' + warnaTampil(ev.color)">
                                         <i class="fa-solid" :class="ev.editable ? 'fa-note-sticky' : 'fa-calendar-day'"></i>
                                     </div>
                                     <div class="db-event-content">
@@ -2871,7 +2880,7 @@
                                                 <p class="db-note-desc" x-show="note.desc" x-text="note.desc"></p>
                                                 <div class="db-note-meta">
                                                     <span class="tag"
-                                                        :style="'background:' + hexSoft(note.color) + '; color:' + note.color">
+                                                        :style="'background:' + hexSoft(note.color) + '; color:' + warnaTampil(note.color)">
                                                         <i class="fa-solid fa-tag"></i><span x-text="note.category"></span>
                                                     </span>
                                                     <span><i class="fa-regular fa-clock"></i> <span
@@ -2900,7 +2909,7 @@
                                     <i class="fa-solid fa-plus"></i> Tambah catatan di tanggal ini
                                 </button>
 
-                                <p class="mt-3 text-center text-[9px] text-slate-400">
+                                <p class="mt-3 text-center text-[9px] text-slate-500 dark:text-slate-400">
                                     <i class="fa-solid fa-lock"></i> Catatan tersimpan di perangkat ini.
                                 </p>
                             </div>
@@ -2999,6 +3008,7 @@
                 return {
                     tanggal: new Date(),
                     dipilih: null,
+                    temaGelap: window.bacaDarkMode(),
                     modalOpen: false,
                     formMode: null,
                     events: [],
@@ -3013,6 +3023,10 @@
                     },
 
                     init() {
+                        window.addEventListener('tema-diubah', (e) => {
+                            this.temaGelap = Boolean(e.detail);
+                        });
+
                         this.events = (serverEvents || []).map((e, i) => ({
                             id: 'info-' + i,
                             title: e.title || 'Kegiatan',
@@ -3304,9 +3318,20 @@
                         }) : (dateStr || '-');
                     },
 
+                    /* Warna event yang disimpan tetap gelap; saat dark dipetakan ke versi terang. */
+                    warnaTampil(color) {
+                        const gelap = typeof this.temaGelap === 'boolean'
+                            ? this.temaGelap
+                            : document.documentElement.classList.contains('dark');
+
+                        return warnaEvent(color, gelap);
+                    },
+
                     hexSoft(color) {
-                        return /^#[0-9a-f]{6}$/i.test(String(color || '')) ? color + '20' :
-                            'rgba(100,116,139,.15)';
+                        const c = this.warnaTampil(color);
+
+                        return /^#[0-9a-f]{6}$/i.test(String(c || '')) ? c + '20' :
+                            'rgba(148,163,184,.18)';
                     },
 
                     warnaKategori(k) {
@@ -3350,9 +3375,64 @@
                 return nama || '-';
             };
 
+            /* Pemetaan warna gelap -> terang, dipakai Alpine dan Chart.js. */
+            const petaWarnaTerang = {
+                '#2563eb': '#60a5fa',
+                '#12a67a': '#34d399',
+                '#b45309': '#fbbf24',
+                '#e11d48': '#fb7185',
+                '#8b5cc6': '#c4b5fd',
+                '#0e9f8e': '#2dd4bf',
+                '#17402f': '#6ee7b7',
+                '#b08d3e': '#fcd34d',
+                '#9cb49d': '#cbd5e1',
+                '#0e8a66': '#34d399',
+            };
+
+            const warnaEvent = (color, gelap) => {
+                if (!gelap) return color;
+
+                return petaWarnaTerang[String(color || '').toLowerCase()] || color;
+            };
+
+            /* Warna teks/grid grafik mengikuti tema yang aktif sejak first paint. */
+            const warnaGrafik = () => {
+                let gelap = document.documentElement.classList.contains('dark');
+
+                if (!gelap) {
+                    try {
+                        gelap = localStorage.getItem('darkMode') === 'true';
+                    } catch (e) {
+                        gelap = false;
+                    }
+                }
+
+                return {
+                    gelap,
+                    tick: gelap ? '#94a3b8' : '#64748b',
+                    grid: gelap ? '#334155' : '#f1f5f9',
+                    legend: gelap ? '#cbd5e1' : '#334155',
+                };
+            };
+
+            const grafikDashboard = [];
+
+            const buatGrafik = (ctx, config) => {
+                (config.data.datasets || []).forEach((dataset) => {
+                    dataset._warnaAsli = Array.isArray(dataset.backgroundColor) ?
+                        dataset.backgroundColor.slice() : dataset.backgroundColor;
+                });
+
+                const chart = new Chart(ctx, config);
+                grafikDashboard.push(chart);
+
+                return chart;
+            };
+
             const legendChart = () => ({
                 position: 'bottom',
                 labels: {
+                    color: warnaGrafik().legend,
                     boxWidth: 8,
                     padding: chartMobile ? 6 : 12,
                     usePointStyle: true,
@@ -3367,14 +3447,14 @@
             const ctxJenjang = document.getElementById('chartJenjang');
             if (ctxJenjang) {
                 const dataJenjang = @json($jenjangStats);
-                new Chart(ctxJenjang, {
+                buatGrafik(ctxJenjang, {
                     type: 'bar',
                     data: {
                         labels: dataJenjang.map(d => d.kode),
                         datasets: [{
                             label: 'Pendaftar',
                             data: dataJenjang.map(d => d.pendaftar),
-                            backgroundColor: dataJenjang.map(d => d.warna),
+                            backgroundColor: dataJenjang.map(d => warnaEvent(d.warna, warnaGrafik().gelap)),
                             borderRadius: 5,
                             maxBarThickness: chartMobile ? 14 : 18,
                         }]
@@ -3411,10 +3491,10 @@
                                     font: {
                                         size: 9
                                     },
-                                    color: '#64748b'
+                                    color: warnaGrafik().tick
                                 },
                                 grid: {
-                                    color: '#f1f5f9'
+                                    color: warnaGrafik().grid
                                 }
                             },
                             y: {
@@ -3422,7 +3502,7 @@
                                     font: {
                                         size: chartMobile ? 8.5 : 9.5
                                     },
-                                    color: '#64748b',
+                                    color: warnaGrafik().tick,
                                     autoSkip: false
                                 },
                                 grid: {
@@ -3438,10 +3518,10 @@
             const ctxSantri = document.getElementById('chartSantri');
             if (ctxSantri) {
                 const dataSantri = @json($santriPerJenjang);
-                const warnaSantri = dataSantri.map((d, i) => ['#17402f', '#b08d3e', '#2563eb', '#12a67a', '#e11d48', '#0e9f8e',
-                    '#9cb49d'
-                ][i % 7]);
-                new Chart(ctxSantri, {
+                const warnaSantri = dataSantri.map((d, i) => warnaEvent([
+                    '#17402f', '#b08d3e', '#2563eb', '#12a67a', '#e11d48', '#0e9f8e', '#9cb49d'
+                ][i % 7], warnaGrafik().gelap));
+                buatGrafik(ctxSantri, {
                     type: 'doughnut',
                     data: {
                         labels: dataSantri.map(d => singkatJenjang(d.jenjang)),
@@ -3478,10 +3558,10 @@
             const ctxAlumni = document.getElementById('chartAlumni');
             if (ctxAlumni) {
                 const dataAlumni = @json($alumniPerJenjang);
-                const warnaAlumni = dataAlumni.map((d, i) => ['#b45309', '#e11d48', '#12a67a', '#2563eb', '#8b5cc6', '#0e9f8e',
-                    '#9cb49d'
-                ][i % 7]);
-                new Chart(ctxAlumni, {
+                const warnaAlumni = dataAlumni.map((d, i) => warnaEvent([
+                    '#b45309', '#e11d48', '#12a67a', '#2563eb', '#8b5cc6', '#0e9f8e', '#9cb49d'
+                ][i % 7], warnaGrafik().gelap));
+                buatGrafik(ctxAlumni, {
                     type: 'doughnut',
                     data: {
                         labels: dataAlumni.map(d => singkatJenjang(d.jenjang)),
@@ -3518,28 +3598,28 @@
             const ctxDataJenjang = document.getElementById('chartDataJenjang');
             if (ctxDataJenjang) {
                 const dataJenjangAll = @json($jenjangStats);
-                new Chart(ctxDataJenjang, {
+                buatGrafik(ctxDataJenjang, {
                     type: 'bar',
                     data: {
                         labels: dataJenjangAll.map(d => d.kode),
                         datasets: [{
                                 label: 'Santri',
                                 data: dataJenjangAll.map(d => d.santri),
-                                backgroundColor: '#12a67a',
+                                backgroundColor: warnaEvent('#12a67a', warnaGrafik().gelap),
                                 borderRadius: 5,
                                 maxBarThickness: chartMobile ? 8 : 14,
                             },
                             {
                                 label: 'Pendaftar',
                                 data: dataJenjangAll.map(d => d.pendaftar),
-                                backgroundColor: '#2563eb',
+                                backgroundColor: warnaEvent('#2563eb', warnaGrafik().gelap),
                                 borderRadius: 5,
                                 maxBarThickness: chartMobile ? 8 : 14,
                             },
                             {
                                 label: 'Alumni',
                                 data: dataJenjangAll.map(d => d.alumni),
-                                backgroundColor: '#b45309',
+                                backgroundColor: warnaEvent('#b45309', warnaGrafik().gelap),
                                 borderRadius: 5,
                                 maxBarThickness: chartMobile ? 8 : 14,
                             },
@@ -3573,10 +3653,10 @@
                                     font: {
                                         size: 9
                                     },
-                                    color: '#64748b'
+                                    color: warnaGrafik().tick
                                 },
                                 grid: {
-                                    color: '#f1f5f9'
+                                    color: warnaGrafik().grid
                                 }
                             },
                             y: {
@@ -3584,7 +3664,7 @@
                                     font: {
                                         size: chartMobile ? 8.5 : 9.5
                                     },
-                                    color: '#64748b',
+                                    color: warnaGrafik().tick,
                                     autoSkip: false
                                 },
                                 grid: {
@@ -3593,6 +3673,39 @@
                             }
                         }
                     }
+                });
+            }
+
+            /* Tombol dark mode mengganti kelas <html>: perbarui grafik tanpa reload. */
+            if (window.MutationObserver) {
+                new MutationObserver(() => {
+                    const w = warnaGrafik();
+
+                    grafikDashboard.forEach((chart) => {
+                        const scales = chart.options.scales || {};
+
+                        Object.values(scales).forEach((scale) => {
+                            if (scale.ticks) scale.ticks.color = w.tick;
+                            if (scale.grid) scale.grid.color = w.grid;
+                        });
+
+                        const legend = chart.options.plugins && chart.options.plugins.legend;
+                        if (legend && legend.labels) legend.labels.color = w.legend;
+
+                        (chart.data.datasets || []).forEach((dataset) => {
+                            const asli = dataset._warnaAsli;
+
+                            if (asli === undefined) return;
+
+                            dataset.backgroundColor = Array.isArray(asli) ?
+                                asli.map((c) => warnaEvent(c, w.gelap)) : warnaEvent(asli, w.gelap);
+                        });
+
+                        chart.update('none');
+                    });
+                }).observe(document.documentElement, {
+                    attributes: true,
+                    attributeFilter: ['class']
                 });
             }
 

@@ -6,8 +6,9 @@
     @php
         $v = fn ($value) => filled($value) ? $value : '-';
         $labelCls = 'font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[10px] mb-1';
-        $boxCls = 'bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800/80';
+        $boxCls = 'bg-slate-50/80 dark:bg-slate-800/40 p-3 rounded-xl';
         $cardCls = 'bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 shadow-sm';
+        $iconCls = 'w-10 h-10 rounded-2xl flex items-center justify-center font-bold shrink-0';
         $bisaUbah = auth()->user()->bisa('alumni.ubah');
     @endphp
 
@@ -77,11 +78,27 @@
             </div>
         </div>
 
+        <!-- LOMPATAN CEPAT -->
+        <div class="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200/80 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
+            <span class="mr-1 text-[10px] font-black uppercase tracking-wider text-slate-400">Lompat ke</span>
+            @foreach ([
+                '#data-diri' => 'Data Diri',
+                '#kontak' => 'Kontak',
+                '#akun' => 'Akun',
+                '#dokumen' => 'Dokumen & Nilai',
+            ] as $target => $label)
+                <a href="{{ $target }}"
+                    class="rounded-full border border-slate-200 px-3 py-1.5 text-[10px] font-bold text-slate-600 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:text-slate-300 dark:hover:border-emerald-500/40 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300">
+                    {{ $label }}
+                </a>
+            @endforeach
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- DATA PRIBADI & AKADEMIK -->
-            <div class="{{ $cardCls }}">
+            <div class="{{ $cardCls }} scroll-mt-24" id="data-diri">
                 <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
-                    <div class="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+                    <div class="{{ $iconCls }} bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                         <i class="fa-solid fa-id-card"></i>
                     </div>
                     <div>
@@ -154,9 +171,9 @@
             </div>
 
             <!-- KONTAK & DOMISILI -->
-            <div class="{{ $cardCls }}">
+            <div class="{{ $cardCls }} scroll-mt-24" id="kontak">
                 <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
-                    <div class="w-10 h-10 rounded-2xl bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold">
+                    <div class="{{ $iconCls }} bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400">
                         <i class="fa-solid fa-address-book"></i>
                     </div>
                     <div>
@@ -182,9 +199,9 @@
             </div>
 
             <!-- AKUN LOGIN ALUMNI -->
-            <div class="{{ $cardCls }}">
+            <div class="{{ $cardCls }} scroll-mt-24" id="akun">
                 <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
-                    <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+                    <div class="{{ $iconCls }} bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
                         <i class="fa-solid fa-user-lock"></i>
                     </div>
                     <div>
@@ -247,7 +264,7 @@
             <!-- KEGIATAN SETELAH LULUS -->
             <div class="{{ $cardCls }}">
                 <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
-                    <div class="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+                    <div class="{{ $iconCls }} bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">
                         <i class="fa-solid fa-briefcase"></i>
                     </div>
                     <div>
@@ -279,7 +296,7 @@
             <!-- TESTIMONI -->
             <div class="{{ $cardCls }}">
                 <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
-                    <div class="w-10 h-10 rounded-2xl bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">
+                    <div class="{{ $iconCls }} bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400">
                         <i class="fa-solid fa-quote-left"></i>
                     </div>
                     <div>
@@ -298,109 +315,122 @@
             </div>
         </div>
 
-        <!-- NILAI / TRANSKRIP -->
-        <div class="{{ $cardCls }}" id="nilai">
+        <!-- DOKUMEN KELULUSAN & TRANSKRIP (SATU JALUR, TAMPIL DI PORTAL WALI & ALUMNI) -->
+        <div class="{{ $cardCls }} scroll-mt-24" id="dokumen">
             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-5">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold">
-                        <i class="fa-solid fa-file-pdf"></i>
+                    <div class="{{ $iconCls }} bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                        <i class="fa-solid fa-folder-open"></i>
                     </div>
                     <div>
-                        <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">Nilai / Transkrip Alumni</h2>
-                        <p class="text-[11px] text-slate-400">Unggah satu berkas PDF nilai atau transkrip untuk alumni ini.</p>
+                        <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">Dokumen &amp; Transkrip Alumni</h2>
+                        <p class="text-[11px] text-slate-400">
+                            Satu jalur unggah untuk ijazah, SKL, transkrip nilai, dan sertifikat. Berkas tampil di
+                            <b>/portal/dokumen</b> (wali) dan <b>/alumni/dokumen</b> (alumni).
+                        </p>
                     </div>
                 </div>
-                @if ($alumni->nilai_path)
-                    <span class="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-2 text-[10px] font-black text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
-                        <i class="fa-solid fa-circle-check"></i> Berkas tersedia
-                    </span>
+                @if ($tautanSiap && $alumni->santri && $bisaUbah)
+                    <a href="{{ route('admin.santri.detail', $alumni->santri_id) }}"
+                        class="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-[10px] font-bold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Detail santri
+                    </a>
                 @endif
             </div>
 
-            @if (! $nilaiSiap)
+            @if ($alumni->nilai_path)
+                <div class="mb-5 flex flex-col gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="font-bold">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                        Masih ada berkas nilai lama. Unggah ulang sebagai <b>Transkrip Nilai Final</b> agar tampil di portal.
+                    </p>
+                    <a href="{{ route('admin.alumni.nilai.unduh', $alumni) }}"
+                        class="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-[10px] font-black text-amber-700 shadow-sm hover:bg-amber-100 dark:bg-slate-900 dark:text-amber-300">
+                        <i class="fa-solid fa-download"></i> Unduh nilai lama
+                    </a>
+                </div>
+            @endif
+
+            @if (! $tautanSiap || ! $alumni->santri)
                 <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
-                    <p class="font-black"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Fitur nilai alumni belum aktif.</p>
-                    <p class="mt-1">Jalankan <b>php artisan migrate</b> terlebih dahulu.</p>
+                    <p class="font-black"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Alumni belum tertaut ke data santri.</p>
+                    <p class="mt-1">Tautkan santri asal terlebih dahulu agar dokumen bisa diunggah dan tampil di portal wali/alumni.</p>
                 </div>
             @else
-                <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
-                    <div class="lg:col-span-3 space-y-4">
-                        @if ($alumni->nilai_path)
-                            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
-                                <p class="text-xs font-black text-slate-800 dark:text-slate-100 break-all">
-                                    <i class="fa-solid fa-file-pdf mr-1 text-rose-600"></i>
-                                    {{ $alumni->nilai_nama ?: 'nilai-'.$alumni->nama.'.pdf' }}
-                                </p>
-                                <p class="mt-1 text-[10px] text-slate-400">
-                                    Diunggah {{ optional($alumni->nilai_diunggah_pada)->translatedFormat('d F Y, H:i') ?? '-' }}
-                                </p>
-                                <div class="mt-3 flex flex-wrap items-center gap-2">
-                                    <a href="{{ route('admin.alumni.nilai.unduh', $alumni) }}"
-                                        class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-[10px] font-bold text-white hover:bg-emerald-700 transition">
-                                        <i class="fa-solid fa-download"></i> Unduh PDF
-                                    </a>
-                                    <a href="{{ $alumni->nilai_url }}" target="_blank" rel="noopener"
-                                        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[10px] font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
-                                        <i class="fa-solid fa-up-right-from-square"></i> Buka
+                @php
+                    $santriDokumen = $alumni->santri;
+                    $dokumenTersedia = $santriDokumen->dokumen->keyBy('jenis');
+                @endphp
+
+                @if ($bisaUbah)
+                    <form action="{{ route('admin.santri.dokumen.store', $santriDokumen->id) }}" method="POST" enctype="multipart/form-data"
+                        class="mb-5 grid grid-cols-1 gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 p-4 dark:border-slate-700 dark:bg-slate-800/30 sm:grid-cols-3">
+                        @csrf
+                        <div>
+                            <label class="mb-1 block text-[10px] font-bold text-slate-500 dark:text-slate-400">Jenis Dokumen</label>
+                            <select name="jenis" required class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                                @foreach (\App\Models\DokumenSantri::JENIS as $kunci => $label)
+                                    <option value="{{ $kunci }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            @error('jenis') <p class="mt-1 text-[10px] text-rose-600">{{ $message }}</p> @enderror
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="mb-1 block text-[10px] font-bold text-slate-500 dark:text-slate-400">Berkas (PDF/JPG/PNG, maks 10 MB)</label>
+                            <div class="flex gap-2">
+                                <input type="file" name="file" required accept=".pdf,.jpg,.jpeg,.png"
+                                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-[11px] text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-sky-600 file:px-4 file:py-2 file:text-[11px] file:font-black file:text-white hover:file:bg-sky-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                                <button type="submit" class="shrink-0 rounded-xl bg-sky-600 px-4 py-2 text-[11px] font-black text-white hover:bg-sky-700">
+                                    <i class="fa-solid fa-upload mr-1"></i> Unggah
+                                </button>
+                            </div>
+                            @error('file') <p class="mt-1 text-[10px] text-rose-600">{{ $message }}</p> @enderror
+                            <p class="mt-1 text-[10px] text-slate-400">Unggah ulang jenis yang sama akan menimpa berkas lama.</p>
+                        </div>
+                    </form>
+                @endif
+
+                <div class="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200/80 dark:divide-slate-800 dark:border-slate-800">
+                    @foreach (\App\Models\DokumenSantri::JENIS as $kunci => $label)
+                        @php $d = $dokumenTersedia->get($kunci); @endphp
+                        <div class="flex items-center justify-between gap-3 px-4 py-3">
+                            <div class="flex min-w-0 items-center gap-3">
+                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl {{ $d ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500' }}">
+                                    <i class="fa-solid {{ $d ? 'fa-circle-check' : 'fa-circle' }} text-xs"></i>
+                                </span>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-bold text-slate-800 dark:text-slate-100">{{ $label }}</p>
+                                    <p class="truncate text-[10px] text-slate-400">
+                                        @if ($d)
+                                            {{ $d->file_name ?: 'Berkas' }} · {{ $d->ukuranManusia() }}{{ $d->created_at ? ' · '.$d->created_at->translatedFormat('d M Y') : '' }}
+                                        @else
+                                            Belum diunggah
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex shrink-0 items-center gap-1.5">
+                                @if ($d)
+                                    <a href="{{ $d->url() }}" target="_blank" rel="noopener" title="Lihat {{ $label }}"
+                                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-[11px] font-bold text-white transition hover:bg-emerald-700">
+                                        <i class="fa-solid fa-eye"></i>
                                     </a>
                                     @if ($bisaUbah)
-                                        <form action="{{ route('admin.alumni.nilai.hapus', $alumni) }}" method="POST"
-                                            onsubmit="return confirm('Hapus berkas nilai {{ $alumni->nama }}? Tindakan ini tidak bisa dibatalkan.');">
+                                        <form action="{{ route('admin.santri.dokumen.hapus', $d) }}" method="POST" onsubmit="return confirm('Hapus dokumen {{ $label }}?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit"
-                                                class="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 px-3 py-2 text-[10px] font-bold text-rose-600 hover:bg-rose-100 transition dark:bg-rose-500/10 dark:text-rose-300">
-                                                <i class="fa-solid fa-trash"></i> Hapus
+                                            <button type="submit" title="Hapus {{ $label }}"
+                                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-rose-50 text-[11px] font-bold text-rose-600 transition hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-300">
+                                                <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </form>
                                     @endif
-                                </div>
+                                @else
+                                    <span class="text-[10px] font-bold text-slate-300 dark:text-slate-600">—</span>
+                                @endif
                             </div>
-
-                            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
-                                <iframe src="{{ $alumni->nilai_url }}#toolbar=1&navpanes=0&view=FitH"
-                                    class="h-[420px] w-full" title="Pratinjau nilai {{ $alumni->nama }}"></iframe>
-                            </div>
-                        @else
-                            <div class="rounded-2xl border border-dashed border-slate-200 px-4 py-10 text-center text-xs text-slate-400 dark:border-slate-700">
-                                <i class="fa-solid fa-file-circle-plus mb-2 block text-2xl text-slate-300"></i>
-                                Belum ada berkas nilai/transkrip untuk alumni ini.
-                            </div>
-                        @endif
-                    </div>
-
-                    @if ($bisaUbah)
-                        <div class="lg:col-span-2">
-                            <form action="{{ route('admin.alumni.nilai.upload', $alumni) }}" method="POST"
-                                enctype="multipart/form-data"
-                                class="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
-                                @csrf
-                                <div>
-                                    <p class="text-xs font-black text-slate-800 dark:text-slate-100">
-                                        {{ $alumni->nilai_path ? 'Ganti Berkas Nilai' : 'Unggah Berkas Nilai' }}
-                                    </p>
-                                    <p class="mt-1 text-[10px] leading-relaxed text-slate-400">
-                                        Format PDF, maksimal 10 MB. Unggah ulang akan menimpa berkas lama.
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <label for="file_nilai" class="mb-1.5 block text-[10px] font-black uppercase tracking-wider text-slate-400">
-                                        Berkas PDF <span class="text-rose-500">*</span>
-                                    </label>
-                                    <input id="file_nilai" type="file" name="file_nilai" accept="application/pdf,.pdf" required
-                                        class="block w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-rose-600 file:px-4 file:py-2 file:text-[11px] file:font-black file:text-white hover:file:bg-rose-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                                    @error('file_nilai') <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p> @enderror
-                                </div>
-
-                                <button type="submit"
-                                    class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-rose-600 px-5 py-2.5 text-[11px] font-black text-white transition hover:bg-rose-700">
-                                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                                    {{ $alumni->nilai_path ? 'Unggah Ulang' : 'Unggah Nilai' }}
-                                </button>
-                            </form>
                         </div>
-                    @endif
+                    @endforeach
                 </div>
             @endif
         </div>
