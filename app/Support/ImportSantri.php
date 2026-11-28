@@ -232,8 +232,9 @@ class ImportSantri
                                 'role'                    => 'wali_santri',
                                 'phone'                   => $data['no_hp_wali'] ?? null,
                                 'is_active'               => true,
-                                'must_change_password'    => true,
-                                'temp_password_expires_at' => now()->addDay(),
+                                // Sama seperti PPDB: kredensial di email langsung dipakai.
+                                'must_change_password'    => false,
+                                'temp_password_expires_at' => null,
                             ]);
 
                             $kredensialBaru = ['user' => $userWali, 'password' => $password];
@@ -286,7 +287,8 @@ class ImportSantri
                                 passwordSementara: $kredensialBaru['password'],
                                 peran: 'Wali Santri',
                                 judul: 'Akun Portal Wali Santri',
-                                catatan: 'Password sementara berlaku 24 jam dan wajib diganti pada login pertama.',
+                                catatan: 'Akun ini terhubung dengan santri hasil import.',
+                                wajibGanti: false,
                             ));
                     } catch (\Throwable $e) {
                         $hasil['emailGagal']++;

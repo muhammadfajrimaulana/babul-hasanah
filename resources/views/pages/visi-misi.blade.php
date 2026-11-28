@@ -30,18 +30,18 @@
     /* Motto dibungkus kartu tersendiri supaya tidak menyatu dengan footer hijau. */
     /* Jarak atas/bawah sama dengan bagian Harapan & Keberlanjutan (.pd-doc-area). */
     .pd-motto {
-        padding: 64px clamp(18px, 4vw, 64px);
+        padding: 64px 0;
         background: var(--cream);
         text-align: center;
     }
-    .pd-motto .pd-wrap { max-width: none; padding-inline: 0; }
-    /* Lebar, padding, dan tepian kartu disamakan dengan .pd-doc di atasnya. */
+    .pd-motto .pd-wrap { width: min(1200px, 90%); margin-inline: auto; padding-inline: 0; }
+    /* Lebar, padding, dan tepian kartu disamakan dengan CTA halaman lain. */
     .pd-motto-card {
         position: relative; overflow: hidden; width: 100%; max-width: none;
-        padding: clamp(24px, 4vw, 46px);
-        border-radius: 22px;
+        padding: 50px;
+        border-radius: 32px;
         background: linear-gradient(135deg, var(--green) 0%, var(--green-2) 100%);
-        box-shadow: 0 26px 54px -30px rgba(23, 64, 47, .6);
+        box-shadow: var(--shadow-lg);
     }
     .pd-motto-card::after {
         content: ""; position: absolute; right: -64px; bottom: -104px;
@@ -56,8 +56,16 @@
     @media (max-width: 860px) {
         .pd-hero { padding: 32px 0 48px; }
         .pd-section-wrap, .pd-doc-area { padding: 48px 0; }
-        .pd-motto { padding: 48px 18px; }
-        .pd-doc-area .pd-doc, .pd-motto-card { border-radius: 18px; }
+        .pd-motto { padding: 48px 0; }
+        .pd-motto-card { padding: 30px 22px; border-radius: 22px; }
+        .pd-doc-area .pd-doc { border-radius: 18px; }
+    }
+    @media (max-width: 560px) {
+        .pd-nav a { padding: 7px 12px; font-size: .8rem; }
+        .pd-wide .pd-visi-card { padding: 24px 20px; }
+        .pd-visi-card p, .pd-prose, .pd-numbered-item h3, .pd-numbered-item p,
+        .pd-feature h3, .pd-feature p { overflow-wrap: anywhere; }
+        .pd-motto-card h2 { font-size: 1.35rem; line-height: 1.35; }
     }
 </style>
 

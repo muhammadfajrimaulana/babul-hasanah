@@ -44,8 +44,9 @@ class AlumniAkun
             'role' => 'alumni',
             'phone' => $alumni->no_hp,
             'is_active' => true,
-            'must_change_password' => true,
-            'temp_password_expires_at' => now()->addDay(),
+            // Kredensial dikirim saat kelulusan dan langsung dipakai untuk login.
+            'must_change_password' => false,
+            'temp_password_expires_at' => null,
         ]);
 
         $alumni->forceFill([

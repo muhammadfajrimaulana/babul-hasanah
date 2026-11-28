@@ -6,9 +6,8 @@
 
     <style>
         .al {
-            --green: #17402f; --green-2: #1d4d3a; --cream: #f1eee6; --paper: #fbfaf6; --gold: #b7791f;
-            --ink: #1f2a24; --muted: #6b756f; --line: #e4e0d4; --emerald: #12b886; --emerald-d: #0e9f73;
-            --radius: 22px; --shadow: 0 10px 30px rgba(23, 64, 47, .07); --shadow-lg: 0 22px 50px rgba(23, 64, 47, .14);
+            /* Warna memakai token global dari layouts/app.blade.php; hanya radius & shadow lokal. */
+            --radius: 22px; --shadow: 0 10px 30px rgba(23, 64, 47, .07);
             font-family: 'Poppins', system-ui, sans-serif; color: var(--ink); font-size: 15px; line-height: 1.6;
             background:
                 radial-gradient(900px 500px at 100% -5%, rgba(183, 121, 31, .07), transparent 60%),
@@ -17,9 +16,9 @@
         }
         .al *, .al *::before, .al *::after { box-sizing: border-box; }
         .al a { color: inherit; text-decoration: none; }
-        .al h1, .al h2, .al h3, .al h4 { margin: 0; font-weight: 600; line-height: 1.25; color: var(--green); letter-spacing: -.01em; }
+        .al h1, .al h2, .al h3, .al h4 { margin: 0; font-weight: 800; line-height: 1.3; color: var(--green); letter-spacing: -.015em; }
         .al p { margin: 0; }
-        .al .container { width: min(1180px, 92%); margin-inline: auto; }
+        .al .container { width: min(1200px, 90%); margin-inline: auto; }
         .al .eyebrow {
             display: flex; align-items: center; gap: 12px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
             color: var(--gold); font-weight: 600; margin-bottom: 14px;
@@ -30,7 +29,7 @@
 
         /* ---------- HEADER HALAMAN ---------- */
         .al-hero {
-            position: relative; overflow: hidden; color: #fff; padding: 70px 0 90px;
+            position: relative; overflow: hidden; color: #fff; padding: 38px 0 78px;
             background: linear-gradient(130deg, var(--green), var(--green-2));
         }
         .al-hero::before {
@@ -44,9 +43,9 @@
         .al-hero .container { position: relative; z-index: 1; }
         .al-crumb { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #b9d0c4; margin-bottom: 22px; }
         .al-crumb a:hover { color: #fff; }
-        .al-hero h1 { color: #fff; font-size: clamp(30px, 4.6vw, 52px); font-weight: 700; margin-bottom: 14px; }
-        .al-hero h1 span { color: #19d68f; }
-        .al-hero p.lead { max-width: 640px; color: rgba(255, 255, 255, .85); font-size: clamp(13.5px, 1.4vw, 16px); }
+        .al-hero h1 { color: #fff; font-size: clamp(1.75rem, 4vw, 2.9rem); font-weight: 800; letter-spacing: -.02em; line-height: 1.18; margin-bottom: 14px; max-width: 680px; }
+        .al-hero h1 span { color: var(--emerald); }
+        .al-hero p.lead { max-width: 680px; color: rgba(255, 255, 255, .85); font-size: clamp(13.5px, 1.4vw, 16px); }
 
         /* ---------- RINGKASAN ---------- */
         .al-stats { margin-top: -48px; position: relative; z-index: 2; }
@@ -66,10 +65,10 @@
         .al-stat span { font-size: 11.5px; color: var(--muted); }
 
         /* ---------- TOOLBAR FILTER ---------- */
-        .al-main { padding: 56px 0 70px; }
+        .al-main { padding: 64px 0; }
         .al-toolbar { display: flex; flex-direction: column; gap: 18px; margin-bottom: 32px; }
         .al-toolbar-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
-        .al-toolbar h2 { font-size: clamp(24px, 3vw, 34px); }
+        .al-toolbar h2 { font-size: clamp(1.5rem, 2.6vw, 2.05rem); }
         .al-controls { display: flex; gap: 12px; flex-wrap: wrap; }
         .al-field { position: relative; }
         .al-field i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 13px; pointer-events: none; }
@@ -97,7 +96,7 @@
         .al-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
         .al-card {
             background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
-            display: flex; flex-direction: column; transition: all .3s ease;
+            display: flex; flex-direction: column; min-width: 0; transition: all .3s ease;
         }
         .al-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: var(--gold); }
         .al-card.hide { display: none; }
@@ -134,13 +133,13 @@
             border-radius: 999px; background: var(--cream); color: var(--green);
         }
         .al-tag.gold { background: rgba(183, 121, 31, .12); color: var(--gold); }
-        .al-body h3 { font-size: 17.5px; }
-        .al-instansi { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--muted); }
+        .al-body h3 { font-size: 17.5px; overflow-wrap: anywhere; }
+        .al-instansi { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
         .al-instansi i { color: var(--gold); margin-top: 4px; font-size: 12px; }
         .al-quote {
             margin: 4px 0 0; padding: 12px 15px; background: var(--cream); border-left: 3px solid var(--gold);
             border-radius: 0 12px 12px 0; font-size: 12px; line-height: 1.65; color: var(--muted);
-            font-style: italic; flex: 1;
+            font-style: italic; flex: 1; overflow-wrap: anywhere;
         }
 
         .al-empty { display: none; text-align: center; padding: 60px 20px; background: #fff; border: 1px dashed var(--line); border-radius: var(--radius); }
@@ -150,7 +149,7 @@
         .al-empty p { font-size: 13px; color: var(--muted); }
 
         /* ---------- AJAKAN ---------- */
-        .al-cta { padding: 0 0 80px; }
+        .al-cta { padding: 0 0 64px; }
         .al-cta-box {
             background: linear-gradient(135deg, var(--green), var(--green-2)); border-radius: 32px; padding: 50px; color: #fff;
             display: flex; justify-content: space-between; align-items: center; gap: 30px; flex-wrap: wrap; box-shadow: var(--shadow-lg);
@@ -175,14 +174,19 @@
             .al-stat:nth-child(n+3) { border-top: 1px solid var(--line); }
         }
         @media (max-width: 640px) {
-            .al-hero { padding: 48px 0 80px; }
+            .al-hero { padding: 32px 0 68px; }
             .al-hero::after { font-size: 130px; right: -10px; }
+            .al-crumb { flex-wrap: wrap; }
+            .al-stats { margin-top: -38px; }
             .al-grid { grid-template-columns: 1fr; }
             .al-stat { padding: 18px 16px; gap: 12px; }
             .al-stat .ic { width: 40px; height: 40px; font-size: 16px; }
             .al-stat b { font-size: 22px; }
+            .al-toolbar-top { gap: 16px; }
             .al-controls { width: 100%; }
-            .al-field, .al-select { flex: 1; }
+            .al-field, .al-select { flex: 1; min-width: 0; }
+            /* 16px mencegah Safari iOS meng-zoom otomatis saat field difokus. */
+            .al-input, .al-select { font-size: 16px; }
             .al-input { width: 100%; }
             .al-select { width: 100%; }
             .al-chips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 6px; margin-inline: -4%; padding-inline: 4%; scrollbar-width: none; }
@@ -190,6 +194,17 @@
             .al-chip { white-space: nowrap; flex: none; }
             .al-cta-box { padding: 30px 22px; border-radius: 22px; }
             .al-btn { width: 100%; justify-content: center; }
+        }
+        @media (max-width: 480px) {
+            .al-stats { margin-top: -30px; }
+            .al-stat { padding: 14px 12px; gap: 8px; }
+            .al-stat .ic { width: 36px; height: 36px; font-size: 15px; }
+            .al-stat b { font-size: 20px; }
+            .al-stat span { font-size: 10.5px; }
+            .al-controls { flex-direction: column; }
+            .al-body { padding: 18px; }
+            .al-cta-box { padding: 26px 18px; }
+            .al-cta-box h2 { font-size: 20px; }
         }
         @media (prefers-reduced-motion: reduce) { .al .reveal { transition: none !important; opacity: 1 !important; transform: none !important; } }
     </style>

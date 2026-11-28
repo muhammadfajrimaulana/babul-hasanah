@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 
 class SantriAksiController extends Controller
 {
-    /** Reset password wali menjadi password sementara 24 jam. */
+    /** Reset password wali menjadi password baru yang langsung bisa dipakai. */
     public function resetPasswordWali($id)
     {
         $santri = Santri::with('user')->findOrFail($id);
@@ -36,8 +36,8 @@ class SantriAksiController extends Controller
 
         $wali->forceFill([
             'password' => Hash::make($password),
-            'must_change_password' => true,
-            'temp_password_expires_at' => now()->addDay(),
+            'must_change_password' => false,
+            'temp_password_expires_at' => null,
             'is_active' => true,
         ])->save();
 
@@ -50,7 +50,8 @@ class SantriAksiController extends Controller
                 passwordSementara: $password,
                 peran: 'Wali Santri',
                 judul: 'Reset Password Portal Wali Santri',
-                catatan: 'Password sementara untuk akun wali santri '.$santri->nama_lengkap.'.',
+                catatan: 'Password baru untuk akun wali santri '.$santri->nama_lengkap.'.',
+                wajibGanti: false,
             ));
             $terkirim = true;
         } catch (\Throwable $e) {
@@ -65,7 +66,7 @@ class SantriAksiController extends Controller
         return back()->with(
             $terkirim ? 'success' : 'error',
             $terkirim
-                ? 'Password wali direset. Password sementara telah dikirim ke email wali dan berlaku 24 jam.'
+                ? 'Password wali direset. Password baru telah dikirim ke email wali dan bisa langsung dipakai.'
                 : 'Password wali direset, tetapi email gagal dikirim. Periksa konfigurasi email.'
         );
     }

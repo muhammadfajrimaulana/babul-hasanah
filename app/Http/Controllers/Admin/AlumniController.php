@@ -252,7 +252,7 @@ class AlumniController extends Controller
                         $hasil['user'],
                         $hasil['password'],
                         'Akun Portal Alumni & Unduh Ijazah',
-                        'Ijazah dan dokumen kelulusan Anda dapat diunduh setelah login pertama.'
+                        'Kredensial di email langsung dipakai; ijazah dan dokumen kelulusan dapat diunduh setelah login.'
                     );
                 }
 
@@ -295,7 +295,7 @@ class AlumniController extends Controller
     }
 
     /**
-     * Reset password alumni menjadi password sementara 24 jam.
+     * Reset password alumni menjadi password baru yang langsung bisa dipakai.
      *
      * Bila alumni belum punya akun, akun dibuat lebih dulu agar tombol ini
      * tetap berguna untuk data lama yang belum tersinkron.
@@ -332,16 +332,16 @@ class AlumniController extends Controller
 
             $akun->forceFill([
                 'password' => Hash::make($password),
-                'must_change_password' => true,
-                'temp_password_expires_at' => now()->addDay(),
+                'must_change_password' => false,
+                'temp_password_expires_at' => null,
                 'is_active' => true,
             ])->save();
         }
 
         $judul = $akunBaru ? 'Akun Portal Alumni & Unduh Ijazah' : 'Reset Password Portal Alumni';
         $catatan = $akunBaru
-            ? 'Akun alumni dibuat oleh admin. Ijazah dan dokumen kelulusan dapat diunduh setelah login pertama.'
-            : 'Password sementara untuk akun alumni '.$alumni->nama.'. Harap ganti setelah login pertama.';
+            ? 'Akun alumni dibuat oleh admin. Ijazah dan dokumen kelulusan dapat diunduh setelah login.'
+            : 'Password baru untuk akun alumni '.$alumni->nama.'. Langsung dipakai untuk login.';
 
         $terkirim = $this->kirimKredensial($akun, $password, $judul, $catatan);
 
@@ -356,7 +356,7 @@ class AlumniController extends Controller
         if ($terkirim) {
             return back()->with(
                 'success',
-                $kata.'. Password sementara dikirim ke '.$akun->email.' dan berlaku 24 jam.'
+                $kata.'. Password baru dikirim ke '.$akun->email.' dan langsung bisa dipakai.'
             );
         }
 
@@ -586,6 +586,7 @@ class AlumniController extends Controller
                 peran: 'Alumni',
                 judul: $judul,
                 catatan: $catatan,
+                wajibGanti: false,
             ));
 
             return true;

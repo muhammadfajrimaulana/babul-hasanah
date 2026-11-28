@@ -55,9 +55,11 @@ Catatan: P0-2 memakai middleware baca (`super_admin,admin,pengurus,pembina`) dan
 ### 3.1 Password akun wali dari PPDB — ✅ Selesai
 
 **Kondisi sekarang:** `PendaftaranController@updateStatus` membuat password acak
-`Str::password(12)`, mengisi `must_change_password = true` dan `temp_password_expires_at = now()->addDay()`,
-lalu mengirim email kredensial (`KredensialMail`). Login pertama dipaksa ke `/ganti-password`;
-password sementara yang kedaluwarsa ditolak dan harus direset admin.
+`Str::password(12)`, mengisi `must_change_password = false` dan `temp_password_expires_at = null`,
+lalu mengirim email kredensial (`KredensialMail`) berisi username (email wali) + password.
+Kredensial langsung dipakai tanpa ganti password. Akun wali lama dibersihkan oleh migrasi
+`2026_11_28_000006_hapus_paksa_ganti_password_wali.php`. Perlakuan yang sama berlaku untuk alumni
+(migrasi `2026_11_28_000007_hapus_paksa_ganti_password_alumni.php`).
 
 **Sisa risiko:** keberhasilan pengiriman email bergantung konfigurasi mailer. Bila gagal, admin
 mendapat pesan untuk memakai tombol **Reset Password Wali**. Pastikan mailer produksi benar dan
@@ -121,8 +123,9 @@ tanpa memproses data. Package `maatwebsite/excel` tidak ada dan template XLSX ti
   Admin Jenjang (`Akses::cocokJenjang()`), email santri, dan duplikasi nomor induk.
 - Baris gagal dilewati dan dilaporkan di halaman index (maksimal 20 pesan pertama); baris valid
   tetap tersimpan. Setiap penyimpanan dibungkus `DB::transaction()`.
-- Jika `email_wali` belum memiliki akun, akun `wali_santri` dibuat dengan password sementara 24 jam
-  dan email kredensial dikirim. Kegagalan email tidak membatalkan import dan dilaporkan terpisah.
+- Jika `email_wali` belum memiliki akun, akun `wali_santri` dibuat dengan kredensial yang langsung
+  bisa dipakai (tanpa ganti password) dan email kredensial dikirim. Kegagalan email tidak
+  membatalkan import dan dilaporkan terpisah.
 - `downloadTemplate()` kini menghasilkan `template_data_santri.csv` secara dinamis, sehingga tidak
   bergantung pada berkas statis di `public/assets/template/`.
 
@@ -331,7 +334,8 @@ Mengikuti fase di [14-modul-akademik.md](14-modul-akademik.md) §8:
 - [ ] Uji manual P0: `/kegiatan`, `admin.kegiatan.index`, `super.settings`
 - [ ] Uji P1: login dengan role lama `pengasuh`/`super` → harus dinormalkan
 - [ ] Uji P1: pendaftaran dua anak dengan satu email
-- [ ] Uji alur: PPDB diterima → email kredensial → wajib ganti password
+- [ ] Uji alur: PPDB diterima → email kredensial → wali langsung login ke portal
+- [ ] Uji alur: santri LULUS → email kredensial → alumni langsung login ke portal
 - [ ] Uji alur: izin pulang (setujui/tolak/terlambat/selesai)
 - [ ] Uji alur: naik kelas + rollback Superadmin
 - [ ] Uji alur: kelulusan → akun alumni → portal alumni

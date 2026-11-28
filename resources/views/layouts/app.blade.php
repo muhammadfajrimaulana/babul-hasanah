@@ -25,6 +25,9 @@
             --cream: #f1eee6;
             --paper: #fbfaf6;
             --gold: #b7791f;
+            --gold-text: #955f0f;
+            --gold-soft: #fdf4e0;
+            --gold-light: #f3d9a0;
             --ink: #1f2a24;
             --muted: #6b756f;
             --line: #e4e0d4;
@@ -207,11 +210,8 @@
         @media (max-width: 1024px) {
             .site-burger { display: inline-flex; align-items: center; justify-content: center; }
 
-            /* PERBAIKAN: Masuk TIDAK lagi disembunyikan di mobile, tampil sebagai tombol outline */
-            .site-login {
-                display: inline-flex; padding: 8px 14px; font-size: 13px; font-weight: 600;
-                border: 1px solid var(--line); color: var(--green); background: #fff;
-            }
+            /* "Masuk" sudah tersedia di dalam menu burger (.menu-extra), jadi tombol di navbar disembunyikan. */
+            .site-login { display: none; }
             .site-actions { gap: 8px; }
             .site-actions .site-btn-desktop { display: none; }
 

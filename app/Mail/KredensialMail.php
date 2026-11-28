@@ -25,6 +25,7 @@ class KredensialMail extends Mailable
         public string $peran,
         public string $judul,
         public ?string $catatan = null,
+        public bool $wajibGanti = true,
     ) {
     }
 
@@ -44,6 +45,7 @@ class KredensialMail extends Mailable
                 'peran' => $this->peran,
                 'judul' => $this->judul,
                 'catatan' => $this->catatan,
+                'wajibGanti' => $this->wajibGanti,
                 'loginUrl' => route('login'),
             ],
         );

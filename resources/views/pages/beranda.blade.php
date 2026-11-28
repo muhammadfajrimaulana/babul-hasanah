@@ -118,18 +118,11 @@
             background: rgba(9, 24, 17, .45); border: 1px solid rgba(255, 255, 255, .16);
             border-radius: 999px; padding: 7px 9px; backdrop-filter: blur(8px);
         }
-        .dh .hero2-arrow {
-            width: 30px; height: 30px; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
-            display: grid; place-items: center; flex: none; font-size: 10px;
-            background: rgba(255, 255, 255, .14); color: #fff; transition: background .25s ease, transform .25s ease;
-        }
-        .dh .hero2-arrow:hover { background: rgba(255, 255, 255, .3); transform: scale(1.06); }
         .dh .hero2-dots { display: flex; align-items: center; gap: 6px; }
         .dh .hero2-dot {
-            width: 20px; height: 4px; border-radius: 999px; border: 0; padding: 0; cursor: pointer;
+            width: 20px; height: 4px; border-radius: 999px;
             background: rgba(255, 255, 255, .32); transition: background .3s ease, width .3s ease;
         }
-        .dh .hero2-dot:hover { background: rgba(255, 255, 255, .6); }
         .dh .hero2-dot.is-active { background: #19d68f; width: 36px; }
         .dh .hero2::before {
             content: ""; position: absolute; inset: 0; z-index: 1;
@@ -670,13 +663,23 @@
         }
         @media (max-width: 640px) {
             .dh { --sec: 28px; }
-            .dh .hero2 h1 { font-size: 30px; }
-            .dh .hero2 p.lead { font-size: 13.5px; }
-            .dh .hero2-badge { font-size: 10.5px; padding: 8px 14px; margin-bottom: 18px; }
-            .dh .hero2-cta { flex-direction: column; width: 100%; }
-            .dh .hero2-cta .btn { width: 100%; }
-            .dh .hero2 .container { padding: 48px 0 88px; }
-            .dh .hero2-nav { left: max(4%, 16px); right: max(4%, 16px); bottom: 16px; justify-content: center; }
+
+            /* Pembeda warna tiap section agar tidak terlihat menyambung di HP. */
+            .dh > section { position: relative; }
+            .dh > section:not(.hero2):not(.stats) { border-top: 1px solid var(--line); }
+            .dh .profile, .dh .org, .dh .news, .dh .achv, .dh .psb { background: #fff; }
+            .dh .ih-sec, .dh .alum, .dh .contact { background: var(--paper); }
+            .dh .levels, .dh .gallery, .dh .fac, .dh .map-section { background: var(--cream); }
+
+            /* Hero HP: lebih pendek, tidak memenuhi layar. */
+            .dh .hero2 { min-height: 460px; }
+            .dh .hero2 .container { padding: 24px 0 80px; }
+            .dh .hero2-badge { font-size: 10px; padding: 6px 12px; margin-bottom: 12px; }
+            .dh .hero2 h1 { font-size: 26px; line-height: 1.22; margin-bottom: 12px; }
+            .dh .hero2 p.lead { font-size: 12.5px; line-height: 1.6; margin-bottom: 20px; }
+            .dh .hero2-cta { flex-direction: row; width: 100%; gap: 10px; }
+            .dh .hero2-cta .btn { flex: 1 1 0; min-width: 0; padding: 11px 10px; font-size: 12px; white-space: normal; text-align: center; }
+            .dh .hero2-nav { left: max(4%, 16px); right: max(4%, 16px); bottom: 10px; justify-content: center; padding: 5px 7px; }
             .dh .hero2-dots { flex: 1; justify-content: center; }
             .dh .hero2-dot { width: 16px; }
             .dh .stats { padding: 26px 0; }
@@ -711,6 +714,11 @@
             .dh .alum-box::after { font-size: 96px; right: 12px; }
             .dh .alum-head { gap: 16px; margin-bottom: 22px; }
             .dh .alum-card { flex-basis: 100%; }
+        }
+        @media (max-width: 380px) {
+            .dh .hero2-cta { flex-direction: column; }
+            .dh .hero2-cta .btn { width: 100%; white-space: nowrap; }
+            .dh .hero2 h1 { font-size: 24px; }
         }
         @media (prefers-reduced-motion: reduce) {
             .dh .reveal { transition: none !important; opacity: 1 !important; transform: none !important; }
@@ -761,21 +769,13 @@
                 </div>
             </div>
 
-            <div class="hero2-nav">
-                <button type="button" class="hero2-arrow" data-slide="prev" aria-label="Gambar sebelumnya">
-                    <i class="fa-solid fa-chevron-left"></i>
-                </button>
-                <div class="hero2-dots" role="tablist" aria-label="Pilih gambar hero">
+            {{-- Titik hanya indikator; gambar berganti otomatis --}}
+            <div class="hero2-nav" aria-hidden="true">
+                <div class="hero2-dots">
                     @foreach ($heroSlides as $i => $slide)
-                        <button type="button" class="hero2-dot {{ $i === 0 ? 'is-active' : '' }}"
-                            data-slide="{{ $i }}" role="tab"
-                            aria-selected="{{ $i === 0 ? 'true' : 'false' }}"
-                            aria-label="Gambar {{ $i + 1 }}"></button>
+                        <span class="hero2-dot {{ $i === 0 ? 'is-active' : '' }}"></span>
                     @endforeach
                 </div>
-                <button type="button" class="hero2-arrow" data-slide="next" aria-label="Gambar berikutnya">
-                    <i class="fa-solid fa-chevron-right"></i>
-                </button>
             </div>
         </section>
 
@@ -1339,11 +1339,7 @@
                         s.classList.toggle('is-active', n === heroIndex);
                         s.setAttribute('aria-hidden', n === heroIndex ? 'false' : 'true');
                     });
-                    heroDots.forEach((d, n) => {
-                        const on = n === heroIndex;
-                        d.classList.toggle('is-active', on);
-                        d.setAttribute('aria-selected', on ? 'true' : 'false');
-                    });
+                    heroDots.forEach((d, n) => d.classList.toggle('is-active', n === heroIndex));
                 };
 
                 const stopAuto = () => {
@@ -1359,23 +1355,7 @@
                     heroTimer = setInterval(() => showSlide(heroIndex + 1), DURASI);
                 };
 
-                heroDots.forEach((dot, i) => dot.addEventListener('click', () => {
-                    showSlide(i);
-                    startAuto();
-                }));
-
-                hero.querySelector('[data-slide="prev"]')
-                    ?.addEventListener('click', () => { showSlide(heroIndex - 1); startAuto(); });
-                hero.querySelector('[data-slide="next"]')
-                    ?.addEventListener('click', () => { showSlide(heroIndex + 1); startAuto(); });
-
-                // Berhenti sejenak saat kursor/fokus di area hero, lanjut lagi setelahnya
-                hero.addEventListener('mouseenter', stopAuto);
-                hero.addEventListener('mouseleave', startAuto);
-                hero.addEventListener('focusin', stopAuto);
-                hero.addEventListener('focusout', (e) => {
-                    if (!hero.contains(e.relatedTarget)) startAuto();
-                });
+                // Slide tetap berputar walau kursor/fokus berada di area hero.
                 document.addEventListener('visibilitychange', () => {
                     document.hidden ? stopAuto() : startAuto();
                 });

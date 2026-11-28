@@ -34,7 +34,7 @@
                             <p style="margin:0 0 14px;font-size:13px;line-height:1.8;color:#3c4741;">
                                 Pendaftaran Anda saat ini <strong>menunggu verifikasi Admin Jenjang {{ $jenjang }}</strong>.
                                 Setelah diterima, sistem akan membuat akun Portal Wali Santri dan mengirimkan
-                                username serta password sementara ke email ini.
+                                username serta password ke email ini.
                             </p>
 
                             @if (! empty($emailSantri))
@@ -45,8 +45,8 @@
                             @endif
 
                             <p style="margin:0 0 14px;font-size:13px;line-height:1.8;color:#3c4741;">
-                                Password sementara hanya berlaku 24 jam dan wajib diganti saat login pertama.
-                                Admin tidak dapat melihat password Anda.
+                                Kredensial tersebut dapat langsung dipakai untuk masuk ke Portal Wali Santri.
+                                Jangan bagikan kata sandi kepada pihak lain.
                             </p>
 
                             <p style="margin:22px 0 0;font-size:14px;line-height:1.8;">Wassalamu&rsquo;alaikum warahmatullahi wabarakatuh,</p>

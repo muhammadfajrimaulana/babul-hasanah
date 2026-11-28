@@ -116,8 +116,8 @@ class VerifikasiPPDBTest extends TestCase
 
         $wali = User::where('email', $pendaftaran->email)->firstOrFail();
         $this->assertSame('wali_santri', $wali->role);
-        $this->assertTrue($wali->must_change_password);
-        $this->assertNotNull($wali->temp_password_expires_at);
+        $this->assertFalse($wali->must_change_password);
+        $this->assertNull($wali->temp_password_expires_at);
 
         $santri = Santri::where('pendaftaran_online_id', $pendaftaran->id)->firstOrFail();
         $this->assertSame($pendaftaran->nama_lengkap, $santri->nama_lengkap);
@@ -126,7 +126,7 @@ class VerifikasiPPDBTest extends TestCase
 
         Mail::assertSent(
             KredensialMail::class,
-            fn (KredensialMail $mail) => $mail->hasTo($pendaftaran->email)
+            fn (KredensialMail $mail) => $mail->hasTo($pendaftaran->email) && ! $mail->wajibGanti
         );
     }
 

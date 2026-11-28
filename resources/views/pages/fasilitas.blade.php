@@ -7,13 +7,14 @@
 @include('pages.partials.profil-dokumen-style')
 
 <style>
-    /* ====== Selaras dengan halaman Sejarah & Visi-Misi: lebar penuh & rata kiri ====== */
-    .pd-wide .pd-wrap { width: 100%; max-width: none; padding-inline: clamp(18px, 4vw, 64px); }
-    .pd-wide .pd-hero-inner { max-width: 1040px; margin-left: 0; margin-right: auto; text-align: left; }
+    /* ====== Container, font, dan judul memakai acuan bersama ====== */
+    .pd-wide { font-family: 'Poppins', system-ui, sans-serif; font-size: 15px; line-height: 1.6; }
+    .pd-wide .pd-wrap { width: min(1200px, 90%); margin-inline: auto; padding-inline: 0; }
+    .pd-wide .pd-hero-inner { max-width: 680px; margin-left: 0; margin-right: auto; text-align: left; }
     .pd-wide .pd-crumb { justify-content: flex-start; }
     .pd-wide .pd-hero h1 { margin-left: 0; margin-right: auto; }
     .pd-wide .pd-hero p { margin-left: 0; margin-right: auto; }
-    .pd-wide section[id] { scroll-margin-top: 100px; }
+    .pd-wide section[id] { scroll-margin-top: 90px; }
 
     /* Ritme bagian seragam dengan halaman profil lain */
     .pd-section-wrap { padding: 64px 0; }
@@ -21,8 +22,8 @@
     /* ====== Kepala bagian ====== */
     .pd-fac-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
     .pd-fac-top .pd-eyebrow { margin-bottom: 10px; }
-    .pd-fac-title { margin: 0; font-size: clamp(1.4rem, 2.6vw, 1.95rem); font-weight: 800; line-height: 1.25; letter-spacing: -.015em; color: var(--green); }
-    .pd-fac-count { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 999px; border: 1px solid #f0dfb4; background: var(--gold-soft); color: #8a5a12; font-size: .8rem; font-weight: 700; }
+    .pd-fac-title { margin: 0; font-size: clamp(1.5rem, 2.6vw, 2.05rem); font-weight: 800; line-height: 1.3; letter-spacing: -.015em; color: var(--green); }
+    .pd-fac-count { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--gold-light); background: var(--gold-soft); color: var(--gold-text); font-size: .8rem; font-weight: 700; }
     .pd-fac-count i { color: var(--gold); }
 
     /* ====== Kartu utama (editorial) ====== */
@@ -32,15 +33,15 @@
     .pd-fac-hero:hover .pd-fac-hero-media img { transform: scale(1.05); }
     .pd-fac-hero-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(23, 64, 47, 0) 45%, rgba(23, 64, 47, .45) 100%); }
     .pd-fac-hero-media .pd-facility-ph { position: absolute; inset: 0; }
-    .pd-fac-hero-body { display: flex; flex-direction: column; justify-content: center; padding: clamp(26px, 4vw, 46px); }
+    .pd-fac-hero-body { display: flex; flex-direction: column; justify-content: center; padding: clamp(26px, 4vw, 46px); min-width: 0; }
     .pd-fac-hero-body .pd-eyebrow { margin-bottom: 12px; }
-    .pd-fac-hero-body h2 { margin: 0 0 12px; font-size: clamp(1.4rem, 2.6vw, 2rem); font-weight: 800; line-height: 1.25; color: var(--green); }
-    .pd-fac-hero-body p { margin: 0; font-size: 1rem; line-height: 1.85; color: var(--muted); }
+    .pd-fac-hero-body h2 { margin: 0 0 12px; font-size: clamp(1.4rem, 2.6vw, 2rem); font-weight: 800; line-height: 1.25; color: var(--green); overflow-wrap: anywhere; }
+    .pd-fac-hero-body p { margin: 0; font-size: 1rem; line-height: 1.85; color: var(--muted); overflow-wrap: anywhere; }
     .pd-fac-chip { position: absolute; left: 18px; top: 18px; z-index: 2; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; background: rgba(255, 255, 255, .94); color: var(--green); font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; box-shadow: 0 10px 24px -14px rgba(0, 0, 0, .5); }
     .pd-fac-chip i { color: var(--gold); }
 
     /* ====== Grid kartu lainnya ====== */
-    .pd-facilities { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+    .pd-facilities { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
     .pd-facility-media { overflow: hidden; }
     .pd-facility-media img { transition: transform .6s ease; }
     .pd-facility:hover .pd-facility-media img { transform: scale(1.07); }
@@ -51,13 +52,13 @@
     .pd-fac-empty { padding: 42px 24px; border: 1px dashed var(--line); border-radius: 20px; background: #fff; text-align: center; font-size: .94rem; line-height: 1.7; color: var(--muted); }
 
     /* ====== Ajakan bawah: satu kotak seperti halaman Alumni ====== */
-    .pd-fac-cta { padding: 0 0 80px; }
+    .pd-fac-cta { padding: 0 0 64px; }
     .pd-fac-cta-box {
         background: linear-gradient(135deg, var(--green), var(--green-2)); border-radius: 32px; padding: 50px; color: #fff;
         display: flex; justify-content: space-between; align-items: center; gap: 30px; flex-wrap: wrap; box-shadow: var(--shadow-lg);
     }
-    .pd-fac-cta-box h2 { color: #fff; font-size: clamp(22px, 3vw, 32px); margin-bottom: 8px; }
-    .pd-fac-cta-box p { font-size: 13px; color: #b9d0c4; max-width: 520px; }
+    .pd-fac-cta-box h2 { color: #fff; font-size: clamp(22px, 3vw, 32px); font-weight: 800; letter-spacing: -.01em; margin-bottom: 8px; overflow-wrap: anywhere; }
+    .pd-fac-cta-box p { font-size: 13.5px; color: rgba(255,255,255,.82); max-width: 520px; line-height: 1.7; overflow-wrap: anywhere; }
     .pd-fac-btn {
         display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; border-radius: 999px;
         font-size: 13.5px; font-weight: 600; text-decoration: none; transition: all .25s ease; white-space: nowrap;
@@ -79,10 +80,26 @@
     }
 
     @media (max-width: 600px) {
+        .pd-wide .pd-hero h1 { font-size: 1.45rem; line-height: 1.25; overflow-wrap: anywhere; }
+        .pd-wide .pd-hero p { font-size: .92rem; }
+        .pd-fac-title { font-size: 1.4rem; overflow-wrap: anywhere; }
+        .pd-fac-count { font-size: .75rem; padding: 7px 12px; flex: none; }
         .pd-facilities { grid-template-columns: 1fr; }
         .pd-fac-hero-media { aspect-ratio: 4 / 3; }
+        .pd-fac-hero-body { padding: 24px 20px; }
+        .pd-fac-hero-body h2 { font-size: 1.4rem; }
+        .pd-fac-hero-body p { font-size: .92rem; line-height: 1.75; }
+        .pd-fac-chip { left: 12px; top: 12px; padding: 6px 11px; font-size: .65rem; }
+        .pd-facility-body { padding: 18px; }
+        .pd-facility-body h2, .pd-facility-body p { overflow-wrap: anywhere; }
         .pd-fac-cta-box { padding: 30px 22px; border-radius: 22px; }
+        .pd-fac-cta-box h2 { font-size: 20px; }
         .pd-fac-btn { width: 100%; justify-content: center; }
+    }
+    @media (max-width: 480px) {
+        .pd-fac-hero-body { padding: 22px 18px; }
+        .pd-facility-body { padding: 18px 16px; }
+        .pd-fac-cta-box { padding: 26px 18px; }
     }
 </style>
 

@@ -9,14 +9,18 @@
 @endphp
 
 <style>
-    /* ===== Halaman Berita (memakai variabel warna dari layouts/app) ===== */
+    /* ===== Halaman Berita: container, font, dan judul mengikuti acuan halaman profil ===== */
+    /* .site-container di layout adalah 1180/92%; di sini disamakan ke 1200/90% seperti halaman lain. */
+    .nw-hero .site-container, .nw-body .site-container { width: min(1200px, 90%); }
+    .nw-hero, .nw-body { font-family: 'Poppins', system-ui, -apple-system, sans-serif; font-size: 15px; line-height: 1.6; }
     .nw-hero {
-        position: relative; overflow: hidden; padding: 56px 0 62px; color: #fff;
-        background: linear-gradient(125deg, var(--green) 0%, var(--green-2) 55%, #2a6a50 100%);
+        position: relative; overflow: hidden; padding: 38px 0 58px; color: #fff;
+        background: linear-gradient(135deg, var(--green) 0%, var(--green-2) 68%, #2a6a4d 100%);
     }
     .nw-hero::before {
-        content: ""; position: absolute; inset: 0; opacity: .10;
-        background-image: radial-gradient(#d1fae5 1px, transparent 1px); background-size: 20px 20px;
+        content: ""; position: absolute; inset: 0; opacity: .55;
+        background-image: radial-gradient(rgba(255, 255, 255, .12) 1px, transparent 1px); background-size: 22px 22px;
+        -webkit-mask-image: radial-gradient(ellipse at center, #000, transparent 78%); mask-image: radial-gradient(ellipse at center, #000, transparent 78%);
     }
     .nw-hero::after {
         content: "\f1ea"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute;
@@ -25,17 +29,17 @@
     }
     .nw-hero .site-container { position: relative; z-index: 1; }
     .nw-eyebrow {
-        display: inline-flex; align-items: center; gap: 10px; font-size: 11px; font-weight: 600;
-        letter-spacing: .14em; text-transform: uppercase; color: var(--gold);
+        display: inline-flex; align-items: center; gap: 10px; font-size: 11.5px; font-weight: 700;
+        letter-spacing: .16em; text-transform: uppercase; color: var(--gold);
     }
-    .nw-eyebrow::before { content: ""; width: 26px; height: 1px; background: currentColor; }
-    .nw-hero .nw-eyebrow { color: #e6d3a3; }
+    .nw-eyebrow::before { content: ""; width: 26px; height: 2px; background: currentColor; }
+    .nw-hero .nw-eyebrow { color: var(--gold-light); }
     .nw-title {
-        color: #fff; font-size: clamp(28px, 4.2vw, 44px); font-weight: 700; line-height: 1.18;
-        letter-spacing: -.01em; margin: 12px 0 10px;
+        color: #fff; max-width: 680px; font-size: clamp(1.75rem, 4vw, 2.9rem); font-weight: 800; line-height: 1.18;
+        letter-spacing: -.02em; margin: 12px 0 10px;
     }
-    .nw-title span { color: #19d68f; }
-    .nw-sub { color: rgba(255, 255, 255, .82); max-width: 620px; font-size: 13.5px; line-height: 1.75; }
+    .nw-title span { color: var(--emerald); }
+    .nw-sub { color: rgba(255, 255, 255, .85); max-width: 680px; font-size: 1rem; line-height: 1.8; }
 
     .nw-hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
     .nw-meta-chip {
@@ -43,7 +47,7 @@
         background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .16);
         border-radius: 999px; padding: 8px 14px;
     }
-    .nw-meta-chip i { color: #19d68f; font-size: 11px; }
+    .nw-meta-chip i { color: var(--emerald); font-size: 11px; }
     .nw-meta-chip b { color: #fff; font-weight: 600; }
 
     .nw-ticker {
@@ -61,12 +65,12 @@
     .nw-ticker-text {
         font-size: 12.5px; color: #eaf5ef; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-    .nw-ticker-text b { color: #19d68f; font-weight: 600; margin-right: 6px; }
+    .nw-ticker-text b { color: var(--emerald); font-weight: 700; margin-right: 6px; }
     .nw-date { color: #b9d0c4; font-size: 11.5px; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
-    .nw-date i { color: #e6d3a3; }
+    .nw-date i { color: var(--gold-light); }
 
     /* ===== Body & filter ===== */
-    .nw-body { padding: 42px 0 72px; }
+    .nw-body { padding: 64px 0; }
     .nw-filter { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 26px; }
     .nw-chip {
         display: inline-flex; align-items: center; gap: 7px; font-family: inherit; font-size: 12px;
@@ -79,12 +83,12 @@
     .nw-chip.active { background: var(--green); border-color: var(--green); color: #fff; }
 
     /* ===== Layout ===== */
-    .nw-grid { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 28px; align-items: start; }
+    .nw-grid { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 22px; align-items: start; }
     .nw-main { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
 
     /* ===== Kartu ===== */
     .nw-card {
-        position: relative; display: flex; flex-direction: column; overflow: hidden; text-decoration: none;
+        position: relative; display: flex; flex-direction: column; overflow: hidden; text-decoration: none; min-width: 0;
         background: #fff; border: 1px solid var(--line); border-radius: 22px;
         transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
     }
@@ -99,7 +103,7 @@
         letter-spacing: .09em; text-transform: uppercase; padding: 5px 11px; border-radius: 999px;
         backdrop-filter: blur(4px);
     }
-    .nw-badge.is-new { background: #e6f7ef; color: #0e9f73; }
+    .nw-badge.is-new { background: #e6f7ef; color: var(--emerald-d); }
     .nw-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
     .nw-cat {
@@ -107,17 +111,17 @@
         letter-spacing: .1em; text-transform: uppercase; color: var(--gold);
     }
     .nw-cat::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-    [data-kat="Kegiatan"] .nw-cat { color: #0e9f73; }
-    [data-kat="Prestasi"] .nw-cat { color: #b7791f; }
+    [data-kat="Kegiatan"] .nw-cat { color: var(--emerald-d); }
+    [data-kat="Prestasi"] .nw-cat { color: var(--gold); }
     [data-kat="Akademik"] .nw-cat { color: #2f6fd0; }
     [data-kat="Pendidikan"] .nw-cat { color: #7a4fd0; }
     [data-kat="Fasilitas"] .nw-cat { color: #0f8a9e; }
-    [data-kat="Pesantren"] .nw-cat { color: #17402f; }
+    [data-kat="Pesantren"] .nw-cat { color: var(--green); }
     [data-kat="Ekstrakurikuler"] .nw-cat { color: #c73b60; }
 
     .nw-h {
-        color: var(--green); font-weight: 600; line-height: 1.42; letter-spacing: -.01em;
-        transition: color .2s ease; margin: 0;
+        color: var(--green); font-weight: 800; line-height: 1.3; letter-spacing: -.015em;
+        overflow-wrap: anywhere; transition: color .2s ease; margin: 0;
     }
     .nw-card:hover .nw-h, .nw-pop:hover .nw-h, .nw-kat-item:hover .nw-h { color: var(--emerald-d); }
     .nw-p { font-size: 12.8px; color: var(--muted); line-height: 1.7; margin: 0; }
@@ -139,7 +143,7 @@
         background: linear-gradient(90deg, transparent 60%, rgba(23, 64, 47, .10));
     }
     .nw-feature-body { display: flex; flex-direction: column; justify-content: space-between; gap: 16px; padding: 28px 30px; }
-    .nw-feature .nw-h { font-size: clamp(20px, 2.2vw, 25px); margin: 10px 0; }
+    .nw-feature .nw-h { font-size: clamp(1.5rem, 2.6vw, 2.05rem); margin: 10px 0; }
     .nw-more {
         display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600;
         color: var(--emerald-d); transition: gap .2s ease;
@@ -152,11 +156,11 @@
     .nw-item .nw-h { font-size: 15px; }
 
     /* ===== Sidebar ===== */
-    .nw-side { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 100px; }
+    .nw-side { display: flex; flex-direction: column; gap: 22px; position: sticky; top: 90px; }
     .nw-box { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 20px; }
     .nw-box-title {
         display: flex; align-items: center; justify-content: space-between; gap: 10px;
-        font-size: 13.5px; font-weight: 600; color: var(--green);
+        font-size: 13.5px; font-weight: 800; color: var(--green);
         padding-bottom: 14px; border-bottom: 1px solid var(--line); margin-bottom: 4px;
     }
     .nw-box-title span { display: inline-flex; align-items: center; gap: 9px; }
@@ -185,28 +189,24 @@
 
     .nw-cta {
         position: relative; overflow: hidden; border-radius: 22px; padding: 24px;
-        background: linear-gradient(150deg, var(--green), #2a6a50); color: #cfe0d6; box-shadow: var(--shadow-lg);
-    }
-    .nw-cta::after {
-        content: "\f19d"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute;
-        right: -10px; bottom: -26px; font-size: 110px; color: rgba(255, 255, 255, .07); pointer-events: none;
+        background: linear-gradient(135deg, var(--green), var(--green-2)); color: rgba(255, 255, 255, .82); box-shadow: var(--shadow-lg);
     }
     .nw-cta .nw-pill { position: relative; z-index: 1; background: rgba(255, 255, 255, .14); color: #eaf5ef; }
-    .nw-cta h4 { position: relative; z-index: 1; color: #fff; font-size: 17px; font-weight: 600; line-height: 1.4; margin: 14px 0 8px; }
-    .nw-cta p { position: relative; z-index: 1; font-size: 12.3px; line-height: 1.7; margin-bottom: 18px; }
+    .nw-cta h4 { position: relative; z-index: 1; color: #fff; font-size: 17px; font-weight: 800; line-height: 1.4; letter-spacing: -.015em; margin: 14px 0 8px; }
+    .nw-cta p { position: relative; z-index: 1; font-size: 13.5px; line-height: 1.7; margin-bottom: 18px; }
     .nw-cta .nw-cta-btn {
         position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-        width: 100%; background: #fff; color: var(--green); font-size: 12.5px; font-weight: 700;
-        padding: 12px 18px; border-radius: 12px; text-decoration: none; transition: transform .2s ease, box-shadow .2s ease;
+        width: 100%; background: var(--cream); color: var(--green); font-size: 13.5px; font-weight: 600;
+        padding: 12px 18px; border-radius: 999px; text-decoration: none; transition: transform .2s ease, box-shadow .2s ease;
     }
-    .nw-cta .nw-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0, 0, 0, .22); }
+    .nw-cta .nw-cta-btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0, 0, 0, .22); }
 
     /* ===== Indeks ===== */
     .nw-sec-head {
         display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
         flex-wrap: wrap; margin: 54px 0 22px; padding-top: 30px; border-top: 1px solid var(--line);
     }
-    .nw-sec-title { font-size: 22px; font-weight: 600; color: var(--green); margin-top: 4px; }
+    .nw-sec-title { font-size: clamp(1.5rem, 2.6vw, 2.05rem); font-weight: 800; line-height: 1.3; letter-spacing: -.015em; color: var(--green); margin-top: 4px; }
     .nw-sec-note { font-size: 12px; color: var(--muted); }
     .nw-index { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
     .nw-index .nw-img { height: 170px; }
@@ -217,11 +217,11 @@
         border: 1px dashed var(--line); border-radius: 22px;
     }
     .nw-empty i { display: block; font-size: 34px; color: var(--line); margin-bottom: 14px; }
-    .nw-empty h3 { font-size: 17px; color: var(--green); margin-bottom: 6px; }
+    .nw-empty h3 { font-size: 17px; font-weight: 800; color: var(--green); margin-bottom: 6px; }
     .nw-empty p { font-size: 12.8px; color: var(--muted); margin-bottom: 18px; }
     .nw-empty a {
         display: inline-flex; align-items: center; gap: 8px; background: var(--green); color: #fff;
-        font-size: 12.5px; font-weight: 600; padding: 11px 20px; border-radius: 12px; text-decoration: none;
+        font-size: 12.5px; font-weight: 600; padding: 11px 20px; border-radius: 999px; text-decoration: none;
     }
 
     @media (max-width: 1024px) {
@@ -230,14 +230,25 @@
         .nw-index { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 720px) {
-        .nw-hero { padding: 40px 0 46px; }
+        .nw-hero { padding: 32px 0 46px; }
         .nw-hero::after { display: none; }
+        .nw-hero-meta { gap: 8px; }
+        .nw-meta-chip { font-size: 11.5px; padding: 7px 12px; }
         .nw-body { padding: 32px 0 56px; }
+        /* Filter dibuat satu baris yang bisa digeser, seperti halaman Alumni/Prestasi. */
+        .nw-filter { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 6px; margin-inline: -5%; padding-inline: 5%; scrollbar-width: none; }
+        .nw-filter::-webkit-scrollbar { display: none; }
+        .nw-chip { white-space: nowrap; flex: none; }
         .nw-main, .nw-feature, .nw-index { grid-template-columns: 1fr; }
         .nw-feature .nw-img { min-height: 210px; }
         .nw-feature-body { padding: 22px; }
         .nw-feature .nw-h { font-size: 19px; }
-        .nw-ticker-text { white-space: normal; }
+        .nw-ticker-text { white-space: normal; overflow-wrap: anywhere; }
+    }
+    @media (max-width: 480px) {
+        .nw-ticker { padding: 10px 12px; }
+        .nw-foot { gap: 10px; }
+        .nw-feature-body { padding: 18px; }
     }
 </style>
 

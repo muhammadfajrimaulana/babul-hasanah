@@ -16,12 +16,16 @@ use Laravel\Socialite\Facades\Socialite;
  * Google hanya dipakai sebagai penyedia identitas. Pendaftaran akun baru
  * TIDAK otomatis: email Google harus sudah terdaftar di tabel users dan
  * berstatus aktif. Tombol login disembunyikan bila kredensial belum diisi.
+ * Login Google melewati gerbang password sementara karena email sudah diverifikasi Google.
  */
 class GoogleLoginController extends Controller
 {
     public function redirect()
     {
-        $this->pastikanTersedia();
+        if (! self::aktif()) {
+            return $this->gagal('Login Google belum tersedia. Silakan masuk dengan email dan kata sandi.');
+        }
+
         $this->pasangRedirectUri();
 
         return Socialite::driver('google')->redirect();
@@ -29,7 +33,10 @@ class GoogleLoginController extends Controller
 
     public function callback(Request $request)
     {
-        $this->pastikanTersedia();
+        if (! self::aktif()) {
+            return $this->gagal('Login Google belum tersedia. Silakan masuk dengan email dan kata sandi.');
+        }
+
         $this->pasangRedirectUri();
 
         try {
@@ -61,20 +68,24 @@ class GoogleLoginController extends Controller
                 return $this->gagal('Akun Anda tidak memiliki hak akses yang valid ke sistem.');
             }
 
+            // Google sudah memverifikasi kepemilikan email, sehingga gerbang
+            // password sementara tidak perlu dipakai pada jalur OAuth.
+            $passwordSementaraDilewati = (bool) $user->must_change_password;
+
             $user->forceFill([
                 'email_verified_at' => $user->email_verified_at ?? now(),
                 'last_login_at' => now(),
+                'must_change_password' => false,
+                'temp_password_expires_at' => null,
             ])->save();
 
             Auth::login($user);
             $request->session()->regenerate();
 
-            CatatanAktivitas::catat('login_google', $user, ['email' => $email]);
-
-            if ($user->must_change_password) {
-                return redirect()->route('password.change')
-                    ->with('warning', 'Demi keamanan, ganti password sementara Anda terlebih dahulu.');
-            }
+            CatatanAktivitas::catat('login_google', $user, [
+                'email' => $email,
+                'password_sementara_dilewati' => $passwordSementaraDilewati,
+            ]);
 
             return redirect()->route($tujuan)
                 ->with('success', 'Berhasil masuk dengan akun Google.');
@@ -83,11 +94,6 @@ class GoogleLoginController extends Controller
 
             return $this->gagal('Login Google gagal. Silakan coba lagi atau masuk dengan email dan kata sandi.');
         }
-    }
-
-    private function pastikanTersedia(): void
-    {
-        abort_unless(self::aktif(), 404, 'Login Google belum dikonfigurasi.');
     }
 
     /**
@@ -113,7 +119,10 @@ class GoogleLoginController extends Controller
     /** Apakah tombol Google tersedia di halaman login. */
     public static function aktif(): bool
     {
-        return filled(config('services.google.client_id'))
+        // Jangan tampilkan tombol / jalankan Socialite bila paketnya belum
+        // terpasang di vendor (composer install belum dijalankan).
+        return class_exists(\Laravel\Socialite\Facades\Socialite::class)
+            && filled(config('services.google.client_id'))
             && filled(config('services.google.client_secret'));
     }
 

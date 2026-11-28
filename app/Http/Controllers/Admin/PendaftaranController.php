@@ -132,8 +132,9 @@ class PendaftaranController extends Controller
                     'role' => 'wali_santri',
                     'phone' => $pendaftaran->no_hp_ortu,
                     'is_active' => true,
-                    'must_change_password' => true,
-                    'temp_password_expires_at' => now()->addDay(),
+                    // Kredensial dikirim ke email wali dan langsung dipakai untuk login.
+                    'must_change_password' => false,
+                    'temp_password_expires_at' => null,
                 ]);
             }
 
@@ -207,6 +208,7 @@ class PendaftaranController extends Controller
                     peran: 'Wali Santri',
                     judul: 'Akun Portal Wali Santri',
                     catatan: 'Akun ini terhubung dengan santri '.$pendaftaran->nama_lengkap.'.',
+                    wajibGanti: false,
                 ));
                 $emailTerkirim = true;
             } catch (\Throwable $e) {
@@ -229,7 +231,7 @@ class PendaftaranController extends Controller
         $pesanWa = "Alhamdulillah, Pendaftaran santri atas nama *{$pendaftaran->nama_lengkap}* telah *DITERIMA* di Pesantren Babul Hasanah.\n\n"
             ."Akun Portal Wali Santri: {$pendaftaran->email}\n"
             .($hasil['rawPassword']
-                ? "Password sementara telah dikirim ke email wali dan wajib diganti saat login pertama (berlaku 24 jam).\n\n"
+                ? "Username dan password telah dikirim ke email wali. Gunakan kredensial tersebut untuk masuk ke portal.\n\n"
                 : "Silakan gunakan password akun portal yang sudah ada.\n\n")
             ."Login melalui: {$loginUrl}";
 

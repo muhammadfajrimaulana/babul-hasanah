@@ -6,9 +6,8 @@
 
     <style>
         .ihp {
-            --green: #17402f; --green-2: #1d4d3a; --cream: #f1eee6; --paper: #fbfaf6; --gold: #b7791f;
-            --ink: #1f2a24; --muted: #6b756f; --line: #e4e0d4; --emerald: #12b886; --emerald-d: #0e9f73;
-            --radius: 22px; --shadow: 0 10px 30px rgba(23, 64, 47, .07); --shadow-lg: 0 22px 50px rgba(23, 64, 47, .14);
+            /* Warna memakai token global dari layouts/app.blade.php; hanya radius & shadow lokal. */
+            --radius: 22px; --shadow: 0 10px 30px rgba(23, 64, 47, .07);
             font-family: 'Poppins', system-ui, sans-serif; color: var(--ink); font-size: 15px; line-height: 1.6;
             background:
                 radial-gradient(900px 500px at 100% -5%, rgba(183, 121, 31, .07), transparent 60%),
@@ -17,24 +16,25 @@
         }
         .ihp *, .ihp *::before, .ihp *::after { box-sizing: border-box; }
         .ihp a { color: inherit; text-decoration: none; }
-        .ihp h1, .ihp h2, .ihp h3, .ihp h4 { margin: 0; font-weight: 600; line-height: 1.25; color: var(--green); letter-spacing: -.01em; }
+        .ihp h1, .ihp h2, .ihp h3, .ihp h4 { margin: 0; font-weight: 800; line-height: 1.3; color: var(--green); letter-spacing: -.015em; }
         .ihp p { margin: 0; }
         .ihp ul { list-style: none; margin: 0; padding: 0; }
-        .ihp .container { width: min(1180px, 92%); margin-inline: auto; }
+        .ihp .container { width: min(1200px, 90%); margin-inline: auto; }
         .ihp .eyebrow {
-            display: flex; align-items: center; gap: 12px; font-size: 11px; letter-spacing: .12em;
-            text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 12px; font-size: 11.5px; letter-spacing: .16em;
+            text-transform: uppercase; color: var(--gold); font-weight: 700; margin-bottom: 14px;
         }
-        .ihp .eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--gold); }
+        .ihp .eyebrow::before { content: ""; width: 28px; height: 2px; background: var(--gold); }
 
         /* ================= HERO ================= */
         .ihp-hero {
-            position: relative; overflow: hidden; color: #fff; padding: 64px 0 104px;
-            background: linear-gradient(130deg, var(--green) 0%, var(--green-2) 60%, #245c45 100%);
+            position: relative; overflow: hidden; color: #fff; padding: 38px 0 78px;
+            background: linear-gradient(135deg, var(--green) 0%, var(--green-2) 68%, #2a6a4d 100%);
         }
         .ihp-hero::before {
-            content: ""; position: absolute; inset: 0; opacity: .09;
-            background-image: radial-gradient(#d1fae5 1px, transparent 1px); background-size: 18px 18px;
+            content: ""; position: absolute; inset: 0; opacity: .55;
+            background-image: radial-gradient(rgba(255, 255, 255, .12) 1px, transparent 1px); background-size: 22px 22px;
+            -webkit-mask-image: radial-gradient(ellipse at center, #000, transparent 78%); mask-image: radial-gradient(ellipse at center, #000, transparent 78%);
         }
         .ihp-hero::after {
             content: "\f0a1"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute;
@@ -42,34 +42,34 @@
             font-size: clamp(120px, 18vw, 240px); color: rgba(255, 255, 255, .07); pointer-events: none;
         }
         .ihp-hero .container { position: relative; z-index: 1; }
-        .ihp-crumb { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #b9d0c4; margin-bottom: 22px; flex-wrap: wrap; }
-        .ihp-crumb a:hover { color: #fff; }
+        .ihp-crumb { display: flex; align-items: center; gap: 8px; font-size: 12px; color: rgba(255, 255, 255, .75); margin-bottom: 22px; flex-wrap: wrap; }
+        .ihp-crumb a:hover { color: var(--gold-light); }
         .ihp-crumb i { font-size: 8px; }
         .ihp-badge {
             display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600;
-            letter-spacing: .1em; text-transform: uppercase; color: #e6d3a3;
+            letter-spacing: .1em; text-transform: uppercase; color: var(--gold-light);
             background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .18);
             padding: 7px 14px; border-radius: 999px; margin-bottom: 18px;
         }
         .ihp-badge .live {
-            width: 7px; height: 7px; border-radius: 50%; background: #19d68f;
-            box-shadow: 0 0 0 0 rgba(25, 214, 143, .7); animation: ihpPulse 2s infinite;
+            width: 7px; height: 7px; border-radius: 50%; background: var(--emerald);
+            box-shadow: 0 0 0 0 rgba(18, 184, 134, .7); animation: ihpPulse 2s infinite;
         }
         @keyframes ihpPulse {
-            0% { box-shadow: 0 0 0 0 rgba(25, 214, 143, .6); }
-            70% { box-shadow: 0 0 0 9px rgba(25, 214, 143, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(25, 214, 143, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(18, 184, 134, .6); }
+            70% { box-shadow: 0 0 0 9px rgba(18, 184, 134, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(18, 184, 134, 0); }
         }
-        .ihp-hero h1 { color: #fff; font-size: clamp(28px, 4.4vw, 50px); font-weight: 700; margin-bottom: 16px; max-width: 760px; }
-        .ihp-hero h1 span { color: #19d68f; }
-        .ihp-hero p.lead { max-width: 640px; color: rgba(255, 255, 255, .85); font-size: clamp(13.5px, 1.4vw, 16px); }
+        .ihp-hero h1 { color: #fff; font-size: clamp(1.75rem, 4vw, 2.9rem); font-weight: 800; letter-spacing: -.02em; line-height: 1.18; margin-bottom: 16px; max-width: 680px; }
+        .ihp-hero h1 span { color: var(--emerald); }
+        .ihp-hero p.lead { max-width: 680px; color: rgba(255, 255, 255, .85); font-size: 1rem; line-height: 1.8; }
         .ihp-hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
         .ihp-meta {
             display: inline-flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 500;
             color: #dcece3; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .16);
             padding: 9px 15px; border-radius: 999px;
         }
-        .ihp-meta i { color: #19d68f; font-size: 12px; }
+        .ihp-meta i { color: var(--emerald); font-size: 12px; }
         .ihp-meta b { color: #fff; font-weight: 600; }
 
         /* ================= STATISTIK ================= */
@@ -91,8 +91,8 @@
         .ihp-stat span { font-size: 11.5px; color: var(--muted); }
 
         /* ================= KONTEN ================= */
-        .ihp-main { padding: 54px 0 20px; }
-        .ihp-layout { display: grid; grid-template-columns: .78fr 1.22fr; gap: 26px; align-items: start; }
+        .ihp-main { padding: 64px 0; }
+        .ihp-layout { display: grid; grid-template-columns: .78fr 1.22fr; gap: 22px; align-items: start; }
 
         /* ----- Panel jadwal ----- */
         .ihp-panel {
@@ -102,15 +102,15 @@
         .ihp-panel-top { display: flex; align-items: center; gap: 13px; margin-bottom: 6px; }
         .ihp-panel-top > i {
             width: 44px; height: 44px; border-radius: 14px; background: rgba(255, 255, 255, .12);
-            display: grid; place-items: center; color: #19d68f; font-size: 18px; flex: none;
+            display: grid; place-items: center; color: var(--emerald); font-size: 18px; flex: none;
         }
-        .ihp-panel-top small { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #a9c4b6; display: block; }
+        .ihp-panel-top small { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255, 255, 255, .7); display: block; }
         .ihp-panel-top h2 { color: #fff; font-size: 19px; }
         .ihp-panel-date {
-            font-size: 11.5px; color: #cfe0d6; padding: 8px 0 18px; border-bottom: 1px solid rgba(255, 255, 255, .14);
+            font-size: 11.5px; color: rgba(255, 255, 255, .75); padding: 8px 0 18px; border-bottom: 1px solid rgba(255, 255, 255, .14);
             margin-bottom: 18px; display: flex; align-items: center; gap: 8px;
         }
-        .ihp-panel-date i { color: #e6d3a3; }
+        .ihp-panel-date i { color: var(--gold-light); }
 
         .ihp-tl li {
             display: flex; gap: 13px; position: relative; padding-bottom: 20px;
@@ -126,21 +126,21 @@
         }
         .ihp-tl li.past { opacity: .48; }
         .ihp-tl li.next .ihp-tl-dot {
-            border-color: #19d68f; background: #19d68f; box-shadow: 0 0 0 5px rgba(25, 214, 143, .18);
+            border-color: var(--emerald); background: var(--emerald); box-shadow: 0 0 0 5px rgba(18, 184, 134, .18);
         }
-        .ihp-tl-body b { display: block; font-size: 14.5px; font-weight: 600; color: #e6d3a3; line-height: 1.3; }
-        .ihp-tl li.next .ihp-tl-body b { color: #19d68f; }
-        .ihp-tl-body span { font-size: 12.5px; color: #d8e8df; }
+        .ihp-tl-body b { display: block; font-size: 14.5px; font-weight: 600; color: var(--gold-light); line-height: 1.3; }
+        .ihp-tl li.next .ihp-tl-body b { color: var(--emerald); }
+        .ihp-tl-body span { font-size: 12.5px; color: rgba(255, 255, 255, .82); }
         .ihp-tl-tag {
             display: inline-block; margin-top: 5px; font-size: 9.5px; font-weight: 700; letter-spacing: .07em;
-            text-transform: uppercase; background: rgba(25, 214, 143, .18); color: #19d68f;
+            text-transform: uppercase; background: rgba(18, 184, 134, .18); color: var(--emerald);
             border-radius: 999px; padding: 2px 8px;
         }
         .ihp-panel-foot {
             margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, .14);
-            font-size: 11.5px; color: #a9c4b6; display: flex; align-items: center; gap: 8px;
+            font-size: 11.5px; color: rgba(255, 255, 255, .7); display: flex; align-items: center; gap: 8px;
         }
-        .ihp-panel-foot i { color: #e6d3a3; }
+        .ihp-panel-foot i { color: var(--gold-light); }
 
         /* ----- Toolbar ----- */
         .ihp-toolbar {
@@ -178,10 +178,10 @@
         .ihp-ticker marquee { font-size: 12.5px; color: var(--ink); }
 
         /* ----- Kartu info ----- */
-        .ihp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .ihp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
         .ihp-card {
             background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px;
-            display: flex; flex-direction: column; gap: 9px; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; gap: 9px; position: relative; overflow: hidden; min-width: 0;
             transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
         }
         .ihp-card::before {
@@ -197,7 +197,7 @@
         .ihp-card-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
         .ihp-chip-cat {
             display: inline-flex; align-items: center; gap: 8px; font-size: 10px; letter-spacing: .08em;
-            text-transform: uppercase; font-weight: 600; color: var(--gold);
+            text-transform: uppercase; font-weight: 600; color: var(--gold); min-width: 0; overflow-wrap: anywhere;
         }
         .ihp-chip-cat i {
             width: 28px; height: 28px; border-radius: 9px; background: rgba(183, 121, 31, .1);
@@ -214,11 +214,11 @@
             background: rgba(18, 184, 134, .12); color: var(--emerald-d); padding: 3px 9px; border-radius: 999px;
             white-space: nowrap;
         }
-        .ihp-card h3 { font-size: 15px; line-height: 1.45; }
-        .ihp-card p { font-size: 12.5px; color: var(--muted); flex: 1; }
+        .ihp-card h3 { font-size: 15px; line-height: 1.45; overflow-wrap: anywhere; }
+        .ihp-card p { font-size: 12.5px; color: var(--muted); flex: 1; overflow-wrap: anywhere; }
         .ihp-time {
-            font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px;
-            padding-top: 10px; border-top: 1px dashed var(--line);
+            font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+            overflow-wrap: anywhere; padding-top: 10px; border-top: 1px dashed var(--line);
         }
         .ihp-time i { color: var(--gold); }
         .ihp-empty {
@@ -236,7 +236,7 @@
             display: flex; justify-content: space-between; align-items: flex-end; gap: 20px;
             flex-wrap: wrap; margin-bottom: 22px;
         }
-        .ihp-history-head h2 { font-size: clamp(20px, 2.7vw, 30px); margin-bottom: 7px; }
+        .ihp-history-head h2 { font-size: clamp(1.5rem, 2.6vw, 2.05rem); margin-bottom: 7px; }
         .ihp-history-head p { font-size: 12.5px; color: var(--muted); max-width: 580px; }
         .ihp-history-count {
             display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600;
@@ -247,33 +247,30 @@
         .ihp-card.is-old { background: #fcfbf7; border-style: dashed; }
         .ihp-card.is-old::before { opacity: .38; }
         .ihp-card.is-old:hover { transform: none; box-shadow: var(--shadow); border-color: var(--line); }
-        .ihp-card.is-old h3 { color: #5f6b64; }
+        .ihp-card.is-old h3 { color: var(--muted); }
         .ihp-old {
             font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-            background: #efece2; color: #8a8477; padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+            background: var(--cream); color: var(--muted); padding: 3px 9px; border-radius: 999px; white-space: nowrap;
         }
 
-        /* ================= CTA ================= */
-        .ihp-cta { padding: 50px 0 70px; }
+        /* ================= CTA: dua kolom + pill krem seperti halaman lain ================= */
+        .ihp-cta { padding: 64px 0; }
         .ihp-cta-box {
-            position: relative; overflow: hidden; border-radius: 30px; padding: 44px 46px; color: #fff;
-            background: linear-gradient(120deg, var(--green), #2a6a50);
+            position: relative; overflow: hidden; border-radius: 32px; padding: 50px; color: rgba(255, 255, 255, .82);
+            background: linear-gradient(135deg, var(--green), var(--green-2));
             display: flex; align-items: center; justify-content: space-between; gap: 30px; flex-wrap: wrap;
+            box-shadow: var(--shadow-lg);
         }
-        .ihp-cta-box::after {
-            content: "\f19d"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute;
-            right: 4%; bottom: -30px; font-size: 160px; color: rgba(255, 255, 255, .07); pointer-events: none;
-        }
-        .ihp-cta-box h2 { color: #fff; font-size: clamp(21px, 2.6vw, 30px); margin-bottom: 8px; max-width: 620px; }
-        .ihp-cta-box p { color: rgba(255, 255, 255, .8); font-size: 13px; max-width: 560px; }
+        .ihp-cta-box h2 { color: #fff; font-size: clamp(22px, 3vw, 32px); font-weight: 800; letter-spacing: -.01em; margin-bottom: 8px; max-width: 26ch; }
+        .ihp-cta-box p { color: rgba(255, 255, 255, .82); font-size: 13.5px; line-height: 1.7; max-width: 520px; }
         .ihp-cta-actions { display: flex; gap: 10px; flex-wrap: wrap; position: relative; z-index: 1; }
         .ihp-btn {
-            display: inline-flex; align-items: center; gap: 9px; font-family: inherit; font-size: 13px;
-            font-weight: 600; padding: 13px 22px; border-radius: 13px; transition: all .25s ease; white-space: nowrap;
+            display: inline-flex; align-items: center; gap: 9px; font-family: inherit; font-size: 13.5px;
+            font-weight: 600; padding: 14px 28px; border-radius: 999px; transition: all .25s ease; white-space: nowrap;
         }
         /* Spesifisitas dinaikkan (.ihp .ihp-btn-*) agar tidak tertimpa rule `.ihp a { color: inherit; }` */
-        .ihp .ihp-btn-light { background: #fff; color: #111; box-shadow: 0 10px 24px rgba(0, 0, 0, .16); }
-        .ihp .ihp-btn-light:hover { transform: translateY(-2px); color: #111; }
+        .ihp .ihp-btn-light { background: var(--cream); color: var(--green); box-shadow: 0 10px 24px rgba(0, 0, 0, .16); }
+        .ihp .ihp-btn-light:hover { background: #fff; color: var(--green); transform: translateY(-2px); }
         .ihp .ihp-btn-ghost { border: 1px solid rgba(255, 255, 255, .35); color: #fff; }
         .ihp .ihp-btn-ghost:hover { background: rgba(255, 255, 255, .12); color: #fff; }
 
@@ -294,16 +291,39 @@
             .ihp-stat:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
         }
         @media (max-width: 700px) {
-            .ihp-hero { padding: 48px 0 92px; }
+            .ihp-hero { padding: 32px 0 68px; }
+            .ihp-hero::after { display: none; }
+            .ihp-hero-meta { gap: 8px; margin-top: 18px; }
+            .ihp-meta { font-size: 11.5px; padding: 7px 12px; }
+            .ihp-stats { margin-top: -40px; }
             .ihp-grid { grid-template-columns: 1fr; }
-            .ihp-cta-box { padding: 32px 26px; }
-            .ihp-count { margin-left: 0; width: 100%; }
+            .ihp-toolbar { padding: 16px; }
+            /* 16px mencegah Safari iOS meng-zoom otomatis saat field difokus. */
+            .ihp-input { font-size: 16px; }
+            .ihp-chips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
+            .ihp-chips::-webkit-scrollbar { display: none; }
+            .ihp-chip, .ihp-count { white-space: nowrap; flex: none; }
+            .ihp-count { margin-left: 0; width: auto; }
+            .ihp-ticker { padding: 11px 14px; gap: 10px; }
+            .ihp-cta-box { padding: 30px 22px; }
+            .ihp-cta-box h2 { font-size: 21px; }
+            .ihp-cta-actions { width: 100%; }
+            .ihp-cta-actions .ihp-btn { flex: 1 1 auto; justify-content: center; }
         }
         @media (max-width: 520px) {
             .ihp-stats-grid { grid-template-columns: 1fr; }
-            .ihp-stat { border-left: 0; border-bottom: 1px solid var(--line); }
+            .ihp-stat { border-left: 0; border-bottom: 1px solid var(--line); padding: 18px 16px; gap: 12px; }
+            .ihp-stat .ic { width: 40px; height: 40px; font-size: 16px; }
+            .ihp-stat b { font-size: 22px; }
             .ihp-stat:last-child { border-bottom: 0; }
             .ihp-panel { padding: 22px; }
+            .ihp-card { padding: 18px; }
+            .ihp-card-top { flex-wrap: wrap; align-items: flex-start; }
+            .ihp-pin, .ihp-old { flex: none; }
+            .ihp-cta { padding: 48px 0; }
+            .ihp-cta-box { padding: 26px 18px; }
+            .ihp-cta-actions { flex-direction: column; }
+            .ihp-cta-actions .ihp-btn { width: 100%; }
         }
     </style>
 

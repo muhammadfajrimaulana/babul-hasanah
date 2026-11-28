@@ -314,7 +314,7 @@
                 </button>
             </form>
 
-            @if (filled(config('services.google.client_id')) && filled(config('services.google.client_secret')))
+            @if (\App\Http\Controllers\Auth\GoogleLoginController::aktif())
                 <div class="lg-divider">atau masuk dengan</div>
 
                 <a href="{{ route('auth.google') }}" class="lg-google">

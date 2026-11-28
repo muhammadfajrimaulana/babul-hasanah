@@ -26,14 +26,18 @@
 @endphp
 
 <style>
-    /* ===== Halaman Kontak (selaras dengan halaman Berita) ===== */
+    /* ===== Halaman Kontak: container, font, dan judul mengikuti acuan halaman profil ===== */
+    /* .site-container di layout adalah 1180/92%; di sini disamakan ke 1200/90% seperti halaman lain. */
+    .kt-hero .site-container, .kt-wrap { width: min(1200px, 90%); }
+    .kt-hero, .kt-wrap { font-family: 'Poppins', system-ui, -apple-system, sans-serif; font-size: 15px; line-height: 1.6; }
     .kt-hero {
-        position: relative; overflow: hidden; padding: 56px 0 96px; color: #fff;
-        background: linear-gradient(125deg, var(--green) 0%, var(--green-2) 55%, #2a6a50 100%);
+        position: relative; overflow: hidden; padding: 38px 0 58px; color: #fff;
+        background: linear-gradient(135deg, var(--green) 0%, var(--green-2) 68%, #2a6a4d 100%);
     }
     .kt-hero::before {
-        content: ""; position: absolute; inset: 0; opacity: .10;
-        background-image: radial-gradient(#d1fae5 1px, transparent 1px); background-size: 20px 20px;
+        content: ""; position: absolute; inset: 0; opacity: .55;
+        background-image: radial-gradient(rgba(255, 255, 255, .12) 1px, transparent 1px); background-size: 22px 22px;
+        -webkit-mask-image: radial-gradient(ellipse at center, #000, transparent 78%); mask-image: radial-gradient(ellipse at center, #000, transparent 78%);
     }
     .kt-hero::after {
         content: "\f095"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute;
@@ -42,29 +46,21 @@
     }
     .kt-hero .site-container { position: relative; z-index: 1; }
     .kt-eyebrow {
-        display: inline-flex; align-items: center; gap: 10px; font-size: 11px; font-weight: 600;
-        letter-spacing: .14em; text-transform: uppercase; color: var(--gold);
+        display: inline-flex; align-items: center; gap: 10px; font-size: 11.5px; font-weight: 700;
+        letter-spacing: .16em; text-transform: uppercase; color: var(--gold);
     }
-    .kt-eyebrow::before { content: ""; width: 26px; height: 1px; background: currentColor; }
-    .kt-hero .kt-eyebrow { color: #e6d3a3; }
+    .kt-eyebrow::before { content: ""; width: 26px; height: 2px; background: currentColor; }
+    .kt-hero .kt-eyebrow { color: var(--gold-light); }
     .kt-title {
-        color: #fff; font-size: clamp(28px, 4.2vw, 44px); font-weight: 700; line-height: 1.18;
-        letter-spacing: -.01em; margin: 12px 0 10px;
+        color: #fff; font-size: clamp(1.75rem, 4vw, 2.9rem); font-weight: 800; line-height: 1.18;
+        letter-spacing: -.02em; margin: 12px 0 10px; max-width: 680px;
     }
-    .kt-title span { color: #19d68f; }
-    .kt-sub { color: rgba(255, 255, 255, .82); max-width: 620px; font-size: 13.5px; line-height: 1.75; }
-
-    .kt-hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
-    .kt-meta-chip {
-        display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: #dcece3;
-        background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .16);
-        border-radius: 999px; padding: 8px 14px;
-    }
-    .kt-meta-chip i { color: #19d68f; font-size: 11px; }
-    .kt-meta-chip b { color: #fff; font-weight: 600; }
+    .kt-title span { color: var(--emerald); }
+    .kt-sub { color: rgba(255, 255, 255, .85); max-width: 680px; font-size: 1rem; line-height: 1.8; }
 
     /* Kartu info (menumpuk ke hero) */
-    .kt-info { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: -64px; position: relative; z-index: 2; }
+    /* Kartu info diletakkan di bawah hero hijau dengan jarak tetap (tanpa overlap). */
+    .kt-info { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; margin-top: 0; }
     .kt-box {
         background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 24px 22px;
         box-shadow: 0 12px 34px rgba(23, 64, 47, .08); display: block;
@@ -72,18 +68,18 @@
     }
     a.kt-box:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--emerald); }
     .kt-ic {
-        width: 48px; height: 48px; border-radius: 14px; background: #e8f6ef; color: var(--emerald-d);
+        width: 48px; height: 48px; border-radius: 14px; background: rgba(18, 184, 134, .12); color: var(--emerald-d);
         display: grid; place-items: center; font-size: 18px; margin-bottom: 16px; transition: all .25s ease;
     }
     a.kt-box:hover .kt-ic { background: var(--emerald); color: #fff; }
-    .kt-box h3 { font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
+    .kt-box h3 { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
     .kt-box p { font-size: 14px; font-weight: 500; color: var(--green); line-height: 1.6; margin-top: 6px; word-break: break-word; }
     .kt-box small { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.6; }
 
     /* Form + peta */
-    .kt-main { display: grid; grid-template-columns: 1.05fr 1fr; gap: 28px; margin-top: 56px; align-items: start; }
+    .kt-main { display: grid; grid-template-columns: 1.05fr 1fr; gap: 22px; margin-top: 64px; align-items: start; }
     .kt-card { background: #fff; border: 1px solid var(--line); border-radius: 26px; padding: 32px; }
-    .kt-card-title { font-size: 21px; font-weight: 600; color: var(--green); margin-top: 6px; }
+    .kt-card-title { font-size: clamp(1.5rem, 2.6vw, 2.05rem); font-weight: 800; line-height: 1.3; letter-spacing: -.015em; color: var(--green); margin-top: 6px; }
     .kt-card-sub { font-size: 13px; color: var(--muted); line-height: 1.7; margin: 8px 0 22px; }
 
     .kt-field { margin-bottom: 16px; }
@@ -101,7 +97,7 @@
     .kt-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
     .kt-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
-    .kt-actions .site-btn { flex: 1; min-width: 180px; border: 0; cursor: pointer; font-family: inherit; }
+    .kt-actions .site-btn { flex: 1; min-width: 180px; border: 0; cursor: pointer; font-family: inherit; border-radius: 999px; }
     .kt-wa { background: #25d366; box-shadow: 0 8px 20px rgba(37, 211, 102, .28); }
     .kt-wa:hover { background: #1ebe5a; }
     .kt-mail { background: #fff; color: var(--green); border: 1px solid var(--line) !important; box-shadow: none; }
@@ -120,8 +116,8 @@
     .kt-map-foot a { font-size: 13px; font-weight: 600; color: var(--emerald-d); transition: color .2s ease; }
     .kt-map-foot a:hover { color: var(--green); }
 
-    .kt-social { background: var(--green); color: #cfe0d6; border-radius: 26px; padding: 26px; box-shadow: var(--shadow-lg); }
-    .kt-social h4 { color: #fff; font-size: 16px; font-weight: 600; }
+    .kt-social { background: var(--green); color: rgba(255, 255, 255, .82); border-radius: 22px; padding: 26px; box-shadow: var(--shadow-lg); }
+    .kt-social h4 { color: #fff; font-size: 16px; font-weight: 800; }
     .kt-social p { font-size: 12.5px; line-height: 1.7; margin: 6px 0 16px; }
     .kt-social-list { display: flex; gap: 10px; flex-wrap: wrap; }
     .kt-social-list a {
@@ -135,9 +131,9 @@
         display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap;
         margin: 64px 0 22px; padding-top: 30px; border-top: 1px solid var(--line);
     }
-    .kt-sec-title { font-size: 22px; font-weight: 600; color: var(--green); margin-top: 4px; }
+    .kt-sec-title { font-size: clamp(1.5rem, 2.6vw, 2.05rem); font-weight: 800; line-height: 1.3; letter-spacing: -.015em; color: var(--green); margin-top: 4px; }
     .kt-sec-note { font-size: 12px; color: var(--muted); }
-    .kt-faq { max-width: 860px; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+    .kt-faq { width: 100%; max-width: none; margin: 0; display: flex; flex-direction: column; gap: 12px; }
     .kt-q { background: #fff; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; transition: border-color .2s ease, box-shadow .2s ease; }
     .kt-q.open { border-color: var(--emerald); box-shadow: 0 10px 28px rgba(23, 64, 47, .08); }
     .kt-q button {
@@ -145,48 +141,63 @@
         background: none; border: 0; cursor: pointer; font-family: inherit; font-size: 14.5px; font-weight: 600;
         color: var(--green); padding: 18px 22px;
     }
+    .kt-q button span { min-width: 0; overflow-wrap: anywhere; }
     .kt-q button i { color: var(--emerald-d); font-size: 12px; transition: transform .25s ease; flex: none; }
     .kt-q.open button i { transform: rotate(180deg); }
     .kt-a { padding: 0 22px 20px; font-size: 13.5px; color: var(--muted); line-height: 1.8; }
 
-    /* CTA */
+    /* CTA: dua kolom + pill krem seperti halaman lain */
     .kt-cta {
-        margin: 64px 0 0; background: linear-gradient(150deg, var(--green), #2a6a50);
-        border-radius: 26px; padding: 40px 36px; color: #cfe0d6;
-        display: flex; align-items: center; justify-content: space-between; gap: 28px; flex-wrap: wrap;
+        margin: 64px 0 0; background: linear-gradient(135deg, var(--green), var(--green-2));
+        border-radius: 32px; padding: 50px; color: rgba(255, 255, 255, .82);
+        display: flex; align-items: center; justify-content: space-between; gap: 30px; flex-wrap: wrap;
         position: relative; overflow: hidden; box-shadow: var(--shadow-lg);
     }
-    .kt-cta::after {
-        content: "\f19d"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute;
-        right: 3%; bottom: -34px; font-size: 150px; color: rgba(255, 255, 255, .07); pointer-events: none;
-    }
     .kt-cta > * { position: relative; z-index: 1; }
-    .kt-cta h3 { color: #fff; font-size: clamp(20px, 2.4vw, 26px); font-weight: 600; line-height: 1.3; }
-    .kt-cta p { font-size: 13.5px; line-height: 1.7; margin-top: 8px; max-width: 480px; }
+    .kt-cta h3 { color: #fff; font-size: clamp(22px, 3vw, 32px); font-weight: 800; line-height: 1.28; letter-spacing: -.01em; }
+    .kt-cta p { font-size: 13.5px; line-height: 1.7; margin-top: 8px; max-width: 520px; }
     .kt-cta-btn {
-        display: inline-flex; align-items: center; gap: 9px; background: #fff; color: var(--green);
-        font-size: 13px; font-weight: 700; padding: 13px 22px; border-radius: 13px; white-space: nowrap;
-        box-shadow: 0 10px 24px rgba(0, 0, 0, .18); transition: transform .2s ease, color .2s ease;
+        display: inline-flex; align-items: center; gap: 9px; background: var(--cream); color: var(--green);
+        font-size: 13.5px; font-weight: 600; padding: 14px 28px; border-radius: 999px; white-space: nowrap;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, .18); transition: all .25s ease;
     }
-    .kt-cta-btn:hover { transform: translateY(-2px); color: var(--green); }
+    .kt-cta-btn:hover { background: #fff; color: var(--green); transform: translateY(-2px); }
 
-    .kt-wrap { padding-bottom: 72px; }
+    .kt-wrap { padding: 28px 0 64px; }
 
     @media (max-width: 1024px) {
         .kt-info { grid-template-columns: repeat(2, 1fr); }
         .kt-main { grid-template-columns: 1fr; }
     }
     @media (max-width: 640px) {
-        .kt-hero { padding: 44px 0 92px; }
+        .kt-hero { padding: 32px 0 46px; }
         .kt-hero::after { display: none; }
-        .kt-info { grid-template-columns: 1fr; margin-top: -56px; gap: 14px; }
-        .kt-card { padding: 24px 20px; border-radius: 22px; }
+        .kt-wrap { padding-top: 20px; }
+        .kt-info { grid-template-columns: 1fr; margin-top: 0; gap: 14px; }
+        .kt-main { margin-top: 44px; }
+        .kt-card { padding: 22px 18px; border-radius: 22px; }
+        /* 16px mencegah Safari iOS meng-zoom otomatis saat field difokus. */
+        .kt-field input, .kt-field select, .kt-field textarea { font-size: 16px; }
         .kt-row { grid-template-columns: 1fr; gap: 0; }
+        .kt-actions { gap: 10px; }
         .kt-actions .site-btn { min-width: 100%; }
         .kt-map iframe { height: 260px; }
-        .kt-cta { padding: 32px 24px; border-radius: 24px; }
+        .kt-map-foot { padding: 14px 16px; }
+        .kt-social { padding: 22px 18px; }
+        .kt-sec-head { margin-top: 48px; }
+        .kt-q button { font-size: 13.5px; padding: 16px 18px; gap: 12px; }
+        .kt-a { padding: 0 18px 18px; font-size: 13px; }
+        .kt-cta { padding: 30px 22px; border-radius: 22px; }
+        .kt-cta h3 { font-size: 21px; }
         .kt-cta .kt-cta-btn { width: 100%; }
-        .kt-sec-head { margin-top: 56px; }
+    }
+    @media (max-width: 480px) {
+        .kt-box { padding: 20px 18px; }
+        .kt-card { padding: 20px 16px; }
+        .kt-q button { font-size: 13px; }
+        .kt-map iframe { height: 220px; }
+        .kt-cta { padding: 26px 18px; }
+        .kt-cta-btn { font-size: 12.5px; padding: 13px 18px; }
     }
 </style>
 
@@ -218,12 +229,6 @@
         <span class="kt-eyebrow">Hubungi Kami</span>
         <h1 class="kt-title">Kami Siap <span>Membantu Anda</span></h1>
         <p class="kt-sub">Punya pertanyaan seputar pendaftaran, jenjang pendidikan, atau ingin berkunjung ke Pondok Pesantren Babul Hasanah? Silakan hubungi kami.</p>
-
-        <div class="kt-hero-meta">
-            <span class="kt-meta-chip"><i class="fa-brands fa-whatsapp"></i> {{ $telpTampil }}</span>
-            <span class="kt-meta-chip"><i class="fa-solid fa-envelope"></i> {{ $email }}</span>
-            <span class="kt-meta-chip"><i class="fa-regular fa-clock"></i> Senin–Sabtu, 08.00–16.00 WIB</span>
-        </div>
     </div>
 </section>
 

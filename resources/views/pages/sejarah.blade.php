@@ -88,6 +88,15 @@
     }
     @media (max-width: 560px) {
         .pd-toc-group ol { grid-template-columns: 1fr; }
+        /* Judul sejarah sangat panjang: kecilkan sampai pas di layar HP. */
+        .pd-wide .pd-hero h1 { font-size: 1.45rem; line-height: 1.25; overflow-wrap: anywhere; }
+        /* 4 chip terlalu sempit kalau tetap 4 kolom di 320px. */
+        .pd-toc-mobile { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .pd-toc-chip { flex-direction: row; justify-content: flex-start; gap: 8px; padding: 12px 10px; text-align: left; }
+        .pd-toc-chip span { font-size: .7rem; }
+        .pd-wide .pd-doc { padding: 20px 18px; }
+        .pd-chapter-title, .pd-section-title, .pd-prose { overflow-wrap: anywhere; }
+        .pd-daftar-card h2 { font-size: 20px; }
     }
 </style>
 

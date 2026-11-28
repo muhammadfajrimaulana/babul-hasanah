@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -21,6 +22,10 @@ class ResetPasswordController extends Controller
      */
     public function create(Request $request, string $token): View
     {
+        // Tautan dari email bisa dibuka dari browser yang masih login.
+        // Logout dulu agar form reset tidak dilempar ke beranda oleh middleware guest.
+        $this->keluarJikaMasihLogin($request);
+
         return view('auth.reset-password', [
             'token' => $token,
             'email' => (string) $request->query('email', ''),
@@ -35,6 +40,8 @@ class ResetPasswordController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $this->keluarJikaMasihLogin($request);
+
         $request->validate([
             'token' => ['required'],
             'email' => ['required', 'email', 'max:255'],
@@ -87,6 +94,23 @@ class ResetPasswordController extends Controller
         return redirect()
             ->route('login')
             ->with('status', 'Kata sandi berhasil diperbarui. Silakan masuk menggunakan kata sandi baru Anda.');
+    }
+
+    /**
+     * Logout bila tautan reset dibuka dari sesi yang masih aktif.
+     *
+     * Session dibuat ulang supaya token CSRF form Reset Password baru
+     * dan tidak tertolak setelah logout.
+     */
+    private function keluarJikaMasihLogin(Request $request): void
+    {
+        if (! Auth::check()) {
+            return;
+        }
+
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
     }
 
     /**

@@ -295,23 +295,24 @@ class SantriController extends Controller
         $alumni = Kelulusan::luluskan($santri, $tahun);
 
         $user = null;
-        $passwordSementara = null;
+        $passwordAkun = null;
         $emailTerkirim = false;
 
         if ($alumni) {
             $hasil = AlumniAkun::pastikan($alumni);
             $user = $hasil['user'];
-            $passwordSementara = $hasil['password'];
+            $passwordAkun = $hasil['password'];
 
-            if ($passwordSementara) {
+            if ($passwordAkun) {
                 try {
                     Mail::to($user->email, $user->name)->send(new KredensialMail(
                         nama: $user->name,
                         email: $user->email,
-                        passwordSementara: $passwordSementara,
+                        passwordSementara: $passwordAkun,
                         peran: 'Alumni',
                         judul: 'Akun Portal Alumni & Unduh Ijazah',
-                        catatan: 'Ijazah dan dokumen kelulusan Anda dapat diunduh setelah login pertama.',
+                        catatan: 'Akun dibuat saat kelulusan. Kredensial di email langsung dipakai untuk masuk dan mengunduh ijazah.',
+                        wajibGanti: false,
                     ));
                     $emailTerkirim = true;
                 } catch (\Throwable $e) {
@@ -329,7 +330,7 @@ class SantriController extends Controller
         return [
             'alumni' => $alumni,
             'user' => $user,
-            'password' => $passwordSementara,
+            'password' => $passwordAkun,
             'email_terkirim' => $emailTerkirim,
         ];
     }

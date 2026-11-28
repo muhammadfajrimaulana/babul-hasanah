@@ -29,6 +29,13 @@ return [
         // Nilai default di-resolve saat request (lihat GoogleLoginController::redirectUri()).
         // Memanggil url() di sini akan merusak perintah artisan di CLI.
         'redirect' => env('GOOGLE_REDIRECT_URI'),
+
+        // XAMPP/PHP di Windows sering tidak punya curl.cainfo, sehingga
+        // Socialite gagal dengan cURL error 60 saat menukar code ke token.
+        // Pakai CA bundle lokal agar verifikasi SSL tetap aktif.
+        'guzzle' => [
+            'verify' => env('GOOGLE_CA_BUNDLE') ?: storage_path('certs/cacert.pem'),
+        ],
     ],
 
     'postmark' => [

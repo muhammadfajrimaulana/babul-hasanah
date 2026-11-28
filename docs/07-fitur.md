@@ -244,7 +244,8 @@ kelulusan dan dicek terhadap akun serta pendaftaran lain. Tabel admin `/admin/pe
 - Tidak ada status "diproses" atau catatan penolakan pada PPDB.
 - Menghapus pendaftaran yang belum diverifikasi bersifat permanen dan tidak memakai soft delete;
   pendaftar yang sudah menjadi santri/alumni dilindungi sebagai arsip.
-- Password sementara 24 jam harus benar-benar diganti; bila kedaluwarsa, wali perlu reset admin.
+- Password wali dari PPDB dan alumni dari kelulusan langsung dipakai dari email; tidak ada
+  kewajiban ganti password pada alur otomatis.
 
 ## 3. Autentikasi
 
@@ -253,7 +254,8 @@ kelulusan dan dicek terhadap akun serta pendaftaran lain. Tabel admin `/admin/pe
 - Form email + password + remember.
 - Redirect sesuai role (Superadmin, Pengurus, Pembina, Admin Jenjang, Wali, Alumni).
 - Akun nonaktif (`is_active = false`) dan password sementara kedaluwarsa ditolak.
-- Akun dengan `must_change_password` dipaksa ke `/ganti-password`.
+- Akun dengan `must_change_password` dipaksa ke `/ganti-password` (akun manual berflag; wali PPDB
+  dan alumni kelulusan memakai `false`).
 - Pesan error Bahasa Indonesia.
 - Toggle password & state loading (JS).
 - Tombol **"Masuk dengan Google"** sudah memakai Socialite (`/auth/google` → callback
@@ -311,8 +313,9 @@ Lihat bagian 2.2. Tampilan responsif: kartu di mobile, tabel di desktop, pencari
 - **Rollback** kenaikan kelas: khusus Superadmin, wajib alasan, tercatat di log aktivitas.
 - **Pindah jenjang:** data lama ikut (nilai, hafalan, pelanggaran, izin, dokumen) + riwayat kelas.
 - **Arsipkan:** santri keluar/berhenti diarsipkan, bukan dihapus; akun wali tetap aktif.
-- **Kelulusan:** menandai lulus otomatis membuat alumni + akun alumni + password sementara + email.
-- **Reset Password Wali:** membuat password sementara baru 24 jam + email kredensial.
+- **Kelulusan:** menandai lulus otomatis membuat alumni + akun alumni + email berisi kredensial
+  yang langsung bisa dipakai.
+- **Reset Password Wali/Alumni:** membuat password baru + email kredensial yang langsung bisa dipakai.
 - Tombol **Import Excel** masih stub dan **Template** mengarah ke file yang tidak ada.
 
 ### 4.4 Data Alumni — ✅

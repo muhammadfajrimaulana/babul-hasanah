@@ -68,7 +68,8 @@ namanya tampil pada halaman Nilai.
 - **Publik:** beranda, profil (sejarah, visi-misi, struktur, pembelajaran), 7 halaman jenjang,
   berita, galeri album, prestasi, alumni, info harian, pendaftaran online, kontak.
 - **PPDB:** wali wajib mengisi jenjang + email/WA. Pendaftar diterima otomatis menjadi santri,
-  dibuatkan akun wali, password sementara 24 jam, dan email kredensial. Login pertama wajib ganti password.
+  dibuatkan akun wali, dan dikirim email berisi username (email) + password yang langsung bisa dipakai
+  untuk masuk portal (tanpa ganti password).
 - **Admin Jenjang:** verifikasi PPDB, data santri, naik kelas/rollback, pindah jenjang, arsip,
   kelulusan, alumni, nilai/hafalan/presensi, izin, pengumuman jenjangnya, kelas & guru, rekap wali kelas.
 - **Pengurus:** monitoring lintas jenjang dan pengumuman; **Pembina:** pembinaan harian (hafalan,
@@ -83,7 +84,7 @@ namanya tampil pada halaman Nilai.
 
 | Aspek | Kondisi |
 |-------|---------|
-| Autentikasi | Berjalan (login email/password, **6 role**, status aktif, password sementara 24 jam) |
+| Autentikasi | Berjalan (login email/password & Google, **6 role**, status aktif; kredensial wali & alumni dari email langsung dipakai) |
 | Otorisasi | Middleware `CheckRole` + `App\Support\Akses`; Policy (`SantriPolicy`, `NilaiPolicy`) sudah terpasang dan dipakai di modul santri & nilai, modul lain menyusul |
 | Dashboard per peran | **Berjalan**: Superadmin, Pengurus, Pembina, Admin Jenjang, Wali Santri, Alumni |
 | Batas data per jenjang | **Berjalan** untuk santri, pendaftaran, alumni, nilai, kelas, pengumuman, dan izin (role `admin`) |

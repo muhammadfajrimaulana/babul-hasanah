@@ -40,7 +40,7 @@
                                                 <td style="font-size:13px;font-weight:600;color:#17402f;padding-bottom:8px;word-break:break-all;">{{ $email }}</td>
                                             </tr>
                                             <tr>
-                                                <td style="font-size:12.5px;color:#6b756f;">Password sementara</td>
+                                                <td style="font-size:12.5px;color:#6b756f;">{{ $wajibGanti ? 'Password sementara' : 'Password' }}</td>
                                                 <td>
                                                     <span style="display:inline-block;padding:6px 12px;border-radius:8px;background:#fff;border:1px dashed #a7d9c6;font-family:'Courier New',monospace;font-size:14px;letter-spacing:.1em;color:#17402f;">
                                                         {{ $passwordSementara }}
@@ -60,11 +60,18 @@
                                 </tr>
                             </table>
 
-                            <p style="margin:0 0 12px;font-size:13px;line-height:1.8;color:#3c4741;">
-                                Password sementara hanya berlaku <strong>24 jam</strong>. Saat login pertama, Anda
-                                <strong>wajib mengganti password</strong> dan tidak bisa melewati halaman tersebut.
-                                Admin tidak dapat melihat password Anda.
-                            </p>
+                            @if ($wajibGanti)
+                                <p style="margin:0 0 12px;font-size:13px;line-height:1.8;color:#3c4741;">
+                                    Password sementara hanya berlaku <strong>24 jam</strong>. Saat login pertama, Anda
+                                    <strong>wajib mengganti password</strong> dan tidak bisa melewati halaman tersebut.
+                                    Admin tidak dapat melihat password Anda.
+                                </p>
+                            @else
+                                <p style="margin:0 0 12px;font-size:13px;line-height:1.8;color:#3c4741;">
+                                    Gunakan kredensial di atas untuk masuk ke portal. Jangan bagikan kata sandi
+                                    kepada pihak lain. Bila lupa, hubungi Sekretariat Pesantren untuk kirim ulang.
+                                </p>
+                            @endif
 
                             @if ($catatan)
                                 <p style="margin:0 0 12px;font-size:13px;line-height:1.8;color:#3c4741;">{{ $catatan }}</p>

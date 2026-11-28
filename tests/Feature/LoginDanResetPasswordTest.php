@@ -227,6 +227,21 @@ class LoginDanResetPasswordTest extends TestCase
         $this->assertDatabaseHas('password_reset_tokens', ['email' => $user->email]);
     }
 
+    public function test_tautan_reset_bisa_dibuka_saat_masih_login(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('password.reset', [
+                'token' => 'token-uji',
+                'email' => $user->email,
+            ]))
+            ->assertOk()
+            ->assertSee('Kata Sandi Baru');
+
+        $this->assertGuest();
+    }
+
     public function test_logout_mengakhiri_sesi(): void
     {
         $user = User::factory()->create();

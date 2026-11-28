@@ -402,7 +402,7 @@
                                         @if ($a->user_id)
                                             <form action="{{ route('admin.alumni.reset-password', $a) }}" method="POST"
                                                 class="inline-block"
-                                                onsubmit="return confirm('Reset password alumni {{ $a->nama }}? Password sementara akan dikirim ke {{ $a->user?->email ?: $a->email }} dan berlaku 24 jam.');">
+                                                onsubmit="return confirm('Reset password alumni {{ $a->nama }}? Password baru akan dikirim ke {{ $a->user?->email ?: $a->email }} dan langsung bisa dipakai.');">
                                                 @csrf
                                                 <button type="submit"
                                                     class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-[10px] font-bold transition">Reset Password</button>

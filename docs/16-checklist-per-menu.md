@@ -33,7 +33,7 @@ ditandai.
 | Policy | ✅ sebagian | `SantriPolicy` + `NilaiPolicy` dipakai di modul santri & nilai |
 | Email PPDB | ✅ | Email wali boleh multi-anak; `email_santri` unik via migrasi |
 | Anti-spam PPDB | ✅ | `throttle:5,10`, honeypot, halaman 429 |
-| Kelulusan & akun alumni | ✅ | Lulus massal, buat akun massal, reset password + email 24 jam |
+| Kelulusan & akun alumni | ✅ | Lulus massal, buat akun massal, email kredensial langsung dipakai |
 | Migrasi | ✅ | Pengguna melaporkan sudah menjalankan `php artisan migrate` |
 | Menu mati `Program` & `Kegiatan` admin | ✅ | `Program` tetap alias redirect; `Kegiatan` diisi dari Info Harian + catatan kalender + absensi santri (28 Nov 2026) |
 | Scoping prestasi & widget gender | ✅ | Prestasi sudah difilter per jenjang; `santri.jenis_kelamin` ditambahkan (migrasi 28 Nov 2026) dan diisi dari PPDB/form/import (28 Nov 2026) |

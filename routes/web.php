@@ -134,11 +134,14 @@ Route::middleware('guest')->group(function () {
         ->middleware('throttle:6,1')
         ->name('password.email');
 
-    Route::get('/reset-kata-sandi/{token}', [ResetPasswordController::class, 'create'])->name('password.reset');
-    Route::post('/reset-kata-sandi', [ResetPasswordController::class, 'store'])
-        ->middleware('throttle:6,1')
-        ->name('password.store');
 });
+
+// Tautan reset sengaja tidak berada di dalam middleware guest. Bila dibuka
+// saat masih login, controller akan logout lebih dulu sebelum menampilkan form.
+Route::get('/reset-kata-sandi/{token}', [ResetPasswordController::class, 'create'])->name('password.reset');
+Route::post('/reset-kata-sandi', [ResetPasswordController::class, 'store'])
+    ->middleware('throttle:6,1')
+    ->name('password.store');
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout')->middleware('auth');
 

@@ -366,7 +366,7 @@
                     <div class="rounded-2xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40">
                         <h3 class="text-xs font-black text-slate-800 dark:text-slate-100"><i class="fa-solid fa-key mr-1 text-emerald-600"></i> Reset Password Wali</h3>
                         <p class="mt-1 text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
-                            Password sementara baru berlaku 24 jam dan dikirim ke email wali. Admin tidak bisa melihat password.
+                            Password baru dikirim ke email wali dan langsung bisa dipakai untuk login. Admin tidak bisa melihat password.
                         </p>
                         @if ($santri->user)
                             <form action="{{ route('admin.santri.reset-wali', $santri->id) }}" method="POST" class="mt-3"

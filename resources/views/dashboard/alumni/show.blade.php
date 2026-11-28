@@ -60,7 +60,7 @@
                     </a>
                     @if ($akunSiap)
                         <form action="{{ route('admin.alumni.reset-password', $alumni) }}" method="POST"
-                            onsubmit="return confirm('{{ $akunAlumni ? 'Reset password' : 'Buat akun' }} alumni {{ $alumni->nama }}? Kredensial dikirim ke {{ $akunAlumni?->email ?: ($alumni->email ?: 'email alumni') }} dan berlaku 24 jam.');">
+                            onsubmit="return confirm('{{ $akunAlumni ? 'Reset password' : 'Buat akun' }} alumni {{ $alumni->nama }}? Kredensial dikirim ke {{ $akunAlumni?->email ?: ($alumni->email ?: 'email alumni') }} dan langsung bisa dipakai.');">
                             @csrf
                             <button type="submit"
                                 class="bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
@@ -224,7 +224,7 @@
                                         </span>
                                     @else
                                         <span class="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
-                                            Sudah diganti
+                                            Langsung dipakai
                                         </span>
                                     @endif
                                 </dd>
@@ -232,8 +232,8 @@
                         </div>
                     </dl>
                     <p class="mt-4 text-[10px] leading-relaxed text-slate-400">
-                        Gunakan tombol <b>Reset Password Alumni</b> untuk mengirim password sementara baru ke username di atas.
-                        Password hanya dikirim lewat email dan tidak dapat dilihat oleh admin.
+                        Gunakan tombol <b>Reset Password Alumni</b> untuk mengirim password baru ke username di atas.
+                        Password langsung bisa dipakai, hanya dikirim lewat email, dan tidak dapat dilihat oleh admin.
                     </p>
                 @else
                     <div class="rounded-2xl border border-dashed border-slate-200 px-4 py-6 text-center text-xs text-slate-400 dark:border-slate-700">

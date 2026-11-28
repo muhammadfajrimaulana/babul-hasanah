@@ -10,10 +10,10 @@
     /* Token & container disamakan dengan halaman jenjang/profil (Poppins + .pd-wrap). */
     .sj-page { --g900:#073a26; --g800:var(--green); --g700:var(--green-2); --g600:var(--emerald-d); --g500:var(--emerald);
         --g50:var(--paper); --gold:#b7791f; --gold-text:#955f0f; --gold-soft:#fdf4e0; --gold-light:#f3d9a0;
-        color: var(--ink); font-family: 'Poppins', system-ui, -apple-system, sans-serif; }
+        color: var(--ink); font-family: 'Poppins', system-ui, -apple-system, sans-serif; font-size: 15px; line-height: 1.6; }
     .sj-page *, .sj-page *::before, .sj-page *::after { box-sizing: border-box; }
-    .sj-wrap { width: min(1100px, 92%); margin-inline: auto; }
-    .sj-page section[id] { scroll-margin-top: 80px; }
+    .sj-wrap { width: min(1200px, 90%); margin-inline: auto; }
+    .sj-page section[id] { scroll-margin-top: 90px; }
 
     .sj-eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--gold-text); margin-bottom: 14px; }
     .sj-eyebrow::before { content: ""; width: 28px; height: 2px; background: var(--gold); }
@@ -21,7 +21,7 @@
     .sj-eyebrow.light::before { background: var(--gold-light); }
 
     /* ====== Hero ====== */
-    .sj-hero { position: relative; overflow: hidden; color: #fff; padding: 48px 0 58px;
+    .sj-hero { position: relative; overflow: hidden; color: #fff; padding: 38px 0 58px;
         background:
             radial-gradient(600px 300px at 90% 0%, rgba(253,230,138,.18), transparent 65%),
             radial-gradient(500px 300px at 0% 100%, rgba(16,185,129,.28), transparent 65%),
@@ -36,9 +36,9 @@
     .sj-crumb { font-size: 14px; color: rgba(255,255,255,.75); margin-bottom: 30px; }
     .sj-crumb a { color: #fff; text-decoration: none; }
     .sj-crumb a:hover { text-decoration: underline; }
-    .sj-hero h1 { margin: 0 0 18px; font-size: clamp(2.2rem, 5vw, 3.6rem); line-height: 1.12; color: #fff; max-width: 18ch; }
+    .sj-hero h1 { margin: 0 0 18px; max-width: 680px; font-size: clamp(1.75rem, 4vw, 2.9rem); font-weight: 800; letter-spacing: -.02em; line-height: 1.18; color: #fff; }
     .sj-hero h1 span { color: var(--gold-light); }
-    .sj-hero p { margin: 0 0 30px; max-width: 58ch; font-size: 1.1rem; line-height: 1.8; color: rgba(255,255,255,.88); }
+    .sj-hero p { margin: 0 0 30px; max-width: 680px; font-size: 1rem; line-height: 1.8; color: rgba(255,255,255,.85); }
     .sj-nav { display: flex; flex-wrap: wrap; gap: 10px; }
     .sj-nav a { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 999px; font-weight: 600; font-size: .95rem; text-decoration: none;
         color: #fff; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.25); transition: all .25s ease; }
@@ -49,16 +49,14 @@
     .sj-sec { padding: 64px 0; }
     .sj-sec.alt { background: var(--cream); }
     .sj-head { max-width: 680px; margin: 0 0 30px; }
-    .sj-head.center { margin-left: auto; margin-right: auto; text-align: center; }
-    .sj-head.center .sj-eyebrow { justify-content: center; }
-    .sj-head h2 { font-size: clamp(1.7rem, 3.2vw, 2.4rem); line-height: 1.25; margin: 0 0 12px; color: var(--g800); }
+    .sj-head h2 { font-size: clamp(1.5rem, 2.6vw, 2.05rem); font-weight: 800; letter-spacing: -.015em; line-height: 1.3; margin: 0 0 10px; color: var(--g800); }
     .sj-head p { margin: 0; color: var(--muted); line-height: 1.75; font-size: .98rem; }
 
     /* ====== Bagan: level bertumpuk (mengacu pada struktur manajemen) ====== */
-    .org-tree { display: flex; flex-direction: column; align-items: center; gap: 40px; width: 100%; margin: 0 auto; position: relative; }
-    .tree-level { position: relative; display: flex; flex-wrap: wrap; justify-content: center; align-items: stretch; gap: 40px 18px; width: 100%; }
+    .org-tree { display: flex; flex-direction: column; align-items: center; gap: 30px; width: 100%; margin: 0 auto; position: relative; }
+    .tree-level { position: relative; display: flex; flex-wrap: wrap; justify-content: center; align-items: stretch; gap: 30px 22px; width: 100%; }
     /* Level berisi banyak kartu: rapatkan baris agar terbaca sebagai satu kelompok */
-    .tree-level.is-grid { gap: 18px; }
+    .tree-level.is-grid { gap: 22px; }
 
     .person { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; width: 220px;
         background: #fff; padding: 22px 18px 20px; border-radius: 20px; border: 1px solid rgba(6,78,59,.12);
@@ -68,7 +66,7 @@
 
     .avatar { position: relative; width: 88px; height: 88px; border-radius: 50%; margin: 0 auto 14px; overflow: hidden;
         display: flex; align-items: center; justify-content: center; font-size: 32px; color: #fff;
-        background: linear-gradient(135deg, #10b981, #0f5132); border: 4px solid #fff; box-shadow: 0 6px 16px rgba(20,83,45,.18); }
+        background: linear-gradient(135deg, var(--emerald), #0f5132); border: 4px solid #fff; box-shadow: 0 6px 16px rgba(20,83,45,.18); }
     .avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
     .person span { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
@@ -77,10 +75,8 @@
 
     /* Pimpinan puncak */
     .person.top { width: 270px; padding: 28px 20px 24px; overflow: hidden; border: 0;
-        background: linear-gradient(140deg, #0b3f29, #15803d); box-shadow: 0 24px 46px -22px rgba(20,83,45,.7); }
+        background: linear-gradient(140deg, var(--green), var(--emerald-d)); box-shadow: 0 24px 46px -22px rgba(20,83,45,.7); }
     .person.top > * { position: relative; z-index: 1; }
-    .person.top::after { content: ""; position: absolute; right: -48px; bottom: -48px; width: 170px; height: 170px; z-index: 0;
-        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.28' stroke-width='1'%3E%3Crect x='20' y='20' width='60' height='60'/%3E%3Crect x='20' y='20' width='60' height='60' transform='rotate(45 50 50)'/%3E%3Ccircle cx='50' cy='50' r='30'/%3E%3Ccircle cx='50' cy='50' r='14'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat; }
     .person.top .avatar { width: 96px; height: 96px; border-color: rgba(255,255,255,.35); background: linear-gradient(135deg, #d99a2b, #b7791f); }
     .person.top span { color: var(--gold-light); }
     .person.top h3 { color: #fff; font-size: 1.1rem; }
@@ -104,9 +100,8 @@
     .jenjang { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
     .jj { background: #fff; border-radius: 22px; overflow: hidden; border: 1px solid rgba(6,78,59,.14); text-align: center; box-shadow: 0 12px 28px -18px rgba(20,83,45,.35); transition: transform .3s ease, box-shadow .3s ease; }
     .jj:hover { transform: translateY(-5px); box-shadow: 0 24px 38px -18px rgba(20,83,45,.45); }
-    .jj-head { position: relative; overflow: hidden; background: linear-gradient(140deg, #0b3f29, #15803d); color: #fff; padding: 24px 16px 56px; }
-    .jj-head::after { content: ""; position: absolute; right: -30px; top: -30px; width: 110px; height: 110px; border-radius: 50%; border: 18px solid rgba(255,255,255,.07); }
-    .jj:nth-child(even) .jj-head { background: linear-gradient(140deg, #8a560d, #c98a2b); }
+    .jj-head { position: relative; overflow: hidden; background: linear-gradient(140deg, var(--green), var(--emerald-d)); color: #fff; padding: 24px 16px 56px; }
+    .jj:nth-child(even) .jj-head { background: linear-gradient(140deg, var(--gold-text), var(--gold)); }
     .jj-head b { position: relative; display: block; font-size: 1.5rem; line-height: 1.2; }
     .jj-head small { position: relative; display: block; margin-top: 6px; font-size: .85rem; line-height: 1.4; color: rgba(255,255,255,.85); }
     .jj-body { padding: 0 16px 24px; }
@@ -116,10 +111,9 @@
     .jj:nth-child(even) span { color: var(--gold-text); background: var(--gold-soft); }
 
     /* ====== Bidang ====== */
-    .bidang { counter-reset: bd; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    .bidang-item { counter-increment: bd; position: relative; overflow: hidden; padding: 26px 24px; background: #fff; border: 1px solid rgba(6,78,59,.12); border-radius: 22px;
+    .bidang { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .bidang-item { position: relative; overflow: hidden; padding: 26px 24px; background: #fff; border: 1px solid rgba(6,78,59,.12); border-radius: 22px;
         display: grid; grid-template-columns: 52px 1fr; gap: 16px; align-items: start; box-shadow: 0 10px 26px rgba(6,78,59,.06); transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease; }
-    .bidang-item::after { content: counter(bd, decimal-leading-zero); position: absolute; right: 16px; top: 4px; font-size: 3.4rem; font-weight: 800; line-height: 1; color: rgba(183,121,31,.12); }
     .bidang-item:hover { transform: translateY(-5px); border-color: var(--g500); box-shadow: 0 18px 36px -18px rgba(20,83,45,.45); }
     .bidang-ico { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
         background: #dcfce7; color: var(--g700); font-size: 20px; transition: background .2s ease, color .2s ease; }
@@ -131,7 +125,7 @@
 
     /* ====== CTA: kotak ajakan sama seperti halaman jenjang/alumni ====== */
     .sj-cta { background: linear-gradient(135deg, var(--green), var(--green-2)); color: #fff; border-radius: 32px; padding: 50px; display: flex; justify-content: space-between; align-items: center; gap: 30px; flex-wrap: wrap; box-shadow: var(--shadow-lg); }
-    .sj-cta h2 { margin: 0 0 8px; color: #fff; font-size: clamp(22px, 3vw, 32px); }
+    .sj-cta h2 { margin: 0 0 8px; color: #fff; font-size: clamp(22px, 3vw, 32px); font-weight: 800; letter-spacing: -.01em; }
     .sj-cta p { margin: 0; max-width: 520px; color: rgba(255,255,255,.82); line-height: 1.7; }
     .sj-btn { display: inline-flex; align-items: center; gap: 10px; background: var(--cream); color: var(--green); font-weight: 600; font-size: 13.5px; padding: 14px 28px; border-radius: 999px; text-decoration: none; white-space: nowrap; transition: all .25s ease; }
     .sj-page .sj-btn:hover { background: #fff; color: var(--green); transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.18); }
@@ -149,6 +143,7 @@
     @media (max-width: 640px) {
         .sj-sec { padding: 60px 0; }
         .sj-hero { padding: 40px 0 56px; }
+        .sj-nav a { padding: 8px 14px; font-size: .85rem; }
         .sj-hero::after { width: 240px; height: 240px; right: -70px; bottom: -70px; }
         .bidang { grid-template-columns: 1fr; }
         .sj-cta { padding: 30px 22px; border-radius: 22px; }
@@ -163,7 +158,15 @@
         .person span { min-height: 0; font-size: 10px; }
         .person h3 { font-size: .95rem; }
     }
-    @media (max-width: 480px) { .jenjang { grid-template-columns: 1fr; } }
+    @media (max-width: 480px) {
+        .jenjang { grid-template-columns: 1fr; }
+        .sj-crumb { flex-wrap: wrap; }
+        .bidang-item { padding: 20px 16px; grid-template-columns: 44px 1fr; gap: 12px; }
+        .bidang-ico { width: 44px; height: 44px; font-size: 18px; border-radius: 14px; }
+        .person span, .jj-head small, .bidang-item h3, .bidang-item p,
+        .sj-head h2, .sj-head p { overflow-wrap: anywhere; }
+        .sj-cta h2 { font-size: 20px; }
+    }
     @media (prefers-reduced-motion: reduce) {
         .person, .jj, .bidang-item, .bidang-ico { transition: none; }
         .person:hover, .jj:hover, .bidang-item:hover { transform: none; }
@@ -199,7 +202,7 @@
     {{-- ============ BAGAN KEPENGURUSAN ============ --}}
     <section class="sj-sec alt" id="bagan">
         <div class="sj-wrap">
-            <div class="sj-head center">
+            <div class="sj-head">
                 <div class="sj-eyebrow">Kepengurusan</div>
                 <h2>Susunan pengurus pesantren</h2>
             </div>
